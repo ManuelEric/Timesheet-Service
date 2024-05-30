@@ -1,5 +1,5 @@
 <script setup>
-import UpgradeToPro from '@/components/UpgradeToPro.vue'
+import UpgradeToPro from '@/components/UpgradeToPro.vue';
 </script>
 
 <template>
