@@ -25,12 +25,12 @@ export default [
         component: () => import('@/pages/admin/timesheet/timesheet-detail.vue'),
       },
       {
-        path: '/admin/unpaid',
-        component: () => import('@/pages/admin/cut-off/unpaid.vue'),
+        path: '/admin/cut-off/pre',
+        component: () => import('@/pages/admin/cut-off/pre.vue'),
       },
       {
-        path: '/admin/paid',
-        component: () => import('@/pages/admin/cut-off/paid.vue'),
+        path: '/admin/cut-off/completed',
+        component: () => import('@/pages/admin/cut-off/completed.vue'),
       },
       {
         path: '/admin/account-settings',

@@ -71,15 +71,47 @@ const desserts = [
       </div>
     </VCardTitle>
     <VCardText>
-      <VBtn
-        density="compact"
-        color="warning"
-        class="mb-2"
-        :disabled="selected.length > 0 ? false : true"
-        @click="dialog = true"
-      >
-        Assign
-      </VBtn>
+      <VRow class="my-1">
+        <VCol
+          cols="12"
+          md="2"
+        >
+          <VAutocomplete
+            clearable="true"
+            label="Program Name"
+            :items="['Program 1', 'Program 2', 'Program 3']"
+            placeholder="Select Program Name"
+            density="compact"
+          />
+        </VCol>
+        <VCol
+          cols="12"
+          md="3"
+        >
+          <VAutocomplete
+            clearable="true"
+            label="Timesheet - Package"
+            :items="['Timesheet 1', 'Timesheet 2', 'Timesheet 3']"
+            placeholder="Select Timesheet"
+            density="compact"
+          />
+        </VCol>
+        <VCol
+          cols="12"
+          md="7"
+          class="text-end"
+        >
+          <VBtn
+            density="compact"
+            :color="selected.length > 0 ? 'warning' : 'primary'"
+            class="mb-2"
+            :disabled="selected.length > 0 ? false : true"
+            @click="dialog = true"
+          >
+            Assign {{ selected.length > 1 ? 'to Group' : '' }}
+          </VBtn>
+        </VCol>
+      </VRow>
 
       <VDialog
         v-model="dialog"
@@ -129,6 +161,13 @@ const desserts = [
               </VCol>
               <VCol md="12">
                 <VTextarea label="Notes"></VTextarea>
+              </VCol>
+              <VCol md="12">
+                <VTextField
+                  density="compact"
+                  type="url"
+                  label="Meeting Link"
+                />
               </VCol>
             </VRow>
 

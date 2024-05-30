@@ -10,7 +10,7 @@ const selected = ref([])
     <VCardTitle>
       <div class="d-flex justify-between align-center">
         <div class="w-100">
-          <h4>Paid Timesheet</h4>
+          <h4>Completed Cut-Off</h4>
         </div>
       </div>
     </VCardTitle>
@@ -18,31 +18,42 @@ const selected = ref([])
       <VRow class="my-1">
         <VCol
           cols="12"
-          md="3"
+          md="2"
         >
           <VAutocomplete
             clearable="true"
-            label="Mentor/Tutor"
-            :items="['Mentor 1', 'Mentor 2', 'Mentor 3']"
-            placeholder="Select Mentor/Tutor"
+            label="Program Name"
+            :items="['Program 1', 'Program 2', 'Program 3']"
+            placeholder="Select Program Name"
             density="compact"
           />
         </VCol>
         <VCol
-          cols="7"
+          cols="12"
           md="3"
         >
           <VAutocomplete
             clearable="true"
-            label="Cut-Off Payment"
-            :items="['January 2024', 'Febuary 2024', 'March 2024']"
-            placeholder="Select Cut-Off Payment"
+            label="Timesheet - Package"
+            :items="['Timesheet 1', 'Timesheet 2', 'Timesheet 3']"
+            placeholder="Select Timesheet"
             density="compact"
           />
         </VCol>
         <VCol
-          cols="5"
-          md="6"
+          cols="12"
+          md="2"
+        >
+          <VTextField
+            type="date"
+            density="compact"
+            label="Cut-Off Date"
+            clearable
+          />
+        </VCol>
+        <VCol
+          cols="12"
+          md="5"
           class="text-end"
         >
           <VBtn
@@ -52,11 +63,15 @@ const selected = ref([])
             @click="isBulkDialogVisible = true"
             v-if="selected.length > 0"
           >
+            <VIcon
+              icon="ri-close-line"
+              class="me-2"
+            />
             Cancel
           </VBtn>
           <VMenu
             :close-on-content-click="false"
-            location="end"
+            location="bottom"
           >
             <template v-slot:activator="{ props }">
               <VBtn
@@ -65,21 +80,10 @@ const selected = ref([])
                 v-bind="props"
               >
                 Action
+                <VIcon class="ri-arrow-down-s-line ms-2" />
               </VBtn>
             </template>
             <VList>
-              <VListItem>
-                <div
-                  class="cursor-pointer"
-                  @click="isDialogVisible = true"
-                >
-                  <VIcon
-                    icon="ri-pencil-line"
-                    class="me-2"
-                  />
-                  Add Bonus
-                </div>
-              </VListItem>
               <VListItem>
                 <VListItemTitle>
                   <div class="cursor-pointer">
@@ -111,7 +115,7 @@ const selected = ref([])
             <th class="text-uppercase text-center">Time Spent</th>
             <th class="text-uppercase text-center">Fee/Hours</th>
             <th class="text-uppercase text-center">Cut-Off Date</th>
-            <th class="text-uppercase text-center">Payment Status</th>
+            <th class="text-uppercase text-center">Cut-Off Status</th>
           </tr>
         </thead>
         <tbody>
@@ -132,15 +136,20 @@ const selected = ref([])
             <td>60 Minutes</td>
             <td>Rp. 200.000</td>
             <td class="text-center">20 Januari 2024</td>
-            <td class="text-end">
+            <td class="text-center">
               <VChip color="success"> Paid </VChip>
             </td>
           </tr>
         </tbody>
         <thead>
           <tr>
-            <th colspan="6">Total Fee</th>
-            <th colspan="2">Rp. 2.500.000</th>
+            <th colspan="8">Total Fee</th>
+            <th
+              colspan="2"
+              class="text-end"
+            >
+              Rp. 2.500.000
+            </th>
           </tr>
         </thead>
       </VTable>
@@ -152,52 +161,6 @@ const selected = ref([])
         />
       </div>
     </VCardText>
-
-    <!-- Cut-Off Dialog -->
-    <VDialog
-      v-model="isDialogVisible"
-      max-width="450"
-      persistent
-    >
-      <VCard title="Cut-Off">
-        <VCardText>
-          <VRow>
-            <VCol cols="12">
-              <VAutocomplete
-                label="Timesheet - Mentor/Tutor"
-                placeholder="Timesheet - Mentor/Tutor"
-                :items="['California', 'Colorado', 'Florida', 'Georgia', 'Texas', 'Wyoming']"
-              ></VAutocomplete>
-            </VCol>
-            <VCol cols="6">
-              <VTextField
-                type="date"
-                label="Date"
-                placeholder="Date"
-              />
-            </VCol>
-            <VCol cols="6">
-              <VTextField
-                type="number"
-                label="Bonus Fee"
-                placeholder="Bonus Fee"
-              />
-            </VCol>
-          </VRow>
-        </VCardText>
-        <VCardActions>
-          <VSpacer />
-          <VBtn
-            color="error"
-            @click="isDialogVisible = false"
-          >
-            Close
-          </VBtn>
-          <VBtn color="success"> Save </VBtn>
-          <VSpacer />
-        </VCardActions>
-      </VCard>
-    </VDialog>
   </VCard>
 </template>
 

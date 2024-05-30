@@ -14,7 +14,7 @@ const selected = ref([])
     <VCardTitle>
       <div class="d-flex justify-between align-center">
         <div class="w-100">
-          <h4>Unpaid Timesheet</h4>
+          <h4>Pre Cut-Off</h4>
         </div>
       </div>
     </VCardTitle>
@@ -38,15 +38,15 @@ const selected = ref([])
         >
           <VAutocomplete
             clearable="true"
-            label="Timesheet - Mentor/Tutor"
+            label="Timesheet - Package"
             :items="['Timesheet 1', 'Timesheet 2', 'Timesheet 3']"
-            placeholder="Select Timesheet - Mentor/Tutor"
+            placeholder="Select Timesheet - Package"
             density="compact"
           />
         </VCol>
         <VCol
-          cols="5"
-          md="6"
+          cols="6"
+          md="7"
           class="text-end"
         >
           <VBtn
@@ -56,12 +56,16 @@ const selected = ref([])
             @click="isDialogVisible.add_existing = true"
             v-if="selected.length > 0"
           >
+            <VIcon
+              icon="ri-add-box-line"
+              class="me-2"
+            />
             Add to Existing Cut-Off
           </VBtn>
 
           <VMenu
             :close-on-content-click="false"
-            location="end"
+            location="bottom"
           >
             <template v-slot:activator="{ props }">
               <VBtn
@@ -71,6 +75,10 @@ const selected = ref([])
                 class="me-1"
               >
                 Additional Fee
+                <VIcon
+                  icon="ri-arrow-down-s-line"
+                  class="ms-2"
+                />
               </VBtn>
             </template>
             <VList>
@@ -80,7 +88,7 @@ const selected = ref([])
                   @click="isDialogVisible.additional_fee = true"
                 >
                   <VIcon
-                    icon="ri-download-line"
+                    icon="ri-wallet-2-line"
                     class="me-2"
                   />
                   Additional Fee
@@ -92,7 +100,7 @@ const selected = ref([])
                   @click="isDialogVisible.add_bonus = true"
                 >
                   <VIcon
-                    icon="ri-pencil-line"
+                    icon="ri-wallet-3-line"
                     class="me-2"
                   />
                   Add Bonus
@@ -105,6 +113,10 @@ const selected = ref([])
             density="compact"
             @click="isDialogVisible.cut_off = true"
           >
+            <VIcon
+              icon="ri-scissors-cut-line"
+              class="me-2"
+            />
             Cut-Off
           </VBtn>
         </VCol>
@@ -130,7 +142,7 @@ const selected = ref([])
             <th class="text-uppercase text-center">Date & Time</th>
             <th class="text-uppercase text-center">Time Spent</th>
             <th class="text-uppercase text-center">Fee/Hours</th>
-            <th class="text-uppercase text-center">Payment Status</th>
+            <th class="text-uppercase text-center">Cut-Offf Status</th>
           </tr>
         </thead>
         <tbody>
@@ -151,7 +163,7 @@ const selected = ref([])
             <td>10 Januari 2024 (14.00 - 15.00)</td>
             <td>60 Minutes</td>
             <td>Rp. 200.000</td>
-            <td class="text-end">
+            <td class="text-center">
               <VChip color="#214223"> Not Yet </VChip>
             </td>
           </tr>
@@ -191,47 +203,71 @@ const selected = ref([])
               />
             </VCol>
           </VRow>
+          <VDivider class="my-3" />
+          <VCardActions>
+            <VBtn
+              color="error"
+              @click="isDialogVisible.cut_off = false"
+            >
+              <VIcon
+                icon="ri-close-line"
+                class="me-3"
+              />
+              Close
+            </VBtn>
+            <VSpacer />
+            <VBtn color="success">
+              Save
+              <VIcon
+                icon="ri-save-line"
+                class="ms-3"
+              />
+            </VBtn>
+          </VCardActions>
         </VCardText>
-        <VCardActions>
-          <VSpacer />
-          <VBtn
-            color="error"
-            @click="isDialogVisible.cut_off = false"
-          >
-            Close
-          </VBtn>
-          <VBtn color="success"> Save </VBtn>
-          <VSpacer />
-        </VCardActions>
       </VCard>
     </VDialog>
 
     <!-- Add Existing Dialog -->
     <VDialog
       v-model="isDialogVisible.add_existing"
-      max-width="450"
+      max-width="300"
       persistent
-      absolute="true"
+      scrollable
     >
-      <VCard title="Add to Cut-Off Date">
+      <VCard title="Add to Cut-Off">
         <VCardText>
           <VRow>
             <VCol cols="12">
-              <VueDatePicker time-picker />
+              <VTextField
+                type="date"
+                density="compact"
+              ></VTextField>
             </VCol>
           </VRow>
+
+          <VDivider class="my-3" />
+          <VCardActions>
+            <VBtn
+              color="error"
+              @click="isDialogVisible.add_existing = false"
+            >
+              <VIcon
+                icon="ri-close-line"
+                class="me-3"
+              />
+              Close
+            </VBtn>
+            <VSpacer />
+            <VBtn color="success">
+              Save
+              <VIcon
+                icon="ri-save-line"
+                class="ms-3"
+              />
+            </VBtn>
+          </VCardActions>
         </VCardText>
-        <VCardActions>
-          <VSpacer />
-          <VBtn
-            color="error"
-            @click="isDialogVisible.add_existing = false"
-          >
-            Close
-          </VBtn>
-          <VBtn color="success"> Save </VBtn>
-          <VSpacer />
-        </VCardActions>
       </VCard>
     </VDialog>
   </VCard>
@@ -247,8 +283,9 @@ const selected = ref([])
         <VRow>
           <VCol cols="12">
             <VAutocomplete
-              label="Timesheet - Mentor/Tutor"
-              placeholder="Timesheet - Mentor/Tutor"
+              label="Timesheet - Package"
+              density="compact"
+              placeholder="Timesheet - Package"
               :items="['California', 'Colorado', 'Florida', 'Georgia', 'Texas', 'Wyoming']"
             ></VAutocomplete>
           </VCol>
@@ -256,6 +293,7 @@ const selected = ref([])
             <VTextField
               type="date"
               label="Date"
+              density="compact"
               placeholder="Date"
             />
           </VCol>
@@ -263,22 +301,33 @@ const selected = ref([])
             <VTextField
               type="number"
               label="Bonus Fee"
+              density="compact"
               placeholder="Bonus Fee"
             />
           </VCol>
         </VRow>
+        <VDivider class="my-3" />
+        <VCardActions>
+          <VBtn
+            color="error"
+            @click="isDialogVisible.add_bonus = false"
+          >
+            <VIcon
+              icon="ri-close-line"
+              class="me-3"
+            />
+            Close
+          </VBtn>
+          <VSpacer />
+          <VBtn color="success">
+            Save
+            <VIcon
+              icon="ri-save-line"
+              class="ms-3"
+            />
+          </VBtn>
+        </VCardActions>
       </VCardText>
-      <VCardActions>
-        <VSpacer />
-        <VBtn
-          color="error"
-          @click="isDialogVisible = false"
-        >
-          Close
-        </VBtn>
-        <VBtn color="success"> Save </VBtn>
-        <VSpacer />
-      </VCardActions>
     </VCard>
   </VDialog>
 
@@ -288,14 +337,15 @@ const selected = ref([])
     max-width="450"
     persistent
   >
-    <VCard title="Add Additional">
+    <VCard title="Add Additional Fee">
       <VCardText>
         <VRow>
           <VCol cols="12">
             <VAutocomplete
-              label="Timesheet - Mentor/Tutor"
-              placeholder="Timesheet - Mentor/Tutor"
+              label="Timesheet - Package"
+              placeholder="Timesheet - Package"
               :items="['California', 'Colorado', 'Florida', 'Georgia', 'Texas', 'Wyoming']"
+              density="compact"
             ></VAutocomplete>
           </VCol>
           <VCol cols="6">
@@ -303,6 +353,7 @@ const selected = ref([])
               type="date"
               label="Date"
               placeholder="Date"
+              density="compact"
             />
           </VCol>
           <VCol cols="6">
@@ -310,21 +361,32 @@ const selected = ref([])
               type="number"
               label="Additional Fee"
               placeholder="Additional Fee"
+              density="compact"
             />
           </VCol>
         </VRow>
+        <VDivider class="my-3" />
+        <VCardActions>
+          <VBtn
+            color="error"
+            @click="isDialogVisible.additional_fee = false"
+          >
+            <VIcon
+              icon="ri-close-line"
+              class="me-3"
+            />
+            Close
+          </VBtn>
+          <VSpacer />
+          <VBtn color="success">
+            Save
+            <VIcon
+              icon="ri-save-line"
+              class="ms-3"
+            />
+          </VBtn>
+        </VCardActions>
       </VCardText>
-      <VCardActions>
-        <VSpacer />
-        <VBtn
-          color="error"
-          @click="isDialogVisible.additional_fee = false"
-        >
-          Close
-        </VBtn>
-        <VBtn color="success"> Save </VBtn>
-        <VSpacer />
-      </VCardActions>
     </VCard>
   </VDialog>
 </template>

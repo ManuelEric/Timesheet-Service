@@ -47,23 +47,23 @@ import VerticalNavLink from '@layouts/components/VerticalNavLink.vue'
 
   <VerticalNavGroup
     :item="{
-      title: 'Cut Off',
+      title: 'Cut-Off',
       icon: 'ri-scissors-cut-line',
     }"
   >
     <VerticalNavLink
       :item="{
-        title: 'Unpaid',
+        title: 'Pre Cut-Off',
         icon: 'ri-calendar-todo-line',
-        to: '/admin/unpaid',
+        to: '/admin/cut-off/pre',
       }"
     />
 
     <VerticalNavLink
       :item="{
-        title: 'Paid',
+        title: 'Completed',
         icon: 'ri-calendar-todo-line',
-        to: '/admin/paid',
+        to: '/admin/cut-off/completed',
       }"
     />
   </VerticalNavGroup>

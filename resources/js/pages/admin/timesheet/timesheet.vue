@@ -54,22 +54,35 @@ const desserts = [
         <div class="w-100">
           <h4>TimeSheet</h4>
         </div>
-
-        <div class="w-25">
-          <VTextField
-            :loading="loading"
-            append-inner-icon="mdi-magnify"
-            density="compact"
-            label="Search"
-            variant="solo"
-            hide-details
-            single-line
-            @click:append-inner="onClick"
-          ></VTextField>
-        </div>
       </div>
     </VCardTitle>
     <VCardText>
+      <VRow class="my-1">
+        <VCol
+          cols="12"
+          md="2"
+        >
+          <VAutocomplete
+            clearable="true"
+            label="Program Name"
+            :items="['Program 1', 'Program 2', 'Program 3']"
+            placeholder="Select Program Name"
+            density="compact"
+          />
+        </VCol>
+        <VCol
+          cols="12"
+          md="3"
+        >
+          <VAutocomplete
+            clearable="true"
+            label="Timesheet - Package"
+            :items="['Timesheet 1', 'Timesheet 2', 'Timesheet 3']"
+            placeholder="Select Timesheet"
+            density="compact"
+          />
+        </VCol>
+      </VRow>
       <VTable class="text-no-wrap">
         <thead>
           <tr>

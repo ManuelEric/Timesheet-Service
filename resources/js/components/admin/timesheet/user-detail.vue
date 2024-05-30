@@ -39,7 +39,7 @@ const toggleDialog = type => {
       <div>
         <VMenu
           :close-on-content-click="false"
-          location="end"
+          location="bottom"
         >
           <template v-slot:activator="{ props }">
             <VBtn
@@ -48,6 +48,7 @@ const toggleDialog = type => {
               v-bind="props"
             >
               Action
+              <VIcon icon="ri-arrow-down-s-line ms-2"></VIcon>
             </VBtn>
           </template>
           <VList>
