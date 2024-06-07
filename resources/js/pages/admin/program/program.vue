@@ -55,19 +55,6 @@ const desserts = [
         <div class="w-100">
           <h4>Program Name</h4>
         </div>
-
-        <div class="w-25">
-          <VTextField
-            :loading="loading"
-            append-inner-icon="mdi-magnify"
-            density="compact"
-            label="Search"
-            variant="solo"
-            hide-details
-            single-line
-            @click:append-inner="onClick"
-          ></VTextField>
-        </div>
       </div>
     </VCardTitle>
     <VCardText>
