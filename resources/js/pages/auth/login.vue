@@ -11,7 +11,7 @@ const form = ref({
   confirm_password: '',
 })
 
-const exist_email = ref(false)
+const exist_email = ref(true)
 const exist_password = ref(true)
 const isPasswordVisible = ref(false)
 
@@ -90,14 +90,14 @@ const checkLogin = () => {
                 @click:append-inner="isPasswordVisible = !isPasswordVisible"
               />
 
-              <!-- remember me checkbox -->
+              <!-- forgot password -->
               <div class="d-flex align-center justify-end flex-wrap my-2">
-                <a
+                <router-link
+                  to="/user/forgot"
                   class="ms-2 mb-1"
-                  href="javascript:void(0)"
                 >
                   Forgot Password?
-                </a>
+                </router-link>
               </div>
 
               <!-- login button -->
