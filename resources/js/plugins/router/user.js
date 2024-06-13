@@ -31,6 +31,10 @@ export default [
         component: () => import('@/pages/auth/login.vue'),
       },
       {
+        path: '/user/forgot',
+        component: () => import('@/pages/auth/forgot.vue'),
+      },
+      {
         path: '/user/register',
         component: () => import('@/pages/auth/register.vue'),
       },

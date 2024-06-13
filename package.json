@@ -10,6 +10,7 @@
     "postinstall": "npm run build:icons"
   },
   "dependencies": {
+    "@chenfengyuan/vue-countdown": "^2.1.2",
     "@floating-ui/dom": "1.5.3",
     "@iconify-json/bxl": "^1.1.10",
     "@popperjs/core": "^2.11.8",
@@ -22,7 +23,7 @@
     "qalendar": "^3.8.1",
     "roboto-fontface": "^0.10.0",
     "v-calendar": "^3.1.2",
-    "vue": "^3.3.4",
+    "vue": "^3.4.27",
     "vue-flatpickr-component": "11.0.3",
     "vue-prism-component": "^2.0.0",
     "vue-router": "^4.2.5",
