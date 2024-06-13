@@ -1,11 +1,9 @@
 <script setup>
-import { useTheme } from 'vuetify'
-import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
-import logo from '@images/logo.svg?raw'
+import { router } from '@/plugins/router'
+import logo from '@images/eduall/eduall.png'
 import authV1MaskDark from '@images/pages/auth-v1-mask-dark.png'
 import authV1MaskLight from '@images/pages/auth-v1-mask-light.png'
-import authV1Tree2 from '@images/pages/auth-v1-tree-2.png'
-import authV1Tree from '@images/pages/auth-v1-tree.png'
+import { useTheme } from 'vuetify'
 
 const form = ref({
   email: '',
@@ -13,13 +11,22 @@ const form = ref({
   remember: false,
 })
 
+const exist_email = ref(false)
+const isPasswordVisible = ref(false)
+
 const vuetifyTheme = useTheme()
 
 const authThemeMask = computed(() => {
   return vuetifyTheme.global.name.value === 'light' ? authV1MaskLight : authV1MaskDark
 })
 
-const isPasswordVisible = ref(false)
+const checkEmail = () => {
+  exist_email.value = true
+}
+
+const checkLogin = () => {
+  router.push('/user/dashboard')
+}
 </script>
 
 <template>
@@ -31,28 +38,23 @@ const isPasswordVisible = ref(false)
       max-width="448"
     >
       <VCardItem class="justify-center">
-        <template #prepend>
-          <div class="d-flex">
-            <div v-html="logo" />
-          </div>
-        </template>
-
-        <VCardTitle class="font-weight-semibold text-2xl text-uppercase">
-          Materio
-        </VCardTitle>
+        <div class="d-flex justify-center mb-5">
+          <img
+            :src="logo"
+            alt="Timesheet - EduALL"
+            class="w-50 text-center"
+          />
+        </div>
+        <VCardTitle class="font-weight-semibold text-2xl text-uppercase"> Timesheet App </VCardTitle>
       </VCardItem>
 
       <VCardText class="pt-2">
-        <h5 class="text-h5 font-weight-semibold mb-1">
-          Welcome to Materio! 👋🏻
-        </h5>
-        <p class="mb-0">
-          Please sign-in to your account and start the adventure
-        </p>
+        <h5 class="text-h5 font-weight-semibold mb-1">Welcome to Timesheet App! 👋🏻</h5>
+        <p class="mb-0">Please sign-in to your account and start the adventure</p>
       </VCardText>
 
       <VCardText>
-        <VForm @submit.prevent="() => {}">
+        <VForm @submit.prevent="checkLogin">
           <VRow>
             <!-- email -->
             <VCol cols="12">
@@ -61,10 +63,23 @@ const isPasswordVisible = ref(false)
                 label="Email"
                 type="email"
               />
+
+              <VBtn
+                block
+                type="button"
+                @click="checkEmail"
+                class="mt-4"
+                v-if="!exist_email"
+              >
+                Check Email
+              </VBtn>
             </VCol>
 
             <!-- password -->
-            <VCol cols="12">
+            <VCol
+              cols="12"
+              v-if="exist_email"
+            >
               <VTextField
                 v-model="form.password"
                 label="Password"
@@ -93,67 +108,17 @@ const isPasswordVisible = ref(false)
               <VBtn
                 block
                 type="submit"
-                to="/"
               >
                 Login
               </VBtn>
-            </VCol>
-
-            <!-- create account -->
-            <VCol
-              cols="12"
-              class="text-center text-base"
-            >
-              <span>New on our platform?</span>
-              <RouterLink
-                class="text-primary ms-2"
-                to="/register"
-              >
-                Create an account
-              </RouterLink>
-            </VCol>
-
-            <VCol
-              cols="12"
-              class="d-flex align-center"
-            >
-              <VDivider />
-              <span class="mx-4">or</span>
-              <VDivider />
-            </VCol>
-
-            <!-- auth providers -->
-            <VCol
-              cols="12"
-              class="text-center"
-            >
-              <AuthProvider />
             </VCol>
           </VRow>
         </VForm>
       </VCardText>
     </VCard>
-
-    <VImg
-      class="auth-footer-start-tree d-none d-md-block"
-      :src="authV1Tree"
-      :width="250"
-    />
-
-    <VImg
-      :src="authV1Tree2"
-      class="auth-footer-end-tree d-none d-md-block"
-      :width="350"
-    />
-
-    <!-- bg img -->
-    <VImg
-      class="auth-footer-mask d-none d-md-block"
-      :src="authThemeMask"
-    />
   </div>
 </template>
 
 <style lang="scss">
-@use "@core-scss/pages/page-auth.scss";
+@use '@core-scss/pages/page-auth.scss';
 </style>

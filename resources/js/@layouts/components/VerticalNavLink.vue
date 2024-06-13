@@ -17,6 +17,7 @@ const props = defineProps({
       :to="item.to"
       :href="item.href"
       :target="item.target"
+      :class="{ 'router-link-exact-active': $route.path.startsWith(item.to) && $route.path !== '/' }"
     >
       <VIcon
         :icon="item.icon || 'ri-checkbox-blank-circle-line'"

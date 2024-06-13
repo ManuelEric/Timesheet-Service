@@ -1,5 +1,5 @@
 <script setup>
-import { useTheme } from 'vuetify'
+import { useTheme } from 'vuetify';
 
 const props = defineProps({
   themes: {
@@ -26,6 +26,16 @@ const changeTheme = () => {
 // Update icon if theme is changed from other sources
 watch(() => globalTheme.name.value, val => {
   currentThemeName.value = val
+  localStorage.setItem('mode', val)
+})
+
+onMounted(()=>{
+  const mode = localStorage.getItem('mode')
+
+  if(mode) {
+    currentThemeName.value = mode
+    globalTheme.name.value = mode
+  }
 })
 </script>
 

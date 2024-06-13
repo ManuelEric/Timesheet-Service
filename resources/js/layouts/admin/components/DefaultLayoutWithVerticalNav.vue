@@ -1,8 +1,8 @@
 <script setup>
 import Footer from '@/layouts/components/Footer.vue'
-import NavItemsUser from '@/layouts/components/NavItemsUser.vue'
 import NavbarThemeSwitcher from '@/layouts/components/NavbarThemeSwitcher.vue'
-import UserProfile from '@/layouts/components/UserProfile.vue'
+import NavItemsAdmin from '@/layouts/admin/components/NavItemsAdmin.vue'
+import UserProfile from '@/layouts/admin/components/UserProfile.vue'
 import logo from '@images/eduall/eduall.png'
 import VerticalNavLayout from '@layouts/components/VerticalNavLayout.vue'
 
@@ -25,11 +25,9 @@ const logo_navbar = logo
         <!-- 👉 Search -->
         <div
           class="d-flex align-center cursor-pointer"
-          style="user-select: none;"
+          style="user-select: none"
         >
-        <h3>
-          Welcome Back, [User]
-        </h3>
+          <h3>Welcome Back, [User]</h3>
         </div>
 
         <VSpacer />
@@ -58,11 +56,13 @@ const logo_navbar = logo
         to="/"
         class="app-logo app-title-wrapper"
       >
-      <img :src="logo_navbar" alt="Timesheet - EduALL" class="d-flex w-25 text-center">
+        <img
+          :src="logo_navbar"
+          alt="Timesheet - EduALL"
+          class="d-flex w-25 text-center"
+        />
 
-        <h1 class="font-weight-medium leading-normal text-xl text-uppercase">
-          Timesheet
-        </h1>
+        <h1 class="font-weight-medium leading-normal text-xl text-uppercase">Timesheet</h1>
       </RouterLink>
 
       <IconBtn
@@ -74,7 +74,7 @@ const logo_navbar = logo
     </template>
 
     <template #vertical-nav-content>
-      <NavItemsUser />
+      <NavItemsAdmin />
     </template>
 
     <!-- 👉 Pages -->
