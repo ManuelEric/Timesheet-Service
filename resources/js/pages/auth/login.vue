@@ -5,13 +5,15 @@ import authV1MaskDark from '@images/pages/auth-v1-mask-dark.png'
 import authV1MaskLight from '@images/pages/auth-v1-mask-light.png'
 import { useTheme } from 'vuetify'
 
+const props = defineProps({ id: String })
+
 const form = ref({
   email: '',
   password: '',
   confirm_password: '',
 })
 
-const exist_email = ref(true)
+const exist_email = ref(false)
 const exist_password = ref(true)
 const isPasswordVisible = ref(false)
 
@@ -28,6 +30,17 @@ const checkEmail = () => {
 const checkLogin = () => {
   router.push('/user/dashboard')
 }
+
+const checkToken = () => {
+  exist_email.value = true
+  exist_password.value = false
+}
+
+onMounted(() => {
+  if (props.id) {
+    checkToken()
+  }
+})
 </script>
 
 <template>

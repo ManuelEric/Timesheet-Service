@@ -27,8 +27,11 @@ export default [
     component: () => import('@/layouts/blank.vue'),
     children: [
       {
-        path: '/user/login',
+        path: '/user/login/:id?',
         component: () => import('@/pages/auth/login.vue'),
+        props: route => ({
+          id:route.params.id
+        })
       },
       {
         path: '/user/forgot',
