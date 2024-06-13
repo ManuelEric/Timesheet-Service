@@ -1,6 +1,5 @@
 import App from '@/App.vue';
 import { registerPlugins } from '@core/utils/plugins';
-import '@vuepic/vue-datepicker/dist/main.css';
 import { createApp } from 'vue';
 
 // Styles

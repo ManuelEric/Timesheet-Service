@@ -1,0 +1,46 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Activity extends Model
+{
+    use HasFactory;
+
+    protected $table = 'timesheet_activities';
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'timesheet_id',
+        'activity',
+        'description',
+        'start_date',
+        'end_date',
+        'fee_hours',
+        'additional_fee',
+        'time_spent',
+        'status',
+        'cutoff_status',
+    ];
+
+    /**
+     * The relations.
+     *
+     * @var array<int, string>
+     */
+    public function timesheet()
+    {
+        return $this->belongsTo(Timesheet::class, 'timesheet_id', 'id');
+    }
+
+    public function cutoff_history()
+    {
+        return $this->belongsTo(Cutoff::class, 'cutoff_ref_id', 'id');
+    }
+}
