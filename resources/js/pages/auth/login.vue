@@ -8,10 +8,11 @@ import { useTheme } from 'vuetify'
 const form = ref({
   email: '',
   password: '',
-  remember: false,
+  confirm_password: '',
 })
 
 const exist_email = ref(false)
+const exist_password = ref(true)
 const isPasswordVisible = ref(false)
 
 const vuetifyTheme = useTheme()
@@ -75,10 +76,10 @@ const checkLogin = () => {
               </VBtn>
             </VCol>
 
-            <!-- password -->
+            <!-- exist password -->
             <VCol
               cols="12"
-              v-if="exist_email"
+              v-if="exist_email && exist_password"
             >
               <VTextField
                 v-model="form.password"
@@ -90,12 +91,7 @@ const checkLogin = () => {
               />
 
               <!-- remember me checkbox -->
-              <div class="d-flex align-center justify-space-between flex-wrap mt-1 mb-4">
-                <VCheckbox
-                  v-model="form.remember"
-                  label="Remember me"
-                />
-
+              <div class="d-flex align-center justify-end flex-wrap my-2">
                 <a
                   class="ms-2 mb-1"
                   href="javascript:void(0)"
@@ -103,6 +99,40 @@ const checkLogin = () => {
                   Forgot Password?
                 </a>
               </div>
+
+              <!-- login button -->
+              <VBtn
+                block
+                type="submit"
+              >
+                Login
+              </VBtn>
+            </VCol>
+
+            <!-- new password -->
+            <VCol
+              cols="12"
+              v-if="exist_email && !exist_password"
+            >
+              <VTextField
+                v-model="form.password"
+                label="New Password"
+                placeholder="············"
+                :type="isPasswordVisible ? 'text' : 'password'"
+                :append-inner-icon="isPasswordVisible ? 'ri-eye-off-line' : 'ri-eye-line'"
+                @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                class="mb-6"
+              />
+
+              <VTextField
+                v-model="form.confirm_password"
+                label="Confirmation Password"
+                placeholder="············"
+                :type="isPasswordVisible ? 'text' : 'password'"
+                :append-inner-icon="isPasswordVisible ? 'ri-eye-off-line' : 'ri-eye-line'"
+                @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                class="mb-6"
+              />
 
               <!-- login button -->
               <VBtn

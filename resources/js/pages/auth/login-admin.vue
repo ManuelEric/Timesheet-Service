@@ -8,10 +8,8 @@ import { useTheme } from 'vuetify'
 const form = ref({
   email: '',
   password: '',
-  remember: false,
 })
 
-const exist_email = ref(false)
 const isPasswordVisible = ref(false)
 
 const vuetifyTheme = useTheme()
@@ -19,10 +17,6 @@ const vuetifyTheme = useTheme()
 const authThemeMask = computed(() => {
   return vuetifyTheme.global.name.value === 'light' ? authV1MaskLight : authV1MaskDark
 })
-
-const checkEmail = () => {
-  exist_email.value = true
-}
 
 const checkLogin = () => {
   router.push('/admin/dashboard')
@@ -56,30 +50,16 @@ const checkLogin = () => {
       <VCardText>
         <VForm @submit.prevent="checkLogin">
           <VRow>
-            <!-- email -->
             <VCol cols="12">
+              <!-- email  -->
               <VTextField
                 v-model="form.email"
                 label="Email"
                 type="email"
+                class="mb-3"
               />
 
-              <VBtn
-                block
-                type="button"
-                @click="checkEmail"
-                class="mt-4"
-                v-if="!exist_email"
-              >
-                Check Email
-              </VBtn>
-            </VCol>
-
-            <!-- password -->
-            <VCol
-              cols="12"
-              v-if="exist_email"
-            >
+              <!-- password -->
               <VTextField
                 v-model="form.password"
                 label="Password"
@@ -87,22 +67,8 @@ const checkLogin = () => {
                 :type="isPasswordVisible ? 'text' : 'password'"
                 :append-inner-icon="isPasswordVisible ? 'ri-eye-off-line' : 'ri-eye-line'"
                 @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                class="mb-5"
               />
-
-              <!-- remember me checkbox -->
-              <div class="d-flex align-center justify-space-between flex-wrap mt-1 mb-4">
-                <VCheckbox
-                  v-model="form.remember"
-                  label="Remember me"
-                />
-
-                <a
-                  class="ms-2 mb-1"
-                  href="javascript:void(0)"
-                >
-                  Forgot Password?
-                </a>
-              </div>
 
               <!-- login button -->
               <VBtn
