@@ -3,14 +3,20 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
+
+    public $incrementing = false;
 
     /**
      * The attributes that are mass assignable.
@@ -18,9 +24,10 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
+        'full_name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -30,16 +37,38 @@ class User extends Authenticatable
      */
     protected $hidden = [
         'password',
-        'remember_token',
     ];
 
+    public static function boot()
+    {
+        parent::boot();
+
+        self::creating(function ($model) {
+            $model->id = (string) Str::ulid();
+        });
+    }
+
     /**
-     * The attributes that should be cast.
+     * The mutators.
      *
-     * @var array<string, string>
+     * @var array<int, string>
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-    ];
+    protected function password(): Attribute
+    {
+        return Attribute::make(
+            set: fn($value) => Hash::make($value)
+        );
+    }
+
+    /**
+     * The relations.
+     *
+     * @var array<int, string>
+     */
+
+    public function timesheets()
+    {
+        return $this->belongsToMany(Timesheet::class, 'timesheet_pics', 'user_id', 'timesheet_id')->withTimestamps();
+    }
+
 }
