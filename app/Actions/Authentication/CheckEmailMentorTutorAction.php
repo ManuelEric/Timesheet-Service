@@ -12,7 +12,7 @@ class CheckEmailMentorTutorAction
             'uuid' => null, 'full_name' => null, 'email_exist' => null, 'has_password' => null
         ];
 
-        $request = Http::get( env('CRM_DOMAIN') . 'oauth/email/check', [
+        $request = Http::get( env('CRM_DOMAIN') . 'auth/email/check', [
             'email' => $email
         ]);
         $response = $request->json();

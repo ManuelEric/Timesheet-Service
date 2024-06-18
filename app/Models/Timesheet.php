@@ -35,6 +35,11 @@ class Timesheet extends Model
         return $this->belongsToMany(User::class, 'timesheet_pics', 'timesheet_id', 'user_id')->withTimestamps();
     }
 
+    public function handle_by()
+    {
+        return $this->belongsToMany(TempUser::class, 'timesheet_handle_by', 'timesheet_id', 'temp_user_id')->withTimestamps();
+    }
+
     public function package()
     {
         return $this->belongsTo(Package::class, 'package_id', 'id');

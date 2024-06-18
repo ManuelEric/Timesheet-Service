@@ -11,12 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::create('temp_users', function (Blueprint $table) {
+            $table->ulid('id')->primary();
+            $table->string('full_name');
+            $table->string('email');
+            $table->text('password');
+            $table->enum('role', ['mentor', 'tutor']);
+            $table->datetime('last_activity')->nullable();
+            $table->timestamps();
+        });
+
         Schema::create('users', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->string('full_name');
             $table->string('email');
             $table->text('password');
             $table->enum('role', ['super_admin', 'admin', 'finance']);
+            $table->datetime('last_activity')->nullable();
             $table->timestamps();
         });
 
@@ -36,19 +47,29 @@ return new class extends Migration
             $table->string('inhouse_user_name');
             $table->foreignId('package_id')->constrained(
                 table: 'packages', indexName: 'timesheets_package_id'
-            )->onUpdate('cascade')->onDelete('cascade');
+            )->onUpdate('restrict')->onDelete('restrict');
             $table->text('notes')->nullable();
-            $table->text('meeting_link');
         });
 
         Schema::create('timesheet_pics', function (Blueprint $table) {
             $table->id();
             $table->foreignUlid('user_id')->constrained(
                 table: 'users', indexName: 'timesheet_pics_user_id'
-            )->onUpdate('cascade')->onDelete('cascade');
+            )->onUpdate('restrict')->onDelete('restrict');
             $table->foreignId('timesheet_id')->constrained(
                 table: 'timesheets', indexName: 'timesheet_pics_timesheet_id'
-            )->onUpdate('cascade')->onDelete('cascade');
+            )->onUpdate('restrict')->onDelete('restrict');
+            $table->timestamps();
+        });
+
+        Schema::create('timesheet_handle_by', function (Blueprint $table) {
+            $table->id();
+            $table->foreignUlid('temp_user_id')->constrained(
+                table: 'temp_users', indexName: 'timesheet_handle_by_temp_user_id'
+            )->onUpdate('restrict')->onDelete('restrict');
+            $table->foreignId('timesheet_id')->constrained(
+                table: 'timesheets', indexName: 'timesheet_handle_by_timesheet_id'
+            )->onUpdate('restrict')->onDelete('restrict');
             $table->timestamps();
         });
 
@@ -63,17 +84,18 @@ return new class extends Migration
             $table->id();
             $table->foreignId('timesheet_id')->constrained(
                 table: 'timesheets', indexName: 'timesheet_activities_timesheet_id'
-            )->onUpdate('cascade')->onDelete('cascade');
+            )->onUpdate('restrict')->onDelete('restrict');
             $table->string('activity');
             $table->text('description');
             $table->datetime('start_date');
             $table->datetime('end_date');
             $table->float('time_spent')->comment('in hours');
+            $table->text('meeting_link');
             $table->integer('status');
             $table->enum('cutoff_status', ['paid', 'unpaid'])->default('unpaid');
             $table->foreignUlid('cutoff_ref_id')->constrained(
                 table: 'timesheet_cutoff_history', indexName: 'timesheet_activities_cutoff_ref_id'
-            )->onUpdate('cascade')->onDelete('cascade');
+            )->onUpdate('restrict')->onDelete('restrict');
             $table->timestamps();
         });
 
@@ -86,7 +108,7 @@ return new class extends Migration
             $table->string('program_name');
             $table->foreignId('timesheet_id')->constrained(
                 table: 'timesheets', indexName: 'ref_clientprograms_timesheet_id'
-            )->onUpdate('cascade')->onDelete('cascade');
+            )->onUpdate('restrict')->onDelete('restrict');
             $table->timestamps();
         });
 
