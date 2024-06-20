@@ -15,7 +15,7 @@ return [
 
     'defaults' => [
         'guard' => 'web',
-        'passwords' => 'users',
+        'passwords' => 'temp_users',
     ],
 
     /*
@@ -40,6 +40,11 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        
+        'api' => [
+            'driver' => 'token',
+            'provider' => 'users',
+        ]
     ],
 
     /*
@@ -63,6 +68,11 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
+        ],
+
+        'temp_users' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\TempUser::class,
         ],
 
         // 'users' => [
@@ -96,6 +106,13 @@ return [
             'table' => 'password_reset_tokens',
             'expire' => 60,
             'throttle' => 60,
+        ],
+
+        'temp_users' => [
+            'provider' => 'temp_users',
+            'table' => 'password_reset_tokens',
+            'expire' => 60,
+            'throttle' => 10,
         ],
     ],
 

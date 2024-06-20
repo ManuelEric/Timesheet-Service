@@ -2,10 +2,20 @@
 
 namespace App\Actions\Authentication;
 
+use App\Http\Traits\ConcatenateName;
+use App\Services\ResponseService;
 use Illuminate\Support\Facades\Http;
 
 class CheckEmailMentorTutorAction
 {
+    use ConcatenateName; 
+    protected $responseService;
+
+    public function __construct(ResponseService $responseService)
+    {
+        $this->responseService = $responseService;
+    }
+
     public function execute(string $email)
     {
         $fillableArray = [
@@ -16,26 +26,35 @@ class CheckEmailMentorTutorAction
             'email' => $email
         ]);
         $response = $request->json();
+        
 
         if (empty($response)) 
             return $fillableArray;
-        
+
 
         /* initialize the data */
         $uuid = $response['uuid'];
-        $fullName = $response['first_name'] . ' ' . $response['last_name'];
+        $fullName = $this->concat($response['first_name'], $response['last_name']);
+        $roles = $response['roles'];
         $emailExist = $response['email'] ? true : false;
         $hasPassword = $response['password'] ? true : false;
         
         /* manipulate the response */
-        $fillableArray = [
+        $checkingResult = [
             'uuid' => $uuid,
             'full_name' => $fullName,
             'email_exist' => $emailExist,
             'has_password' => $hasPassword,
         ];
 
-        $result = $fillableArray;
+        $rawInformation = [
+            'full_name' => $fullName,
+            'email' => $response['email'],
+            'password' => $response['password'],
+            'roles' => $roles,
+        ];
+
+        $result = compact('checkingResult', 'rawInformation');
 
         return $result;
     }

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->ulid('id')->primary();
             $table->string('full_name');
             $table->string('email');
-            $table->text('password');
+            $table->text('password')->nullable();
             $table->enum('role', ['mentor', 'tutor']);
             $table->datetime('last_activity')->nullable();
             $table->timestamps();
@@ -126,10 +126,12 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('temp_users');
         Schema::dropIfExists('users');
         Schema::dropIfExists('packages');
         Schema::dropIfExists('timesheets');
         Schema::dropIfExists('timesheet_pics');
+        Schema::dropIfExists('timesheet_handle_by');
         Schema::dropIfExists('timesheet_cutoff_history');
         Schema::dropIfExists('timesheet_activities');
         Schema::dropIfExists('ref_clientprograms');
