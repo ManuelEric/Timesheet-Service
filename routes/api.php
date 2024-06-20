@@ -30,7 +30,6 @@ Route::prefix('auth')->group(function () {
     Route::POST('email/checking', [V1CheckEmailController::class, 'execute']);
     Route::POST('token', [V1LoginController::class, 'authenticateAdmin']);
     Route::POST('forgot-password', [V1ForgotPasswordController::class, 'sendResetLink']);
-    Route::GET('reset-password/{token}', [V1ResetPasswordController::class, 'handle'])->name('password.reset'); # need to be changed into the route that front-end provides
     Route::POST('reset-password', [V1ResetPasswordController::class, 'execute']);
 
     Route::middleware(['auth:sanctum'])->group(function() {

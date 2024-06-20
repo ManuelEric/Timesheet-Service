@@ -19,18 +19,6 @@ use Illuminate\Support\Str;
 
 class ResetPasswordController extends Controller
 {
-    public function handle($token): JsonResponse
-    {
-        //! need to be remembered
-        //! in the front-end, always provide the token box and bring the token back 
-
-        /* TEMPORARY CODE */
-        /* should be changed to route from front-end */
-        return response()->json([
-            'token' => $token
-        ]);
-    }
-
     public function execute(
         ResetPasswordRequest $request,
         ResetPasswordService $resetPasswordService,
