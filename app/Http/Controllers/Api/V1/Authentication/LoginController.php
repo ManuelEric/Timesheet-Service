@@ -3,15 +3,10 @@
 namespace App\Http\Controllers\Api\V1\Authentication;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\AuthenticateAdminRequest;
-use App\Http\Requests\AuthenticateNonAdminRequest;
-use App\Models\User;
+use App\Http\Requests\Authentication\AuthenticateAdminRequest;
+use App\Http\Requests\Authentication\AuthenticateNonAdminRequest;
 use App\Services\Authentication\GenerateTokenService;
-use Exception;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
