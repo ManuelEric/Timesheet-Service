@@ -105,6 +105,19 @@ onMounted(() => {
                 </vue-countdown>
               </div>
             </VCol>
+            <!-- login instead -->
+            <VCol
+              cols="12"
+              class="text-center text-base"
+            >
+              <span>Remember your password already?</span>
+              <RouterLink
+                class="text-primary ms-2"
+                to="login"
+              >
+                Sign in
+              </RouterLink>
+            </VCol>
           </VRow>
         </VForm>
       </VCardText>
