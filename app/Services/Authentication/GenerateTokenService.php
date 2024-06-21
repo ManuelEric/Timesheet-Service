@@ -32,6 +32,14 @@ class GenerateTokenService
         $validatedEmail = $validated['email'];
         $validatedPassword = $validated['password'];
         $tempUser = TempUser::where('email', $validatedEmail)->first();
+        if (! $tempUser)
+        {
+            throw new HttpResponseException(
+                response()->json([
+                    'errors' => 'The account does not exist.'
+                ], JsonResponse::HTTP_BAD_REQUEST)
+            );
+        }
 
         
         /* check user credentials */
