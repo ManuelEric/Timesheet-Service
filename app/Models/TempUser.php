@@ -3,16 +3,20 @@
 namespace App\Models;
 
 use App\Observers\TempUserObserver;
+use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Contracts\Auth\CanResetPassword;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Str;
 
 #[ObservedBy([TempUserObserver::class])]
-class TempUser extends Model
+class TempUser extends Authenticatable implements CanResetPassword
 {
-    use HasFactory, HasApiTokens;
+    use HasFactory, HasApiTokens, Notifiable;
 
     public $incrementing = false;
     protected $table = 'temp_users';
@@ -56,6 +60,12 @@ class TempUser extends Model
         self::creating(function ($model) {
             $model->id = (string) Str::ulid();
         });
+
+        /* Register any authentication / authorization services */
+        ResetPassword::createUrlUsing(function (TempUser $user, string $token) {
+            return env('TIMESHEET_FE_DOMAIN') . '?token=' . $token .'&email=' . $user->email;
+        });
+
     }
 
     /**

@@ -32,7 +32,7 @@ class TempUserObserver
      */
     public function created(TempUser $tempUser): void
     {
-        //
+        Log::info($tempUser->full_name . ' has been registered.');
     }
 
     /**
@@ -40,7 +40,11 @@ class TempUserObserver
      */
     public function updated(TempUser $tempUser): void
     {
-        //
+        /**
+         * Listening to 'updated password'
+         */
+        if ( $tempUser->wasChanged('password') )
+            Log::info($tempUser->full_name . ' has perform a password change.');
     }
 
     /**

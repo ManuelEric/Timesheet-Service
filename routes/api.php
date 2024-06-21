@@ -3,6 +3,8 @@
 use App\Http\Controllers\Api\V1\Authentication\CheckEmailController as V1CheckEmailController;
 use App\Http\Controllers\Api\V1\Authentication\LoginController as V1LoginController;
 use App\Http\Controllers\Api\V1\Authentication\LogoutController as V1LogoutController;
+use App\Http\Controllers\Api\V1\Authentication\ForgotPasswordController as V1ForgotPasswordController;
+use App\Http\Controllers\Api\V1\Authentication\ResetPasswordController as V1ResetPasswordController;
 use App\Http\Controllers\Api\V1\MentorTutors\ListController as V1MentorTutorsListController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +29,8 @@ Route::prefix('auth')->group(function () {
 
     Route::POST('email/checking', [V1CheckEmailController::class, 'execute']);
     Route::POST('token', [V1LoginController::class, 'authenticateAdmin']);
+    Route::POST('forgot-password', [V1ForgotPasswordController::class, 'sendResetLink']);
+    Route::POST('reset-password', [V1ResetPasswordController::class, 'execute']);
 
     Route::middleware(['auth:sanctum'])->group(function() {
         /* Logout */
