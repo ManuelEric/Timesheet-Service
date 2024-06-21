@@ -2,24 +2,20 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-
-use App\Observers\UserObserver;
+use App\Observers\TempUserObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\Eloquent\Model;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Str;
 
-#[ObservedBy([UserObserver::class])]
-class User extends Authenticatable
+#[ObservedBy([TempUserObserver::class])]
+class TempUser extends Model
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasFactory, HasApiTokens;
 
     public $incrementing = false;
+    protected $table = 'temp_users';
 
     /**
      * The attributes that are mass assignable.
@@ -84,9 +80,9 @@ class User extends Authenticatable
      * @var array<int, string>
      */
 
-    public function timesheets()
-    {
-        return $this->belongsToMany(Timesheet::class, 'timesheet_pics', 'user_id', 'timesheet_id')->withTimestamps();
-    }
+     public function timesheets()
+     {
+         return $this->belongsToMany(Timesheet::class, 'timesheet_handle_by', 'temp_user_id', 'timesheet_id')->withTimestamps();
+     }
 
 }
