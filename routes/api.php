@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\Authentication\LoginController as V1LoginControl
 use App\Http\Controllers\Api\V1\Authentication\LogoutController as V1LogoutController;
 use App\Http\Controllers\Api\V1\Authentication\ForgotPasswordController as V1ForgotPasswordController;
 use App\Http\Controllers\Api\V1\Authentication\ResetPasswordController as V1ResetPasswordController;
+use App\Http\Controllers\Api\V1\Authentication\CreatePasswordController as V1CreatePasswordController;
 use App\Http\Controllers\Api\V1\MentorTutors\ListController as V1MentorTutorsListController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -31,6 +32,7 @@ Route::prefix('auth')->group(function () {
     Route::POST('token', [V1LoginController::class, 'authenticateAdmin']);
     Route::POST('forgot-password', [V1ForgotPasswordController::class, 'sendResetLink']);
     Route::POST('reset-password', [V1ResetPasswordController::class, 'execute']);
+    Route::POST('create-password', [V1CreatePasswordController::class, 'execute']);
 
     Route::middleware(['auth:sanctum'])->group(function() {
         /* Logout */

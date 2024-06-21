@@ -12,6 +12,13 @@ use Illuminate\Support\Facades\Password;
 
 class ResetPasswordService
 {
+    public function createLocalPassword(string $email, string $password)
+    {
+        $user = TempUser::where('email', $email)->first();
+        $user->password = Hash::make($password);
+        $user->save();
+    }
+
     public function updateLocalPassword(string $token, string $email, string $password)
     {
         $status = Password::reset(
