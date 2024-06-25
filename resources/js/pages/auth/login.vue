@@ -17,16 +17,18 @@ const authThemeMask = computed(() => {
 })
 
 // Start Variable
-const props = defineProps({ id: String })
+const props = defineProps({ token: String, email: String })
 
 const formData = ref()
 
 const form = ref({
+  token: '',
   email: '',
   password: '',
   password_confirmation: '',
 })
 
+const loading = ref(false)
 const exist_email = ref(false)
 const exist_password = ref(true)
 const isPasswordVisible = ref(false)
@@ -46,6 +48,7 @@ const confirmPassword = [
 const checkEmail = async () => {
   const { valid } = await formData.value.validate()
   if (valid) {
+    loading.value = true
     try {
       const res = await ApiService.post('api/v1/auth/email/checking', {
         email: form.value.email,
@@ -59,9 +62,11 @@ const checkEmail = async () => {
           exist_password.value = false
         }
       }
+      loading.value = false
     } catch (error) {
-      c
+      showNotif('error', 'You`re email is not found!', 'bottom-end')
       console.error(error)
+      loading.value = false
     }
   }
 }
@@ -71,6 +76,7 @@ const checkLogin = async () => {
   const { valid } = await formData.value.validate()
 
   if (valid) {
+    loading.value = true
     try {
       if (exist_password.value) {
         const res = await ApiService.post('api/v1/identity/generate-token', {
@@ -80,21 +86,21 @@ const checkLogin = async () => {
 
         if (res) {
           // save token
-
           JwtService.saveToken(res.granted_token)
           showNotif('success', 'You`ve successfully log-in.', 'bottom-end')
           setTimeout(() => {
             router.go(0)
           }, 1500)
-        } else {
-          form.value.password = ''
-          showNotif('error', 'You`re password is wrong.', 'bottom-end')
         }
       } else {
-        createPassword()
+        await createPassword()
       }
+      loading.value = false
     } catch (error) {
+      form.value.password = ''
+      showNotif('error', 'You`re password is wrong.', 'bottom-end')
       console.error(error)
+      loading.value = false
     }
   }
 }
@@ -102,19 +108,27 @@ const checkLogin = async () => {
 // Create New Password
 const createPassword = async () => {
   try {
-    const res = await ApiService.post('api/v1/auth/create-password', form.value)
+    const url = props.token ? 'api/v1/auth/reset-password' : 'api/v1/auth/create-password'
+    const res = await ApiService.post(url, form.value)
     if (res) {
-      checkLogin()
+      exist_password.value = true
+      await checkLogin()
     }
   } catch (error) {
     console.error(error)
   }
 }
 
-// Checking Token
-const checkToken = () => {}
+// Checking Reset Password
+const checkResetPassword = () => {
+  form.value.email = props.email
+  form.value.token = props.token
 
-// Checking Token
+  exist_email.value = true
+  exist_password.value = false
+}
+
+// Checking Auth
 const checkAuth = () => {
   const is_login = verifyAuth().isAuthenticated.value
 
@@ -127,9 +141,8 @@ const checkAuth = () => {
 onMounted(() => {
   // JwtService.destroyToken()
   checkAuth()
-
-  if (props.id) {
-    checkToken()
+  if (props.token) {
+    checkResetPassword()
   }
 })
 </script>
@@ -182,6 +195,8 @@ onMounted(() => {
                 @click="checkEmail"
                 class="mt-4"
                 v-if="!exist_email"
+                :loading="loading"
+                :disabled="loading"
               >
                 Check Email
               </VBtn>
@@ -216,6 +231,8 @@ onMounted(() => {
               <VBtn
                 block
                 type="submit"
+                :loading="loading"
+                :disabled="loading"
               >
                 Login
               </VBtn>
@@ -252,6 +269,8 @@ onMounted(() => {
               <VBtn
                 block
                 type="submit"
+                :loading="loading"
+                :disabled="loading"
               >
                 Create New Password
               </VBtn>
