@@ -1,44 +1,148 @@
 <script setup>
+import { showNotif } from '@/helper/notification'
+import { rules } from '@/helper/rules'
+import { verifyAuth } from '@/helper/verifyAuth'
 import { router } from '@/plugins/router'
+import ApiService from '@/services/ApiService'
+import JwtService from '@/services/JwtService'
 import logo from '@images/eduall/eduall.png'
 import authV1MaskDark from '@images/pages/auth-v1-mask-dark.png'
 import authV1MaskLight from '@images/pages/auth-v1-mask-light.png'
 import { useTheme } from 'vuetify'
 
-const props = defineProps({ id: String })
-
-const form = ref({
-  email: '',
-  password: '',
-  confirm_password: '',
-})
-
-const exist_email = ref(false)
-const exist_password = ref(true)
-const isPasswordVisible = ref(false)
-
+// Theme
 const vuetifyTheme = useTheme()
-
 const authThemeMask = computed(() => {
   return vuetifyTheme.global.name.value === 'light' ? authV1MaskLight : authV1MaskDark
 })
 
-const checkEmail = () => {
-  exist_email.value = true
+// Start Variable
+const props = defineProps({ token: String, email: String })
+
+const formData = ref()
+
+const form = ref({
+  token: '',
+  email: '',
+  password: '',
+  password_confirmation: '',
+})
+
+const loading = ref(false)
+const exist_email = ref(false)
+const exist_password = ref(true)
+const isPasswordVisible = ref(false)
+// End Variable
+
+// Start Function
+
+// Rules Confirmation Password
+const confirmPassword = [
+  value => {
+    if (value !== form.value.password) return 'Passwords do not match'
+    return true
+  },
+]
+
+// Checking Email
+const checkEmail = async () => {
+  const { valid } = await formData.value.validate()
+  if (valid) {
+    loading.value = true
+    try {
+      const res = await ApiService.post('api/v1/auth/email/checking', {
+        email: form.value.email,
+      })
+
+      if (res) {
+        exist_email.value = true
+        if (res.has_password) {
+          exist_password.value = true
+        } else {
+          exist_password.value = false
+        }
+      }
+      loading.value = false
+    } catch (error) {
+      showNotif('error', 'You`re email is not found!', 'bottom-end')
+      console.error(error)
+      loading.value = false
+    }
+  }
 }
 
-const checkLogin = () => {
-  router.push('/user/dashboard')
+// Login Process & Save Token
+const checkLogin = async () => {
+  const { valid } = await formData.value.validate()
+
+  if (valid) {
+    loading.value = true
+    try {
+      if (exist_password.value) {
+        const res = await ApiService.post('api/v1/identity/generate-token', {
+          email: form.value.email,
+          password: form.value.password,
+        })
+
+        if (res) {
+          // save token
+          JwtService.saveToken(res.granted_token)
+          showNotif('success', 'You`ve successfully log-in.', 'bottom-end')
+          setTimeout(() => {
+            router.go(0)
+          }, 1500)
+        }
+      } else {
+        await createPassword()
+      }
+      loading.value = false
+    } catch (error) {
+      form.value.password = ''
+      showNotif('error', 'You`re password is wrong.', 'bottom-end')
+      console.error(error)
+      loading.value = false
+    }
+  }
 }
 
-const checkToken = () => {
+// Create New Password
+const createPassword = async () => {
+  try {
+    const url = props.token ? 'api/v1/auth/reset-password' : 'api/v1/auth/create-password'
+    const res = await ApiService.post(url, form.value)
+    if (res) {
+      exist_password.value = true
+      await checkLogin()
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+// Checking Reset Password
+const checkResetPassword = () => {
+  form.value.email = props.email
+  form.value.token = props.token
+
   exist_email.value = true
   exist_password.value = false
 }
 
+// Checking Auth
+const checkAuth = () => {
+  const is_login = verifyAuth().isAuthenticated.value
+
+  if (is_login) {
+    router.push('/user/dashboard')
+  }
+}
+// End Function
+
 onMounted(() => {
-  if (props.id) {
-    checkToken()
+  // JwtService.destroyToken()
+  checkAuth()
+  if (props.token) {
+    checkResetPassword()
   }
 })
 </script>
@@ -68,7 +172,12 @@ onMounted(() => {
       </VCardText>
 
       <VCardText>
-        <VForm @submit.prevent="checkLogin">
+        <VForm
+          ref="formData"
+          @submit.prevent="checkLogin"
+          validate-on="input"
+          fast-fail
+        >
           <VRow>
             <!-- email -->
             <VCol cols="12">
@@ -76,6 +185,8 @@ onMounted(() => {
                 v-model="form.email"
                 label="Email"
                 type="email"
+                :disabled="exist_email"
+                :rules="rules.email"
               />
 
               <VBtn
@@ -84,6 +195,8 @@ onMounted(() => {
                 @click="checkEmail"
                 class="mt-4"
                 v-if="!exist_email"
+                :loading="loading"
+                :disabled="loading"
               >
                 Check Email
               </VBtn>
@@ -101,6 +214,7 @@ onMounted(() => {
                 :type="isPasswordVisible ? 'text' : 'password'"
                 :append-inner-icon="isPasswordVisible ? 'ri-eye-off-line' : 'ri-eye-line'"
                 @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                :rules="rules.required"
               />
 
               <!-- forgot password -->
@@ -117,6 +231,8 @@ onMounted(() => {
               <VBtn
                 block
                 type="submit"
+                :loading="loading"
+                :disabled="loading"
               >
                 Login
               </VBtn>
@@ -134,25 +250,29 @@ onMounted(() => {
                 :type="isPasswordVisible ? 'text' : 'password'"
                 :append-inner-icon="isPasswordVisible ? 'ri-eye-off-line' : 'ri-eye-line'"
                 @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                :rules="rules.password"
                 class="mb-6"
               />
 
               <VTextField
-                v-model="form.confirm_password"
+                v-model="form.password_confirmation"
                 label="Confirmation Password"
                 placeholder="············"
                 :type="isPasswordVisible ? 'text' : 'password'"
                 :append-inner-icon="isPasswordVisible ? 'ri-eye-off-line' : 'ri-eye-line'"
                 @click:append-inner="isPasswordVisible = !isPasswordVisible"
                 class="mb-6"
+                :rules="confirmPassword"
               />
 
               <!-- login button -->
               <VBtn
                 block
                 type="submit"
+                :loading="loading"
+                :disabled="loading"
               >
-                Login
+                Create New Password
               </VBtn>
             </VCol>
           </VRow>

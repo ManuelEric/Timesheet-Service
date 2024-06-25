@@ -16,11 +16,10 @@ class CheckEmailController extends Controller
         AuthenticationCheckEmailMentorTutorAction $checkEmailMentorTutorAction,
         CreateNewTempUserAction $createNewTempuserAction,
         TimesheetLog $timesheetLog
-        ): JsonResponse
-    {
+    ): JsonResponse {
         $validated = $request->safe()->only(['email']);
         $validatedEmail = $validated['email'];
-        
+
         $result = $checkEmailMentorTutorAction->execute($validatedEmail);
         $emailCheckingResult = $result['checkingResult'];
         $userRawInformation = $result['rawInformation'];
