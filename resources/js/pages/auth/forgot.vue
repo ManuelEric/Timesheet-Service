@@ -118,7 +118,7 @@ onMounted(() => {
                 block
                 type="submit"
                 :loading="loading"
-                :disabled="isDisabled"
+                :disabled="loading || isDisabled"
               >
                 Send
               </VBtn>
@@ -132,7 +132,7 @@ onMounted(() => {
                   v-slot="{ seconds }"
                   @end="endCountDown"
                 >
-                  Please wait to resend verification link: {{ seconds }}
+                  Please wait to resend verification link: {{ seconds }}s
                 </vue-countdown>
               </div>
             </VCol>
@@ -143,9 +143,9 @@ onMounted(() => {
               class="text-center text-base"
             >
               <VDivider class="mb-3" />
-              <span>I've Remembered</span>
+              <span>I've Remembered,</span>
               <RouterLink
-                class="text-primary ms-2"
+                class="text-primary ms-1"
                 to="login"
               >
                 Sign in Now
