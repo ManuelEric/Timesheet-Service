@@ -34,7 +34,7 @@ Route::prefix('auth')->group(function () {
     Route::POST('reset-password', [V1ResetPasswordController::class, 'execute']);
     Route::POST('create-password', [V1CreatePasswordController::class, 'execute']);
 
-    Route::middleware(['auth:sanctum'])->group(function() {
+    Route::middleware(['auth:sanctum'])->group(function () {
         /* Logout */
         Route::GET('terminate', [V1LogoutController::class, 'execute']);
     });
@@ -47,5 +47,5 @@ Route::prefix('user')->group(function () {
         Route::GET('mentor-tutors', [V1MentorTutorsListController::class, 'index']);
     });
 });
-    
+
 Route::POST('identity/generate-token', [V1LoginController::class, 'authenticateNonAdmin']);

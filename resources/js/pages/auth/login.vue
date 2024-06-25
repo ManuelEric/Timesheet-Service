@@ -1,42 +1,133 @@
 <script setup>
+import { showNotif } from '@/helper/notification'
+import { rules } from '@/helper/rules'
+import { verifyAuth } from '@/helper/verifyAuth'
 import { router } from '@/plugins/router'
+import ApiService from '@/services/ApiService'
+import JwtService from '@/services/JwtService'
 import logo from '@images/eduall/eduall.png'
 import authV1MaskDark from '@images/pages/auth-v1-mask-dark.png'
 import authV1MaskLight from '@images/pages/auth-v1-mask-light.png'
 import { useTheme } from 'vuetify'
 
+// Theme
+const vuetifyTheme = useTheme()
+const authThemeMask = computed(() => {
+  return vuetifyTheme.global.name.value === 'light' ? authV1MaskLight : authV1MaskDark
+})
+
+// Start Variable
 const props = defineProps({ id: String })
+
+const formData = ref()
 
 const form = ref({
   email: '',
   password: '',
-  confirm_password: '',
+  password_confirmation: '',
 })
 
 const exist_email = ref(false)
 const exist_password = ref(true)
 const isPasswordVisible = ref(false)
+// End Variable
 
-const vuetifyTheme = useTheme()
+// Start Function
 
-const authThemeMask = computed(() => {
-  return vuetifyTheme.global.name.value === 'light' ? authV1MaskLight : authV1MaskDark
-})
+// Rules Confirmation Password
+const confirmPassword = [
+  value => {
+    if (value !== form.value.password) return 'Passwords do not match'
+    return true
+  },
+]
 
-const checkEmail = () => {
-  exist_email.value = true
+// Checking Email
+const checkEmail = async () => {
+  const { valid } = await formData.value.validate()
+  if (valid) {
+    try {
+      const res = await ApiService.post('api/v1/auth/email/checking', {
+        email: form.value.email,
+      })
+
+      if (res) {
+        exist_email.value = true
+        if (res.has_password) {
+          exist_password.value = true
+        } else {
+          exist_password.value = false
+        }
+      }
+    } catch (error) {
+      c
+      console.error(error)
+    }
+  }
 }
 
-const checkLogin = () => {
-  router.push('/user/dashboard')
+// Login Process & Save Token
+const checkLogin = async () => {
+  const { valid } = await formData.value.validate()
+
+  if (valid) {
+    try {
+      if (exist_password.value) {
+        const res = await ApiService.post('api/v1/identity/generate-token', {
+          email: form.value.email,
+          password: form.value.password,
+        })
+
+        if (res) {
+          // save token
+
+          JwtService.saveToken(res.granted_token)
+          showNotif('success', 'You`ve successfully log-in.', 'bottom-end')
+          setTimeout(() => {
+            router.go(0)
+          }, 1500)
+        } else {
+          form.value.password = ''
+          showNotif('error', 'You`re password is wrong.', 'bottom-end')
+        }
+      } else {
+        createPassword()
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
 }
 
-const checkToken = () => {
-  exist_email.value = true
-  exist_password.value = false
+// Create New Password
+const createPassword = async () => {
+  try {
+    const res = await ApiService.post('api/v1/auth/create-password', form.value)
+    if (res) {
+      checkLogin()
+    }
+  } catch (error) {
+    console.error(error)
+  }
 }
+
+// Checking Token
+const checkToken = () => {}
+
+// Checking Token
+const checkAuth = () => {
+  const is_login = verifyAuth().isAuthenticated.value
+
+  if (is_login) {
+    router.push('/user/dashboard')
+  }
+}
+// End Function
 
 onMounted(() => {
+  // JwtService.destroyToken()
+  checkAuth()
+
   if (props.id) {
     checkToken()
   }
@@ -68,7 +159,12 @@ onMounted(() => {
       </VCardText>
 
       <VCardText>
-        <VForm @submit.prevent="checkLogin">
+        <VForm
+          ref="formData"
+          @submit.prevent="checkLogin"
+          validate-on="input"
+          fast-fail
+        >
           <VRow>
             <!-- email -->
             <VCol cols="12">
@@ -76,6 +172,8 @@ onMounted(() => {
                 v-model="form.email"
                 label="Email"
                 type="email"
+                :disabled="exist_email"
+                :rules="rules.email"
               />
 
               <VBtn
@@ -101,6 +199,7 @@ onMounted(() => {
                 :type="isPasswordVisible ? 'text' : 'password'"
                 :append-inner-icon="isPasswordVisible ? 'ri-eye-off-line' : 'ri-eye-line'"
                 @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                :rules="rules.required"
               />
 
               <!-- forgot password -->
@@ -134,17 +233,19 @@ onMounted(() => {
                 :type="isPasswordVisible ? 'text' : 'password'"
                 :append-inner-icon="isPasswordVisible ? 'ri-eye-off-line' : 'ri-eye-line'"
                 @click:append-inner="isPasswordVisible = !isPasswordVisible"
+                :rules="rules.password"
                 class="mb-6"
               />
 
               <VTextField
-                v-model="form.confirm_password"
+                v-model="form.password_confirmation"
                 label="Confirmation Password"
                 placeholder="············"
                 :type="isPasswordVisible ? 'text' : 'password'"
                 :append-inner-icon="isPasswordVisible ? 'ri-eye-off-line' : 'ri-eye-line'"
                 @click:append-inner="isPasswordVisible = !isPasswordVisible"
                 class="mb-6"
+                :rules="confirmPassword"
               />
 
               <!-- login button -->
@@ -152,7 +253,7 @@ onMounted(() => {
                 block
                 type="submit"
               >
-                Login
+                Create New Password
               </VBtn>
             </VCol>
           </VRow>

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Http;
 
 class CheckEmailMentorTutorAction
 {
-    use ConcatenateName; 
+    use ConcatenateName;
     protected $responseService;
 
     public function __construct(ResponseService $responseService)
@@ -22,13 +22,13 @@ class CheckEmailMentorTutorAction
             'uuid' => null, 'full_name' => null, 'email_exist' => null, 'has_password' => null
         ];
 
-        $request = Http::get( env('CRM_DOMAIN') . 'auth/email/check', [
+        $request = Http::get(env('CRM_DOMAIN') . 'auth/email/check', [
             'email' => $email
         ]);
         $response = $request->json();
-        
 
-        if (empty($response)) 
+
+        if (empty($response))
             return $fillableArray;
 
 
@@ -38,7 +38,7 @@ class CheckEmailMentorTutorAction
         $roles = $response['roles'];
         $emailExist = $response['email'] ? true : false;
         $hasPassword = $response['password'] ? true : false;
-        
+
         /* manipulate the response */
         $checkingResult = [
             'uuid' => $uuid,
