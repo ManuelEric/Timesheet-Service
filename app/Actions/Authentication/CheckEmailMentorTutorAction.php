@@ -4,6 +4,8 @@ namespace App\Actions\Authentication;
 
 use App\Http\Traits\ConcatenateName;
 use App\Services\ResponseService;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
 
 class CheckEmailMentorTutorAction
@@ -18,19 +20,19 @@ class CheckEmailMentorTutorAction
 
     public function execute(string $email)
     {
-        $fillableArray = [
-            'uuid' => null, 'full_name' => null, 'email_exist' => null, 'has_password' => null
-        ];
-
         $request = Http::get( env('CRM_DOMAIN') . 'auth/email/check', [
             'email' => $email
         ]);
         $response = $request->json();
         
-
-        if (empty($response)) 
-            return $fillableArray;
-
+        if (empty($response)) {
+            throw new HttpResponseException(
+                response()->json([
+                    'errors' => 'The provided email does not exists.'
+                ], JsonResponse::HTTP_BAD_REQUEST)
+            );
+        }
+            
 
         /* initialize the data */
         $uuid = $response['uuid'];

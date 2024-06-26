@@ -14,14 +14,14 @@ class CheckEmailController extends Controller
     public function execute(
         CheckEmailRequest $request,
         AuthenticationCheckEmailMentorTutorAction $checkEmailMentorTutorAction,
-        CreateNewTempUserAction $createNewTempuserAction,
-        TimesheetLog $timesheetLog
+        CreateNewTempUserAction $createNewTempuserAction
         ): JsonResponse
     {
         $validated = $request->safe()->only(['email']);
         $validatedEmail = $validated['email'];
         
         $result = $checkEmailMentorTutorAction->execute($validatedEmail);
+
         $emailCheckingResult = $result['checkingResult'];
         $userRawInformation = $result['rawInformation'];
 

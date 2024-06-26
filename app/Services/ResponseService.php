@@ -8,6 +8,8 @@ class ResponseService
 {
     public function storeErrorLog(string $message, string $errors, array $value = [])
     {
+        /* value array should contain file, error_line */
+
         $response = $message;
         $response .= '\n ' . $errors;
         if ( isset($value) ) {

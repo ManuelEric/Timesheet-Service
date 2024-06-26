@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\Authentication\ForgotPasswordController as V1For
 use App\Http\Controllers\Api\V1\Authentication\ResetPasswordController as V1ResetPasswordController;
 use App\Http\Controllers\Api\V1\Authentication\CreatePasswordController as V1CreatePasswordController;
 use App\Http\Controllers\Api\V1\MentorTutors\ListController as V1MentorTutorsListController;
+use App\Http\Controllers\Api\V1\Programs\ListController as V1ProgramsListController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -45,6 +46,14 @@ Route::prefix('user')->group(function () {
     Route::middleware(['auth:sanctum', 'abilities:mentortutors-menu'])->group(function () {
         /* List Mentor & Tutors */
         Route::GET('mentor-tutors', [V1MentorTutorsListController::class, 'index']);
+    });
+});
+
+/* Programs */
+Route::prefix('program')->group(function () {
+    Route::middleware(['auth:sanctum', 'abilities:program-menu'])->group(function () {
+        /* list Programs */
+        Route::GET('list', [V1ProgramsListController::class, 'index']);
     });
 });
     
