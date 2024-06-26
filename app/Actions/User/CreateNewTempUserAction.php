@@ -32,6 +32,14 @@ class CreateNewTempUserAction
         /* check existing temp user */
         $tempUser = TempUser::where('email', $email)->first();
 
+
+        /* if the user has been created before, and then they change their password from crm directly, then password on timesheet db should be changed too */
+        if ( $tempUser ) {
+            $tempUser->password = $password;
+            $tempUser->save();           
+        }
+        
+
         /* stored the user into timesheet db */
         if ( !$tempUser ) {
 
