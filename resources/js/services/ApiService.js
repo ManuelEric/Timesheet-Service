@@ -29,9 +29,9 @@ apiClient.interceptors.request.use(
 
 export default {
   // Contoh method untuk mengambil data
-  async get(url) {
+  async get(url, data={}) {
     try {
-      const response = await apiClient.get(url)
+      const response = await apiClient.get(url, data)
       
       return response.data
     } catch (error) {
