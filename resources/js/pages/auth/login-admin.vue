@@ -57,7 +57,6 @@ const checkAuth = () => {
   const is_login = verifyAuth().isAuthenticated.value
 
   if (is_login) {
-    showNotif('success', 'You`ve already login', 'bottom-end')
     router.push('/admin/dashboard')
   }
 }
