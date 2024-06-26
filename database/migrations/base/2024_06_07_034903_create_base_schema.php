@@ -106,7 +106,7 @@ return new class extends Migration
             $table->string('student_name');
             $table->string('student_school');
             $table->string('program_name');
-            $table->foreignId('timesheet_id')->constrained(
+            $table->foreignId('timesheet_id')->nullable()->constrained(
                 table: 'timesheets', indexName: 'ref_clientprograms_timesheet_id'
             )->onUpdate('restrict')->onDelete('restrict');
             $table->timestamps();

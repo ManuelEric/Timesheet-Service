@@ -19,6 +19,9 @@ class Kernel extends ConsoleKernel
 
         /* delete all the reset password token */
         $schedule->command('auth:clear-resets')->everyFifteenMinutes();
+
+        /* synchronize success program from CRMs */
+        $schedule->command('sync:success-program')->everyMinute()->withoutOverlapping();
     }
 
     /**
