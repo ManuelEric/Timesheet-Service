@@ -5,6 +5,7 @@ import { verifyAuth } from '@/helper/verifyAuth'
 import { router } from '@/plugins/router'
 import ApiService from '@/services/ApiService'
 import JwtService from '@/services/JwtService'
+import UserService from '@/services/UserService'
 import logo from '@images/eduall/eduall.png'
 import authV1MaskDark from '@images/pages/auth-v1-mask-dark.png'
 import authV1MaskLight from '@images/pages/auth-v1-mask-light.png'
@@ -87,7 +88,8 @@ const checkLogin = async () => {
         if (res) {
           // save token
           JwtService.saveToken(res.granted_token)
-          showNotif('success', 'You`ve successfully log-in.', 'bottom-end')
+          UserService.saveUser(res)
+          showNotif('success', 'You`ve successfully login.', 'bottom-end')
           setTimeout(() => {
             router.go(0)
           }, 1500)
@@ -133,6 +135,7 @@ const checkAuth = () => {
   const is_login = verifyAuth().isAuthenticated.value
 
   if (is_login) {
+    showNotif('success', 'You`ve already login', 'bottom-end')
     router.push('/user/dashboard')
   }
 }
