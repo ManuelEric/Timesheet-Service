@@ -5,8 +5,11 @@ import NavItemsAdmin from '@/layouts/admin/components/NavItemsAdmin.vue'
 import UserProfile from '@/layouts/admin/components/UserProfile.vue'
 import logo from '@images/eduall/eduall.png'
 import VerticalNavLayout from '@layouts/components/VerticalNavLayout.vue'
+import UserService from '@/services/UserService'
 
 const logo_navbar = logo
+
+const user = UserService.getUser()
 </script>
 
 <template>
@@ -27,23 +30,14 @@ const logo_navbar = logo
           class="d-flex align-center cursor-pointer"
           style="user-select: none"
         >
-          <h3>Welcome Back, [User]</h3>
+          <h3>Welcome Back, {{ user?.full_name }}</h3>
         </div>
 
         <VSpacer />
 
-        <IconBtn
-          class="me-2"
-          href="https://github.com/themeselection/materio-vuetify-vuejs-laravel-admin-template-free"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <VIcon icon="ri-github-fill" />
-        </IconBtn>
-
-        <IconBtn class="me-2">
+        <!-- <IconBtn class="me-2">
           <VIcon icon="ri-notification-line" />
-        </IconBtn>
+        </IconBtn> -->
 
         <NavbarThemeSwitcher class="me-2" />
 

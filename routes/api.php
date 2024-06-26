@@ -35,7 +35,7 @@ Route::prefix('auth')->group(function () {
     Route::POST('reset-password', [V1ResetPasswordController::class, 'execute']);
     Route::POST('create-password', [V1CreatePasswordController::class, 'execute']);
 
-    Route::middleware(['auth:sanctum'])->group(function() {
+    Route::middleware(['auth:sanctum'])->group(function () {
         /* Logout */
         Route::GET('terminate', [V1LogoutController::class, 'execute']);
     });

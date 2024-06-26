@@ -19,7 +19,7 @@ class CheckEmailController extends Controller
     {
         $validated = $request->safe()->only(['email']);
         $validatedEmail = $validated['email'];
-        
+
         $result = $checkEmailMentorTutorAction->execute($validatedEmail);
 
         $emailCheckingResult = $result['checkingResult'];

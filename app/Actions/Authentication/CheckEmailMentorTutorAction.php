@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Http;
 
 class CheckEmailMentorTutorAction
 {
-    use ConcatenateName; 
+    use ConcatenateName;
     protected $responseService;
 
     public function __construct(ResponseService $responseService)
@@ -32,7 +32,7 @@ class CheckEmailMentorTutorAction
                 ], JsonResponse::HTTP_BAD_REQUEST)
             );
         }
-            
+           
 
         /* initialize the data */
         $uuid = $response['uuid'];
@@ -40,7 +40,7 @@ class CheckEmailMentorTutorAction
         $roles = $response['roles'];
         $emailExist = $response['email'] ? true : false;
         $hasPassword = $response['password'] ? true : false;
-        
+
         /* manipulate the response */
         $checkingResult = [
             'uuid' => $uuid,
