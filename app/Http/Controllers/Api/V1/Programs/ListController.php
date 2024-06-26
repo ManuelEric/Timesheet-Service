@@ -20,7 +20,7 @@ class ListController extends Controller
         /* incoming request */
         $keyword = $request->only(['program_name', 'timesheet_package']);
 
-        $ref_success_programs = Ref_ClientProgram::onSearch($keyword)->paginate();
+        $ref_success_programs = Ref_ClientProgram::onSearch($keyword)->paginate(10);
         
         return response()->json($ref_success_programs);
     }
