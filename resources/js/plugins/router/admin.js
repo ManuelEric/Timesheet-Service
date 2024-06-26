@@ -3,6 +3,9 @@ export default [
   {
     path: '/admin',
     component: () => import('@/layouts/admin/default.vue'),
+    meta: {
+      middleware: "auth-admin",
+    },
     children: [
       {
         path: '/admin/dashboard',
@@ -43,6 +46,7 @@ export default [
     component: () => import('@/layouts/blank.vue'),
     children: [
       {
+        name:'login-admin',
         path: '/admin/login',
         component: () => import('@/pages/auth/login-admin.vue'),
       },

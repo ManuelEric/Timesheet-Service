@@ -2,10 +2,14 @@
 import avatar1 from '@images/avatars/avatar-1.png'
 import { router } from '@/plugins/router'
 import JwtService from '@/services/JwtService'
+import UserService from '@/services/UserService'
 import { showNotif } from '@/helper/notification'
+
+const user = UserService.getUser()
 
 const logout = () => {
   JwtService.destroyToken()
+  UserService.destroyUser()
   showNotif('success', 'You`ve successfully log-out', 'bottom-end')
   router.push('/')
 }
@@ -56,8 +60,8 @@ const logout = () => {
               </VListItemAction>
             </template>
 
-            <VListItemTitle class="font-weight-semibold"> John Doe </VListItemTitle>
-            <VListItemSubtitle>Admin</VListItemSubtitle>
+            <VListItemTitle class="font-weight-semibold"> {{ user?.full_name }} </VListItemTitle>
+            <VListItemSubtitle>Tutor/Mentor</VListItemSubtitle>
           </VListItem>
           <VDivider class="my-2" />
 

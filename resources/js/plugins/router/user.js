@@ -3,6 +3,9 @@ export default [
   {
     path: '/',
     component: () => import('@/layouts/default.vue'),
+    meta: {
+      middleware: "auth-user",
+    },
     children: [
       {
         path: '/user/dashboard',
@@ -28,6 +31,7 @@ export default [
     children: [
       {
         path: '/user/login',
+        name:'login-user',
         component: () => import('@/pages/auth/login.vue'),
       },
       {
