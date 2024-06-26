@@ -1,7 +1,6 @@
 <script setup>
-import { router } from '@/plugins/router'
-import { rules } from '@/helper/rules'
 import { showNotif } from '@/helper/notification'
+import { rules } from '@/helper/rules'
 import ApiService from '@/services/ApiService'
 import logo from '@images/eduall/eduall.png'
 import authV1MaskDark from '@images/pages/auth-v1-mask-dark.png'
@@ -33,18 +32,24 @@ const forgotPassword = async () => {
     loading.value = true
     try {
       const res = await ApiService.post('api/v1/auth/forgot-password', form.value)
-      console.log(res)
+
       if (res) {
         var currentDate = new Date()
         var newDate = new Date(currentDate.getTime() + 20 * 1000)
 
         //   Save in localStorage
         localStorage.setItem('new_date', Math.floor(newDate.getTime() / 1000))
+        localStorage.setItem('email', form.value.email)
 
         // diff new date - current date
         time.value = Math.floor(newDate.getTime() / 1000) - Math.floor(currentDate.getTime() / 1000)
 
         isDisabled.value = true
+        showNotif(
+          'success',
+          'Please check your inbox and follow the instructions to reset your password.',
+          'bottom-end',
+        )
       }
       loading.value = false
     } catch (error) {
@@ -58,11 +63,15 @@ const forgotPassword = async () => {
 const endCountDown = () => {
   time.value = 0
   isDisabled.value = false
+  localStorage.removeItem('new_date')
 }
 // End Function
 
 onMounted(() => {
   if (localStorage.getItem('new_date')) {
+    isDisabled.value = true
+    form.value.email = localStorage.getItem('email')
+
     var newDate = localStorage.getItem('new_date')
     var newTime = newDate - Math.floor(new Date().getTime() / 1000)
     time.value = newTime
