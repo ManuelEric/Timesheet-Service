@@ -89,7 +89,7 @@ class GenerateTokenService
                 $granted_access = ['*']; # all access granted for admin
                 break;
         }
-        $token = $user->createToken('admin-access', $granted_access, Carbon::now()->addSeconds(10))->plainTextToken;
+        $token = $user->createToken('admin-access', $granted_access, Carbon::now()->addHours(1))->plainTextToken;
 
         return [
             'full_name' => $user->full_name,
