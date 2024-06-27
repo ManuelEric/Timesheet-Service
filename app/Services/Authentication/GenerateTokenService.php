@@ -14,26 +14,25 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 
-class GenerateTokenService 
+class GenerateTokenService
 {
     use ConcatenateName;
-    
+
     public function createNonAdminToken(array $validated): array
     {
         /* call API to identify the user information */
-        $request = Http::post( env('CRM_DOMAIN') . 'auth/token', $validated);
+        $request = Http::post(env('CRM_DOMAIN') . 'auth/token', $validated);
         $response = $request->json();
 
         if (!$response)
-            return response()->json($response, JsonResponse::HTTP_BAD_REQUEST);  
+            return response()->json($response, JsonResponse::HTTP_BAD_REQUEST);
 
 
         /* check if the user has already stored in timesheet app */
         $validatedEmail = $validated['email'];
         $validatedPassword = $validated['password'];
         $tempUser = TempUser::where('email', $validatedEmail)->first();
-        if (! $tempUser)
-        {
+        if (!$tempUser) {
             throw new HttpResponseException(
                 response()->json([
                     'errors' => 'The account does not exist.'
@@ -41,7 +40,7 @@ class GenerateTokenService
             );
         }
 
-        
+
         /* check user credentials */
         if (!Hash::check($validatedPassword, $tempUser->password)) { # need to be remember that "tempUser->password" need to be updated also if the one in crm was updated, for now no update function (need to be discussed)
             throw new HttpResponseException(
@@ -62,7 +61,6 @@ class GenerateTokenService
             'role' => $tempUser->role,
             'granted_token' => $token
         ];
-
     }
 
     public function createAdminToken(array $validated): array
@@ -86,12 +84,12 @@ class GenerateTokenService
             case 'finance':
                 $granted_access = ['program-menu', 'timesheet-menu', 'cutoff-menu']; # all access granted for finance
                 break;
-            
+
             default:
                 $granted_access = ['*']; # all access granted for admin
                 break;
         }
-        $token = $user->createToken('admin-access', $granted_access, Carbon::now()->addHours(1))->plainTextToken;
+        $token = $user->createToken('admin-access', $granted_access, Carbon::now()->addSeconds(10))->plainTextToken;
 
         return [
             'full_name' => $user->full_name,

@@ -1,3 +1,4 @@
+import { router } from '@/plugins/router'
 import axios from 'axios'
 import JwtService from './JwtService'
 
@@ -13,7 +14,7 @@ const apiClient = axios.create({
   },
 })
 
-// Interceptor untuk menangani setiap permintaan
+// Interceptor untuk menangani setiap melakukan permintaan
 apiClient.interceptors.request.use(
   config => {
     if (token) {
@@ -23,6 +24,23 @@ apiClient.interceptors.request.use(
     return config
   },
   error => {
+    return Promise.reject(error)
+  },
+)
+
+// Interceptor untuk menangani setiap menerima permintaan
+apiClient.interceptors.response.use(
+  response => {
+    return response
+  },
+  error => {
+    if (error?.response?.status === 401) {
+      // Hapus token dari tempat penyimpanan Anda
+      console.log('Token expired or invalid. Please log in again.');
+      JwtService.destroyToken();
+      router.go(0)
+    }
+
     return Promise.reject(error)
   },
 )

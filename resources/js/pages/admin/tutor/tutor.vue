@@ -17,7 +17,7 @@ const loading = ref(false)
 
 // Start Function
 const getData = async () => {
-  const page = '?page=' + currentPage
+  const page = '?page=' + currentPage.value
   const search = keyword.value ? '&keyword=' + keyword.value : ''
   try {
     loading.value = true
@@ -25,7 +25,7 @@ const getData = async () => {
 
     if (res) {
       currentPage.value = res.current_page
-      totalPage.value = res.to
+      totalPage.value = res.last_page
       data.value = res
     }
     loading.value = false
@@ -89,7 +89,7 @@ onMounted(() => {
             :key="index"
           >
             <td>
-              {{ index + 1 }}
+              {{ parseInt(index) + 1 }}
             </td>
             <td>
               <VAvatar
@@ -176,10 +176,7 @@ onMounted(() => {
           </tr>
         </tbody>
       </VTable>
-      <div
-        class="d-flex justify-center mt-5"
-        v-if="data.data?.length > 0"
-      >
+      <div class="d-flex justify-center mt-5">
         <VPagination
           v-model="currentPage"
           :length="totalPage"
