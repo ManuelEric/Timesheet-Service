@@ -61,7 +61,7 @@ const desserts = [
       <VRow class="my-1">
         <VCol
           cols="12"
-          md="2"
+          md="3"
         >
           <VAutocomplete
             clearable="true"
@@ -71,21 +71,10 @@ const desserts = [
             density="compact"
           />
         </VCol>
+
         <VCol
           cols="12"
-          md="3"
-        >
-          <VAutocomplete
-            clearable="true"
-            label="Timesheet - Package"
-            :items="['Timesheet 1', 'Timesheet 2', 'Timesheet 3']"
-            placeholder="Select Timesheet"
-            density="compact"
-          />
-        </VCol>
-        <VCol
-          cols="12"
-          md="7"
+          md="9"
           class="text-end"
         >
           <VBtn
