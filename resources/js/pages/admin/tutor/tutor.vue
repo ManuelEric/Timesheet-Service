@@ -22,7 +22,7 @@ const getData = async () => {
   try {
     loading.value = true
     const res = await ApiService.get('api/v1/user/mentor-tutors' + page + search)
-
+    console.log(res)
     if (res) {
       currentPage.value = res.current_page
       totalPage.value = res.last_page
@@ -33,6 +33,11 @@ const getData = async () => {
     console.error(error)
     loading.value = false
   }
+}
+
+const searchData = async () => {
+  currentPage.value = 1
+  await getData()
 }
 // End Function
 
@@ -60,7 +65,7 @@ onMounted(() => {
             variant="solo"
             hide-details
             single-line
-            @change="getData"
+            @change="searchData"
           ></VTextField>
         </div>
       </div>
