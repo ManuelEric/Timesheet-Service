@@ -87,7 +87,6 @@ onMounted(() => {
             <th class="text-uppercase text-center">Detail</th>
           </tr>
         </thead>
-
         <tbody>
           <tr
             v-for="(item, index) in data.data"
@@ -180,6 +179,17 @@ onMounted(() => {
             </td>
           </tr>
         </tbody>
+        <!-- If Nothing Data  -->
+        <tfoot v-if="data?.data?.length == 0">
+          <tr>
+            <td
+              colspan="6"
+              class="text-center"
+            >
+              Sorry, no data found.
+            </td>
+          </tr>
+        </tfoot>
       </VTable>
       <div class="d-flex justify-center mt-5">
         <VPagination
