@@ -168,7 +168,7 @@ onMounted(() => {
         <VCardTitle class="font-weight-semibold text-2xl text-uppercase"> Timesheet App </VCardTitle>
       </VCardItem>
 
-      <VCardText class="pt-2">
+      <VCardText class="pt-2 text-center">
         <h5 class="text-h5 font-weight-semibold mb-1">Welcome to Timesheet App! 👋🏻</h5>
         <p class="mb-0">Please sign-in to your account and start the adventure</p>
       </VCardText>
