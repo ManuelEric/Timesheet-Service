@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Api\V1\Programs;
 
 use App\Http\Controllers\Controller;
-use App\Models\Ref_ClientProgram;
+use App\Models\Ref_Program;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Http;
 
 class ListController extends Controller
 {
@@ -16,12 +15,20 @@ class ListController extends Controller
         /* trigger to sync the success-program */
         Artisan::call('sync:success-program');
 
-
         /* incoming request */
-        $keyword = $request->only(['program_name', 'timesheet_package']);
+        $search = $request->only(['program_name', 'keyword']); 
 
-        $ref_success_programs = Ref_ClientProgram::onSearch($keyword)->paginate();
+        $ref_success_programs = Ref_Program::onSearch($search)->paginate(10);
         
         return response()->json($ref_success_programs);
+    }
+
+    /**
+     * The component functions
+     */
+    public function component(Request $request): JsonResponse
+    {
+        $programs = Ref_Program::groupBy('program_name')->select('program_name')->get();
+        return response()->json($programs);
     }
 }

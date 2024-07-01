@@ -12,7 +12,7 @@ class ListController extends Controller
     public function index(Request $request): JsonResponse
     {
         /* incoming request */
-        $keyword = $request->only(['keyword', 'page']);
+        $keyword = $request->only(['keyword', 'paginate', 'page']);
 
         /* call API to get all of the mentors and tutors */
         $request = Http::get( env('CRM_DOMAIN') . 'user/mentor-tutors', $keyword);

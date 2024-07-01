@@ -5,12 +5,9 @@ namespace App\Services\Authentication;
 use App\Http\Traits\ConcatenateName;
 use App\Models\TempUser;
 use App\Models\User;
-use App\Services\ResponseService;
-use Exception;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 

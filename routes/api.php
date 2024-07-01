@@ -8,6 +8,8 @@ use App\Http\Controllers\Api\V1\Authentication\ResetPasswordController as V1Rese
 use App\Http\Controllers\Api\V1\Authentication\CreatePasswordController as V1CreatePasswordController;
 use App\Http\Controllers\Api\V1\MentorTutors\ListController as V1MentorTutorsListController;
 use App\Http\Controllers\Api\V1\Programs\ListController as V1ProgramsListController;
+use App\Http\Controllers\Api\V1\Timesheets\CreateController as V1TimesheetsCreateController;
+use App\Http\Controllers\Api\V1\Timesheets\ListController as V1TimesheetsListController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +27,12 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+/* API Documentation */ 
+Route::get('api-documentation', function() {
+    return view('API-documentation');
+});
+
 
 /* Authentication */
 Route::prefix('auth')->group(function () {
@@ -54,7 +62,25 @@ Route::prefix('program')->group(function () {
     Route::middleware(['auth:sanctum', 'abilities:program-menu'])->group(function () {
         /* list Programs */
         Route::GET('list', [V1ProgramsListController::class, 'index']);
+
+
+        /**
+         * The Components
+         */
+        Route::prefix('component')->group(function () {
+            Route::GET('list', [V1ProgramsListController::class, 'component']);
+        });
     });
+});
+
+/* Timesheet */
+Route::prefix('timesheet')->group(function () {
+    Route::middleware(['auth:sanctum', 'abilities:timesheet-menu'])->group(function () {
+        /* List Timesheet */
+        Route::GET('list', [V1TimesheetsListController::class, 'index']);
+        /* store Timesheet */
+        Route::POST('create', [V1TimesheetsCreateController::class, 'store']);
+    }); 
 });
     
 Route::POST('identity/generate-token', [V1LoginController::class, 'authenticateNonAdmin']);

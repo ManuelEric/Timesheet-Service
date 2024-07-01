@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions\Authentication;
+namespace App\Services\Authentication;
 
 use App\Http\Traits\ConcatenateName;
 use App\Services\ResponseService;
@@ -8,7 +8,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
 
-class CheckEmailMentorTutorAction
+class CheckEmailMentorTutorService
 {
     use ConcatenateName;
     protected $responseService;
@@ -56,7 +56,7 @@ class CheckEmailMentorTutorAction
             'roles' => $roles,
         ];
 
-        $result = compact('checkingResult', 'rawInformation');
+        $result = [$checkingResult, $rawInformation];
 
         return $result;
     }
