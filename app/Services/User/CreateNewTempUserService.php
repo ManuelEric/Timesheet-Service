@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions\User;
+namespace App\Services\User;
 
 use App\Http\Traits\ConcatenateName;
 use App\Models\TempUser;
@@ -11,7 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
-class CreateNewTempUserAction
+class CreateNewTempUserService
 {
     use ConcatenateName;
     protected $responseService;
@@ -98,6 +98,8 @@ class CreateNewTempUserAction
                 );
     
             }
+
+            return $tempUser;
         }
     }
 }
