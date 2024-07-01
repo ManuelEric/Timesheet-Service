@@ -1,14 +1,47 @@
 <script setup>
-import avatar1 from '@images/avatars/avatar-1.png'
-import avatar2 from '@images/avatars/avatar-2.png'
-import avatar3 from '@images/avatars/avatar-3.png'
-import avatar4 from '@images/avatars/avatar-4.png'
-import avatar5 from '@images/avatars/avatar-5.png'
+import ApiService from '@/services/ApiService'
 
-const avatars = [avatar1, avatar2, avatar3, avatar4, avatar5]
-const currentPage = ref(1)
+// Start Variable
 const selected = ref([])
 const dialog = ref(false)
+
+const currentPage = ref(1)
+const totalPage = ref()
+const keyword = ref()
+const data = ref([])
+const loading = ref(false)
+// End Variable
+
+// Start Function
+const getData = async () => {
+  const page = '?page=' + currentPage.value
+  const search = keyword.value ? '&keyword=' + keyword.value : ''
+  try {
+    loading.value = true
+    const res = await ApiService.get('api/v1/program/list' + page + search)
+
+    if (res) {
+      currentPage.value = res.current_page
+      totalPage.value = res.last_page
+      data.value = res
+    }
+    loading.value = false
+  } catch (error) {
+    console.error(error)
+    loading.value = false
+  }
+}
+
+const searchData = async () => {
+  currentPage.value = 1
+  await getData()
+}
+// End Function
+
+onMounted(() => {
+  getData()
+})
+
 const desserts = [
   {
     dessert: 'Frozen Yogurt',
@@ -69,12 +102,32 @@ const desserts = [
             :items="['Program 1', 'Program 2', 'Program 3']"
             placeholder="Select Program Name"
             density="compact"
+            variant="solo"
+            hide-details
+            single-line
+            :loading="loading"
+            :disabled="loading"
+          />
+        </VCol>
+        <VCol
+          cols="12"
+          md="3"
+        >
+          <VTextField
+            :loading="loading"
+            :disabled="loading"
+            append-inner-icon="ri-search-line"
+            density="compact"
+            label="Search"
+            variant="solo"
+            hide-details
+            single-line
           />
         </VCol>
 
         <VCol
           cols="12"
-          md="9"
+          md="6"
           class="text-end"
         >
           <VBtn
@@ -89,6 +142,7 @@ const desserts = [
         </VCol>
       </VRow>
 
+      <!-- Start Assign Modal  -->
       <VDialog
         v-model="dialog"
         width="auto"
@@ -138,13 +192,6 @@ const desserts = [
               <VCol md="12">
                 <VTextarea label="Notes"></VTextarea>
               </VCol>
-              <VCol md="12">
-                <VTextField
-                  density="compact"
-                  type="url"
-                  label="Meeting Link"
-                />
-              </VCol>
             </VRow>
 
             <VDivider class="my-3" />
@@ -171,8 +218,18 @@ const desserts = [
           </VCardText>
         </VCard>
       </VDialog>
+      <!-- End Assign Modal  -->
 
-      <VTable>
+      <!-- Loader  -->
+      <vSkeletonLoader
+        class="mx-auto border"
+        type="table-thead, table-row@10"
+        v-if="loading"
+      ></vSkeletonLoader>
+      <VTable
+        class="table-responsive"
+        v-else
+      >
         <thead>
           <tr>
             <th
@@ -181,22 +238,15 @@ const desserts = [
             >
               #
             </th>
-            <th
-              class="text-uppercase"
-              width="1%"
-            >
-              No
-            </th>
             <th class="text-uppercase text-center">Invoice ID</th>
             <th class="text-uppercase text-center">Student/School Name</th>
             <th class="text-uppercase text-center">Program Name</th>
             <th class="text-uppercase text-center">Timesheet</th>
           </tr>
         </thead>
-
         <tbody>
           <tr
-            v-for="(item, index) in desserts"
+            v-for="(item, index) in data.data"
             :key="index"
           >
             <td>
@@ -205,51 +255,86 @@ const desserts = [
                 :value="item"
               ></VCheckbox>
             </td>
-            <td>
-              {{ index + 1 }}
-            </td>
-            <td>
+            <td nowrap>
               <VIcon
                 icon="ri-receipt-line"
                 class="me-3"
               ></VIcon>
-              {{ item.dessert }}
+              {{ item.invoice_id }}
             </td>
-            <td class="text-left">
+            <td
+              class="text-left"
+              nowrap
+            >
               <VIcon
                 icon="ri-user-line"
                 class="me-3"
               ></VIcon>
-              {{ item.dessert }}
+              {{ item.student_name + ' - ' + item.student_school }}
             </td>
-            <td class="text-left">
+            <td
+              class="text-left"
+              nowrap
+            >
               <VIcon
                 icon="ri-bookmark-line"
                 class="me-3"
               ></VIcon>
-              {{ item.calories }}
+              {{ item.program_name }}
             </td>
             <td class="text-center">
-              <VIcon
-                icon="ri-file-check-line"
-                class="mx-1"
-                color="success"
-              ></VIcon>
-              <VIcon
-                icon="ri-file-close-line"
-                class="mx-1"
-                color="error"
+              <VTooltip
+                text="Timesheet already exists."
+                v-if="item.timesheet_id"
               >
-              </VIcon>
+                <template v-slot:activator="{ props }">
+                  <VIcon
+                    icon="ri-file-check-line"
+                    class="mx-1"
+                    color="success"
+                    v-bind="props"
+                  ></VIcon>
+                </template>
+              </VTooltip>
+
+              <VTooltip
+                text="Not Yet"
+                v-else
+              >
+                <template v-slot:activator="{ props }">
+                  <VIcon
+                    icon="ri-file-close-line"
+                    class="mx-1"
+                    color="error"
+                    v-bind="props"
+                  ></VIcon>
+                </template>
+              </VTooltip>
             </td>
           </tr>
         </tbody>
+        <!-- If Nothing Data  -->
+        <tfoot v-if="data?.data?.length == 0">
+          <tr>
+            <td
+              colspan="6"
+              class="text-center"
+            >
+              Sorry, no data found.
+            </td>
+          </tr>
+        </tfoot>
       </VTable>
+
       <div class="d-flex justify-center mt-5">
         <VPagination
           v-model="currentPage"
-          :length="5"
+          :length="totalPage"
+          :total-visible="4"
           color="primary"
+          density="compact"
+          :show-first-last-page="false"
+          @update:modelValue="getData"
         />
       </div>
     </VCardText>

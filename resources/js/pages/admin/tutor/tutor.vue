@@ -22,7 +22,7 @@ const getData = async () => {
   try {
     loading.value = true
     const res = await ApiService.get('api/v1/user/mentor-tutors' + page + search)
-    console.log(res)
+
     if (res) {
       currentPage.value = res.current_page
       totalPage.value = res.last_page
@@ -59,7 +59,7 @@ onMounted(() => {
             v-model="keyword"
             :loading="loading"
             :disabled="loading"
-            append-inner-icon="mdi-magnify"
+            append-inner-icon="ri-search-line"
             density="compact"
             label="Search"
             variant="solo"
@@ -71,7 +71,14 @@ onMounted(() => {
       </div>
     </VCardTitle>
     <VCardText>
-      <VTable>
+      <!-- Loader  -->
+      <vSkeletonLoader
+        class="mx-auto border"
+        type="table-thead, table-row@10"
+        v-if="loading"
+      ></vSkeletonLoader>
+
+      <VTable v-else>
         <thead>
           <tr>
             <th
@@ -95,7 +102,7 @@ onMounted(() => {
             <td>
               {{ parseInt(index) + 1 }}
             </td>
-            <td>
+            <td nowrap>
               <VAvatar
                 size="25"
                 class="avatar-center me-3"
@@ -103,28 +110,40 @@ onMounted(() => {
               />
               {{ item.first_name + ' ' + item.last_name }}
             </td>
-            <td class="text-start">
+            <td
+              class="text-start"
+              nowrap
+            >
               <VIcon
                 icon="ri-mail-line"
                 class="me-3"
               ></VIcon>
               {{ item.email }}
             </td>
-            <td class="text-start">
+            <td
+              class="text-start"
+              nowrap
+            >
               <VIcon
                 icon="ri-user-line"
                 class="me-3"
               ></VIcon>
               {{ item.role }}
             </td>
-            <td class="text-start">
+            <td
+              class="text-start"
+              nowrap
+            >
               <VIcon
                 icon="ri-smartphone-line"
                 class="me-3"
               ></VIcon>
               {{ item.phone }}
             </td>
-            <td class="text-center">
+            <td
+              class="text-center"
+              nowrap
+            >
               <VDialog max-width="500">
                 <template v-slot:activator="{ props: activatorProps }">
                   <VIcon
