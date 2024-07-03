@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\MentorTutors\ListController as V1MentorTutorsLis
 use App\Http\Controllers\Api\V1\Programs\ListController as V1ProgramsListController;
 use App\Http\Controllers\Api\V1\Timesheets\CreateController as V1TimesheetsCreateController;
 use App\Http\Controllers\Api\V1\Timesheets\ListController as V1TimesheetsListController;
+use App\Http\Controllers\Api\V1\Timesheets\DetailController as V1TimesheetsDetailController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -76,9 +77,13 @@ Route::prefix('program')->group(function () {
 /* Timesheet */
 Route::prefix('timesheet')->group(function () {
     Route::middleware(['auth:sanctum', 'abilities:timesheet-menu'])->group(function () {
+        /* Detail Timesheet */
+        Route::GET('{id}/detail', [V1TimesheetsDetailController::class, 'show']);
+        /* List Activities of the Timesheet */
+        // Route::GET('{id}/activities', []);
         /* List Timesheet */
         Route::GET('list', [V1TimesheetsListController::class, 'index']);
-        /* store Timesheet */
+        /* Store Timesheet */
         Route::POST('create', [V1TimesheetsCreateController::class, 'store']);
     }); 
 });
