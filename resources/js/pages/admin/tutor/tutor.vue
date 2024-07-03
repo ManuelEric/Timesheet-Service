@@ -19,10 +19,11 @@ const loading = ref(false)
 const getData = async () => {
   const page = '?page=' + currentPage.value
   const search = keyword.value ? '&keyword=' + keyword.value : ''
+  const paginate = '&paginate=true'
   try {
     loading.value = true
-    const res = await ApiService.get('api/v1/user/mentor-tutors' + page + search)
-
+    const res = await ApiService.get('api/v1/user/mentor-tutors' + page + search + paginate)
+    console.log(res)
     if (res) {
       currentPage.value = res.current_page
       totalPage.value = res.last_page

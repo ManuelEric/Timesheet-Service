@@ -1,5 +1,7 @@
 <script setup>
 import ApiService from '@/services/ApiService'
+import { showNotif } from '@/helper/notification'
+import { rules } from '@/helper/rules'
 
 // Start Variable
 const selected = ref([])
@@ -10,15 +12,34 @@ const totalPage = ref()
 const keyword = ref()
 const data = ref([])
 const loading = ref(false)
+const program_list = ref([])
+const program_name = ref()
+const tutor_list = ref([])
+const package_list = ref([])
+const pic_list = ref([])
+const inhouse_mentor = ref([])
+
+const formData = ref()
+const form = ref({
+  ref_id: [],
+  mentortutor_email: 'n.hendra@all-inedu.com',
+  package_id: '3',
+  detail_package: '360',
+  pic_id: ['01J1VA25YGWYX0SE81NRNJW6BB'],
+  notes: 'Lorem Ipsum',
+})
+
 // End Variable
 
 // Start Function
 const getData = async () => {
   const page = '?page=' + currentPage.value
   const search = keyword.value ? '&keyword=' + keyword.value : ''
+  const program = program_name.value ? '&program_name=' + program_name.value : ''
+  const paginate = '&paginate=true'
   try {
     loading.value = true
-    const res = await ApiService.get('api/v1/program/list' + page + search)
+    const res = await ApiService.get('api/v1/program/list' + page + search + program + paginate)
 
     if (res) {
       currentPage.value = res.current_page
@@ -32,53 +53,93 @@ const getData = async () => {
   }
 }
 
+const getProgram = async () => {
+  try {
+    const res = await ApiService.get('api/v1/program/component/list')
+    if (res) {
+      program_list.value = res
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const getTutor = async () => {
+  try {
+    const res = await ApiService.get('api/v1/user/mentor-tutors')
+    if (res) {
+      tutor_list.value = res
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const getPackage = async () => {
+  try {
+    const res = await ApiService.get('api/v1/user/mentor-tutors')
+    if (res) {
+      package_list.value = res
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const getPIC = async () => {
+  try {
+    const res = await ApiService.get('api/v1/user/mentor-tutors')
+    if (res) {
+      pic_list.value = res
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const getInHouseMentor = async () => {
+  try {
+    const res = await ApiService.get('api/v1/user/mentor-tutors')
+    if (res) {
+      inhouse_mentor.value = res
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+
 const searchData = async () => {
   currentPage.value = 1
   await getData()
+}
+
+const submit = async () => {
+  const { valid } = await formData.value.validate()
+  if (valid) {
+    // set ref id first
+    form.value.ref_id = selected.value
+
+    try {
+      const res = await ApiService.post('api/v1/timesheet/create', form.value)
+
+      if (res) {
+        showNotif('success', res.message, 'bottom-end')
+        selected.value = []
+        dialog.value = false
+        getData()
+      }
+    } catch (error) {
+      console.error(error.response)
+    }
+  }
 }
 // End Function
 
 onMounted(() => {
   getData()
+  getProgram()
+  getTutor()
 })
-
-const desserts = [
-  {
-    dessert: 'Frozen Yogurt',
-    calories: 159,
-    fat: 6,
-    carbs: 24,
-    protein: 4,
-  },
-  {
-    dessert: 'Ice cream sandwich',
-    calories: 237,
-    fat: 6,
-    carbs: 24,
-    protein: 4,
-  },
-  {
-    dessert: 'Eclair',
-    calories: 262,
-    fat: 6,
-    carbs: 24,
-    protein: 4,
-  },
-  {
-    dessert: 'Cupcake',
-    calories: 305,
-    fat: 6,
-    carbs: 24,
-    protein: 4,
-  },
-  {
-    dessert: 'Gingerbread',
-    calories: 356,
-    fat: 6,
-    carbs: 24,
-    protein: 4,
-  },
-]
 </script>
 
 <template>
@@ -94,12 +155,14 @@ const desserts = [
       <VRow class="my-1">
         <VCol
           cols="12"
-          md="3"
+          md="5"
         >
           <VAutocomplete
-            clearable="true"
+            clearable
+            v-model="program_name"
             label="Program Name"
-            :items="['Program 1', 'Program 2', 'Program 3']"
+            :items="program_list"
+            item-title="program_name"
             placeholder="Select Program Name"
             density="compact"
             variant="solo"
@@ -107,6 +170,7 @@ const desserts = [
             single-line
             :loading="loading"
             :disabled="loading"
+            @update:modelValue="getData"
           />
         </VCol>
         <VCol
@@ -122,12 +186,14 @@ const desserts = [
             variant="solo"
             hide-details
             single-line
+            v-model="keyword"
+            @change="searchData"
           />
         </VCol>
 
         <VCol
           cols="12"
-          md="6"
+          md="4"
           class="text-end"
         >
           <VBtn
@@ -154,67 +220,90 @@ const desserts = [
           title="Assign to Mentor/Tutor"
         >
           <VCardText>
-            <VRow>
-              <VCol md="12">
-                <VAutocomplete
-                  density="compact"
-                  clearable
-                  label="Mentor/Tutor"
-                  :items="['California', 'Colorado', 'Florida', 'Georgia', 'Texas', 'Wyoming']"
-                ></VAutocomplete>
-              </VCol>
-              <VCol md="8">
-                <VAutocomplete
-                  density="compact"
-                  clearable
-                  label="Package"
-                  :items="['California', 'Colorado', 'Florida', 'Georgia', 'Texas', 'Wyoming']"
-                ></VAutocomplete>
-              </VCol>
-              <VCol md="4">
-                <VTextField
-                  type="number"
-                  density="compact"
-                  clearable
-                  label="Hours"
-                />
-              </VCol>
-              <VCol md="12">
-                <VAutocomplete
-                  density="compact"
-                  multiple
-                  clearable
-                  chips
-                  label="PIC"
-                  :items="['California', 'Colorado', 'Florida', 'Georgia', 'Texas', 'Wyoming']"
-                ></VAutocomplete>
-              </VCol>
-              <VCol md="12">
-                <VTextarea label="Notes"></VTextarea>
-              </VCol>
-            </VRow>
+            <VForm
+              @submit.prevent="submit"
+              ref="formData"
+              validate-on="input"
+              fast-fail
+            >
+              <VRow>
+                <VCol md="12">
+                  <VAutocomplete
+                    density="compact"
+                    clearable
+                    v-model="form.mentortutor_email"
+                    label="Mentor/Tutor"
+                    :items="tutor_list"
+                    :item-props="
+                      item => ({
+                        title: item.first_name + ' ' + item.last_name,
+                        subtitle: item.role,
+                      })
+                    "
+                    item-value="email"
+                    :rules="rules.required"
+                  ></VAutocomplete>
+                </VCol>
+                <VCol md="8">
+                  <VAutocomplete
+                    density="compact"
+                    clearable
+                    label="Package"
+                    :items="['California', 'Colorado', 'Florida', 'Georgia', 'Texas', 'Wyoming']"
+                    :rules="rules.required"
+                  ></VAutocomplete>
+                </VCol>
+                <VCol md="4">
+                  <VTextField
+                    type="number"
+                    density="compact"
+                    clearable
+                    label="Hours"
+                    :rules="rules.required"
+                  />
+                </VCol>
+                <VCol md="12">
+                  <VAutocomplete
+                    density="compact"
+                    multiple
+                    clearable
+                    chips
+                    label="PIC"
+                    :items="['California', 'Colorado', 'Florida', 'Georgia', 'Texas', 'Wyoming']"
+                    :rules="rules.required"
+                  ></VAutocomplete>
+                </VCol>
+                <VCol md="12">
+                  <VTextarea label="Notes"></VTextarea>
+                </VCol>
+              </VRow>
 
-            <VDivider class="my-3" />
-            <VCardActions>
-              <VBtn
-                color="error"
-                @click="dialog = false"
-              >
-                <VIcon
-                  icon="ri-close-line"
-                  class="me-3"
-                />
-                Close
-              </VBtn>
-              <VSpacer />
-              <VBtn color="success">
-                Save
-                <VIcon
-                  icon="ri-save-line"
-                  class="ms-3"
-                />
-              </VBtn>
-            </VCardActions>
+              <VDivider class="my-3" />
+              <VCardActions>
+                <VBtn
+                  color="error"
+                  type="button"
+                  @click="dialog = false"
+                >
+                  <VIcon
+                    icon="ri-close-line"
+                    class="me-3"
+                  />
+                  Close
+                </VBtn>
+                <VSpacer />
+                <VBtn
+                  color="success"
+                  type="submit"
+                >
+                  Save
+                  <VIcon
+                    icon="ri-save-line"
+                    class="ms-3"
+                  />
+                </VBtn>
+              </VCardActions>
+            </VForm>
           </VCardText>
         </VCard>
       </VDialog>
@@ -248,12 +337,19 @@ const desserts = [
           <tr
             v-for="(item, index) in data.data"
             :key="index"
+            :class="{ 'bg-secondary': selected.includes(item.id) }"
           >
             <td>
               <VCheckbox
                 v-model="selected"
-                :value="item"
+                :value="item.id"
+                v-if="!item.timesheet_id"
               ></VCheckbox>
+              <VIcon
+                icon="ri-check-line"
+                color="success"
+                v-else
+              ></VIcon>
             </td>
             <td nowrap>
               <VIcon
@@ -283,33 +379,31 @@ const desserts = [
               {{ item.program_name }}
             </td>
             <td class="text-center">
-              <VTooltip
-                text="Timesheet already exists."
-                v-if="item.timesheet_id"
-              >
-                <template v-slot:activator="{ props }">
-                  <VIcon
-                    icon="ri-file-check-line"
-                    class="mx-1"
-                    color="success"
-                    v-bind="props"
-                  ></VIcon>
-                </template>
-              </VTooltip>
+              <VText v-if="item.timesheet_id">
+                <VIcon
+                  icon="ri-file-check-line"
+                  class="mx-1"
+                  color="success"
+                ></VIcon>
+                <v-tooltip
+                  activator="parent"
+                  location="top"
+                  >Already</v-tooltip
+                >
+              </VText>
 
-              <VTooltip
-                text="Not Yet"
-                v-else
-              >
-                <template v-slot:activator="{ props }">
-                  <VIcon
-                    icon="ri-file-close-line"
-                    class="mx-1"
-                    color="error"
-                    v-bind="props"
-                  ></VIcon>
-                </template>
-              </VTooltip>
+              <VText v-else>
+                <VIcon
+                  icon="ri-file-close-line"
+                  class="mx-1"
+                  color="error"
+                ></VIcon>
+                <v-tooltip
+                  activator="parent"
+                  location="top"
+                  >Not Yet</v-tooltip
+                >
+              </VText>
             </td>
           </tr>
         </tbody>

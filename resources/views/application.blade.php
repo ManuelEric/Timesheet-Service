@@ -8,6 +8,32 @@
     <title>Timesheet - EduALL</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('loader.css') }}" />
     @vite(['resources/js/main.js'])
+
+    <style>
+        /* Untuk Chrome, Safari, Opera */
+        *::-webkit-scrollbar {
+            height: 3px;
+            width: 5px;
+            /* tinggi scrollbar */
+        }
+
+        *::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            /* warna latar belakang track */
+        }
+
+        *::-webkit-scrollbar-thumb {
+            background-color: #6363e7;
+            /* warna thumb scrollbar */
+            border-radius: 10px;
+            /* sudut bulat thumb */
+        }
+
+        *::-webkit-scrollbar-thumb:hover {
+            background-color: #0000FF;
+            /* warna thumb saat dihover */
+        }
+    </style>
 </head>
 
 <body>
