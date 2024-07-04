@@ -8,9 +8,8 @@ use App\Http\Controllers\Api\V1\Authentication\ResetPasswordController as V1Rese
 use App\Http\Controllers\Api\V1\Authentication\CreatePasswordController as V1CreatePasswordController;
 use App\Http\Controllers\Api\V1\MentorTutors\ListController as V1MentorTutorsListController;
 use App\Http\Controllers\Api\V1\Programs\ListController as V1ProgramsListController;
-use App\Http\Controllers\Api\V1\Timesheets\CreateController as V1TimesheetsCreateController;
-use App\Http\Controllers\Api\V1\Timesheets\ListController as V1TimesheetsListController;
-use App\Http\Controllers\Api\V1\Timesheets\DetailController as V1TimesheetsDetailController;
+use App\Http\Controllers\Api\V1\TimesheetController as V1TimesheetController;
+use App\Http\Controllers\Api\V1\ActivityController as V1ActivitiesController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -77,14 +76,23 @@ Route::prefix('program')->group(function () {
 /* Timesheet */
 Route::prefix('timesheet')->group(function () {
     Route::middleware(['auth:sanctum', 'abilities:timesheet-menu'])->group(function () {
-        /* Detail Timesheet */
-        Route::GET('{id}/detail', [V1TimesheetsDetailController::class, 'show']);
-        /* List Activities of the Timesheet */
-        // Route::GET('{id}/activities', []);
         /* List Timesheet */
-        Route::GET('list', [V1TimesheetsListController::class, 'index']);
+        Route::GET('list', [V1TimesheetController::class, 'index']);
         /* Store Timesheet */
-        Route::POST('create', [V1TimesheetsCreateController::class, 'store']);
+        Route::POST('create', [V1TimesheetController::class, 'store']);
+        /* Detail Timesheet */
+        Route::GET('{timesheet}/detail', [V1TimesheetController::class, 'show']);
+        
+        /* List Activities of the Timesheet */
+        Route::GET('{timesheet}/activities', [V1ActivitiesController::class, 'index']);
+        /* Show the Activity */
+        Route::GET('{timesheet}/activity/{activity}', [V1ActivitiesController::class, 'show']);
+        /* Store Activity */
+        Route::POST('{timesheet}/activity', [V1ActivitiesController::class, 'store']);
+        /* Update Activity */
+        Route::PUT('{timesheet}/activity/{activity}', [V1ActivitiesController::class, 'update']);
+        /* Destroy the activity */
+        Route::DELETE('{timesheet}/activity/{activity}', [V1ActivitiesController::class, 'destroy']);
     }); 
 });
     

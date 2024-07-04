@@ -2,34 +2,34 @@
 
 namespace App\Actions\Timesheet;
 
+use App\Actions\Authentication\CheckEmailMentorTutorAction;
 use App\Models\TempUser;
-use App\Services\Authentication\CheckEmailMentorTutorService;
 use App\Services\ResponseService;
-use App\Services\User\CreateNewTempUserService;
+use App\Actions\User\CreateTempUserAction;
 use Exception;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
-class RegisterMentorTutorAction
+class SelectOrRegisterMentorTutorAction
 {
-    protected $checkEmailMentorTutorService;
-    protected $createNewTempuserService;
+    protected $checkEmailMentorTutorAction;
+    protected $createTempUserAction;
     protected $responseService;
 
     public function __construct(
-        CheckEmailMentorTutorService $checkEmailMentorTutorService,
-        CreateNewTempUserService $createNewTempuserService,
+        CheckEmailMentorTutorAction $checkEmailMentorTutorAction,
+        CreateTempUserAction $createTempUserAction,
         ResponseService $responseService,
         )
     {
-        $this->checkEmailMentorTutorService = $checkEmailMentorTutorService;
-        $this->createNewTempuserService = $createNewTempuserService;
+        $this->checkEmailMentorTutorAction = $checkEmailMentorTutorAction;
+        $this->createTempUserAction = $createTempUserAction;
         $this->responseService = $responseService;
     }
 
-    public function execute(string $mentortutor_email): String
+    public function handle(string $mentortutor_email): String
     {
 
         /* find mentor tutor in temp user */
@@ -44,8 +44,8 @@ class RegisterMentorTutorAction
             DB::beginTransaction();
             try {
                 
-                [$emailCheckingResult, $userRawInformation] = $this->checkEmailMentorTutorService->execute($mentortutor_email);
-                $createdTempUser = $this->createNewTempuserService->execute($userRawInformation);
+                [$emailCheckingResult, $userRawInformation] = $this->checkEmailMentorTutorAction->execute($mentortutor_email);
+                $createdTempUser = $this->createTempUserAction->execute($userRawInformation);
                 $selectedMentorOrTutorId = $createdTempUser->id;
 
                 DB::commit();

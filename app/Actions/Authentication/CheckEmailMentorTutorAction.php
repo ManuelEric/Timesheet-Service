@@ -1,23 +1,16 @@
 <?php
 
-namespace App\Services\Authentication;
+namespace App\Actions\Authentication;
 
 use App\Http\Traits\ConcatenateName;
-use App\Services\ResponseService;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
 
-class CheckEmailMentorTutorService
+class CheckEmailMentorTutorAction
 {
     use ConcatenateName;
-    protected $responseService;
-
-    public function __construct(ResponseService $responseService)
-    {
-        $this->responseService = $responseService;
-    }
-
+    
     public function execute(string $email)
     {
         $request = Http::get( env('CRM_DOMAIN') . 'auth/email/check', [
@@ -50,10 +43,11 @@ class CheckEmailMentorTutorService
         ];
 
         $rawInformation = [
+            'uuid' => $uuid,
             'full_name' => $fullName,
             'email' => $response['email'],
             'password' => $response['password'],
-            'roles' => $roles,
+            'roles' => collect($roles),
         ];
 
         $result = [$checkingResult, $rawInformation];

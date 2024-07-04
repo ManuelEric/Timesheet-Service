@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Pivot\HandleBy;
 use App\Observers\TimesheetObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,6 +20,8 @@ class Timesheet extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'inhouse_id',
+        'inhouse_name',
         'package_id',
         'package_type',
         'detail_package',
@@ -39,7 +42,7 @@ class Timesheet extends Model
 
     public function handle_by()
     {
-        return $this->belongsToMany(TempUser::class, 'timesheet_handle_by', 'timesheet_id', 'temp_user_id')->withTimestamps();
+        return $this->belongsToMany(TempUser::class, 'timesheet_handle_by', 'timesheet_id', 'temp_user_id')->withTimestamps()->using(HandleBy::class);
     }
 
     public function package()
