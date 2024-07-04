@@ -164,7 +164,7 @@ class ActivityController extends Controller
         }
 
         return response()->json([
-            'message' => 'Activity has been updated successfully.'
+            'message' => 'The Activity has been updated successfully.'
         ]);
     }
 
@@ -205,5 +205,9 @@ class ActivityController extends Controller
                 ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY)
             );
         }
+
+        return response()->json([
+            'message' => 'The Activity has been deleted successfully.'
+        ]);
     }
 }

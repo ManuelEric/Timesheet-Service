@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\MentorTutors\ListController as V1MentorTutorsLis
 use App\Http\Controllers\Api\V1\Programs\ListController as V1ProgramsListController;
 use App\Http\Controllers\Api\V1\TimesheetController as V1TimesheetController;
 use App\Http\Controllers\Api\V1\ActivityController as V1ActivitiesController;
+use App\Http\Controllers\Api\V1\Packages\ListController as V1PackagesListController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -93,6 +94,18 @@ Route::prefix('timesheet')->group(function () {
         Route::PUT('{timesheet}/activity/{activity}', [V1ActivitiesController::class, 'update']);
         /* Destroy the activity */
         Route::DELETE('{timesheet}/activity/{activity}', [V1ActivitiesController::class, 'destroy']);
+    }); 
+});
+
+/* Package */
+Route::prefix('package')->group(function () {
+    Route::middleware(['auth:sanctum', 'abilities:timesheet-menu'])->group(function () {
+        /**
+         * The Components
+         */
+        Route::prefix('component')->group(function () {
+            Route::GET('list', [V1PackagesListController::class, 'component']);
+        });
     }); 
 });
     
