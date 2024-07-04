@@ -92,9 +92,14 @@ class TempUser extends Authenticatable implements CanResetPassword
      * @var array<int, string>
      */
 
-     public function timesheets()
-     {
-         return $this->belongsToMany(Timesheet::class, 'timesheet_handle_by', 'temp_user_id', 'timesheet_id')->withTimestamps()->using(HandleBy::class);
-     }
+    public function timesheets()
+    {
+        return $this->belongsToMany(Timesheet::class, 'timesheet_handle_by', 'temp_user_id', 'timesheet_id')->withTimestamps()->using(HandleBy::class);
+    }
+
+    public function roles()
+    {
+        return $this->hasMany(TempUserRoles::class, 'temp_user_id', 'id');
+    }
 
 }

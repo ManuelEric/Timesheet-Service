@@ -17,8 +17,19 @@ return new class extends Migration
             $table->string('full_name');
             $table->string('email');
             $table->text('password')->nullable();
-            $table->enum('role', ['Mentor', 'Tutor']);
             $table->datetime('last_activity')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('temp_user_roles', function (Blueprint $table) {
+            $table->id();
+            $table->foreignUlid('temp_user_id')->constrained(
+                table: 'temp_users', indexName: 'temp_user_roles_temp_user_id'
+            )->onUpdate('cascade')->onDelete('cascade');
+            $table->string('role');
+            $table->string('tutor_subject')->nullable();
+            $table->bigInteger('fee_hours')->default(0);
+            $table->bigInteger('fee_session')->default(0);
             $table->timestamps();
         });
 
@@ -37,7 +48,7 @@ return new class extends Migration
             $table->string('category');
             $table->string('type_of');
             $table->string('package')->nullable();
-            $table->string('detail')->nullable();
+            $table->integer('detail')->nullable();
             $table->timestamps();
         });
 
