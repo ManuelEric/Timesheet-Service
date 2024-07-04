@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Pivot\HandleBy;
 use App\Observers\TempUserObserver;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Contracts\Auth\CanResetPassword;
@@ -27,6 +28,7 @@ class TempUser extends Authenticatable implements CanResetPassword
      * @var array<int, string>
      */
     protected $fillable = [
+        'uuid',
         'full_name',
         'email',
         'password',
@@ -92,7 +94,7 @@ class TempUser extends Authenticatable implements CanResetPassword
 
      public function timesheets()
      {
-         return $this->belongsToMany(Timesheet::class, 'timesheet_handle_by', 'temp_user_id', 'timesheet_id')->withTimestamps();
+         return $this->belongsToMany(Timesheet::class, 'timesheet_handle_by', 'temp_user_id', 'timesheet_id')->withTimestamps()->using(HandleBy::class);
      }
 
 }

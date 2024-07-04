@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\User;
+namespace App\Actions\User;
 
 use App\Http\Traits\ConcatenateName;
 use App\Models\TempUser;
@@ -8,10 +8,9 @@ use App\Services\ResponseService;
 use Exception;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
-class CreateNewTempUserService
+class CreateTempUserAction
 {
     use ConcatenateName;
     protected $responseService;
@@ -24,6 +23,7 @@ class CreateNewTempUserService
     public function execute(array $userRawInformation)
     {
         /* fetch user raw information */
+        $uuid = $userRawInformation['uuid'];
         $full_name = $userRawInformation['full_name'];
         $email = $userRawInformation['email'];
         $password = $userRawInformation['password'];
@@ -46,7 +46,7 @@ class CreateNewTempUserService
             /* create temporary mentor / tutor */
             # checking his/her roles from CRM in order to match the roles on timesheet app
             $acceptedRole = '';
-            $acceptedRolesInTimesheet = ['Mentor', 'Tutor'];
+            $acceptedRolesInTimesheet = ['Tutor'];
             foreach ($roles as $role) 
             {
                 if ( array_search($role['role_name'], $acceptedRolesInTimesheet) !== false ) 
@@ -68,10 +68,11 @@ class CreateNewTempUserService
     
             # initiate details for new temporary user
             $userDetails = [
+                'uuid' => $uuid,
                 'full_name' => $full_name,
                 'email' => $email,
                 'password' => $password,
-                'role' => strtolower($acceptedRole),
+                'role' => ucwords($acceptedRole),
             ];
     
             DB::beginTransaction();

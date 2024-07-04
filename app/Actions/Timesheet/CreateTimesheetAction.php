@@ -24,7 +24,7 @@ class CreateTimesheetAction
     {
         /* define submitted package variables */
         $packageId = $storePackageDetails['validatedPackageId'];
-        $duration = $storePackageDetails['validatedDetailPackage'];
+        $duration = $storePackageDetails['validatedDuration'];
 
         /* fetch package details from db by submitted package ID */
         $packageMaster = Package::find($packageId);
@@ -44,7 +44,7 @@ class CreateTimesheetAction
         try {
 
             $createdTimesheet = Timesheet::create($timesheetDetails);
-            $createdTimesheet->handle_by()->attach($mentortutorId);
+            $createdTimesheet->handle_by()->attach($mentortutorId, ['active' => true]);
             $createdTimesheet->admin()->attach($picIds);
 
         } catch (Exception $e) {

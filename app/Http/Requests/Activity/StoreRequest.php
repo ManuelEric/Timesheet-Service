@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Timesheet;
+namespace App\Http\Requests\Activity;
 
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -35,39 +35,10 @@ class StoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'ref_id' => 'required',
-            'ref_id.*' => 'required|exists:ref_programs,id',
-            'mentortutor_email' => 'required|email',
-            'package_id' => 'required|exists:timesheet_packages,id',
-            'duration' => 'required|integer',
-            'pic_id' => 'required|exists:users,id',
-            'pic_id.*' => 'required|exists:users,id',
-            'notes' => 'nullable',
-        ];
-    }
-
-    /**
-     * Get the error messages for the defined validation rules.
-     *
-     * @return array<string, string>
-     */
-    public function messages(): array
-    {
-        return [
-            'ref_id.*.exists' => 'There seems to be a problem with the selected programs',
-        ];
-    }
-
-    /**
-     * Set the custom attributes for the defined validation rules.
-     *
-     * @return array<string, string>
-     */
-    public function attributes(): array
-    {
-        return [
-            'ref_id' => 'programs',
-            'mentortutor_email' => 'mentor or tutor email',
+            'activity' => 'required',
+            'description' => 'nullable',
+            'start_date' => 'required|date|date_format:Y-m-d H:i:s',
+            'meeting_link' => 'nullable|active_url',
         ];
     }
 }

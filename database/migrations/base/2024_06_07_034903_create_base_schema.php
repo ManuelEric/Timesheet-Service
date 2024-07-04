@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('temp_users', function (Blueprint $table) {
             $table->ulid('id')->primary();
+            $table->string('uuid');
             $table->string('full_name');
             $table->string('email');
             $table->text('password')->nullable();
-            $table->enum('role', ['mentor', 'tutor']);
+            $table->enum('role', ['Mentor', 'Tutor']);
             $table->datetime('last_activity')->nullable();
             $table->timestamps();
         });
@@ -42,12 +43,14 @@ return new class extends Migration
 
         Schema::create('timesheets', function (Blueprint $table) {
             $table->id();
+            $table->string('inhouse_id')->nullable();
+            $table->string('inhouse_name')->nullable();
             $table->foreignId('package_id')->constrained(
                 table: 'timesheet_packages', indexName: 'timesheets_package_id'
             )->onUpdate('restrict')->onDelete('restrict');
             $table->string('package_type');
             $table->string('detail_package');
-            $table->float('duration');
+            $table->integer('duration');
             $table->text('notes')->nullable();
             $table->timestamps();
         });
@@ -71,6 +74,7 @@ return new class extends Migration
             $table->foreignId('timesheet_id')->constrained(
                 table: 'timesheets', indexName: 'timesheet_handle_by_timesheet_id'
             )->onUpdate('restrict')->onDelete('restrict');
+            $table->boolean('active');
             $table->timestamps();
         });
 
@@ -89,7 +93,7 @@ return new class extends Migration
             $table->string('activity');
             $table->text('description');
             $table->datetime('start_date');
-            $table->datetime('end_date');
+            $table->datetime('end_date')->nullable();
             $table->decimal('fee_hours');
             $table->decimal('additional_fee');
             $table->float('time_spent')->comment('in hours');
