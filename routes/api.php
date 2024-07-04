@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\Programs\ListController as V1ProgramsListControl
 use App\Http\Controllers\Api\V1\TimesheetController as V1TimesheetController;
 use App\Http\Controllers\Api\V1\ActivityController as V1ActivitiesController;
 use App\Http\Controllers\Api\V1\Packages\ListController as V1PackagesListController;
+use App\Http\Controllers\Api\V1\User\ListController as V1UserListController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -52,9 +53,16 @@ Route::prefix('auth')->group(function () {
 
 /* Mentor & Tutors */
 Route::prefix('user')->group(function () {
-    Route::middleware(['auth:sanctum', 'abilities:mentortutors-menu'])->group(function () {
+    Route::middleware(['auth:sanctum', 'abilities:mentortutors-menu,program-menu'])->group(function () {
         /* List Mentor & Tutors */
         Route::GET('mentor-tutors', [V1MentorTutorsListController::class, 'index']);
+
+        /**
+         * The Components
+         */
+        Route::prefix('component')->middleware(['abilities:program-menu'])->group(function () {
+            Route::GET('list', [V1UserListController::class, 'component']);
+        });
     });
 });
 
