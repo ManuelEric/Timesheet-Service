@@ -28,6 +28,7 @@ class Ref_Program extends Model
         'student_name',
         'student_school',
         'program_name',
+        'require',
         'timesheet_id',
     ];
 

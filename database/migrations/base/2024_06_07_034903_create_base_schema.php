@@ -126,6 +126,7 @@ return new class extends Migration
             $table->string('student_name')->nullable();
             $table->string('student_school');
             $table->string('program_name');
+            $table->enum('require', ['Mentor', 'Tutor']);
             $table->foreignId('timesheet_id')->nullable()->constrained(
                 table: 'timesheets', indexName: 'ref_programs_timesheet_id'
             )->onUpdate('restrict')->onDelete('restrict');
