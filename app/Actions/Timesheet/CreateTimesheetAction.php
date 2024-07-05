@@ -28,14 +28,10 @@ class CreateTimesheetAction
 
         /* fetch package details from db by submitted package ID */
         $packageMaster = Package::find($packageId);
-        $packageType = $packageMaster->type_of;
-        $detailPackage = $packageMaster->package;
 
         /* merge variables into array that going to be stored into timesheet */
         $timesheetDetails = [
             'package_id' => $packageId,
-            'package_type' => $packageType,
-            'detail_package' => $detailPackage,
             'duration' => $duration,
             'notes' => $notes,
         ];

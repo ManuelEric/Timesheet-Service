@@ -23,8 +23,6 @@ class Timesheet extends Model
         'inhouse_id',
         'inhouse_name',
         'package_id',
-        'package_type',
-        'detail_package',
         'duration',
         'notes',
     ];
@@ -67,7 +65,8 @@ class Timesheet extends Model
     public function scopeOnSearch(Builder $query, array $search = []): void
     {
         $program_name = $search['program_name'] ?? false;
-        $timesheet_package = $search['timesheet_package'] ?? false;
+        $package_id = $search['package_id'] ?? false;
+        $keyword = $search['keyword'] ?? false;
 
         $query->
             when( $program_name, function ($_sub_) use ($program_name) {
@@ -75,8 +74,18 @@ class Timesheet extends Model
                     $__sub__->where('program_name', 'like', '%'.$program_name.'%');
                 });
             })->
-            when( $timesheet_package, function ($_sub_) use ($timesheet_package) {
-                $_sub_->where('package_type', 'like', '%'.$timesheet_package.'%');
+            when( $package_id, function ($_sub_) use ($package_id) {
+                $_sub_->where('package_id', $package_id);
+            })->
+            when( $keyword, function ($_sub_) use ($keyword) {
+                $_sub_->
+                    where( function ($__sub__) use ($keyword) {
+                        $__sub__->
+                            where('inhouse_name', 'like', '%'.$keyword.'%')->
+                            orWhereHas('ref_program', function ($___sub___) use ($keyword) {
+                                $___sub___->where('student_name', 'like', '%'.$keyword.'%')->orWhere('student_school', 'like', '%'.$keyword.'%');
+                        });
+                    });
             });
     }
 }

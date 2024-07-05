@@ -40,11 +40,16 @@ class TempUserObserver
      */
     public function updated(TempUser $tempUser): void
     {
+        $admin = auth('sanctum')->user();
+
         /**
          * Listening to 'updated password'
          */
         if ( $tempUser->wasChanged('password') )
             Log::info($tempUser->full_name . ' has perform a password change.');
+
+        if ( $tempUser->wasChanged('inhouse') )
+            Log::info($tempUser->full_name . ' has been set to inhouse by ' . $admin->full_name );
     }
 
     /**

@@ -6,7 +6,7 @@ use App\Http\Controllers\Api\V1\Authentication\LogoutController as V1LogoutContr
 use App\Http\Controllers\Api\V1\Authentication\ForgotPasswordController as V1ForgotPasswordController;
 use App\Http\Controllers\Api\V1\Authentication\ResetPasswordController as V1ResetPasswordController;
 use App\Http\Controllers\Api\V1\Authentication\CreatePasswordController as V1CreatePasswordController;
-use App\Http\Controllers\Api\V1\MentorTutors\ListController as V1MentorTutorsListController;
+use App\Http\Controllers\Api\V1\MentorTutorsController as V1MentorTutorController;
 use App\Http\Controllers\Api\V1\Programs\ListController as V1ProgramsListController;
 use App\Http\Controllers\Api\V1\TimesheetController as V1TimesheetController;
 use App\Http\Controllers\Api\V1\ActivityController as V1ActivitiesController;
@@ -55,7 +55,8 @@ Route::prefix('auth')->group(function () {
 Route::prefix('user')->group(function () {
     Route::middleware(['auth:sanctum', 'abilities:mentortutors-menu,program-menu'])->group(function () {
         /* List Mentor & Tutors */
-        Route::GET('mentor-tutors', [V1MentorTutorsListController::class, 'index']);
+        Route::GET('mentor-tutors', [V1MentorTutorController::class, 'index']);
+        Route::PUT('mentor-tutors/{mentortutor_id}', [V1MentorTutorController::class, 'update']);
 
         /**
          * The Components
