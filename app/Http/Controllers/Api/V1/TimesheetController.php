@@ -67,7 +67,9 @@ class TimesheetController extends Controller
             ];
         });
 
-        return response()->json($mappedTimesheets);
+        $results = $mappedTimesheets->paginate(10);
+
+        return response()->json($results);
     }
 
     public function show(
