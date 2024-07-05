@@ -1,13 +1,82 @@
 <script setup>
+import { showNotif } from '@/helper/notification'
+import { rules } from '@/helper/rules'
+import ApiService from '@/services/ApiService'
+
 import avatar1 from '@images/avatars/avatar-1.png'
 import avatar2 from '@images/avatars/avatar-2.png'
 import avatar3 from '@images/avatars/avatar-3.png'
 import avatar4 from '@images/avatars/avatar-4.png'
 import avatar5 from '@images/avatars/avatar-5.png'
 
+// Start Variable
 const avatars = [avatar1, avatar2, avatar3, avatar4, avatar5]
-const currentPage = ref(1)
+
 const selected = ref([])
+const currentPage = ref(1)
+const totalPage = ref()
+const keyword = ref()
+const data = ref([])
+const loading = ref(false)
+const program_list = ref([])
+const program_name = ref()
+const package_list = ref([])
+const package_name = ref()
+
+// End Variable
+
+// Start Function
+const getData = async () => {
+  const page = '?page=' + currentPage.value
+  const search = keyword.value ? '&keyword=' + keyword.value : ''
+  const program = program_name.value ? '&program_name=' + program_name.value : ''
+  const package_search = package_name.value ? '&timesheet_package=' + package_name.value : ''
+  const paginate = '&paginate=true'
+  try {
+    loading.value = true
+    const res = await ApiService.get('api/v1/timesheet/list' + page + search + program + package_search + paginate)
+    console.log(res)
+    if (res) {
+      currentPage.value = res.current_page
+      totalPage.value = res.last_page
+      data.value = res
+    }
+    loading.value = false
+  } catch (error) {
+    console.error(error)
+    loading.value = false
+  }
+}
+
+const getProgram = async () => {
+  try {
+    const res = await ApiService.get('api/v1/program/component/list')
+    if (res) {
+      program_list.value = res
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const getPackage = async () => {
+  try {
+    const res = await ApiService.get('api/v1/package/component/list')
+    if (res) {
+      package_list.value = res
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+// End Function
+
+onMounted(() => {
+  getData()
+  getProgram()
+  getPackage()
+})
+
 const desserts = [
   {
     dessert: 'Frozen Yogurt',
@@ -57,33 +126,77 @@ const desserts = [
       </div>
     </VCardTitle>
     <VCardText>
-      <VRow class="my-1">
+      <VRow class="my-1 justify-around">
         <VCol
           cols="12"
-          md="2"
+          md="5"
+        >
+          <VAutocomplete
+            clearable
+            v-model="program_name"
+            label="Program Name"
+            :items="program_list"
+            item-title="program_name"
+            placeholder="Select Program Name"
+            density="compact"
+            variant="solo"
+            hide-details
+            single-line
+            :loading="loading"
+            :disabled="loading"
+            @update:modelValue="getData"
+          />
+        </VCol>
+        <VCol
+          cols="12"
+          md="4"
         >
           <VAutocomplete
             clearable="true"
-            label="Program Name"
-            :items="['Program 1', 'Program 2', 'Program 3']"
-            placeholder="Select Program Name"
+            v-model="package_name"
+            label="Package"
+            :items="package_list"
+            :item-props="item => ({ title: item.package != null ? item.type_of + ' - ' + item.package : item.type_of })"
+            item-value="id"
+            placeholder="Select Package"
             density="compact"
+            variant="solo"
+            hide-details
+            single-line
+            :loading="loading"
+            :disabled="loading"
+            @update:modelValue="getData"
           />
         </VCol>
         <VCol
           cols="12"
           md="3"
         >
-          <VAutocomplete
-            clearable="true"
-            label="Timesheet - Package"
-            :items="['Timesheet 1', 'Timesheet 2', 'Timesheet 3']"
-            placeholder="Select Timesheet"
+          <VTextField
+            :loading="loading"
+            :disabled="loading"
+            append-inner-icon="ri-search-line"
             density="compact"
+            label="Search"
+            variant="solo"
+            hide-details
+            single-line
+            v-model="keyword"
+            @change="searchData"
           />
         </VCol>
       </VRow>
-      <VTable class="text-no-wrap">
+
+      <!-- Loader  -->
+      <vSkeletonLoader
+        class="mx-auto border"
+        type="table-thead, table-row@10"
+        v-if="loading"
+      ></vSkeletonLoader>
+      <VTable
+        class="text-no-wrap"
+        v-else
+      >
         <thead>
           <tr>
             <th
@@ -92,11 +205,11 @@ const desserts = [
             >
               No
             </th>
+            <th class="text-uppercase text-center">School/Student Name</th>
             <th class="text-uppercase text-center">Program Name</th>
             <th class="text-uppercase text-center">Package</th>
             <th class="text-uppercase text-center">Tutor/Mentor</th>
             <th class="text-uppercase text-center">PIC</th>
-            <th class="text-uppercase text-center">School/Student Name</th>
             <th class="text-uppercase text-center">Total Hours</th>
             <th class="text-uppercase text-center">Used</th>
             <th class="text-uppercase text-center">#</th>
@@ -104,25 +217,32 @@ const desserts = [
         </thead>
         <tbody>
           <tr
-            v-for="(item, index) in desserts"
+            v-for="(item, index) in data.data"
             :key="index"
           >
             <td>
-              {{ index + 1 }}
+              {{ parseInt(index) + 1 }}
+            </td>
+            <td class="text-left">
+              <VIcon
+                icon="ri-group-line"
+                class="cursor-pointer me-3"
+              />
+              {{ item.client }}
             </td>
             <td>
               <VIcon
                 icon="ri-bookmark-3-line"
                 class="me-3"
               ></VIcon>
-              {{ item.dessert }}
+              {{ item.program_name }}
             </td>
-            <td class="text-center">
+            <td class="text-start">
               <VIcon
                 icon="ri-bookmark-line"
                 class="me-3"
               ></VIcon>
-              Package {{ index + 1 }}
+              {{ item.detail_package ? item.package_type + ' - ' + item.detail_package : item.package_type }}
             </td>
             <td class="text-left">
               <VAvatar
@@ -130,38 +250,31 @@ const desserts = [
                 class="avatar-center me-3"
                 :image="avatars[index % 5]"
               />
-              {{ item.dessert }}
+              {{ item.tutor_mentor }}
             </td>
             <td class="text-left">
               <VIcon
                 icon="ri-user-line"
                 class="cursor-pointer me-3"
               />
-              {{ item.dessert }}
-            </td>
-            <td class="text-left">
-              <VIcon
-                icon="ri-user-line"
-                class="cursor-pointer me-3"
-              />
-              Student {{ index + 1 }}
+              {{ item.admin }}
             </td>
             <td class="text-left">
               <VIcon
                 icon="ri-calendar-schedule-line"
                 class="cursor-pointer me-3"
               />
-              40 Hours
+              {{ item.duration / 60 }} Hours
             </td>
             <td class="text-left">
               <VIcon
                 icon="ri-timer-2-line"
                 class="cursor-pointer me-3"
               />
-              {{ 25 - (index % 5) }} Hours
+              {{ item.spent / 60 }} Hours
             </td>
             <td>
-              <router-link :to="'/admin/timesheet/' + index">
+              <router-link :to="'/admin/timesheet/' + item.id">
                 <VBtn
                   color="secondary"
                   density="compact"
@@ -184,12 +297,27 @@ const desserts = [
             </td>
           </tr>
         </tbody>
+        <!-- If Nothing Data  -->
+        <tfoot v-if="data?.data?.length == 0">
+          <tr>
+            <td
+              colspan="9"
+              class="text-center"
+            >
+              Sorry, no data found.
+            </td>
+          </tr>
+        </tfoot>
       </VTable>
       <div class="d-flex justify-center mt-5">
         <VPagination
           v-model="currentPage"
-          :length="5"
+          :length="totalPage"
+          :total-visible="4"
           color="primary"
+          density="compact"
+          :show-first-last-page="false"
+          @update:modelValue="getData"
         />
       </div>
     </VCardText>
