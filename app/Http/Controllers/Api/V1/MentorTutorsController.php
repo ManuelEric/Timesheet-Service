@@ -19,6 +19,8 @@ class MentorTutorsController extends Controller
     {
         /* incoming request */
         $keyword = $request->only(['keyword', 'paginate', 'page', 'role']);
+        $requestInhouse = $request->get('inhouse');
+        $inhouse = $requestInhouse === "true" ? 1 : 0;
 
         /* call API to get all of the mentors and tutors */
         $request = Http::get( env('CRM_DOMAIN') . 'user/mentor-tutors', $keyword);
@@ -28,6 +30,7 @@ class MentorTutorsController extends Controller
 
         /* only fetch the data in order to add inhouse item for each data */
         $mentortutorsCollection = $isPaginate == true ? $response['data'] : $response; 
+
 
         /* adding new items which is inhouse */
         $mappedResponse = collect($mentortutorsCollection)->map(function ($item) {
@@ -39,8 +42,15 @@ class MentorTutorsController extends Controller
             ]);
         });
 
+
+        /* process the inhouse request just if using paginate param */
+        if ( $requestInhouse !== NULL )
+            $mappedResponse = $mappedResponse->where('inhouse', $inhouse);
+
+        
         /* combine the processed items with the pagination */
         $results = $isPaginate == true ? array_merge($response, ['data' => $mappedResponse]) : $mappedResponse;
+
 
         return response()->json($results);
     }
