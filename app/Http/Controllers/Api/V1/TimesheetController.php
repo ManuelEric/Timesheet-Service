@@ -16,7 +16,7 @@ class TimesheetController extends Controller
     public function index(Request $request): JsonResponse
     {
         /* Incoming Request */
-        $search = $request->only(['program_name', 'timesheet_package']);
+        $search = $request->only(['program_name', 'package_id', 'keyword']);
         
         $timesheets = Timesheet::with(
                 [
@@ -32,18 +32,21 @@ class TimesheetController extends Controller
                     'activities' => function ($query) {
                         $query->select('time_spent');
                     },
+                    'package' => function ($query) {
+                        $query->select('id', 'type_of', 'package');
+                    },
                 ]
             )->
             onSearch($search)->
-            select('timesheets.id', 'package_type', 'detail_package', 'duration', 'notes')->
+            select('timesheets.id', 'package_id', 'duration', 'notes')->
             get();
 
         $mappedTimesheets = $timesheets->map(function ($data) {
 
             $category = $data->ref_program->category;
             $timesheetId = $data->id;
-            $packageType = $data->package_type;
-            $detailPackage = $data->detail_package;
+            $packageType = $data->package->type_of;
+            $detailPackage = $data->package->package;
             $duration = $data->duration;
             $notes = $data->notes;
             $studentName = $data->ref_program->student_name;

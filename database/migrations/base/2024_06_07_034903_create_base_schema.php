@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('full_name');
             $table->string('email');
             $table->text('password')->nullable();
+            $table->boolean('inhouse')->default(false);
             $table->datetime('last_activity')->nullable();
             $table->timestamps();
         });
@@ -59,8 +60,6 @@ return new class extends Migration
             $table->foreignId('package_id')->constrained(
                 table: 'timesheet_packages', indexName: 'timesheets_package_id'
             )->onUpdate('restrict')->onDelete('restrict');
-            $table->string('package_type');
-            $table->string('detail_package');
             $table->integer('duration');
             $table->text('notes')->nullable();
             $table->timestamps();
