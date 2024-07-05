@@ -1,7 +1,7 @@
 <script setup>
-import ApiService from '@/services/ApiService'
 import { showNotif } from '@/helper/notification'
 import { rules } from '@/helper/rules'
+import ApiService from '@/services/ApiService'
 
 // Start Variable
 const selected = ref([])
@@ -18,15 +18,16 @@ const tutor_list = ref([])
 const package_list = ref([])
 const pic_list = ref([])
 const inhouse_mentor = ref([])
+const duration_readonly = ref(false)
 
 const formData = ref()
 const form = ref({
   ref_id: [],
-  mentortutor_email: 'n.hendra@all-inedu.com',
-  package_id: '3',
-  detail_package: '360',
-  pic_id: ['01J1VA25YGWYX0SE81NRNJW6BB'],
-  notes: 'Lorem Ipsum',
+  mentortutor_email: null,
+  package_id: null,
+  duration: '',
+  pic_id: [],
+  notes: '',
 })
 
 // End Variable
@@ -77,7 +78,7 @@ const getTutor = async () => {
 
 const getPackage = async () => {
   try {
-    const res = await ApiService.get('api/v1/user/mentor-tutors')
+    const res = await ApiService.get('api/v1/package/component/list')
     if (res) {
       package_list.value = res
     }
@@ -86,9 +87,23 @@ const getPackage = async () => {
   }
 }
 
+const checkPackage = () => {
+  const package_id = form.value.package_id
+  const index = package_list.value.findIndex(item => item.id === package_id)
+  let item = package_list.value[index]
+
+  if (item.detail) {
+    duration_readonly.value = true
+    form.value.duration = item.detail
+  } else {
+    duration_readonly.value = false
+    form.value.duration = null
+  }
+}
+
 const getPIC = async () => {
   try {
-    const res = await ApiService.get('api/v1/user/mentor-tutors')
+    const res = await ApiService.get('api/v1/user/component/list')
     if (res) {
       pic_list.value = res
     }
@@ -121,15 +136,22 @@ const submit = async () => {
 
     try {
       const res = await ApiService.post('api/v1/timesheet/create', form.value)
-
       if (res) {
         showNotif('success', res.message, 'bottom-end')
         selected.value = []
         dialog.value = false
+        form.value = {
+          ref_id: [],
+          mentortutor_email: null,
+          package_id: '',
+          duration: '',
+          pic_id: [],
+          notes: '',
+        }
         getData()
       }
     } catch (error) {
-      console.error(error.response)
+      console.error(error)
     }
   }
 }
@@ -139,6 +161,8 @@ onMounted(() => {
   getData()
   getProgram()
   getTutor()
+  getPackage()
+  getPIC()
 })
 </script>
 
@@ -249,8 +273,14 @@ onMounted(() => {
                     density="compact"
                     clearable
                     label="Package"
-                    :items="['California', 'Colorado', 'Florida', 'Georgia', 'Texas', 'Wyoming']"
+                    v-model="form.package_id"
+                    :items="package_list"
+                    :item-props="
+                      item => ({ title: item.package != null ? item.type_of + ' - ' + item.package : item.type_of })
+                    "
+                    item-value="id"
                     :rules="rules.required"
+                    @update:modelValue="checkPackage"
                   ></VAutocomplete>
                 </VCol>
                 <VCol md="4">
@@ -258,7 +288,9 @@ onMounted(() => {
                     type="number"
                     density="compact"
                     clearable
-                    label="Hours"
+                    :label="+form.duration / 60 ? 'Minutes (' + form.duration / 60 + ' Hours)' : 'Minutes'"
+                    :readonly="duration_readonly"
+                    v-model="form.duration"
                     :rules="rules.required"
                   />
                 </VCol>
@@ -269,12 +301,18 @@ onMounted(() => {
                     clearable
                     chips
                     label="PIC"
-                    :items="['California', 'Colorado', 'Florida', 'Georgia', 'Texas', 'Wyoming']"
+                    v-model="form.pic_id"
+                    :items="pic_list"
+                    item-title="full_name"
+                    item-value="id"
                     :rules="rules.required"
                   ></VAutocomplete>
                 </VCol>
                 <VCol md="12">
-                  <VTextarea label="Notes"></VTextarea>
+                  <VTextarea
+                    label="Notes"
+                    v-model="form.notes"
+                  ></VTextarea>
                 </VCol>
               </VRow>
 
