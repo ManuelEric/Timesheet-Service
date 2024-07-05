@@ -225,7 +225,7 @@ const desserts = [
             </td>
             <td class="text-left">
               <VIcon
-                icon="ri-user-line"
+                icon="ri-group-line"
                 class="cursor-pointer me-3"
               />
               {{ item.client }}
@@ -242,7 +242,7 @@ const desserts = [
                 icon="ri-bookmark-line"
                 class="me-3"
               ></VIcon>
-              {{ item.package_type }}
+              {{ item.detail_package ? item.package_type + ' - ' + item.detail_package : item.package_type }}
             </td>
             <td class="text-left">
               <VAvatar
@@ -274,7 +274,7 @@ const desserts = [
               {{ item.spent / 60 }} Hours
             </td>
             <td>
-              <router-link :to="'/admin/timesheet/' + index">
+              <router-link :to="'/admin/timesheet/' + item.id">
                 <VBtn
                   color="secondary"
                   density="compact"

@@ -25,6 +25,9 @@ export default [
       },
       {
         path: '/admin/timesheet/:id',
+        props: route => ({
+          id:route.params.id,
+        }),
         component: () => import('@/pages/admin/timesheet/timesheet-detail.vue'),
       },
       {
