@@ -13,11 +13,24 @@ return new class extends Migration
     {
         Schema::create('temp_users', function (Blueprint $table) {
             $table->ulid('id')->primary();
+            $table->string('uuid')->unique();
             $table->string('full_name');
             $table->string('email');
             $table->text('password')->nullable();
-            $table->enum('role', ['mentor', 'tutor']);
+            $table->boolean('inhouse')->default(false);
             $table->datetime('last_activity')->nullable();
+            $table->timestamps();
+        });
+
+        Schema::create('temp_user_roles', function (Blueprint $table) {
+            $table->id();
+            $table->foreignUlid('temp_user_id')->constrained(
+                table: 'temp_users', indexName: 'temp_user_roles_temp_user_id'
+            )->onUpdate('cascade')->onDelete('cascade');
+            $table->string('role');
+            $table->string('tutor_subject')->nullable();
+            $table->bigInteger('fee_hours')->default(0);
+            $table->bigInteger('fee_session')->default(0);
             $table->timestamps();
         });
 
@@ -31,24 +44,27 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('packages', function (Blueprint $table) {
+        Schema::create('timesheet_packages', function (Blueprint $table) {
             $table->id();
+            $table->string('category');
             $table->string('type_of');
-            $table->string('package');
-            $table->string('detail');
+            $table->string('package')->nullable();
+            $table->integer('detail')->nullable();
             $table->timestamps();
         });
 
         Schema::create('timesheets', function (Blueprint $table) {
             $table->id();
-            $table->string('mentortutor_user_id');
-            $table->string('mentortutor_name');
-            $table->bigInteger('inhouse_user_id');
-            $table->string('inhouse_user_name');
+            $table->foreignUuid('inhouse_id')->references('uuid')->on('temp_users')->onUpdate('restrict')->onDelete('restrict');
             $table->foreignId('package_id')->constrained(
-                table: 'packages', indexName: 'timesheets_package_id'
+                table: 'timesheet_packages', indexName: 'timesheets_package_id'
             )->onUpdate('restrict')->onDelete('restrict');
+            $table->integer('duration');
             $table->text('notes')->nullable();
+            $table->foreignId('subject_id')->constrained(
+                table: 'temp_user_roles', indexName: 'timesheets_subject_id',
+            )->onUpdate('restrict')->onDelete('restrict');
+            $table->timestamps();
         });
 
         Schema::create('timesheet_pics', function (Blueprint $table) {
@@ -70,6 +86,7 @@ return new class extends Migration
             $table->foreignId('timesheet_id')->constrained(
                 table: 'timesheets', indexName: 'timesheet_handle_by_timesheet_id'
             )->onUpdate('restrict')->onDelete('restrict');
+            $table->boolean('active');
             $table->timestamps();
         });
 
@@ -88,26 +105,31 @@ return new class extends Migration
             $table->string('activity');
             $table->text('description');
             $table->datetime('start_date');
-            $table->datetime('end_date');
+            $table->datetime('end_date')->nullable();
+            $table->decimal('fee_hours');
+            $table->decimal('additional_fee');
             $table->float('time_spent')->comment('in hours');
             $table->text('meeting_link');
             $table->integer('status');
             $table->enum('cutoff_status', ['paid', 'unpaid'])->default('unpaid');
-            $table->foreignUlid('cutoff_ref_id')->constrained(
+            $table->foreignUlid('cutoff_ref_id')->nullable()->constrained(
                 table: 'timesheet_cutoff_history', indexName: 'timesheet_activities_cutoff_ref_id'
             )->onUpdate('restrict')->onDelete('restrict');
             $table->timestamps();
         });
 
-        Schema::create('ref_clientprograms', function (Blueprint $table) {
+        Schema::create('ref_programs', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('clientprog_id');
+            $table->enum('category',['b2c', 'b2b']);
+            $table->bigInteger('clientprog_id')->nullable();
+            $table->bigInteger('schprog_id')->nullable();
             $table->char('invoice_id', 50);
-            $table->string('student_name');
+            $table->string('student_name')->nullable();
             $table->string('student_school');
             $table->string('program_name');
+            $table->enum('require', ['Mentor', 'Tutor']);
             $table->foreignId('timesheet_id')->nullable()->constrained(
-                table: 'timesheets', indexName: 'ref_clientprograms_timesheet_id'
+                table: 'timesheets', indexName: 'ref_programs_timesheet_id'
             )->onUpdate('restrict')->onDelete('restrict');
             $table->timestamps();
         });
@@ -134,7 +156,7 @@ return new class extends Migration
         Schema::dropIfExists('timesheet_handle_by');
         Schema::dropIfExists('timesheet_cutoff_history');
         Schema::dropIfExists('timesheet_activities');
-        Schema::dropIfExists('ref_clientprograms');
+        Schema::dropIfExists('ref_programs');
         Schema::dropIfExists('logging');
     }
 };

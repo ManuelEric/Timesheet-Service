@@ -1,44 +1,77 @@
 <script setup>
-import { router } from '@/plugins/router'
+import { showNotif } from '@/helper/notification'
+import { rules } from '@/helper/rules'
+import ApiService from '@/services/ApiService'
 import logo from '@images/eduall/eduall.png'
 import authV1MaskDark from '@images/pages/auth-v1-mask-dark.png'
 import authV1MaskLight from '@images/pages/auth-v1-mask-light.png'
 import { useTheme } from 'vuetify'
 
-const form = ref({
-  email: '',
-  password: '',
-})
-
-const time = ref(0)
-const isDisabled = ref(false)
-
+// Theme
 const vuetifyTheme = useTheme()
 
 const authThemeMask = computed(() => {
   return vuetifyTheme.global.name.value === 'light' ? authV1MaskLight : authV1MaskDark
 })
 
-const forgotPassword = () => {
-  var currentDate = new Date()
-  var newDate = new Date(currentDate.getTime() + 20 * 1000)
+// Start Variable
+const formData = ref()
+const form = ref({
+  email: '',
+})
 
-  //   Save in localStorage
-  localStorage.setItem('new_date', Math.floor(newDate.getTime() / 1000))
+const loading = ref(false)
+const time = ref(0)
+const isDisabled = ref(false)
+// End Variable
 
-  // diff new date - current date
-  time.value = Math.floor(newDate.getTime() / 1000) - Math.floor(currentDate.getTime() / 1000)
+// Start Function
+const forgotPassword = async () => {
+  const { valid } = await formData.value.validate()
+  if (valid) {
+    loading.value = true
+    try {
+      const res = await ApiService.post('api/v1/auth/forgot-password', form.value)
 
-  isDisabled.value = true
+      if (res) {
+        var currentDate = new Date()
+        var newDate = new Date(currentDate.getTime() + 20 * 1000)
+
+        //   Save in localStorage
+        localStorage.setItem('new_date', Math.floor(newDate.getTime() / 1000))
+        localStorage.setItem('email', form.value.email)
+
+        // diff new date - current date
+        time.value = Math.floor(newDate.getTime() / 1000) - Math.floor(currentDate.getTime() / 1000)
+
+        isDisabled.value = true
+        showNotif(
+          'success',
+          'Please check your inbox and follow the instructions to reset your password.',
+          'bottom-end',
+        )
+      }
+      loading.value = false
+    } catch (error) {
+      console.log(error)
+      showNotif('error', 'You`re email is not found.', 'bottom-end')
+      loading.value = false
+    }
+  }
 }
 
 const endCountDown = () => {
   time.value = 0
   isDisabled.value = false
+  localStorage.removeItem('new_date')
 }
+// End Function
 
 onMounted(() => {
   if (localStorage.getItem('new_date')) {
+    isDisabled.value = true
+    form.value.email = localStorage.getItem('email')
+
     var newDate = localStorage.getItem('new_date')
     var newTime = newDate - Math.floor(new Date().getTime() / 1000)
     time.value = newTime
@@ -71,7 +104,12 @@ onMounted(() => {
       </VCardText>
 
       <VCardText>
-        <VForm @submit.prevent="forgotPassword">
+        <VForm
+          @submit.prevent="forgotPassword"
+          ref="formData"
+          validate-on="input"
+          fast-fail
+        >
           <VRow>
             <VCol cols="12">
               <!-- email  -->
@@ -81,13 +119,15 @@ onMounted(() => {
                 type="email"
                 class="mb-3"
                 :disabled="isDisabled"
+                :rules="rules.email"
               />
 
               <!-- login button -->
               <VBtn
                 block
                 type="submit"
-                :disabled="isDisabled"
+                :loading="loading"
+                :disabled="loading || isDisabled"
               >
                 Send
               </VBtn>
@@ -101,9 +141,24 @@ onMounted(() => {
                   v-slot="{ seconds }"
                   @end="endCountDown"
                 >
-                  Please wait to resend verification link: {{ seconds }}
+                  Please wait to resend verification link: {{ seconds }}s
                 </vue-countdown>
               </div>
+            </VCol>
+
+            <!-- login instead -->
+            <VCol
+              cols="12"
+              class="text-center text-base"
+            >
+              <VDivider class="mb-3" />
+              <span>I've Remembered,</span>
+              <RouterLink
+                class="text-primary ms-1"
+                to="login"
+              >
+                Sign in Now
+              </RouterLink>
             </VCol>
           </VRow>
         </VForm>

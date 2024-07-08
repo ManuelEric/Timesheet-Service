@@ -1,13 +1,33 @@
 <script setup>
 import UserEdit from '@/components/admin/timesheet/user-edit.vue'
 import DeleteDialog from '@/components/DeleteHandler.vue'
+import { showNotif } from '@/helper/notification'
+import ApiService from '@/services/ApiService'
+import moment from 'moment'
 
+// Start Variable
+const props = defineProps({ id: String })
+const data = ref([])
 const isDialogVisible = ref([
   {
     edit: false,
     delete: false,
   },
 ])
+// End Variable
+
+// Start Function
+const getData = async id => {
+  try {
+    const res = await ApiService.get('api/v1/timesheet/' + id + '/detail')
+
+    if (res) {
+      data.value = res
+    }
+  } catch (error) {
+    console.log(error)
+  }
+}
 
 const deleteTimesheet = item => {
   isDialogVisible.value.delete = true
@@ -20,6 +40,12 @@ const toggleDialog = type => {
     isDialogVisible.value[type] = false
   }
 }
+
+// End Function
+
+onMounted(() => {
+  getData(props.id)
+})
 </script>
 
 <template>
@@ -34,7 +60,7 @@ const toggleDialog = type => {
             size="25"
           ></VIcon>
         </router-link>
-        Timesheet - Student Name
+        Timesheet - {{ data.clientProfile?.client_name }}
       </div>
       <div>
         <VMenu
@@ -108,12 +134,12 @@ const toggleDialog = type => {
               <tr>
                 <td width="20%">Name</td>
                 <td width="1%">:</td>
-                <td>Student Name</td>
+                <td>{{ data.clientProfile?.client_name }}</td>
               </tr>
               <tr>
                 <td>School Name</td>
                 <td width="1%">:</td>
-                <td>School Name</td>
+                <td>{{ data.clientProfile?.client_school }}</td>
               </tr>
               <tr>
                 <td>Grade</td>
@@ -142,12 +168,12 @@ const toggleDialog = type => {
               <tr>
                 <td width="20%">Program</td>
                 <td width="1%">:</td>
-                <td>Program Name</td>
+                <td>{{ data.packageDetails?.program_name }}</td>
               </tr>
               <tr>
                 <td>Package</td>
                 <td width="1%">:</td>
-                <td>Package Name</td>
+                <td>{{ data.packageDetails?.package_type }}</td>
               </tr>
               <tr>
                 <td>Person in Charge</td>
@@ -157,20 +183,21 @@ const toggleDialog = type => {
                     class="ms-4"
                     type="1"
                   >
-                    <li>Intan Prasanty</li>
-                    <li>Nicholas Hendra</li>
+                    <li>{{ data.packageDetails?.pic }}</li>
                   </ol>
                 </td>
               </tr>
               <tr>
                 <td>Tutor/Mentor</td>
                 <td width="1%">:</td>
-                <td>Tutor Name</td>
+                <td>{{ data.packageDetails?.tutor_mentor }}</td>
               </tr>
               <tr>
                 <td>Update On</td>
                 <td width="1%">:</td>
-                <td>27 Feb 2024</td>
+                <td>
+                  {{ moment().format('LLL') }}
+                </td>
               </tr>
             </tbody>
           </VTable>
@@ -187,7 +214,7 @@ const toggleDialog = type => {
 
               <VCardText class="d-flex justify-between">
                 <div class="d-flex align-end w-100">
-                  <h1 class="m-0 mb-1 text-white">450</h1>
+                  <h1 class="m-0 mb-1 text-white">{{ data.packageDetails?.duration_in_hours }}</h1>
                   <h4 class="m-0 ms-2 text-white">Minutes</h4>
                 </div>
               </VCardText>
@@ -211,7 +238,7 @@ const toggleDialog = type => {
               </VCardItem>
               <VCardText class="d-flex justify-between">
                 <div class="d-flex align-end w-100">
-                  <h1 class="m-0 mb-1 text-white">240</h1>
+                  <h1 class="m-0 mb-1 text-white">{{ data.packageDetails?.time_spent_in_hours }}</h1>
                   <h4 class="m-0 ms-2 text-white">Minutes</h4>
                 </div>
               </VCardText>
@@ -237,7 +264,9 @@ const toggleDialog = type => {
               </VCardItem>
               <VCardText class="d-flex justify-between">
                 <div class="d-flex align-end w-100">
-                  <h1 class="m-0 mb-1 text-white">230</h1>
+                  <h1 class="m-0 mb-1 text-white">
+                    {{ data.packageDetails?.duration_in_hours - data.packageDetails?.time_spent_in_hours }}
+                  </h1>
                   <h4 class="m-0 ms-2 text-white">Minutes</h4>
                 </div>
               </VCardText>

@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use App\Observers\ActivityObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+#[ObservedBy([ActivityObserver::class])]
 class Activity extends Model
 {
     use HasFactory;
@@ -25,6 +28,7 @@ class Activity extends Model
         'fee_hours',
         'additional_fee',
         'time_spent',
+        'meeting_link',
         'status',
         'cutoff_status',
     ];

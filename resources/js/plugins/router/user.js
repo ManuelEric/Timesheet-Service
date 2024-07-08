@@ -3,6 +3,9 @@ export default [
   {
     path: '/',
     component: () => import('@/layouts/default.vue'),
+    meta: {
+      middleware: "auth-user",
+    },
     children: [
       {
         path: '/user/dashboard',
@@ -27,10 +30,16 @@ export default [
     component: () => import('@/layouts/blank.vue'),
     children: [
       {
-        path: '/user/login/:id?',
+        path: '/user/login',
+        name:'login-user',
+        component: () => import('@/pages/auth/login.vue'),
+      },
+      {
+        path: '/reset-password/:token?/:email?',
         component: () => import('@/pages/auth/login.vue'),
         props: route => ({
-          id:route.params.id
+          token:route.query.token,
+          email:route.query.email
         })
       },
       {

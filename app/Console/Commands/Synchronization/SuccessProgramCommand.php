@@ -3,14 +3,13 @@
 namespace App\Console\Commands\Synchronization;
 
 use App\Http\Traits\ConcatenateName;
-use App\Models\Ref_ClientProgram;
+use App\Models\Ref_Program;
 use App\Services\ResponseService;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
-use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
 class SuccessProgramCommand extends Command
 {
@@ -41,6 +40,7 @@ class SuccessProgramCommand extends Command
 
         if (! $response) {
             $this->error('There are no data.');
+            return COMMAND::FAILURE;
         }
 
         /* definition */
@@ -48,24 +48,41 @@ class SuccessProgramCommand extends Command
         $progress->start();
 
         $refs = array();
-        foreach ($response as $crm_program) 
+        foreach ($response as $crm_success_program) #both b2c & b2b 
         {
-            $clientprog_id = $crm_program['clientprog_id'];
-            $invoice_id = $crm_program['invoice_id'];
-            $student_name = $this->concat($crm_program['client']['first_name'], $crm_program['client']['last_name']);
-            $student_school = $crm_program['client']['school_name'];
-            $program_name = $crm_program['program_name'];
+            /* define for both b2c and b2b variables */
+            $category = $crm_success_program['category'];
+            $clientprog_id = $schprog_id = $student_name = NULL;
+            $invoice_id = $crm_success_program['invoice_id'];
+            $student_school = $crm_success_program['client']['school_name'];
+            $program_name = $crm_success_program['program_name'];
+            $require = $crm_success_program['require'];
+
+            if ($category == 'b2c') {
+                /* define b2c variables */
+                $clientprog_id = $crm_success_program['clientprog_id'];
+                $student_name = $this->concat($crm_success_program['client']['first_name'], $crm_success_program['client']['last_name']);
+            }
+            
+            if ($category == 'b2b') {
+                /* define b2b variables */
+                $schprog_id = $crm_success_program['schprog_id'];
+            }
+
 
             /* check existence of success program on timesheet app */
-            if ( Ref_ClientProgram::where('clientprog_id', $clientprog_id)->exists() )
-                continue; # don't put existing clientprog_id into refs[]
+            if ( Ref_Program::whereWetherB2C_B2B($category, $clientprog_id, $schprog_id)->exists() )
+                continue; # don't put existing clientprog_id / schprog_id into refs[]
 
             $refs[] = [
+                'category' => $category,
                 'clientprog_id' => $clientprog_id,
+                'schprog_id' => $schprog_id,
                 'invoice_id' => $invoice_id,
                 'student_name' => $student_name,
                 'student_school' => $student_school,
                 'program_name' => $program_name,
+                'require' => $require,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ];
@@ -76,7 +93,7 @@ class SuccessProgramCommand extends Command
         DB::beginTransaction();
         try {
 
-            Ref_ClientProgram::insert($refs);
+            Ref_Program::insert($refs);
             DB::commit();
             $progress->finish();
 

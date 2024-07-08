@@ -17,6 +17,7 @@ class Package extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'category',
         'type_of',
         'package',
         'detail',

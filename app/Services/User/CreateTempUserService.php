@@ -1,17 +1,17 @@
 <?php
 
-namespace App\Actions\User;
+namespace App\Services\User;
 
 use App\Http\Traits\ConcatenateName;
 use App\Models\TempUser;
+use App\Models\TempUserRoles;
 use App\Services\ResponseService;
 use Exception;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
-class CreateNewTempUserAction
+class CreateTempUserService
 {
     use ConcatenateName;
     protected $responseService;
@@ -24,54 +24,61 @@ class CreateNewTempUserAction
     public function execute(array $userRawInformation)
     {
         /* fetch user raw information */
+        $uuid = $userRawInformation['uuid'];
         $full_name = $userRawInformation['full_name'];
         $email = $userRawInformation['email'];
         $password = $userRawInformation['password'];
-        $roles = $userRawInformation['roles'];
-         
+
         /* check existing temp user */
         $tempUser = TempUser::where('email', $email)->first();
 
+        $roles = array();
+        foreach ($userRawInformation['roles'] as $detail)
+        {
+            /* create model temp_user_roles only if the role are inside acceptable roles */
+            if ( in_array($detail['role_name'], ['Mentor', 'Tutor']) )
+            {
+                $role = $detail['role_name'];
+                $tutor_subject = $detail['tutor_subject'];
+                $fee_hours = $detail['feehours'] ?? 0;
+                $fee_session = $detail['feesession'] ?? 0;
 
-        /* if the user has been created before, and then they change their password from crm directly, then password on timesheet db should be changed too */
+                $roleDetails[] = [
+                    'role' => $role,
+                    'tutor_subject' => $tutor_subject,
+                    'fee_hours' => $fee_hours,
+                    'fee_session' => $fee_session,
+                ];
+            }
+        }
+
+        
+
+
+
+        /* if the user has existed on timesheet db */
         if ( $tempUser ) {
+            /* update the password from CRMs */
             $tempUser->password = $password;
             $tempUser->save();           
+
+            $tempUserId = $tempUser->id;
+
+
+            /* update or create the temp_user_role */
+            $this->storeOrUpdateRoles($tempUserId, $roleDetails);
         }
         
 
         /* stored the user into timesheet db */
         if ( !$tempUser ) {
-
-            /* create temporary mentor / tutor */
-            # checking his/her roles from CRM in order to match the roles on timesheet app
-            $acceptedRole = '';
-            $acceptedRolesInTimesheet = ['Mentor', 'Tutor'];
-            foreach ($roles as $role) 
-            {
-                if ( array_search($role['role_name'], $acceptedRolesInTimesheet) !== false ) 
-                {
-                    $acceptedRole = $role['role_name'];
-                    break;
-                }
-            }
-    
-            if ( !$acceptedRole ) {
-                $this->responseService->storeErrorLog('Invalid role provided.', 'Failed to continue to process create temporary user since the provided user has no acceptable roles');
-    
-                throw new HttpResponseException(
-                    response()->json([
-                        'errors' => 'Invalid role provided.'
-                    ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY)
-                );
-            }
     
             # initiate details for new temporary user
             $userDetails = [
+                'uuid' => $uuid,
                 'full_name' => $full_name,
                 'email' => $email,
                 'password' => $password,
-                'role' => strtolower($acceptedRole),
             ];
     
             DB::beginTransaction();
@@ -79,6 +86,10 @@ class CreateNewTempUserAction
                 
                 /* create a temporary user */
                 $tempUser = TempUser::create($userDetails);
+                $tempUserId = $tempUser->id;
+                
+                /* update or create the temp_user_role */
+                $this->storeOrUpdateRoles($tempUserId, $roleDetails);
                 DB::commit();
             
             } catch (Exception $err) {
@@ -98,6 +109,23 @@ class CreateNewTempUserAction
                 );
     
             }
+
+            return $tempUser;
+        }
+    }
+
+    public function storeOrUpdateRoles(string $tempUserId, array $roleDetails)
+    {
+        foreach ($roleDetails as $detail) {
+            $role = $detail['role'];
+            $tutor_subject = $detail['tutor_subject'];
+            $fee_hours = $detail['feehours'] ?? 0;
+            $fee_session = $detail['feesession'] ?? 0;
+
+            TempUserRoles::updateOrCreate(
+                ['temp_user_id' => $tempUserId, 'role' => $role, 'tutor_subject' => $tutor_subject],
+                ['fee_hours' => $fee_hours, 'fee_session' => $fee_session]
+            );
         }
     }
 }
