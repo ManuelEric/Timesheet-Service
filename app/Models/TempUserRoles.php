@@ -17,6 +17,7 @@ class TempUserRoles extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'temp_user_id',
         'role',
         'tutor_subject',
         'fee_hours',
@@ -31,5 +32,10 @@ class TempUserRoles extends Model
     public function temp_user()
     {
         return $this->belongsTo(TempUser::class, 'temp_user_id', 'id');
+    }
+
+    public function timesheet()
+    {
+        return $this->hasMany(Timesheet::class, 'subject_id', 'id');
     }
 }

@@ -25,6 +25,7 @@ class Timesheet extends Model
         'package_id',
         'duration',
         'notes',
+        'subject_id',
     ];
     
     /**
@@ -56,6 +57,11 @@ class Timesheet extends Model
     public function activities()
     {
         return $this->hasMany(Activity::class, 'timesheet_id', 'id');
+    }
+
+    public function subject()
+    {
+        return $this->belongsTo(TempUserRoles::class, 'subject_id', 'id');
     }
 
     /**

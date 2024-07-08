@@ -5,7 +5,7 @@ namespace App\Actions\Timesheet;
 use App\Actions\Authentication\CheckEmailMentorTutorAction;
 use App\Models\TempUser;
 use App\Services\ResponseService;
-use App\Actions\User\CreateTempUserAction;
+use App\Services\User\CreateTempUserService;
 use Exception;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -15,17 +15,17 @@ use Illuminate\Support\Facades\DB;
 class SelectOrRegisterMentorTutorAction
 {
     protected $checkEmailMentorTutorAction;
-    protected $createTempUserAction;
+    protected $createTempUserService;
     protected $responseService;
 
     public function __construct(
         CheckEmailMentorTutorAction $checkEmailMentorTutorAction,
-        CreateTempUserAction $createTempUserAction,
+        CreateTempUserService $createTempUserService,
         ResponseService $responseService,
         )
     {
         $this->checkEmailMentorTutorAction = $checkEmailMentorTutorAction;
-        $this->createTempUserAction = $createTempUserAction;
+        $this->createTempUserService = $createTempUserService;
         $this->responseService = $responseService;
     }
 
@@ -45,7 +45,7 @@ class SelectOrRegisterMentorTutorAction
             try {
                 
                 [$emailCheckingResult, $userRawInformation] = $this->checkEmailMentorTutorAction->execute($mentortutor_email);
-                $createdTempUser = $this->createTempUserAction->execute($userRawInformation);
+                $createdTempUser = $this->createTempUserService->execute($userRawInformation);
                 $selectedMentorOrTutorId = $createdTempUser->id;
 
                 DB::commit();

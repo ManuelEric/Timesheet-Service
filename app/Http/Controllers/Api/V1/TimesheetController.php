@@ -135,24 +135,28 @@ class TimesheetController extends Controller
         $validated = $request->safe()->only([
             'ref_id',
             'mentortutor_email',
+            'inhouse_id',
             'package_id',
             'duration',
             'pic_id',
             'notes',
+            'subject_id',
         ]); 
 
         /* defines the validated variables */
         $validatedRefPrograms = $validated['ref_id'];
         $validatedEmail = $validated['mentortutor_email'];
+        $validatedInhouse = $validated['inhouse_id'];
         $validatedPics = $validated['pic_id'];
         $validatedPackageId = $validated['package_id'];
         $validatedDuration = $validated['duration'];
         $validatedNotes = $validated['notes'];
+        $validatedSubject = $validated['subject_id'];
 
         $newPackageDetails = compact('validatedPackageId', 'validatedDuration');
 
         $mentorTutorId = $selectOrRegisterMentorTutorTimesheetAction->handle($validatedEmail);
-        $createTimesheetAction->execute($validatedRefPrograms, $newPackageDetails, $validatedNotes, $validatedPics, $mentorTutorId);
+        $createTimesheetAction->execute($validatedRefPrograms, $newPackageDetails, $validatedNotes, $validatedInhouse, $validatedPics, $mentorTutorId, $validatedSubject);
     
         return response()->json([
             'message' => "Timesheet has been created successfully."
