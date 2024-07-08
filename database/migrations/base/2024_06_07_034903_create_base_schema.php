@@ -124,6 +124,7 @@ return new class extends Migration
             $table->bigInteger('clientprog_id')->nullable();
             $table->bigInteger('schprog_id')->nullable();
             $table->char('invoice_id', 50);
+            $table->string('student_uuid');
             $table->string('student_name')->nullable();
             $table->string('student_school');
             $table->string('program_name');

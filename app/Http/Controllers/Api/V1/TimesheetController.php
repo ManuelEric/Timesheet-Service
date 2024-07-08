@@ -10,6 +10,7 @@ use App\Actions\Timesheet\SelectOrRegisterMentorTutorAction as SelectOrRegisterM
 use App\Models\Timesheet;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class TimesheetController extends Controller
 {
@@ -87,12 +88,18 @@ class TimesheetController extends Controller
         /* fetch the client profile information */
         $category = $refProgram->category;
         $isB2c = $category == "b2c" ? true : false;
+        $clientUUID = $refProgram->student_uuid;
         $clientName = $isB2c ? $refProgram->student_name : NULL; 
         $clientSchool = $refProgram->student_school;
+        $request_crm_clientInfo = Http::get( env('CRM_DOMAIN') . 'client/information/' . $clientUUID );
+        $crm_clientInfo = $request_crm_clientInfo->json();
         $clientProfile = [
             'client_name' => $clientName,
+            'client_mail' => $crm_clientInfo['mail'],
             'client_school' => $clientSchool,
+            'client_grade' => $crm_clientInfo['st_grade'],
         ];
+
 
         /* fetch the package details */
         $programName = $refProgram->program_name;
@@ -102,6 +109,7 @@ class TimesheetController extends Controller
         $duration = $timesheet->duration;
         $timeSpent = $timesheet->activities()->sum('time_spent');
         $notes = $timesheet->notes;
+
 
         /* fetch the person in charge */
         $admin = $timesheet->admin;
