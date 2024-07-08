@@ -20,7 +20,7 @@ class CreateTimesheetAction
         $this->responseService = $responseService;
     }
 
-    public function execute(array $ref_programId, array $storePackageDetails, ?string $notes, array $picIds, string $mentortutorId)
+    public function execute(array $ref_programId, array $storePackageDetails, ?string $notes, string $inhouseId, array $picIds, string $mentortutorId, int $subjectId)
     {
         /* define submitted package variables */
         $packageId = $storePackageDetails['validatedPackageId'];
@@ -31,9 +31,11 @@ class CreateTimesheetAction
 
         /* merge variables into array that going to be stored into timesheet */
         $timesheetDetails = [
+            'inhouse_id' => $inhouseId,
             'package_id' => $packageId,
             'duration' => $duration,
             'notes' => $notes,
+            'subject_id' => $subjectId,
         ];
         
         DB::beginTransaction();

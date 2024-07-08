@@ -18,10 +18,10 @@ class CreateActivityAction
         $this->responseService = $responseService;
     }
 
-    public function execute(int $timesheetId, array $validated, array $userInformation, string $role)
+    public function execute(object $timesheet, array $validated)
     {
-        $detailsFee = $userInformation['roles']->where('role_name', $role)->first();
-        $fee_perHours = $detailsFee['pivot']['feehours'];
+        $timesheetId = $timesheet->id;
+        $fee_perHours = $timesheet->subject->fee_hours;
 
         DB::beginTransaction();
         try {

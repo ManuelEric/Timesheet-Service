@@ -96,11 +96,10 @@ class ActivityController extends Controller
         /* get the newest information about the latest tutor/mentor fee hours who signed to handle the timesheet */
         $handleBy = $timesheet->handle_by->last();
         $itsEmail = $handleBy->email;
-        $itsRole = $handleBy->role;
 
         [$checkingResult, $userInformation] = $checkEmailMentorTutorAction->execute($itsEmail);
         
-        $createActivityAction->execute($timesheetId, $validated, $userInformation, $itsRole);
+        $createActivityAction->execute($timesheet, $validated);
 
         return response()->json([
             'message' => 'Activity has created successfully.'

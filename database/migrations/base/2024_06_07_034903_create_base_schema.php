@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('temp_users', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->string('uuid');
+            $table->string('uuid')->unique();
             $table->string('full_name');
             $table->string('email');
             $table->text('password')->nullable();
@@ -55,13 +55,15 @@ return new class extends Migration
 
         Schema::create('timesheets', function (Blueprint $table) {
             $table->id();
-            $table->string('inhouse_id')->nullable();
-            $table->string('inhouse_name')->nullable();
+            $table->foreignUuid('inhouse_id')->references('uuid')->on('temp_users')->onUpdate('restrict')->onDelete('restrict');
             $table->foreignId('package_id')->constrained(
                 table: 'timesheet_packages', indexName: 'timesheets_package_id'
             )->onUpdate('restrict')->onDelete('restrict');
             $table->integer('duration');
             $table->text('notes')->nullable();
+            $table->foreignId('subject_id')->constrained(
+                table: 'temp_user_roles', indexName: 'timesheets_subject_id',
+            )->onUpdate('restrict')->onDelete('restrict');
             $table->timestamps();
         });
 

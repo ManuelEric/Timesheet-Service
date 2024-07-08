@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions\User;
+namespace App\Services\User;
 
 use App\Http\Traits\ConcatenateName;
 use App\Models\TempUser;
@@ -11,7 +11,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
-class CreateTempUserAction
+class CreateTempUserService
 {
     use ConcatenateName;
     protected $responseService;
@@ -43,12 +43,12 @@ class CreateTempUserAction
                 $fee_hours = $detail['feehours'] ?? 0;
                 $fee_session = $detail['feesession'] ?? 0;
 
-                $roles[] = new TempUserRoles([
-                        'role' => $role,
-                        'tutor_subject' => $tutor_subject,
-                        'fee_hours' => $fee_hours,
-                        'fee_session' => $fee_session,
-                    ]);
+                $roleDetails[] = [
+                    'role' => $role,
+                    'tutor_subject' => $tutor_subject,
+                    'fee_hours' => $fee_hours,
+                    'fee_session' => $fee_session,
+                ];
             }
         }
 
@@ -62,10 +62,11 @@ class CreateTempUserAction
             $tempUser->password = $password;
             $tempUser->save();           
 
+            $tempUserId = $tempUser->id;
 
-            $tempUser->roles()->delete();
-            /* save temp_user roles */
-            $tempUser->roles()->saveMany($roles);
+
+            /* update or create the temp_user_role */
+            $this->storeOrUpdateRoles($tempUserId, $roleDetails);
         }
         
 
@@ -85,10 +86,10 @@ class CreateTempUserAction
                 
                 /* create a temporary user */
                 $tempUser = TempUser::create($userDetails);
+                $tempUserId = $tempUser->id;
                 
-                $tempUser->roles()->delete();
-                /* save temp_user roles */
-                $tempUser->roles()->saveMany($roles);
+                /* update or create the temp_user_role */
+                $this->storeOrUpdateRoles($tempUserId, $roleDetails);
                 DB::commit();
             
             } catch (Exception $err) {
@@ -110,6 +111,21 @@ class CreateTempUserAction
             }
 
             return $tempUser;
+        }
+    }
+
+    public function storeOrUpdateRoles(string $tempUserId, array $roleDetails)
+    {
+        foreach ($roleDetails as $detail) {
+            $role = $detail['role'];
+            $tutor_subject = $detail['tutor_subject'];
+            $fee_hours = $detail['feehours'] ?? 0;
+            $fee_session = $detail['feesession'] ?? 0;
+
+            TempUserRoles::updateOrCreate(
+                ['temp_user_id' => $tempUserId, 'role' => $role, 'tutor_subject' => $tutor_subject],
+                ['fee_hours' => $fee_hours, 'fee_session' => $fee_session]
+            );
         }
     }
 }
