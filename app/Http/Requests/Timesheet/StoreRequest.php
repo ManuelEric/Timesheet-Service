@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Timesheet;
 
 use App\Models\TempUser;
+use App\Rules\MatchingProgramName;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -37,8 +38,12 @@ class StoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'ref_id' => 'required',
-            'ref_id.*' => 'required|exists:ref_programs,id',
+            'ref_id' => 'required|array',
+            'ref_id.*' => [
+                'required', 
+                'exists:ref_programs,id',
+                new MatchingProgramName
+            ],
             'mentortutor_email' => 'required|email',
             'inhouse_id' => [
                 'required',
