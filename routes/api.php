@@ -56,7 +56,7 @@ Route::prefix('user')->group(function () {
     Route::middleware(['auth:sanctum', 'abilities:mentortutors-menu,program-menu'])->group(function () {
         /* List Mentor & Tutors */
         Route::GET('mentor-tutors', [V1MentorTutorController::class, 'index']);
-        Route::PUT('mentor-tutors/{mentortutor_id}', [V1MentorTutorController::class, 'update']);
+        Route::PUT('mentor-tutors/{mentortutor_uuid}', [V1MentorTutorController::class, 'update']);
         /* List subject by Mentor / Tutor */
         Route::GET('mentor-tutors/{mentortutor_uuid}/subjects', [V1MentorTutorController::class, 'component']);
 
