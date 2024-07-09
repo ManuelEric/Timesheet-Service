@@ -4,6 +4,8 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Observers\UserObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -12,6 +14,7 @@ use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Str;
 
+#[ObservedBy([UserObserver::class])]
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
@@ -28,6 +31,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'last_activity',
     ];
 
     /**
@@ -37,6 +41,16 @@ class User extends Authenticatable
      */
     protected $hidden = [
         'password',
+    ];
+
+    /**
+     * The attributes that should be observes.
+     *
+     * @var array<int, string>
+     */
+    protected $observables = [
+        'authenticated',
+        'logged_out',
     ];
 
     public static function boot()
@@ -49,15 +63,19 @@ class User extends Authenticatable
     }
 
     /**
-     * The mutators.
-     *
-     * @var array<int, string>
+     * Authenticate & fire custom event
      */
-    protected function password(): Attribute
+    public function authenticate()
     {
-        return Attribute::make(
-            set: fn($value) => Hash::make($value)
-        );
+        $this->fireModelEvent('authenticated', false);
+    }
+
+    /**
+     * Logged out & fire custom event
+     */
+    public function logging_out()
+    {
+        $this->fireModelEvent('logged_out', false);
     }
 
     /**

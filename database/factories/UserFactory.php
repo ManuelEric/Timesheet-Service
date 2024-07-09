@@ -15,7 +15,7 @@ class UserFactory extends Factory
      */
     protected static ?string $password;
     
-    protected static array $roles = ['super_admin', 'admin', 'finance', 'mentor_tutor'];
+    protected static array $roles = ['super_admin', 'admin', 'finance'];
 
     /**
      * Define the model's default state.

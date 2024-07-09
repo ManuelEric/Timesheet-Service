@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Ref_ClientProgram extends Model
+class TempUserRoles extends Model
 {
     use HasFactory;
 
-    protected $table = 'ref_clientprograms';
+    protected $table = 'temp_user_roles';
 
     /**
      * The attributes that are mass assignable.
@@ -17,21 +17,25 @@ class Ref_ClientProgram extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'clientprog_id',
-        'invoice_id',
-        'student_name',
-        'student_school',
-        'program_name',
-        'timesheet_id',
+        'temp_user_id',
+        'role',
+        'tutor_subject',
+        'fee_hours',
+        'fee_session',
     ];
 
     /**
      * The relations.
      *
      * @var array<int, string>
-     */
+     */ 
+    public function temp_user()
+    {
+        return $this->belongsTo(TempUser::class, 'temp_user_id', 'id');
+    }
+
     public function timesheet()
     {
-        return $this->belongsTo(Timesheet::class, 'timesheet_id', 'id');
+        return $this->hasMany(Timesheet::class, 'subject_id', 'id');
     }
 }

@@ -2,32 +2,27 @@
 
 namespace App\Http\Controllers\Api\V1\Authentication;
 
-use App\Actions\Authentication\CheckEmailAdminAction as AuthenticationCheckEmailAdminAction;
-use App\Actions\Authentication\CheckEmailMentorTutorAction as AuthenticationCheckEmailMentorTutorAction;
-use App\Actions\Logging\StoreLogAction as TimesheetLog;
+use App\Actions\Authentication\CheckEmailMentorTutorAction;
+use App\Services\User\CreateTempUserService;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\CheckEmailRequest;
+use App\Http\Requests\Authentication\CheckEmailRequest;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Validator;
 
 class CheckEmailController extends Controller
 {
     public function execute(
         CheckEmailRequest $request,
-        AuthenticationCheckEmailMentorTutorAction $checkEmailMentorTutorAction,
-        TimesheetLog $timesheetLog
+        CheckEmailMentorTutorAction $checkEmailMentorTutorAction,
+        CreateTempUserService $createTempUserService
         ): JsonResponse
     {
         $validated = $request->safe()->only(['email']);
         $validatedEmail = $validated['email'];
-        
-        $result = $checkEmailMentorTutorAction->execute($validatedEmail);
 
-        /* store log */
-        $timesheetLog->storeCheckEmailLog($validatedEmail, $result['uuid'], $result['full_name']);
+        [$emailCheckingResult, $userRawInformation] = $checkEmailMentorTutorAction->execute($validatedEmail);
 
-        return response()->json($result);
+        $createTempUserService->execute($userRawInformation);
+
+        return response()->json($emailCheckingResult);
     }
 }

@@ -13,6 +13,15 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         // $schedule->command('inspire')->hourly();
+        
+        /* prune your application's expired tokens */
+        $schedule->command('sanctum:prune-expired --hours=24')->daily();
+
+        /* delete all the reset password token */
+        $schedule->command('auth:clear-resets')->everyFifteenMinutes();
+
+        /* synchronize success program from CRMs */
+        $schedule->command('sync:success-program')->everyMinute()->withoutOverlapping();
     }
 
     /**

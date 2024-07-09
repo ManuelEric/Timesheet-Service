@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Activity;
 
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -8,7 +8,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 
-class CheckEmailRequest extends FormRequest
+class StoreRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.
@@ -35,8 +35,10 @@ class CheckEmailRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => 'required|email',
-            'role' => 'in:mentor_tutor,admin' # role to decide whether its going to check email admin or check email mentor / tutor
+            'activity' => 'required',
+            'description' => 'nullable',
+            'start_date' => 'required|date|date_format:Y-m-d H:i:s',
+            'meeting_link' => 'nullable|active_url',
         ];
     }
 }

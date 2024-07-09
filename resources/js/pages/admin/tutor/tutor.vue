@@ -1,49 +1,50 @@
 <script setup>
+import ApiService from '@/services/ApiService'
 import avatar1 from '@images/avatars/avatar-1.png'
 import avatar2 from '@images/avatars/avatar-2.png'
 import avatar3 from '@images/avatars/avatar-3.png'
 import avatar4 from '@images/avatars/avatar-4.png'
 import avatar5 from '@images/avatars/avatar-5.png'
 
+// Start Variable
 const avatars = [avatar1, avatar2, avatar3, avatar4, avatar5]
 const currentPage = ref(1)
-const desserts = [
-  {
-    dessert: 'Frozen Yogurt',
-    calories: 159,
-    fat: 6,
-    carbs: 24,
-    protein: 4,
-  },
-  {
-    dessert: 'Ice cream sandwich',
-    calories: 237,
-    fat: 6,
-    carbs: 24,
-    protein: 4,
-  },
-  {
-    dessert: 'Eclair',
-    calories: 262,
-    fat: 6,
-    carbs: 24,
-    protein: 4,
-  },
-  {
-    dessert: 'Cupcake',
-    calories: 305,
-    fat: 6,
-    carbs: 24,
-    protein: 4,
-  },
-  {
-    dessert: 'Gingerbread',
-    calories: 356,
-    fat: 6,
-    carbs: 24,
-    protein: 4,
-  },
-]
+const totalPage = ref()
+const keyword = ref()
+const data = ref([])
+const loading = ref(false)
+// End Variable
+
+// Start Function
+const getData = async () => {
+  const page = '?page=' + currentPage.value
+  const search = keyword.value ? '&keyword=' + keyword.value : ''
+  const paginate = '&paginate=true'
+  try {
+    loading.value = true
+    const res = await ApiService.get('api/v1/user/mentor-tutors' + page + search + paginate)
+    console.log(res)
+    if (res) {
+      currentPage.value = res.current_page
+      totalPage.value = res.last_page
+      data.value = res
+    }
+    loading.value = false
+  } catch (error) {
+    console.error(error)
+    loading.value = false
+  }
+}
+
+const searchData = async () => {
+  currentPage.value = 1
+  await getData()
+}
+// End Function
+
+onMounted(() => {
+  getData()
+})
 </script>
 
 <template>
@@ -56,20 +57,29 @@ const desserts = [
 
         <div class="w-25">
           <VTextField
+            v-model="keyword"
             :loading="loading"
-            append-inner-icon="mdi-magnify"
+            :disabled="loading"
+            append-inner-icon="ri-search-line"
             density="compact"
             label="Search"
             variant="solo"
             hide-details
             single-line
-            @click:append-inner="onClick"
+            @change="searchData"
           ></VTextField>
         </div>
       </div>
     </VCardTitle>
     <VCardText>
-      <VTable>
+      <!-- Loader  -->
+      <vSkeletonLoader
+        class="mx-auto border"
+        type="table-thead, table-row@10"
+        v-if="loading"
+      ></vSkeletonLoader>
+
+      <VTable v-else>
         <thead>
           <tr>
             <th
@@ -80,42 +90,61 @@ const desserts = [
             </th>
             <th class="text-uppercase text-center">Mentor/Tutor Name</th>
             <th class="text-uppercase text-center">Email</th>
+            <th class="text-uppercase text-center">Role</th>
             <th class="text-uppercase text-center">Phone Number</th>
             <th class="text-uppercase text-center">Detail</th>
           </tr>
         </thead>
-
         <tbody>
           <tr
-            v-for="(item, index) in desserts"
+            v-for="(item, index) in data.data"
             :key="index"
           >
             <td>
-              {{ index + 1 }}
+              {{ parseInt(index) + 1 }}
             </td>
-            <td>
+            <td nowrap>
               <VAvatar
                 size="25"
                 class="avatar-center me-3"
                 :image="avatars[index % 5]"
               />
-              {{ item.dessert }}
+              {{ item.first_name + ' ' + item.last_name }}
             </td>
-            <td class="text-center">
+            <td
+              class="text-start"
+              nowrap
+            >
               <VIcon
                 icon="ri-mail-line"
                 class="me-3"
               ></VIcon>
-              {{ item.calories }}
+              {{ item.email }}
             </td>
-            <td class="text-center">
+            <td
+              class="text-start"
+              nowrap
+            >
+              <VIcon
+                icon="ri-user-line"
+                class="me-3"
+              ></VIcon>
+              {{ item.role }}
+            </td>
+            <td
+              class="text-start"
+              nowrap
+            >
               <VIcon
                 icon="ri-smartphone-line"
                 class="me-3"
               ></VIcon>
-              {{ item.fat }}
+              {{ item.phone }}
             </td>
-            <td class="text-center">
+            <td
+              class="text-center"
+              nowrap
+            >
               <VDialog max-width="500">
                 <template v-slot:activator="{ props: activatorProps }">
                   <VIcon
@@ -139,7 +168,10 @@ const desserts = [
                         ></VBtn>
                       </div>
                       <!-- Start Tutor  -->
-                      <VTable density="compact">
+                      <VTable
+                        density="compact"
+                        v-if="item.tutor_subject"
+                      >
                         <thead>
                           <tr>
                             <th class="text-left">Subject</th>
@@ -148,11 +180,17 @@ const desserts = [
                         </thead>
                         <tbody>
                           <tr>
-                            <td>Biology</td>
-                            <td class="text-end">Rp. 130.000</td>
+                            <td>{{ item.tutor_subject }}</td>
+                            <td class="text-end">Rp. {{ item.feehours }}</td>
                           </tr>
                         </tbody>
                       </VTable>
+                      <VCardText
+                        v-else
+                        class="text-center"
+                      >
+                        There is no tutoring subject
+                      </VCardText>
                       <!-- End Tutor  -->
                     </VCardText>
                   </VCard>
@@ -161,12 +199,27 @@ const desserts = [
             </td>
           </tr>
         </tbody>
+        <!-- If Nothing Data  -->
+        <tfoot v-if="data?.data?.length == 0">
+          <tr>
+            <td
+              colspan="6"
+              class="text-center"
+            >
+              Sorry, no data found.
+            </td>
+          </tr>
+        </tfoot>
       </VTable>
       <div class="d-flex justify-center mt-5">
         <VPagination
           v-model="currentPage"
-          :length="5"
+          :length="totalPage"
+          :total-visible="4"
           color="primary"
+          density="compact"
+          :show-first-last-page="false"
+          @update:modelValue="getData"
         />
       </div>
     </VCardText>
