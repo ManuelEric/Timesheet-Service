@@ -163,8 +163,15 @@ class TimesheetController extends Controller
         ]);
     }
 
-    public function update()
+    public function update(
+        $timesheetId,
+        Request $request,
+        IdentifyTimesheetIdAction $identifyTimesheetIdAction
+        )
     {
+        $timesheet = $identifyTimesheetIdAction->execute($timesheetId);
+
+        
         //! ketika save update-an terbaru
         //! system perlu nge trigger
         //! $timesheet->handle_by->stored() 

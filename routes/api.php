@@ -94,6 +94,8 @@ Route::prefix('timesheet')->group(function () {
         Route::POST('create', [V1TimesheetController::class, 'store']);
         /* Detail Timesheet */
         Route::GET('{timesheet}/detail', [V1TimesheetController::class, 'show']);
+        /* Update Timesheet */
+        Route::PUT('{timesheet}/update', [V1TimesheetController::class, 'update']);
         
         /* List Activities of the Timesheet */
         Route::GET('{timesheet}/activities', [V1ActivitiesController::class, 'index']);
