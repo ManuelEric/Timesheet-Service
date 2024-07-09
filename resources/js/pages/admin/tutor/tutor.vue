@@ -129,7 +129,14 @@ onMounted(() => {
                 icon="ri-user-line"
                 class="me-3"
               ></VIcon>
-              {{ item.role }}
+              <span
+                v-for="(role, index) in item.roles"
+                :key="index"
+              >
+                {{ role.role }}
+                <!-- Menambahkan koma jika bukan item terakhir -->
+                <span v-if="index < item.roles.length - 1">, </span>
+              </span>
             </td>
             <td
               class="text-start"
@@ -145,7 +152,7 @@ onMounted(() => {
               class="text-center"
               nowrap
             >
-              <VDialog max-width="500">
+              <VDialog max-width="600">
                 <template v-slot:activator="{ props: activatorProps }">
                   <VIcon
                     icon="ri-folder-info-line"
@@ -170,19 +177,30 @@ onMounted(() => {
                       <!-- Start Tutor  -->
                       <VTable
                         density="compact"
-                        v-if="item.tutor_subject"
+                        v-if="item.roles.findIndex(role => role.role === 'Tutor') >= 0"
                       >
                         <thead>
                           <tr>
-                            <th class="text-left">Subject</th>
+                            <th class="text-left">Subject Tutoring</th>
                             <th class="text-end">Fee/Hours</th>
                           </tr>
                         </thead>
                         <tbody>
-                          <tr>
-                            <td>{{ item.tutor_subject }}</td>
-                            <td class="text-end">Rp. {{ item.feehours }}</td>
-                          </tr>
+                          <template
+                            v-for="(sub_item, index) in item.roles"
+                            :key="index"
+                          >
+                            <tr
+                              v-if="sub_item.role == 'Tutor'"
+                              v-for="(subject, index) in sub_item.subjects"
+                              :key="index"
+                            >
+                              <td>{{ subject.name }}</td>
+                              <td class="text-end">
+                                {{ subject.fee_hours.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) }}
+                              </td>
+                            </tr>
+                          </template>
                         </tbody>
                       </VTable>
                       <VCardText

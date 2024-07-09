@@ -58,13 +58,13 @@ class MentorTutorsController extends Controller
 
     public function update(
         TempUserUpdateRequest $request, 
-        $tempUserId,
+        $tempUserUuid,
         ResponseService $responseService): JsonResponse
     {
         /* only receive updates inhouse column */
         $validatedInhouse = $request->safe()->only(['inhouse']);
 
-        if ( !$tempUser = TempUser::find($tempUserId) )
+        if ( !$tempUser = TempUser::where('uuid', $tempUserUuid)->first() )
         {
             throw new HttpResponseException(
                 response()->json([

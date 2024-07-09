@@ -19,6 +19,7 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Security: typeof import('./resources/js/components/admin/setting/security.vue')['default']
+    Test: typeof import('./resources/js/components/admin/timesheet/test.vue')['default']
     ThemeSwitcher: typeof import('./resources/js/@core/components/ThemeSwitcher.vue')['default']
     TimesheetDetail: typeof import('./resources/js/components/admin/timesheet/timesheet-detail.vue')['default']
     UpgradeToPro: typeof import('./resources/js/components/UpgradeToPro.vue')['default']
