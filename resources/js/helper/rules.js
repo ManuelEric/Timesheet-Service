@@ -32,4 +32,15 @@ export const rules = {
       return true;
     },
   ],
+  url: [
+    value => {
+      if (!value || value.length === 0) return 'URL is required';
+      return true;
+    },
+    value => {
+      // Regular expression for a valid URL
+      if (!/^https?:\/\/[\w\-]+(\.[\w\-]+)+[/#?]?.*$/.test(value)) return 'URL must be valid';
+      return true;
+    },
+  ],
 }

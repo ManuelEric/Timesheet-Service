@@ -51,7 +51,7 @@ class Timesheet extends Model
 
     public function ref_program()
     {
-        return $this->hasOne(Ref_Program::class, 'timesheet_id', 'id');
+        return $this->hasMany(Ref_Program::class, 'timesheet_id', 'id');
     }
 
     public function activities()

@@ -10,6 +10,7 @@ use App\Actions\Timesheet\SelectOrRegisterMentorTutorAction as SelectOrRegisterM
 use App\Models\Timesheet;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class TimesheetController extends Controller
 {
@@ -43,15 +44,34 @@ class TimesheetController extends Controller
 
         $mappedTimesheets = $timesheets->map(function ($data) {
 
-            $category = $data->ref_program->category;
+            # because timesheets consists of multiple ref programs
+            # we need to extract 
+            $clients = array();
+            $ref_program = $data->ref_program;
+            if ( count($ref_program) > 1 )
+            {
+                foreach ( $ref_program as $ref )
+                {
+                    $category = $ref->category;
+                    $studentName = $ref->student_name;
+                    $studentSchool = $ref->student_school;
+                    $client = $category == "b2c" ? $studentName : $studentSchool;
+
+                    array_push($clients, $client);
+                }
+            } else {
+                $category = $ref_program->first()->category;
+                $studentName = $ref_program->first()->student_name;
+                $studentSchool = $ref_program->first()->student_school;
+                $clients = $category == "b2c" ? $studentName : $studentSchool;
+            }
+
             $timesheetId = $data->id;
             $packageType = $data->package->type_of;
             $detailPackage = $data->package->package;
             $duration = $data->duration;
             $notes = $data->notes;
-            $studentName = $data->ref_program->student_name;
-            $studentSchool = $data->ref_program->student_school;
-            $programName = $data->ref_program->program_name;
+            $programName = $data->ref_program->first()->program_name;
             $tutorMentorName = $data->handle_by->first()->full_name;
             $adminName = $data->admin->first()->full_name;
             $total_timespent = $data->activities()->sum('time_spent');
@@ -65,8 +85,9 @@ class TimesheetController extends Controller
                 'program_name' => $programName,
                 'tutor_mentor' => $tutorMentorName,
                 'admin' => $adminName,
-                'client' => $category == "b2c" ? $studentName : $studentSchool,
-                'spent' => $total_timespent
+                'spent' => $total_timespent,
+                'group' => count($ref_program) > 1 ? true : false,
+                'clients' => $clients
             ];
         });
 
@@ -87,12 +108,18 @@ class TimesheetController extends Controller
         /* fetch the client profile information */
         $category = $refProgram->category;
         $isB2c = $category == "b2c" ? true : false;
+        $clientUUID = $refProgram->student_uuid;
         $clientName = $isB2c ? $refProgram->student_name : NULL; 
         $clientSchool = $refProgram->student_school;
+        $request_crm_clientInfo = Http::get( env('CRM_DOMAIN') . 'client/information/' . $clientUUID );
+        $crm_clientInfo = $request_crm_clientInfo->json();
         $clientProfile = [
             'client_name' => $clientName,
+            'client_mail' => $crm_clientInfo['mail'],
             'client_school' => $clientSchool,
+            'client_grade' => $crm_clientInfo['st_grade'],
         ];
+
 
         /* fetch the package details */
         $programName = $refProgram->program_name;
@@ -102,6 +129,7 @@ class TimesheetController extends Controller
         $duration = $timesheet->duration;
         $timeSpent = $timesheet->activities()->sum('time_spent');
         $notes = $timesheet->notes;
+
 
         /* fetch the person in charge */
         $admin = $timesheet->admin;

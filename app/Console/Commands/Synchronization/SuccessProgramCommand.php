@@ -52,7 +52,7 @@ class SuccessProgramCommand extends Command
         {
             /* define for both b2c and b2b variables */
             $category = $crm_success_program['category'];
-            $clientprog_id = $schprog_id = $student_name = NULL;
+            $clientprog_id = $schprog_id = $student_uuid = $student_name = NULL;
             $invoice_id = $crm_success_program['invoice_id'];
             $student_school = $crm_success_program['client']['school_name'];
             $program_name = $crm_success_program['program_name'];
@@ -61,6 +61,7 @@ class SuccessProgramCommand extends Command
             if ($category == 'b2c') {
                 /* define b2c variables */
                 $clientprog_id = $crm_success_program['clientprog_id'];
+                $student_uuid = $crm_success_program['client']['uuid'];
                 $student_name = $this->concat($crm_success_program['client']['first_name'], $crm_success_program['client']['last_name']);
             }
             
@@ -79,6 +80,7 @@ class SuccessProgramCommand extends Command
                 'clientprog_id' => $clientprog_id,
                 'schprog_id' => $schprog_id,
                 'invoice_id' => $invoice_id,
+                'student_uuid' => $student_uuid,
                 'student_name' => $student_name,
                 'student_school' => $student_school,
                 'program_name' => $program_name,

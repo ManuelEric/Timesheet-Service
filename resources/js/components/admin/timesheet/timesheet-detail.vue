@@ -1,15 +1,15 @@
 <script setup>
+import ApiService from '@/services/ApiService'
+
 import AddActivity from '@/components/admin/timesheet/activity-add.vue'
 import EditActivity from '@/components/admin/timesheet/activity-edit.vue'
 import DeleteDialog from '@/components/DeleteHandler.vue'
-import avatar1 from '@images/avatars/avatar-1.png'
-import avatar2 from '@images/avatars/avatar-2.png'
-import avatar3 from '@images/avatars/avatar-3.png'
-import avatar4 from '@images/avatars/avatar-4.png'
-import avatar5 from '@images/avatars/avatar-5.png'
 
-const avatars = [avatar1, avatar2, avatar3, avatar4, avatar5]
-const currentPage = ref(1)
+// Start Variable
+const props = defineProps({ id: String })
+const data = ref([])
+const loading = ref(false)
+
 const isDialogVisible = ref([
   {
     add: false,
@@ -19,6 +19,24 @@ const isDialogVisible = ref([
 ])
 
 const selectedItem = ref([])
+// End Variable
+
+// Start Function
+const getData = async () => {
+  loading.value = false
+  try {
+    const res = await ApiService.get('api/v1/timesheet/' + props.id + '/activities')
+    if (res) {
+      data.value = res
+      loading.value = true
+    }
+  } catch (error) {
+    loading.value = false
+    console.error(error)
+  }
+}
+
+const submit = async () => {}
 
 const toggleDialog = type => {
   if (!isDialogVisible.value[type]) {
@@ -38,43 +56,10 @@ const deleteActivity = item => {
   selectedItem.value = item
 }
 
-const desserts = [
-  {
-    dessert: 'Frozen Yogurt',
-    calories: 159,
-    fat: 6,
-    carbs: 24,
-    protein: 4,
-  },
-  {
-    dessert: 'Ice cream sandwich',
-    calories: 237,
-    fat: 6,
-    carbs: 24,
-    protein: 4,
-  },
-  {
-    dessert: 'Eclair',
-    calories: 262,
-    fat: 6,
-    carbs: 24,
-    protein: 4,
-  },
-  {
-    dessert: 'Cupcake',
-    calories: 305,
-    fat: 6,
-    carbs: 24,
-    protein: 4,
-  },
-  {
-    dessert: 'Gingerbread',
-    calories: 356,
-    fat: 6,
-    carbs: 24,
-    protein: 4,
-  },
-]
+// End Function
+onMounted(() => {
+  getData()
+})
 </script>
 
 <template>
@@ -103,7 +88,10 @@ const desserts = [
           max-width="600"
           persistent
         >
-          <AddActivity @close="toggleDialog('add')" />
+          <AddActivity
+            :id="props.id"
+            @close="toggleDialog('add')"
+          />
         </VDialog>
       </div>
     </VCardTitle>
@@ -134,7 +122,7 @@ const desserts = [
 
         <tbody>
           <tr
-            v-for="(item, index) in desserts"
+            v-for="(item, index) in data"
             :key="index"
           >
             <td>
