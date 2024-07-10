@@ -60,7 +60,6 @@ class StoreRequest extends FormRequest
                 'required',
                 Rule::exists('temp_user_roles', 'id')->where(function ($query) { #if selected subject is same with tempuser's
                     $tempUser = TempUser::where('email', $this->input('mentortutor_email'))->first();
-
                     return $query->where('id', $this->input('subject_id'))->where('temp_user_id', $tempUser->id);
                 })
             ]

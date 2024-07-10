@@ -38,6 +38,7 @@ class MentorTutorsController extends Controller
 
             $queryTempUser = TempUser::where('uuid', $item['uuid']);
 
+            // return collect($item)->put('inhouse', $queryTempUser->exists() ? (bool) $queryTempUser->first()->inhouse : false);
             return array_merge($item, [
                 'inhouse' => $queryTempUser->exists() ? (bool) $queryTempUser->first()->inhouse : false
             ]);
@@ -45,8 +46,13 @@ class MentorTutorsController extends Controller
 
 
         /* process the inhouse request just if using paginate param */
-        if ( $requestInhouse !== NULL )
-            $mappedResponse = $mappedResponse->where('inhouse', $inhouse);
+        if ( $requestInhouse !== NULL ) {
+
+            $mappedResponse = $mappedResponse->where('inhouse', $inhouse)->toArray();
+            $mappedResponse = array_values($mappedResponse);
+        }
+
+        
 
         
         /* combine the processed items with the pagination */

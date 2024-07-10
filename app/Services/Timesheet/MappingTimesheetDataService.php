@@ -1,0 +1,197 @@
+<?php
+
+namespace App\Services\Timesheet;
+
+use App\Models\Timesheet;
+use Illuminate\Support\Facades\Http;
+
+class MappingTimesheetDataService
+{
+    public function listTimesheet(array $search)
+    {
+        $timesheets = Timesheet::with(
+            [
+                'ref_program' => function ($query) {
+                    $query->select('category', 'student_name', 'student_school', 'program_name', 'timesheet_id');
+                },
+                'handle_by' => function ($query) {
+                    $query->select('temp_users.id', 'full_name');
+                },
+                'admin' => function ($query) {
+                    $query->select('users.id', 'full_name');
+                },
+                'activities' => function ($query) {
+                    $query->select('time_spent');
+                },
+                'package' => function ($query) {
+                    $query->select('id', 'type_of', 'package');
+                },
+                'inhouse_pic' => function ($query) {
+                    $query->select('uuid', 'full_name');
+                },
+            ]
+        )->
+        onSearch($search)->
+        select('timesheets.id', 'inhouse_id', 'package_id', 'duration', 'notes')->
+        get();
+
+        $mappedTimesheets = $timesheets->map(function ($data) {
+
+            # because timesheets consists of multiple ref programs
+            # we need to extract and define whether the client was b2c or b2b
+            $clients = array();
+            $refProgram = $data->ref_program;
+            if ( count($refProgram) > 1 )
+            {
+                foreach ( $refProgram as $ref )
+                {
+                    $category = $ref->category;
+                    $studentName = $ref->student_name;
+                    $studentSchool = $ref->student_school;
+                    $client = $category == "b2c" ? $studentName : $studentSchool;
+
+                    array_push($clients, $client);
+                }
+            } else {
+                $category = $refProgram->first()->category;
+                $studentName = $refProgram->first()->student_name;
+                $studentSchool = $refProgram->first()->student_school;
+                $clients = $category == "b2c" ? $studentName : $studentSchool;
+            }
+
+            $timesheetId = $data->id;
+            $packageType = $data->package->type_of;
+            $detailPackage = $data->package->package;
+            $duration = $data->duration;
+            $notes = $data->notes;
+            $programName = $refProgram->first()->program_name;
+            $tutorMentorName = $data->handle_by->first()->full_name;
+            $adminName = $data->admin->first()->full_name;
+            $total_timespent = $data->activities()->sum('time_spent');
+
+            return [
+                'id' => $timesheetId,
+                'package_type' => $packageType,
+                'detail_package' => $detailPackage,
+                'duration' => $duration,
+                'notes' => $notes, 
+                'program_name' => $programName,
+                'tutor_mentor' => $tutorMentorName,
+                'admin' => $adminName,
+                'spent' => $total_timespent,
+                'group' => count($refProgram) > 1 ? true : false,
+                'clients' => $clients
+            ];
+        });
+
+        return $mappedTimesheets->paginate(10);
+    }
+
+    public function detailTimesheet(Timesheet $timesheet)
+    {
+        $refProgram = $timesheet->ref_program;
+        # because timesheets consists of multiple ref programs
+        # we need to extract and define whether the client was b2c or b2b
+        $clients = array();
+        if ( count($refProgram) > 1 )
+        {
+            foreach ( $refProgram as $ref )
+            {
+                $category = $ref->category;
+                $studentUUID = $ref->student_uuid;
+                $studentName = $ref->student_name;
+                $studentSchool = $ref->student_school;
+                $client = $category == "b2c" ? $studentName : $studentSchool;
+
+                if ( $category == "b2c" ) {
+                    /* fetch the client profile information from CRM */
+                    $request_crm_clientInfo = Http::get( env('CRM_DOMAIN') . 'client/information/' . $studentUUID );
+                    $crm_clientInfo = $request_crm_clientInfo->json();
+
+                    array_push($clients, [
+                        'category' => $category,
+                        'client_name' => $studentName,
+                        'client_mail' => $crm_clientInfo['mail'],
+                        'client_school' => $studentSchool,
+                        'client_grade' => $crm_clientInfo['st_grade'],
+                    ]);
+                    continue;
+                } 
+
+                if ( $category == "b2b" ) {
+                    array_push($clients, [
+                        'category' => $category,
+                        'client_school' => $studentSchool
+                    ]); 
+                    continue;
+                }
+            }
+        } else {
+            $category = $refProgram->first()->category;
+            $studentUUID = $refProgram->first()->student_uuid;
+            $studentName = $refProgram->first()->student_name;
+            $studentSchool = $refProgram->first()->student_school;
+
+            if ( $category == "b2c" ) {
+                /* fetch the client profile information from CRM */
+                $request_crm_clientInfo = Http::get( env('CRM_DOMAIN') . 'client/information/' . $studentUUID );
+                $crm_clientInfo = $request_crm_clientInfo->json();
+
+                array_push($clients, [
+                    'category' => $category,
+                    'client_name' => $studentName,
+                    'client_mail' => $crm_clientInfo['mail'],
+                    'client_school' => $studentSchool,
+                    'client_grade' => $crm_clientInfo['st_grade'],
+                ]);
+            }   
+        }
+
+
+        /* fetch the package details */
+        $programName = $refProgram->first()->program_name;
+        $package = $timesheet->package;
+        $packageId = $timesheet->package_id;
+        $packageType = $timesheet->package->package;
+        $detailPackage = $timesheet->detail_package;
+        $duration = $timesheet->duration;
+        $timeSpent = $timesheet->activities()->sum('time_spent');
+        $notes = $timesheet->notes;
+
+
+        /* fetch the person in charge */
+        $admin = $timesheet->admin;
+        $adminId = $admin->pluck('id')->toArray();
+        $adminName = implode(", ", $admin->pluck('full_name')->toArray());
+        $tutorMentor = $timesheet->handle_by;
+        $tutorMentorUuid = $tutorMentor->pluck('uuid')->toArray();
+        $tutorMentorEmail = $tutorMentor->pluck('email')->toArray();
+        $tutorMentorName = implode(", ", $tutorMentor->pluck('full_name')->toArray());
+        $last_updated = $timesheet->updated_at;
+        $clientProfile = $clients;
+        $packageDetails = [
+            'program_name' => $programName,
+            'package_id' => $packageId,
+            'package_type' => $packageType,
+            'pic_name' => $adminName,
+            'tutormentor_name' => $tutorMentorName,
+            'last_updated' => $last_updated,
+            'duration_in_hours' => $duration,
+            'time_spent_in_hours' => $timeSpent,
+        ];
+
+
+        /* fetch the data to support editable columns */
+        $subjectId = $timesheet->subject_id;
+        $editableColumns = [
+            'pic_id' => $adminId,
+            'tutormentor_id' => $tutorMentorUuid,
+            'tutormentor_email' => $tutorMentorEmail,
+            'duration' => $duration,
+            'notes' => $notes,
+            'subject_id' => $subjectId
+        ];
+
+        return compact('clientProfile', 'packageDetails', 'editableColumns');
+    }
+}
