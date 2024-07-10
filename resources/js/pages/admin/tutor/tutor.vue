@@ -1,4 +1,5 @@
 <script setup>
+import { showNotif } from '@/helper/notification'
 import ApiService from '@/services/ApiService'
 import avatar1 from '@images/avatars/avatar-1.png'
 import avatar2 from '@images/avatars/avatar-2.png'
@@ -23,7 +24,7 @@ const getData = async () => {
   try {
     loading.value = true
     const res = await ApiService.get('api/v1/user/mentor-tutors' + page + search + paginate)
-    console.log(res)
+
     if (res) {
       currentPage.value = res.current_page
       totalPage.value = res.last_page
@@ -39,6 +40,33 @@ const getData = async () => {
 const searchData = async () => {
   currentPage.value = 1
   await getData()
+}
+
+const checkEmail = async email => {
+  try {
+    const res = await ApiService.post('api/v1/auth/email/checking', {
+      email: email,
+    })
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const updateInhouse = async (uuid, value, email) => {
+  await checkEmail(email)
+
+  try {
+    const res = await ApiService.put('api/v1/user/mentor-tutors/' + uuid, {
+      inhouse: value ? 1 : 0,
+    })
+
+    if (res) {
+      showNotif('success', res.message, 'bottom-end')
+      await getData()
+    }
+  } catch (error) {
+    console.error(error)
+  }
 }
 // End Function
 
@@ -91,6 +119,7 @@ onMounted(() => {
             <th class="text-uppercase text-center">Mentor/Tutor Name</th>
             <th class="text-uppercase text-center">Email</th>
             <th class="text-uppercase text-center">Role</th>
+            <th nowrap>Inhouse Mentor</th>
             <th class="text-uppercase text-center">Phone Number</th>
             <th class="text-uppercase text-center">Detail</th>
           </tr>
@@ -137,6 +166,12 @@ onMounted(() => {
                 <!-- Menambahkan koma jika bukan item terakhir -->
                 <span v-if="index < item.roles.length - 1">, </span>
               </span>
+            </td>
+            <td class="d-flex justify-center">
+              <VSwitch
+                v-model="item.inhouse"
+                @update:modelValue="updateInhouse(item.uuid, item.inhouse, item.email)"
+              ></VSwitch>
             </td>
             <td
               class="text-start"
@@ -233,7 +268,7 @@ onMounted(() => {
         <VPagination
           v-model="currentPage"
           :length="totalPage"
-          :total-visible="4"
+          :total-visible="5"
           color="primary"
           density="compact"
           :show-first-last-page="false"

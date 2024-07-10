@@ -68,10 +68,21 @@ export default {
     }
   },
 
-  // Contoh method untuk mengirim data
+  // Contoh method untuk mengirim data PATCH
   async patch(url, data) {
     try {
       const response = await apiClient.patch(url, data)
+      
+      return response.data
+    } catch (error) {
+      throw new Error(`Error sending data: ${error}`)
+    }
+  },
+
+  // Contoh method untuk mengirim data PUT
+  async put(url, data) {
+    try {
+      const response = await apiClient.put(url, data)
       
       return response.data
     } catch (error) {
