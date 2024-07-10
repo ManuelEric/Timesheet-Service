@@ -21,7 +21,6 @@ class Timesheet extends Model
      */
     protected $fillable = [
         'inhouse_id',
-        'inhouse_name',
         'package_id',
         'duration',
         'notes',
@@ -64,6 +63,11 @@ class Timesheet extends Model
         return $this->belongsTo(TempUserRoles::class, 'subject_id', 'id');
     }
 
+    public function inhouse_pic()
+    {
+        return $this->belongsTo(TempUser::class, 'inhouse_id', 'uuid');
+    }
+
     /**
      * The scopes.
      * 
@@ -87,7 +91,12 @@ class Timesheet extends Model
                 $_sub_->
                     where( function ($__sub__) use ($keyword) {
                         $__sub__->
-                            where('inhouse_name', 'like', '%'.$keyword.'%')->
+                            whereHas('inhouse_pic', function ($___sub___) use ($keyword) {
+                                $___sub___->where('full_name', 'like', '%' . $keyword . '%');
+                            })->
+                            orWhereHas('handle_by', function ($___sub___) use ($keyword) {
+                                $___sub___->where('full_name', 'like', '%'. $keyword .'%');
+                            })->
                             orWhereHas('ref_program', function ($___sub___) use ($keyword) {
                                 $___sub___->where('student_name', 'like', '%'.$keyword.'%')->orWhere('student_school', 'like', '%'.$keyword.'%');
                         });
