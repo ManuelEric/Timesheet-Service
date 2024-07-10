@@ -53,7 +53,7 @@ export default {
       
       return response.data
     } catch (error) {
-      throw new Error(`Error fetching data: ${error}`)
+      return Promise.reject(error);
     }
   },
 
@@ -64,7 +64,7 @@ export default {
       
       return response.data
     } catch (error) {
-      throw new Error(`Error sending data: ${error}`)
+      return Promise.reject(error);
     }
   },
 
@@ -75,7 +75,7 @@ export default {
       
       return response.data
     } catch (error) {
-      throw new Error(`Error sending data: ${error}`)
+      return Promise.reject(error);
     }
   },
 
@@ -86,7 +86,7 @@ export default {
       
       return response.data
     } catch (error) {
-      throw new Error(`Error sending data: ${error}`)
+      return Promise.reject(error);
     }
   },
 
