@@ -32,6 +32,7 @@ const getData = async () => {
     }
     loading.value = false
   } catch (error) {
+    showNotif('error', error.response?.data?.message, 'bottom-end')
     console.error(error)
     loading.value = false
   }
