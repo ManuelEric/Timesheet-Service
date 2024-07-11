@@ -3,17 +3,24 @@
 namespace App\Observers;
 
 use App\Models\Timesheet;
+use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 use Illuminate\Support\Facades\Log;
 
-class TimesheetObserver
+class TimesheetObserver implements ShouldHandleEventsAfterCommit
 {
+    protected $user_loggedIn;
+
+    public function __construct()
+    {
+        $this->user_loggedIn = auth('sanctum')->user()->full_name;
+    }
+
     /**
      * Handle the Timesheet "created" event.
      */
     public function created(Timesheet $timesheet): void
     {
-        $user_loggedIn = auth('sanctum')->user()->full_name;
-        Log::info('Timesheet has been created by ' . $user_loggedIn);
+        Log::info('Timesheet has been created by ' . $this->user_loggedIn);
     }
 
     /**
@@ -21,7 +28,7 @@ class TimesheetObserver
      */
     public function updated(Timesheet $timesheet): void
     {
-        //
+        Log::info('Timesheet has been updated by ' . $this->user_loggedIn);
     }
 
     /**

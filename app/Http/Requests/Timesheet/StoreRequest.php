@@ -37,6 +37,20 @@ class StoreRequest extends FormRequest
      */
     public function rules(): array
     {
+        switch ( $this->method() )
+        {
+            case "POST":
+                return $this->store();
+                break;
+
+            case "PUT":
+                return $this->update();
+                break;
+        }
+    }
+
+    public function store(): array
+    {
         return [
             'ref_id' => 'required|array',
             'ref_id.*' => [
@@ -44,6 +58,31 @@ class StoreRequest extends FormRequest
                 'exists:ref_programs,id',
                 new MatchingProgramName
             ],
+            'mentortutor_email' => 'required|email',
+            'inhouse_id' => [
+                'required',
+                Rule::exists('temp_users', 'uuid')->where(function ($query) { #if selected uuid is the existing inhouse temp user
+                    return $query->where('uuid', $this->input('inhouse_id'))->where('inhouse', 1);
+                }) 
+            ],
+            'package_id' => 'required|exists:timesheet_packages,id',
+            'duration' => 'required|integer',
+            'pic_id' => 'required|exists:users,id',
+            'pic_id.*' => 'required|exists:users,id',
+            'notes' => 'nullable',
+            'subject_id' => [
+                'required',
+                Rule::exists('temp_user_roles', 'id')->where(function ($query) { #if selected subject is same with tempuser's
+                    $tempUser = TempUser::where('email', $this->input('mentortutor_email'))->first();
+                    return $query->where('id', $this->input('subject_id'))->where('temp_user_id', $tempUser->id);
+                })
+            ]
+        ];
+    }
+
+    public function update(): array
+    {
+        return [
             'mentortutor_email' => 'required|email',
             'inhouse_id' => [
                 'required',

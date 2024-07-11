@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Pivot\HandleBy;
+use App\Models\Pivot\Pic;
 use App\Observers\TimesheetObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
@@ -35,7 +36,7 @@ class Timesheet extends Model
 
     public function admin()
     {
-        return $this->belongsToMany(User::class, 'timesheet_pics', 'timesheet_id', 'user_id')->withTimestamps();
+        return $this->belongsToMany(User::class, 'timesheet_pics', 'timesheet_id', 'user_id')->withTimestamps()->using(Pic::class);
     }
 
     public function handle_by()

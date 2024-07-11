@@ -2,6 +2,7 @@
 
 namespace App\Models\Pivot;
 
+use App\Models\TempUser;
 use App\Observers\HandleByObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -25,10 +26,21 @@ class HandleBy extends Pivot
     ];
 
     /**
-     * The evnts.
+     * The events.
      */
     public function stored()
     {
-        $this->fireModelEvent('attach');
+        $this->fireModelEvent('attach', false);
+    }
+
+    /**
+     * The relations.
+     *
+     * @var array<int, string>
+     */
+
+    public function mentor_tutor()
+    {
+        return $this->belongsTo(TempUser::class, 'temp_user_id', 'id');
     }
 }

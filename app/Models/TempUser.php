@@ -108,4 +108,9 @@ class TempUser extends Authenticatable implements CanResetPassword
         return $this->hasMany(Timesheet::class, 'inhouse_id', 'uuid');
     }
 
+    public function pivot_mentortutor()
+    {
+        return $this->hasMany(HandleBy::class, 'temp_user_id', 'id');
+    }
+
 }

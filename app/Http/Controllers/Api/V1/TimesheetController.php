@@ -7,6 +7,8 @@ use App\Actions\Timesheet\IdentifierCheckingAction as IdentifyTimesheetIdAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Timesheet\StoreRequest as TimesheetStoreRequest;
 use App\Actions\Timesheet\SelectOrRegisterMentorTutorAction as SelectOrRegisterMentorTutorTimesheetAction;
+use App\Actions\Timesheet\UpdateTimesheetAction;
+use App\Models\TempUser;
 use App\Models\Timesheet;
 use App\Services\Timesheet\MappingTimesheetDataService;
 use Illuminate\Http\JsonResponse;
@@ -31,8 +33,8 @@ class TimesheetController extends Controller
     }
 
     public function show(
+        $timesheetId,
         IdentifyTimesheetIdAction $identifyTimesheetIdAction, 
-        $timesheetId
         ): JsonResponse
     {
         $timesheet = $identifyTimesheetIdAction->execute($timesheetId);
@@ -79,15 +81,40 @@ class TimesheetController extends Controller
 
     public function update(
         $timesheetId,
-        Request $request,
-        IdentifyTimesheetIdAction $identifyTimesheetIdAction
+        TimesheetStoreRequest $request,
+        IdentifyTimesheetIdAction $identifyTimesheetIdAction,
+        UpdateTimesheetAction $updateTimesheetAction,
         )
     {
         $timesheet = $identifyTimesheetIdAction->execute($timesheetId);
 
-        
-        //! ketika save update-an terbaru
-        //! system perlu nge trigger
-        //! $timesheet->handle_by->stored() 
+        $validated = $request->safe()->only([
+            'ref_id',
+            'mentortutor_email',
+            'inhouse_id',
+            'package_id',
+            'duration',
+            'pic_id',
+            'notes',
+            'subject_id',
+        ]); 
+
+        /* defines the validated variables */
+        $validatedEmail = $validated['mentortutor_email'];
+        $validatedInhouse = $validated['inhouse_id'];
+        $validatedPics = $validated['pic_id'];
+        $validatedPackageId = $validated['package_id'];
+        $validatedDuration = $validated['duration'];
+        $validatedNotes = $validated['notes'];
+        $validatedSubject = $validated['subject_id'];
+
+        $newPackageDetails = compact('validatedPackageId', 'validatedDuration');
+
+        $mentorTutorId = TempUser::where('email', $validatedEmail)->first()->id;
+        $updateTimesheetAction->execute($timesheet, $newPackageDetails, $validatedNotes, $validatedInhouse, $validatedPics, $mentorTutorId, $validatedSubject);
+
+        return response()->json([
+            'message' => 'Timesheet has been updated successfully.'
+        ]);
     }
 }

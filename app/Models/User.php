@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Models\Pivot\Pic;
 use App\Observers\UserObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -87,6 +88,11 @@ class User extends Authenticatable
     public function timesheets()
     {
         return $this->belongsToMany(Timesheet::class, 'timesheet_pics', 'user_id', 'timesheet_id')->withTimestamps();
+    }
+
+    public function pivot_user()
+    {
+        return $this->hasMany(Pic::class, 'user_id', 'id');
     }
 
 }

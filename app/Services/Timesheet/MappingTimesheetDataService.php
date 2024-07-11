@@ -152,7 +152,8 @@ class MappingTimesheetDataService
         $programName = $refProgram->first()->program_name;
         $package = $timesheet->package;
         $packageId = $timesheet->package_id;
-        $packageType = $timesheet->package->package;
+        $packageType = $timesheet->package->type_of;
+        $packageName = $timesheet->package->package;
         $detailPackage = $timesheet->detail_package;
         $duration = $timesheet->duration;
         $timeSpent = $timesheet->activities()->sum('time_spent');
@@ -163,18 +164,22 @@ class MappingTimesheetDataService
         $admin = $timesheet->admin;
         $adminId = $admin->pluck('id')->toArray();
         $adminName = implode(", ", $admin->pluck('full_name')->toArray());
-        $tutorMentor = $timesheet->handle_by;
-        $tutorMentorUuid = $tutorMentor->pluck('uuid')->toArray();
-        $tutorMentorEmail = $tutorMentor->pluck('email')->toArray();
-        $tutorMentorName = implode(", ", $tutorMentor->pluck('full_name')->toArray());
+        $tutorMentor = $timesheet->handle_by->first();
+        $tutorMentorUuid = $tutorMentor->uuid;
+        $tutorMentorEmail = $tutorMentor->email;
+        $tutorMentorName = $tutorMentor->full_name;
+        $inhouseUuid = $timesheet->inhouse_pic->uuid;
+        $inhouseName = $timesheet->inhouse_pic->full_name;
         $last_updated = $timesheet->updated_at;
         $clientProfile = $clients;
         $packageDetails = [
             'program_name' => $programName,
             'package_id' => $packageId,
             'package_type' => $packageType,
+            'package_name' => $packageName,
             'pic_name' => $adminName,
             'tutormentor_name' => $tutorMentorName,
+            'inhouse_name' => $inhouseName,
             'last_updated' => $last_updated,
             'duration_in_hours' => $duration,
             'time_spent_in_hours' => $timeSpent,
@@ -189,7 +194,8 @@ class MappingTimesheetDataService
             'tutormentor_email' => $tutorMentorEmail,
             'duration' => $duration,
             'notes' => $notes,
-            'subject_id' => $subjectId
+            'subject_id' => $subjectId,
+            'inhouse_id' => $inhouseUuid
         ];
 
         return compact('clientProfile', 'packageDetails', 'editableColumns');

@@ -20,14 +20,19 @@ class CreateTimesheetAction
         $this->responseService = $responseService;
     }
 
-    public function execute(array $ref_programId, array $storePackageDetails, ?string $notes, string $inhouseId, array $picIds, string $mentortutorId, int $subjectId)
+    public function execute(
+        array $ref_programId, 
+        array $storePackageDetails, 
+        ?string $notes, 
+        string $inhouseId, 
+        array $picIds, 
+        string $mentortutorId, 
+        int $subjectId
+        )
     {
         /* define submitted package variables */
         $packageId = $storePackageDetails['validatedPackageId'];
         $duration = $storePackageDetails['validatedDuration'];
-
-        /* fetch package details from db by submitted package ID */
-        $packageMaster = Package::find($packageId);
 
         /* merge variables into array that going to be stored into timesheet */
         $timesheetDetails = [
@@ -46,7 +51,7 @@ class CreateTimesheetAction
             $createdTimesheet->admin()->attach($picIds);
 
         } catch (Exception $e) {
-
+            
             $errorMessage = "There was an error while creating a timesheet.";
             $this->responseService->storeErrorLog($errorMessage, $e->getMessage(), ['file' => $e->getFile(), 'error_line' => $e->getLine()]);
             throw new HttpResponseException(
