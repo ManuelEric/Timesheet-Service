@@ -3,9 +3,10 @@
 namespace App\Observers;
 
 use App\Models\User;
+use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 use Illuminate\Support\Facades\Log;
 
-class UserObserver
+class UserObserver implements ShouldHandleEventsAfterCommit
 {
     /** 
      * Handle the User "authenticate" event.

@@ -30,6 +30,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+
+Route::get('/test', function() {
+    $test = \App\Models\Pivot\HandleBy::where('timesheet_id', 3)->whereNot('temp_user_id', '01J2DVN3DRFYDDWR4VCF4K2ZZ0')->groupBy('temp_user_id', 'timesheet_id')->get();
+    return $test;
+});
+
+
 /* API Documentation */ 
 Route::get('api-documentation', function() {
     return view('API-documentation');
