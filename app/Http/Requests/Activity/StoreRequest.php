@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Activity;
 
+use App\Rules\ExistStartDateActivities;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -37,7 +38,12 @@ class StoreRequest extends FormRequest
         return [
             'activity' => 'required',
             'description' => 'nullable',
-            'start_date' => 'required|date|date_format:Y-m-d H:i:s',
+            'start_date' => [
+                'required',
+                'date',
+                'date_format:Y-m-d H:i:s',
+                new ExistStartDateActivities($this->route('timesheet'))
+            ],
             'meeting_link' => 'nullable|active_url',
         ];
     }

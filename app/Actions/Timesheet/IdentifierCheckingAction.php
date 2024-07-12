@@ -8,7 +8,7 @@ use Illuminate\Http\JsonResponse;
 
 class IdentifierCheckingAction
 {
-    public function execute($timesheetId)
+    public function execute(int $timesheetId)
     {
         $timesheet = Timesheet::with('ref_program', 'package', 'admin', 'handle_by')->find($timesheetId);
         if ( !$timesheet ) {

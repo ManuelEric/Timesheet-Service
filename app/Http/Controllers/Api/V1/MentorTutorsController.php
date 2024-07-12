@@ -50,9 +50,7 @@ class MentorTutorsController extends Controller
 
             $mappedResponse = $mappedResponse->where('inhouse', $inhouse)->toArray();
             $mappedResponse = array_values($mappedResponse);
-        }
-
-        
+        }        
 
         
         /* combine the processed items with the pagination */
