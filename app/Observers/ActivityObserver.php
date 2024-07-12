@@ -3,9 +3,10 @@
 namespace App\Observers;
 
 use App\Models\Activity;
+use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 use Illuminate\Support\Facades\Log;
 
-class ActivityObserver
+class ActivityObserver implements ShouldHandleEventsAfterCommit
 {
     protected $userName;
 
@@ -20,7 +21,7 @@ class ActivityObserver
      */
     public function created(Activity $activity): void
     {
-        Log::info('Activity of Timesheet ID: ' . $activity->timesheet_id . 'has been created.');
+        Log::info('Activity of Timesheet ID: ' . $activity->timesheet_id . ' has been created.');
     }
 
     /**

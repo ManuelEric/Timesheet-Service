@@ -31,12 +31,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 
-Route::get('/test', function() {
-    $test = \App\Models\Pivot\HandleBy::where('timesheet_id', 3)->whereNot('temp_user_id', '01J2DVN3DRFYDDWR4VCF4K2ZZ0')->groupBy('temp_user_id', 'timesheet_id')->get();
-    return $test;
-});
-
-
 /* API Documentation */ 
 Route::get('api-documentation', function() {
     return view('API-documentation');
@@ -103,6 +97,8 @@ Route::prefix('timesheet')->group(function () {
         Route::GET('{timesheet}/detail', [V1TimesheetController::class, 'show']);
         /* Update Timesheet */
         Route::PUT('{timesheet}/update', [V1TimesheetController::class, 'update']);
+        /* Destroy Timesheet */
+        Route::DELETE('{timesheet}/delete', [V1TimesheetController::class, 'destroy']);
         
         /* List Activities of the Timesheet */
         Route::GET('{timesheet}/activities', [V1ActivitiesController::class, 'index']);

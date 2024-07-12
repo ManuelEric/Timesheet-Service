@@ -11,8 +11,10 @@ use App\Actions\Timesheet\UpdateTimesheetAction;
 use App\Models\TempUser;
 use App\Models\Timesheet;
 use App\Services\Timesheet\MappingTimesheetDataService;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 class TimesheetController extends Controller
@@ -84,7 +86,7 @@ class TimesheetController extends Controller
         TimesheetStoreRequest $request,
         IdentifyTimesheetIdAction $identifyTimesheetIdAction,
         UpdateTimesheetAction $updateTimesheetAction,
-        )
+        ): JsonResponse
     {
         $timesheet = $identifyTimesheetIdAction->execute($timesheetId);
 
@@ -116,5 +118,23 @@ class TimesheetController extends Controller
         return response()->json([
             'message' => 'Timesheet has been updated successfully.'
         ]);
+    }
+
+    public function destroy(
+        $timesheetId,
+        IdentifyTimesheetIdAction $identifyTimesheetIdAction,
+        ): JsonResponse
+    {
+        DB::beginTransaction();    
+        $timesheet = $identifyTimesheetIdAction->execute($timesheetId);
+        
+        if ( $timesheet->delete() )
+            DB::commit();
+            
+
+        return response()->json([
+            'message' => 'Timesheet has been deleted successfully.'
+        ]);
+
     }
 }

@@ -3,9 +3,10 @@
 namespace App\Observers;
 
 use App\Models\Ref_Program;
+use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 use Illuminate\Support\Facades\Log;
 
-class Ref_ProgramObserver
+class Ref_ProgramObserver implements ShouldHandleEventsAfterCommit
 {
     /**
      * Handle the Ref_Program "created" event.
