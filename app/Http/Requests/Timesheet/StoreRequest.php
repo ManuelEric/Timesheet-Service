@@ -58,7 +58,7 @@ class StoreRequest extends FormRequest
                 'exists:ref_programs,id',
                 new MatchingProgramName
             ],
-            'mentortutor_email' => 'required|email',
+            'mentortutor_email' => 'required|email|exists:temp_users,email',
             'inhouse_id' => [
                 'required',
                 Rule::exists('temp_users', 'uuid')->where(function ($query) { #if selected uuid is the existing inhouse temp user
@@ -83,7 +83,7 @@ class StoreRequest extends FormRequest
     public function update(): array
     {
         return [
-            'mentortutor_email' => 'required|email',
+            'mentortutor_email' => 'required|email|exists:temp_users,email',
             'inhouse_id' => [
                 'required',
                 Rule::exists('temp_users', 'uuid')->where(function ($query) { #if selected uuid is the existing inhouse temp user

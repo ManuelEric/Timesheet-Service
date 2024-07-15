@@ -10,7 +10,17 @@ class IdentifierCheckingAction
 {
     public function execute(int $timesheetId)
     {
-        $timesheet = Timesheet::with('ref_program', 'package', 'admin', 'handle_by')->find($timesheetId);
+        $timesheet = Timesheet::with(
+            [
+                'ref_program', 
+                'package', 
+                'admin', 
+                'handle_by' => function ($query) {
+                    $query->wherePivot('active', 1);
+                }
+            ]
+        )->
+        find($timesheetId);
         if ( !$timesheet ) {
             throw new HttpResponseException(
                 response()->json([

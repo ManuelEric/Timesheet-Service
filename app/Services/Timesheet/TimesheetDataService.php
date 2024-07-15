@@ -5,9 +5,9 @@ namespace App\Services\Timesheet;
 use App\Models\Timesheet;
 use Illuminate\Support\Facades\Http;
 
-class MappingTimesheetDataService
-{
-    public function listTimesheet(array $search)
+class TimesheetDataService
+{    
+    public function listTimesheet(array $search = [])
     {
         $timesheets = Timesheet::with(
             [
@@ -92,6 +92,7 @@ class MappingTimesheetDataService
         $refProgram = $timesheet->ref_program;
         # because timesheets consists of multiple ref programs
         # we need to extract and define whether the client was b2c or b2b
+
         $clients = array();
         if ( count($refProgram) > 1 )
         {
@@ -181,8 +182,8 @@ class MappingTimesheetDataService
             'tutormentor_name' => $tutorMentorName,
             'inhouse_name' => $inhouseName,
             'last_updated' => $last_updated,
-            'duration_in_hours' => $duration,
-            'time_spent_in_hours' => $timeSpent,
+            'duration_in_minutes' => $duration,
+            'time_spent_in_minutes' => $timeSpent,
         ];
 
 

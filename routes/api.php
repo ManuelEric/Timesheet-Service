@@ -30,6 +30,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::prefix('timesheet')->group(function () {
+    
+    Route::GET('{timesheet}/export', [V1TimesheetController::class, 'export']);
+});
+
 
 /* API Documentation */ 
 Route::get('api-documentation', function() {
@@ -99,6 +104,8 @@ Route::prefix('timesheet')->group(function () {
         Route::PUT('{timesheet}/update', [V1TimesheetController::class, 'update']);
         /* Destroy Timesheet */
         Route::DELETE('{timesheet}/delete', [V1TimesheetController::class, 'destroy']);
+        /* Export Timesheet */
+        // Route::GET('{timesheet}/export', [V1TimesheetController::class, 'export']);
         
         /* List Activities of the Timesheet */
         Route::GET('{timesheet}/activities', [V1ActivitiesController::class, 'index']);

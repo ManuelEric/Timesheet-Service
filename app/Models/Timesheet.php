@@ -41,7 +41,7 @@ class Timesheet extends Model
 
     public function handle_by()
     {
-        return $this->belongsToMany(TempUser::class, 'timesheet_handle_by', 'timesheet_id', 'temp_user_id')->withTimestamps()->using(HandleBy::class);
+        return $this->belongsToMany(TempUser::class, 'timesheet_handle_by', 'timesheet_id', 'temp_user_id')->withTimestamps()->using(HandleBy::class)->withPivot('active');
     }
 
     public function package()

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Actions\Activity\CreateActivityAction;
+use App\Actions\Activity\IdentifierCheckingAction as IdentifyActivityAction;
 use App\Actions\Authentication\CheckEmailMentorTutorAction;
 use App\Actions\Timesheet\IdentifierCheckingAction as IdentifyTimesheetIdAction;
 use App\Http\Controllers\Controller;
@@ -12,6 +13,7 @@ use Illuminate\Support\Carbon;
 use App\Http\Requests\Activity\StoreRequest as StoreActivityRequest;
 use App\Http\Requests\Activity\UpdateRequest as UpdateActivityRequest;
 use App\Models\Activity;
+use App\Services\Activity\ActivityDataService;
 use App\Services\ResponseService;
 use Exception;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -31,54 +33,25 @@ class ActivityController extends Controller
     }
         
 
-    public function index($timesheetId): JsonResponse
+    public function index(
+        $timesheetId,
+        ActivityDataService $activityDataService,
+        ): JsonResponse
     {
         $timesheet = $this->identifyTimesheetIdAction->execute($timesheetId);
 
-        /* fetch the entire activities */
-        $activities = $timesheet->activities;
-        $mappedActivities = $activities->map(function ($data) {
+        $activities = $activityDataService->listActivities($timesheet);
 
-            $activity = $data->activity;
-            $description = $data->description;
-            $start_date = Carbon::parse($data->start_date);
-            $end_date = $data->end_date ? Carbon::parse($data->end_date) : false;
-            $date = $start_date->format('d F Y');
-            $start_time = $start_date->format('H:i');
-            $end_time = $end_date ? $end_date->format('H:i') : 0;
-            $estimate = $end_date ? $start_date->diffInMinutes($end_date) : 0;
-            $status = $this->translate($data->status);
-
-            return [
-                'id' => $data->id,
-                'activity' => $activity,
-                'description' => $description,
-                'date' => $date,
-                'start_time' => $start_time,
-                'end_time' => $end_time,
-                'estimate' => $estimate,
-                'status' => $status,
-            ];
-        });
-
-        return response()->json($mappedActivities);
+        return response()->json($activities);
     }
 
     public function show(
         $timesheetId,
         $activityId,
+        IdentifyActivityAction $identifyActivityAction,
     )
     {
-        $activity = Activity::find($activityId)->makeHidden(['cutoff_ref_id']);
-        if ( !$activity || $activity->timesheet_id != $timesheetId)
-        {
-            throw new HttpResponseException(
-                response()->json([
-                    'errors' => 'Invalid code provided.'
-                ], JsonResponse::HTTP_BAD_REQUEST)
-            );
-        }
-
+        $activity = $identifyActivityAction->execute($activityId, $timesheetId);
         return response()->json($activity);
     }
 
@@ -111,17 +84,10 @@ class ActivityController extends Controller
         $timesheetId,
         $activityId,
         UpdateActivityRequest $request,
+        IdentifyActivityAction $identifyActivityAction,
     )
     {
-        $activity = Activity::find($activityId);
-        if ( !$activity || $activity->timesheet_id != $timesheetId)
-        {
-            throw new HttpResponseException(
-                response()->json([
-                    'errors' => 'Invalid code provided.'
-                ], JsonResponse::HTTP_BAD_REQUEST)
-            );
-        }
+        $activity = $identifyActivityAction->execute($activityId, $timesheetId);
 
         $validated = $request->safe()->only(['activity', 'description', 'start_date', 'end_date', 'meeting_link']);
 
@@ -170,17 +136,10 @@ class ActivityController extends Controller
     public function destroy(
         $timesheetId,
         $activityId,
+        IdentifyActivityAction $identifyActivityAction,
     )
     {
-        $activity = Activity::find($activityId);
-        if ( !$activity || $activity->timesheet_id != $timesheetId)
-        {
-            throw new HttpResponseException(
-                response()->json([
-                    'errors' => 'Invalid code provided.'
-                ], JsonResponse::HTTP_BAD_REQUEST)
-            );
-        }
+        $activity = $identifyActivityAction->execute($activityId, $timesheetId);
 
         DB::beginTransaction();
         try {
