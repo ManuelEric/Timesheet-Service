@@ -4,33 +4,38 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Actions\Timesheet\CreateTimesheetAction;
 use App\Actions\Timesheet\IdentifierCheckingAction as IdentifyTimesheetIdAction;
+use App\Actions\Activity\IdentifierCheckingAction as IdentifyActivityIdAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Timesheet\StoreRequest as TimesheetStoreRequest;
 use App\Actions\Timesheet\SelectOrRegisterMentorTutorAction as SelectOrRegisterMentorTutorTimesheetAction;
 use App\Actions\Timesheet\UpdateTimesheetAction;
+use App\Exports\TimesheetExport;
+use App\Http\Traits\GenerateTimesheetFileName;
 use App\Models\TempUser;
 use App\Models\Timesheet;
-use App\Services\Timesheet\MappingTimesheetDataService;
+use App\Services\Activity\ActivityDataService;
+use App\Services\Timesheet\TimesheetDataService;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
+use Maatwebsite\Excel\Facades\Excel;
 
 class TimesheetController extends Controller
 {
-    protected $mappingTimesheetService;
+    use GenerateTimesheetFileName;
+    protected $timesheetService;
 
-    public function __construct(MappingTimesheetDataService $mappingTimesheetService)
+    public function __construct(TimesheetDataService $timesheetService)
     {
-        $this->mappingTimesheetService = $mappingTimesheetService;
+        $this->timesheetService = $timesheetService;
     }
 
     public function index(Request $request): JsonResponse
     {
         /* Incoming Request */
         $search = $request->only(['program_name', 'package_id', 'keyword']);
-        $results = $this->mappingTimesheetService->listTimesheet($search);
+        $results = $this->timesheetService->listTimesheet($search);
         return response()->json($results);
     }
 
@@ -40,7 +45,7 @@ class TimesheetController extends Controller
         ): JsonResponse
     {
         $timesheet = $identifyTimesheetIdAction->execute($timesheetId);
-        $result = $this->mappingTimesheetService->detailTimesheet($timesheet);
+        $result = $this->timesheetService->detailTimesheet($timesheet);
         return response()->json($result);
     }
 
@@ -136,5 +141,23 @@ class TimesheetController extends Controller
             'message' => 'Timesheet has been deleted successfully.'
         ]);
 
+    }
+
+    public function export(
+        $timesheetId, 
+        IdentifyTimesheetIdAction $identifyTimesheetIdAction,
+        TimesheetDataService $timesheetDataService,
+        IdentifyActivityIdAction $identifyActivityIdAction,
+        ActivityDataService $activityDataService,
+        )
+    {
+        $timesheet = $identifyTimesheetIdAction->execute($timesheetId);
+        $detailTimesheet = $timesheetDataService->detailTimesheet($timesheet);
+        $timesheetActivities = $activityDataService->listActivities($timesheet);
+
+        // $filename = $this->generateFileName($mappedTimesheetData);
+        $filename = 'Timesheet_' . date('YmdHis') . '.xlsx';
+
+        return Excel::download(new TimesheetExport($detailTimesheet, $timesheetActivities), $filename);
     }
 }

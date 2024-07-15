@@ -16,7 +16,8 @@ class HandleByObserver implements ShouldHandleEventsAfterCommit
     {
         $timesheetId = $handleBy->timesheet_id;
         /* trigger update specifically to update previous mentor/tutor into false status  */
-        $replacedMentorTutors = HandleBy::where('timesheet_id', $timesheetId)->get();
+        $createdDate = $handleBy->created_at;
+        $replacedMentorTutors = HandleBy::where('timesheet_id', $timesheetId)->where('created_at', '<', $createdDate)->get();
         $mts = array();
         foreach ($replacedMentorTutors as $mt)
         {
