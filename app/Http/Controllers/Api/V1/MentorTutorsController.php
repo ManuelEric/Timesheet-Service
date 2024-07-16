@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TempUser\UpdateRequest as TempUserUpdateRequest;
+use App\Http\Traits\HttpCall;
 use App\Models\TempUser;
 use App\Models\TempUserRoles;
 use App\Services\ResponseService;
+use App\Services\Token\TokenService;
 use Exception;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
@@ -16,6 +18,15 @@ use Illuminate\Support\Facades\Http;
 
 class MentorTutorsController extends Controller
 {
+    use HttpCall;
+    
+    protected $tokenService;
+
+    public function __construct(TokenService $tokenService)
+    {
+        $this->tokenService = $tokenService;
+    }
+
     public function index(Request $request): JsonResponse
     {
         /* incoming request */
@@ -24,8 +35,7 @@ class MentorTutorsController extends Controller
         $inhouse = $requestInhouse === "true" ? 1 : 0;
 
         /* call API to get all of the mentors and tutors */
-        $request = Http::get( env('CRM_DOMAIN') . 'user/mentor-tutors', $keyword);
-        $response = $request->json();
+        [$statusCode, $response] = $this->make_call('get', env('CRM_DOMAIN') . 'user/mentor-tutors', $keyword);
 
         $isPaginate = $keyword['paginate'] ?? false;
 
@@ -38,7 +48,6 @@ class MentorTutorsController extends Controller
 
             $queryTempUser = TempUser::where('uuid', $item['uuid']);
 
-            // return collect($item)->put('inhouse', $queryTempUser->exists() ? (bool) $queryTempUser->first()->inhouse : false);
             return array_merge($item, [
                 'inhouse' => $queryTempUser->exists() ? (bool) $queryTempUser->first()->inhouse : false
             ]);

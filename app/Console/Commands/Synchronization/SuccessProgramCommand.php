@@ -3,8 +3,10 @@
 namespace App\Console\Commands\Synchronization;
 
 use App\Http\Traits\ConcatenateName;
+use App\Http\Traits\HttpCall;
 use App\Models\Ref_Program;
 use App\Services\ResponseService;
+use App\Services\Token\TokenService;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
@@ -14,6 +16,7 @@ use Illuminate\Support\Facades\Http;
 class SuccessProgramCommand extends Command
 {
     use ConcatenateName;
+    use HttpCall;
     /**
      * The name and signature of the console command.
      *
@@ -28,16 +31,23 @@ class SuccessProgramCommand extends Command
      */
     protected $description = 'Synchronize CRM application success program.';
 
+    protected $responseService;
+    protected $tokenService;
+
+    public function __construct(ResponseService $responseService, TokenService $tokenService)
+    {
+        parent::__construct();
+        $this->responseService = $responseService;
+        $this->tokenService = $tokenService;
+    }
+
     /**
      * Execute the console command.
      */
-    public function handle(ResponseService $responseService)
+    public function handle()
     {
-
         /* call API to get all of the success and paid programs */
-        $request = Http::get( env('CRM_DOMAIN') . 'program/list');
-        $response = $request->json();
-
+        [$statusCode, $response] = $this->make_call('get', env('CRM_DOMAIN') . 'program/list');
         if (! $response) {
             $this->error('There are no data.');
             return COMMAND::FAILURE;
@@ -102,7 +112,7 @@ class SuccessProgramCommand extends Command
         } catch (Exception $e) {
 
             DB::rollBack();
-            $responseService->storeErrorLog(
+            $this->responseService->storeErrorLog(
                 'Failed to sync success-program from CRMs.', 
                 $e->getMessage(), 
                 [
@@ -116,7 +126,7 @@ class SuccessProgramCommand extends Command
         }
 
         $message = count($refs) . ' success-program has been stored.';
-        $responseService->storeInfoLog($message, $refs);
+        $this->responseService->storeInfoLog($message, $refs);
 
         $this->newLine();
         $this->info($message);

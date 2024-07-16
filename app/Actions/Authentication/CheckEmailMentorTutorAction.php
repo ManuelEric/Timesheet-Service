@@ -3,6 +3,10 @@
 namespace App\Actions\Authentication;
 
 use App\Http\Traits\ConcatenateName;
+use App\Http\Traits\HttpCall;
+use App\Services\Token\TokenService;
+use Illuminate\Http\Client\RequestException;
+use Illuminate\Http\Client\Response;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
@@ -10,22 +14,25 @@ use Illuminate\Support\Facades\Http;
 class CheckEmailMentorTutorAction
 {
     use ConcatenateName;
+    use HttpCall;
+
+    protected $tokenService;
+
+    public function __construct(TokenService $tokenService)
+    {
+        $this->tokenService = $tokenService;
+    }
     
     public function execute(string $email)
     {
-        $request = Http::get( env('CRM_DOMAIN') . 'auth/email/check', [
-            'email' => $email
-        ]);
-        $response = $request->json();
-        
-        if (empty($response)) {
+        [$statusCode, $response] = $this->make_call('get', env('CRM_DOMAIN') . 'auth/email/check', ['email' => $email]);
+        if ( ! $response ) {
             throw new HttpResponseException(
                 response()->json([
                     'errors' => 'The provided email does not exists.'
                 ], JsonResponse::HTTP_BAD_REQUEST)
             );
         }
-           
 
         /* initialize the data */
         $uuid = $response['uuid'];

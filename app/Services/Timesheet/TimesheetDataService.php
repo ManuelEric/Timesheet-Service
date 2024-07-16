@@ -2,11 +2,22 @@
 
 namespace App\Services\Timesheet;
 
+use App\Http\Traits\HttpCall;
 use App\Models\Timesheet;
+use App\Services\Token\TokenService;
 use Illuminate\Support\Facades\Http;
 
 class TimesheetDataService
 {    
+    use HttpCall;
+
+    protected $tokenService;
+    
+    public function __construct(TokenService $tokenService)
+    {
+        $this->tokenService = $tokenService;
+    }
+    
     public function listTimesheet(array $search = [])
     {
         $timesheets = Timesheet::with(
@@ -106,8 +117,7 @@ class TimesheetDataService
 
                 if ( $category == "b2c" ) {
                     /* fetch the client profile information from CRM */
-                    $request_crm_clientInfo = Http::get( env('CRM_DOMAIN') . 'client/information/' . $studentUUID );
-                    $crm_clientInfo = $request_crm_clientInfo->json();
+                    [$statusCode, $crm_clientInfo] = $this->make_call('get', env('CRM_DOMAIN') . 'client/information' . $studentUUID);
 
                     array_push($clients, [
                         'category' => $category,
@@ -135,8 +145,7 @@ class TimesheetDataService
 
             if ( $category == "b2c" ) {
                 /* fetch the client profile information from CRM */
-                $request_crm_clientInfo = Http::get( env('CRM_DOMAIN') . 'client/information/' . $studentUUID );
-                $crm_clientInfo = $request_crm_clientInfo->json();
+                [$statusCode, $crm_clientInfo] = $this->make_call('get', env('CRM_DOMAIN') . 'client/information' . $studentUUID);
 
                 array_push($clients, [
                     'category' => $category,

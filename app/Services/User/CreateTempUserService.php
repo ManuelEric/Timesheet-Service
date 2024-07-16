@@ -52,9 +52,6 @@ class CreateTempUserService
             }
         }
 
-        
-
-
 
         /* if the user has existed on timesheet db */
         if ( $tempUser ) {
