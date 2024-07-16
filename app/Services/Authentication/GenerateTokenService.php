@@ -3,8 +3,10 @@
 namespace App\Services\Authentication;
 
 use App\Http\Traits\ConcatenateName;
+use App\Http\Traits\HttpCall;
 use App\Models\TempUser;
 use App\Models\User;
+use App\Services\Token\TokenService;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
@@ -14,14 +16,20 @@ use Illuminate\Support\Facades\Http;
 class GenerateTokenService
 {
     use ConcatenateName;
+    use HttpCall;
+
+    protected $tokenService;
+    
+    public function __construct(TokenService $tokenService)
+    {
+        $this->tokenService = $tokenService;
+    }
 
     public function createNonAdminToken(array $validated): array
     {
         /* call API to identify the user information */
-        $request = Http::post(env('CRM_DOMAIN') . 'auth/token', $validated);
-        $response = $request->json();
-
-        if (!$response)
+        [$statusCode, $response] = $this->make_call('post', env('CRM_DOMAIN') . 'auth/token', $validated);
+        if ( !$response )
             return response()->json($response, JsonResponse::HTTP_BAD_REQUEST);
 
 

@@ -2,7 +2,9 @@
 
 namespace App\Services\Authentication;
 
+use App\Http\Traits\HttpCall;
 use App\Models\TempUser;
+use App\Services\Token\TokenService;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
@@ -12,6 +14,15 @@ use Illuminate\Support\Facades\Password;
 
 class ResetPasswordService
 {
+    use HttpCall;
+
+    protected $tokenService;
+    
+    public function __construct(TokenService $tokenService)
+    {
+        $this->tokenService = $tokenService;
+    }
+
     public function createLocalPassword(string $email, string $password)
     {
         $user = TempUser::where('email', $email)->first();
@@ -50,12 +61,9 @@ class ResetPasswordService
 
     public function updateCrossPassword(string $email, string $password)
     {
-        $request = Http::post( env('CRM_DOMAIN') . 'user/update', [
-            'email' => $email,
-            'password' => $password
-        ]);
-        $response = $request->getStatusCode();
-        if ( $response !== 200 ) 
+        [$statusCode, $response] = $this->make_call('post', env('CRM_DOMAIN') . 'user/update', ['email' => $email, 'password' => $password]);
+        
+        if ( $statusCode !== 200 ) 
         {
             throw new HttpResponseException(
                 response()->json([
