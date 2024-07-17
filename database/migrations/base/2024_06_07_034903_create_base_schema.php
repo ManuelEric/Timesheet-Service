@@ -92,6 +92,7 @@ return new class extends Migration
 
         Schema::create('timesheet_cutoff_history', function (Blueprint $table) {
             $table->ulid('id')->primary();
+            $table->string('month', 15)->nullable();
             $table->date('from');
             $table->date('to');
             $table->timestamps();

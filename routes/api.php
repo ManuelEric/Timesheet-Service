@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\V1\TimesheetController as V1TimesheetController;
 use App\Http\Controllers\Api\V1\ActivityController as V1ActivitiesController;
 use App\Http\Controllers\Api\V1\Packages\ListController as V1PackagesListController;
 use App\Http\Controllers\Api\V1\User\ListController as V1UserListController;
+use App\Http\Controllers\Api\V1\Payment\PaymentController as V1PaymentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -118,6 +119,14 @@ Route::prefix('timesheet')->group(function () {
         /* Destroy the activity */
         Route::DELETE('{timesheet}/activity/{activity}', [V1ActivitiesController::class, 'destroy']);
     }); 
+});
+
+/* pre cut-off */
+Route::prefix('payment')->group(function () {
+    Route::middleware(['auth:sanctum', 'abilities:payment-menu'])->group(function () {
+        /* list of unpaid activities */
+        Route::GET('unpaid', [V1PaymentController::class, 'index']);
+    });
 });
 
 /* Package */

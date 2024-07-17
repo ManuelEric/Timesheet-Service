@@ -17,6 +17,7 @@ class Cutoff extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'month',
         'from',
         'to',
     ];
