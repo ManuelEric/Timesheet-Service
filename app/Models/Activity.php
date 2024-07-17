@@ -32,6 +32,7 @@ class Activity extends Model
         'meeting_link',
         'status',
         'cutoff_status',
+        'cutoff_ref_id',
     ];
 
     /**

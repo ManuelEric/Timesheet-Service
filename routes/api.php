@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\V1\ActivityController as V1ActivitiesController;
 use App\Http\Controllers\Api\V1\Packages\ListController as V1PackagesListController;
 use App\Http\Controllers\Api\V1\User\ListController as V1UserListController;
 use App\Http\Controllers\Api\V1\Payment\PaymentController as V1PaymentController;
+use App\Http\Controllers\Api\V1\Payment\CutoffController as V1CutoffController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -32,13 +33,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::prefix('timesheet')->group(function () {
-    
+
     Route::GET('{timesheet}/export', [V1TimesheetController::class, 'export']);
 });
 
 
-/* API Documentation */ 
-Route::get('api-documentation', function() {
+/* API Documentation */
+Route::get('api-documentation', function () {
     return view('API-documentation');
 });
 
@@ -107,7 +108,7 @@ Route::prefix('timesheet')->group(function () {
         Route::DELETE('{timesheet}/delete', [V1TimesheetController::class, 'destroy']);
         /* Export Timesheet */
         // Route::GET('{timesheet}/export', [V1TimesheetController::class, 'export']);
-        
+
         /* List Activities of the Timesheet */
         Route::GET('{timesheet}/activities', [V1ActivitiesController::class, 'index']);
         /* Show the Activity */
@@ -118,7 +119,7 @@ Route::prefix('timesheet')->group(function () {
         Route::PUT('{timesheet}/activity/{activity}', [V1ActivitiesController::class, 'update']);
         /* Destroy the activity */
         Route::DELETE('{timesheet}/activity/{activity}', [V1ActivitiesController::class, 'destroy']);
-    }); 
+    });
 });
 
 /* pre cut-off */
@@ -126,6 +127,8 @@ Route::prefix('payment')->group(function () {
     Route::middleware(['auth:sanctum', 'abilities:payment-menu'])->group(function () {
         /* list of unpaid activities */
         Route::GET('unpaid', [V1PaymentController::class, 'index']);
+        /* create cut-off */
+        Route::POST('cut-off/create', [V1CutoffController::class, 'store']);
     });
 });
 
@@ -138,7 +141,7 @@ Route::prefix('package')->group(function () {
         Route::prefix('component')->group(function () {
             Route::GET('list', [V1PackagesListController::class, 'component']);
         });
-    }); 
+    });
 });
-    
+
 Route::POST('identity/generate-token', [V1LoginController::class, 'authenticateNonAdmin']);

@@ -5,13 +5,15 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class AdminSeeder extends Seeder
+class TempUserSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        \App\Models\User::factory(1)->create();
+        \App\Models\TempUser::withoutEvents(function () {
+            \App\Models\TempUser::factory(10)->create();
+        });
     }
 }

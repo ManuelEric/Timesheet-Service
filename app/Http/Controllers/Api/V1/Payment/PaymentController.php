@@ -19,7 +19,7 @@ class PaymentController extends Controller
         /* incoming request */
         $search = $request->only(['program_name', 'package_id', 'keyword']);
         $unpaidActivities = Activity::unpaid()->onSearch($search)->get();
-        $mappedActivities = $unpaidActivities->map( function ($data) {
+        $mappedActivities = $unpaidActivities->map(function ($data) {
             $activityId = $data->id;
             $timesheetId = $data->timesheet->id;
             $activity = $data->activity;

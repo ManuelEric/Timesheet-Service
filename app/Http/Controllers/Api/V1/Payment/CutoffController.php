@@ -2,38 +2,28 @@
 
 namespace App\Http\Controllers\Api\V1\Payment;
 
+use App\Actions\Payment\CutoffAction;
 use App\Http\Controllers\Controller;
-use App\Models\Activity;
-use App\Models\Cutoff;
-use Illuminate\Http\Request;
+use App\Http\Requests\Payment\StoreCutoffRequest;
+use App\Rules\CutoffDate;
 use Illuminate\Support\Carbon;
 
 class CutoffController extends Controller
 {
-    public function store(Request $request)
-    {
-        $request->validate([
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date'
-        ]);
-
-        $validated = $request->only(['start_date', 'end_date']);
+    public function store(
+        StoreCutoffRequest $request,
+        CutoffAction $cutoffAction,
+    ) {
+        $validated = $request->safe()->only(['start_date', 'end_date']);
         $validatedStartDate = $validated['start_date'];
         $validatedEndDate = $validated['end_date'];
 
-        /* select all activities between start_date and end_date */
-        $goingToBePaidActivities = Activity::query()->
-            unpaid()->
-            where($validatedStartDate, '<=', 'start_date')->
-            where($validatedEndDate, '>=', 'end_date')->
-            pluck('id')->
-            toArray();
+        $cutoffAction->execute($validatedStartDate, $validatedEndDate);
 
-        /* store cut-off as reference */
-        $cutoff = new Cutoff;
-        $cutoff->month = Carbon::parse($validatedEndDate)->format('M');
-        $cutoff->from = $validatedStartDate;
-        $cutoff->to = $validatedEndDate;
-        $cutoff->save();
+        $from = Carbon::parse($validatedStartDate)->format('F d');
+        $to = Carbon::parse($validatedEndDate)->format('F d, Y');
+        return response()->json([
+            'message' => "Payments for all activities conducted from {$from} to {$to}, have been processed."
+        ]);
     }
 }
