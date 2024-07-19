@@ -14,6 +14,8 @@ use App\Http\Controllers\Api\V1\Packages\ListController as V1PackagesListControl
 use App\Http\Controllers\Api\V1\User\ListController as V1UserListController;
 use App\Http\Controllers\Api\V1\Payment\PaymentController as V1PaymentController;
 use App\Http\Controllers\Api\V1\Payment\CutoffController as V1CutoffController;
+use App\Http\Controllers\Api\V1\Payment\FeeController as V1FeeController;
+use App\Http\Controllers\Api\V1\Payment\BonusController as V1BonusController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -107,7 +109,14 @@ Route::prefix('timesheet')->group(function () {
         /* Destroy Timesheet */
         Route::DELETE('{timesheet}/delete', [V1TimesheetController::class, 'destroy']);
         /* Export Timesheet */
-        // Route::GET('{timesheet}/export', [V1TimesheetController::class, 'export']);
+        Route::GET('{timesheet}/export', [V1TimesheetController::class, 'export']);
+
+        /**
+         * The Components
+         */
+        Route::prefix('component')->group(function () {
+            Route::GET('list', [V1TimesheetController::class, 'component']);
+        });
 
         /* List Activities of the Timesheet */
         Route::GET('{timesheet}/activities', [V1ActivitiesController::class, 'index']);
@@ -129,6 +138,11 @@ Route::prefix('payment')->group(function () {
         Route::GET('unpaid', [V1PaymentController::class, 'index']);
         /* create cut-off */
         Route::POST('cut-off/create', [V1CutoffController::class, 'store']);
+        /* add additional fee into the timesheet */
+        Route::POST('additional-fee/create', [V1FeeController::class, 'store']);
+        /* add bonus into the timesheet */
+        Route::POST('bonus/create', [V1BonusController::class, 'store']);
+
     });
 });
 

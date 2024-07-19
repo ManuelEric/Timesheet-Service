@@ -31,7 +31,7 @@ class ActivityFactory extends Factory
             'start_date' => $start_date,
             'end_date' => $end_date,
             'fee_hours' => fake()->randomNumber(6),
-            'additional_fee' => fake()->randomNumber(5),
+            'additional_fee' => 0,
             'time_spent' => $time_spent,
             'meeting_link' => fake()->url,
             'status' => 0,

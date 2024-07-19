@@ -28,6 +28,7 @@ class Activity extends Model
         'end_date',
         'fee_hours',
         'additional_fee',
+        'bonus_fee',
         'time_spent',
         'meeting_link',
         'status',

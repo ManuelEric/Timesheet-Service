@@ -5,6 +5,7 @@ namespace App\Http\Traits;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 trait HttpCall
 {
@@ -15,6 +16,7 @@ trait HttpCall
         ])->{$method}( $endpoint, $params );
 
         if ( $request->failed() ) {
+            Log::error('Failed to make a call to ' . $endpoint);
             throw new HttpResponseException(
                 response()->json($request->json(), JsonResponse::HTTP_BAD_REQUEST)
             );
