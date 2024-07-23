@@ -59,6 +59,11 @@ class Activity extends Model
         $query->where('cutoff_status', 'unpaid');
     }
 
+    public function scopePaid(Builder $query): void
+    {
+        $query->where('cutoff_status', 'paid')->whereNotNull('cutoff_ref_id');
+    }
+
     public function scopeOnSearch(Builder $query, array $search = []): void
     {
         $query->whereHas('timesheet', function ($sub) use ($search) {

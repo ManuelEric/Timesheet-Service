@@ -25,20 +25,27 @@ class CutoffAction
         DB::beginTransaction();
         try {
 
-            /* store cut-off as reference */
-            $cutoff = new Cutoff();
-            $cutoff->month = Carbon::parse($endDate)->format('F Y');
-            $cutoff->from = $startDate;
-            $cutoff->to = $endDate;
-            $cutoff->save();
-
             /* select all activities between start_date and end_date */
             /* all of these activities going to be updated into paid activities */
-            Activity::query()->unpaid()->where('start_date', '>=', "{$startDate} 00:00:00")->where('end_date', '<=', "{$endDate} 23:59:59")->update([
-                'status' => 1,
-                'cutoff_status' => 'paid',
-                'cutoff_ref_id' => $cutoff->id
-            ]);
+            $rawQuery = Activity::query()->unpaid()->where('start_date', '>=', "{$startDate} 00:00:00")->where('end_date', '<=', "{$endDate} 23:59:59");
+            $activities = $rawQuery->select('fee_hours', 'additional_fee', 'bonus_fee')->get();
+
+            if ( count($activities) > 0 )
+            {
+                /* store cut-off as reference */
+                $cutoff = new Cutoff();
+                $cutoff->month = Carbon::parse($endDate)->format('F Y');
+                $cutoff->from = $startDate;
+                $cutoff->to = $endDate;
+                $cutoff->save();
+                
+                /* execute */
+                $rawQuery->update([
+                    'status' => 1,
+                    'cutoff_status' => 'paid',
+                    'cutoff_ref_id' => $cutoff->id
+                ]);                
+            }
             DB::commit();
         } catch (Exception $err) {
 
@@ -51,5 +58,7 @@ class CutoffAction
                 ], JsonResponse::HTTP_BAD_REQUEST)
             );
         }
+
+        return $activities;
     }
 }

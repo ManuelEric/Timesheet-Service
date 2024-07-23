@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\V1\Payment\PaymentController as V1PaymentController
 use App\Http\Controllers\Api\V1\Payment\CutoffController as V1CutoffController;
 use App\Http\Controllers\Api\V1\Payment\FeeController as V1FeeController;
 use App\Http\Controllers\Api\V1\Payment\BonusController as V1BonusController;
+use App\Http\Controllers\Api\V1\Payment\ExistingCutoffController as V1ExistingCutoffController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -142,6 +143,8 @@ Route::prefix('payment')->group(function () {
         Route::POST('additional-fee/create', [V1FeeController::class, 'store']);
         /* add bonus into the timesheet */
         Route::POST('bonus/create', [V1BonusController::class, 'store']);
+        /* add to an existing cut-off */
+        Route::POST('cut-off/add', [V1ExistingCutoffController::class, 'store']);
 
     });
 });

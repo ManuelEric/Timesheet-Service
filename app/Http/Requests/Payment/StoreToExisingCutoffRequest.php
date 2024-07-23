@@ -2,14 +2,15 @@
 
 namespace App\Http\Requests\Payment;
 
-use App\Rules\CutoffDate;
+use App\Rules\CutoffMonth;
+use App\Rules\ExistCutoffActivity;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 
-class StoreCutoffRequest extends FormRequest
+class StoreToExisingCutoffRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.
@@ -35,16 +36,10 @@ class StoreCutoffRequest extends FormRequest
      */
     public function rules(): array
     {
-        $start = $this->input('start_date');
-        $end = $this->input('end_date');
         return [
-            'start_date' => 'required|date',
-            'end_date' => [
-                'required',
-                'date',
-                'after:start_date',
-                new CutoffDate($start, $end)
-            ]
+            'activity_id' => 'required|array',
+            'activity_id.*' => ['required', new ExistCutoffActivity],
+            'date' => ['required', 'date', new CutoffMonth],
         ];
     }
 }
