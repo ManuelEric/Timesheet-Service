@@ -87,7 +87,7 @@ class GenerateTokenService
         $user->authenticate();
         switch ($user->role) {
             case 'finance':
-                $granted_access = ['program-menu', 'timesheet-menu', 'cutoff-menu']; # all access granted for finance
+                $granted_access = ['program-menu', 'timesheet-menu', 'payment-menu']; # all access granted for finance
                 break;
 
             default:

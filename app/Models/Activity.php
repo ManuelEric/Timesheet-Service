@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Observers\ActivityObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -27,10 +28,12 @@ class Activity extends Model
         'end_date',
         'fee_hours',
         'additional_fee',
+        'bonus_fee',
         'time_spent',
         'meeting_link',
         'status',
         'cutoff_status',
+        'cutoff_ref_id',
     ];
 
     /**
@@ -46,5 +49,25 @@ class Activity extends Model
     public function cutoff_history()
     {
         return $this->belongsTo(Cutoff::class, 'cutoff_ref_id', 'id');
+    }
+
+    /**
+     * The scopes.
+     */
+    public function scopeUnpaid(Builder $query): void
+    {
+        $query->where('cutoff_status', 'unpaid');
+    }
+
+    public function scopePaid(Builder $query): void
+    {
+        $query->where('cutoff_status', 'paid')->whereNotNull('cutoff_ref_id');
+    }
+
+    public function scopeOnSearch(Builder $query, array $search = []): void
+    {
+        $query->whereHas('timesheet', function ($sub) use ($search) {
+            $sub->onSearch($search);
+        });
     }
 }

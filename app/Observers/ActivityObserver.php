@@ -21,7 +21,20 @@ class ActivityObserver implements ShouldHandleEventsAfterCommit
      */
     public function created(Activity $activity): void
     {
-        Log::info('Activity of Timesheet ID: ' . $activity->timesheet_id . ' has been created.');
+        switch ($activity->activity) 
+        {
+            case "Additional Fee":
+                Log::info('An additional fee has been added to the Timesheet ID: ' . $activity->timesheet_id);
+                break;
+
+            case "Bonus":
+                Log::info('A bonus has been added to the Timesheet ID: ' . $activity->timesheet_id);
+                break;
+
+            default:
+                Log::info('Activity of Timesheet ID: ' . $activity->timesheet_id . ' has been created.');
+        }
+            
     }
 
     /**

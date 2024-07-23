@@ -160,4 +160,35 @@ class TimesheetController extends Controller
 
         return Excel::download(new TimesheetExport($detailTimesheet, $timesheetActivities), $filename);
     }
+
+    /**
+     * The components.
+     */
+    public function component(TimesheetDataService $timesheetDataService): JsonResponse
+    {
+        $timesheets = Timesheet::has('ref_program')->get();
+        $mappedComponents = $timesheets->map(function ($data) use ($timesheetDataService)
+        {
+            /* initialize variables */
+            $detailTimesheet = $timesheetDataService->detailTimesheet($data);
+            unset($detailTimesheet['editableColumns']);
+
+            /* manipulate variables */
+            $clients = count($detailTimesheet['clientProfile']) > 1 ? "Group" : $detailTimesheet['clientProfile'][0]['client_name'];
+            $programName = $detailTimesheet['packageDetails']['program_name'];
+            $packageType = $detailTimesheet['packageDetails']['package_type'];
+            $packageName = $detailTimesheet['packageDetails']['package_name'];
+
+            return [
+                'id' => $data->id,
+                'clients' => $clients,
+                'program_name' => $programName,
+                'package_type' => $packageType,
+                'package_name' => $packageName,
+            ];
+        }); 
+
+    
+        return response()->json($mappedComponents);
+    }
 }

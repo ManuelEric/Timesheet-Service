@@ -2,14 +2,21 @@
 
 namespace App\Models;
 
+use App\Observers\CutOffObserver;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
+#[ObservedBy([CutOffObserver::class])]
 class Cutoff extends Model
 {
     use HasFactory;
 
     protected $table = 'timesheet_cutoff_history';
+    public $incrementing = false;
 
     /**
      * The attributes that are mass assignable.
@@ -17,10 +24,20 @@ class Cutoff extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'month',
         'from',
         'to',
     ];
-    
+
+    public static function boot()
+    {
+        parent::boot();
+
+        self::creating(function ($model) {
+            $model->id = (string) Str::ulid();
+        });
+    }
+
     /**
      * The relations.
      *
@@ -29,5 +46,25 @@ class Cutoff extends Model
     public function activities()
     {
         return $this->hasMany(Activity::class, 'cutoff_ref_id', 'id');
+    }
+
+    /**
+     * The scopes.
+     */
+
+    public function scopeInBetween(Builder $query, string $start, string $end): void
+    {
+        $query->where(function ($sub) use ($start, $end) {
+            $sub->
+                withinTheCutoffDateRange($start)->
+                orWhere(function ($_sub_) use ($start, $end) {
+                    $_sub_->where('from', $start)->where('to', $end);
+                });
+        });
+    }
+
+    public function scopeWithinTheCutoffDateRange(Builder $query, string $date): void
+    {
+        $query->whereRaw("'{$date}' BETWEEN `from` and `to`");
     }
 }

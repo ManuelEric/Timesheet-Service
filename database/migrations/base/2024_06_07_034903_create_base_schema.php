@@ -92,6 +92,7 @@ return new class extends Migration
 
         Schema::create('timesheet_cutoff_history', function (Blueprint $table) {
             $table->ulid('id')->primary();
+            $table->string('month', 15)->nullable();
             $table->date('from');
             $table->date('to');
             $table->timestamps();
@@ -108,8 +109,9 @@ return new class extends Migration
             $table->datetime('end_date')->nullable();
             $table->decimal('fee_hours');
             $table->decimal('additional_fee');
+            $table->decimal('bonus_fee');
             $table->float('time_spent')->comment('in hours');
-            $table->text('meeting_link');
+            $table->text('meeting_link')->nullable();
             $table->integer('status');
             $table->enum('cutoff_status', ['paid', 'unpaid'])->default('unpaid');
             $table->foreignUlid('cutoff_ref_id')->nullable()->constrained(

@@ -30,12 +30,12 @@ class MentorTutorsController extends Controller
     public function index(Request $request): JsonResponse
     {
         /* incoming request */
-        $keyword = $request->only(['keyword', 'paginate', 'page', 'role']);
+        $search = $request->only(['keyword', 'paginate', 'page', 'role']);
         $requestInhouse = $request->get('inhouse');
         $inhouse = $requestInhouse === "true" ? 1 : 0;
 
         /* call API to get all of the mentors and tutors */
-        [$statusCode, $response] = $this->make_call('get', env('CRM_DOMAIN') . 'user/mentor-tutors', $keyword);
+        [$statusCode, $response] = $this->make_call('get', env('CRM_DOMAIN') . 'user/mentor-tutors', $search);
 
         $isPaginate = $keyword['paginate'] ?? false;
 

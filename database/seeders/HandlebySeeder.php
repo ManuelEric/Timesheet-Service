@@ -5,13 +5,15 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class AdminSeeder extends Seeder
+class HandlebySeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        \App\Models\User::factory(1)->create();
+        \App\Models\Pivot\HandleBy::withoutEvents(function () {
+            \App\Models\Pivot\HandleBy::factory(5)->create();
+        });
     }
 }
