@@ -128,7 +128,7 @@ return new class extends Migration
             $table->char('invoice_id', 50);
             $table->string('student_uuid');
             $table->string('student_name')->nullable();
-            $table->string('student_school');
+            $table->string('student_school')->nullable();
             $table->string('program_name');
             $table->enum('require', ['Mentor', 'Tutor']);
             $table->foreignId('timesheet_id')->nullable()->constrained(

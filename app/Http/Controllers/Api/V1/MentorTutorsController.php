@@ -37,11 +37,10 @@ class MentorTutorsController extends Controller
         /* call API to get all of the mentors and tutors */
         [$statusCode, $response] = $this->make_call('get', env('CRM_DOMAIN') . 'user/mentor-tutors', $search);
 
-        $isPaginate = $keyword['paginate'] ?? false;
+        $isPaginate = $search['paginate'] ?? false;
 
         /* only fetch the data in order to add inhouse item for each data */
         $mentortutorsCollection = $isPaginate == true ? $response['data'] : $response; 
-
 
         /* adding new items which is inhouse */
         $mappedResponse = collect($mentortutorsCollection)->map(function ($item) {

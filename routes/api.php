@@ -137,6 +137,8 @@ Route::prefix('payment')->group(function () {
     Route::middleware(['auth:sanctum', 'abilities:payment-menu'])->group(function () {
         /* list of unpaid activities */
         Route::GET('unpaid', [V1PaymentController::class, 'index']);
+        /* list of paid activities */
+        Route::GET('paid', []);
         /* create cut-off */
         Route::POST('cut-off/create', [V1CutoffController::class, 'store']);
         /* add additional fee into the timesheet */

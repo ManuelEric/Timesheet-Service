@@ -66,8 +66,16 @@ class Activity extends Model
 
     public function scopeOnSearch(Builder $query, array $search = []): void
     {
-        $query->whereHas('timesheet', function ($sub) use ($search) {
-            $sub->onSearch($search);
-        });
+        $cutoff_date = $search['cutoff_date'] ?? false;
+
+        $query->
+            whereHas('timesheet', function ($sub) use ($search) {
+                $sub->onSearch($search);
+            })->
+            when( $cutoff_date, function ($sub) use ($cutoff_date) {
+                // $sub->whereHas('cutoff_history', function ($_sub_) use ($cutoff_date) {
+                //     $_sub_->withinTheCutoffDateRange($cutoff_date);
+                // });
+            });
     }
 }
