@@ -137,7 +137,7 @@ class ActivityController extends Controller
         $timesheetId,
         $activityId,
         IdentifyActivityAction $identifyActivityAction,
-    )
+    ): JsonResponse
     {
         $activity = $identifyActivityAction->execute($activityId, $timesheetId);
 

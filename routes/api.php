@@ -68,15 +68,16 @@ Route::prefix('user')->group(function () {
         /* List Mentor & Tutors */
         Route::GET('mentor-tutors', [V1MentorTutorController::class, 'index']);
         Route::PUT('mentor-tutors/{mentortutor_uuid}', [V1MentorTutorController::class, 'update']);
-        /* List subject by Mentor / Tutor */
-        Route::GET('mentor-tutors/{mentortutor_uuid}/subjects', [V1MentorTutorController::class, 'component']);
-
+        
         /**
          * The Components
          */
         Route::prefix('component')->middleware(['abilities:program-menu'])->group(function () {
             Route::GET('list', [V1UserListController::class, 'component']);
         });
+
+        /* List subject by Mentor / Tutor */
+        Route::GET('mentor-tutors/{mentortutor_uuid}/subjects', [V1MentorTutorController::class, 'component']);
     });
 });
 
@@ -135,19 +136,20 @@ Route::prefix('timesheet')->group(function () {
 /* pre cut-off */
 Route::prefix('payment')->group(function () {
     Route::middleware(['auth:sanctum', 'abilities:payment-menu'])->group(function () {
-        /* list of unpaid activities */
+        /* List of unpaid activities */
         Route::GET('unpaid', [V1PaymentController::class, 'index']);
-        /* list of paid activities */
-        Route::GET('paid', []);
-        /* create cut-off */
+        /* List of paid activities */
+        Route::GET('paid', [V1PaymentController::class, 'index']);
+        /* Create cut-off */
         Route::POST('cut-off/create', [V1CutoffController::class, 'store']);
-        /* add additional fee into the timesheet */
+        /* Add additional fee into the timesheet */
         Route::POST('additional-fee/create', [V1FeeController::class, 'store']);
-        /* add bonus into the timesheet */
+        /* Add bonus into the timesheet */
         Route::POST('bonus/create', [V1BonusController::class, 'store']);
-        /* add to an existing cut-off */
+        /* Add to an existing cut-off */
         Route::POST('cut-off/add', [V1ExistingCutoffController::class, 'store']);
-
+        /* Remove the activity from the specified cut-off */
+        Route::PATCH('cut-off/unassign', [V1CutoffController::class, 'unassign']);
     });
 });
 

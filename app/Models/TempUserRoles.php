@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -37,5 +38,13 @@ class TempUserRoles extends Model
     public function timesheet()
     {
         return $this->hasMany(Timesheet::class, 'subject_id', 'id');
+    }
+
+    /**
+     * The scopes.
+     */
+    public function scopeTutor(Builder $query): void
+    {
+        $query->where('role', 'Tutor')->whereNotNull('tutor_subject');
     }
 }

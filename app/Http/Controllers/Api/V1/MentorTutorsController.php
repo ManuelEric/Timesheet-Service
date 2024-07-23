@@ -121,7 +121,7 @@ class MentorTutorsController extends Controller
         $mentorTutorsUuid,
         ): JsonResponse
     {
-        $subjects = TempUserRoles::whereHas('temp_user', function ($query) use ($mentorTutorsUuid) {
+        $subjects = TempUserRoles::tutor()->whereHas('temp_user', function ($query) use ($mentorTutorsUuid) {
             $query->where('uuid', $mentorTutorsUuid);
         })->get();
 

@@ -61,7 +61,7 @@ return new class extends Migration
             )->onUpdate('restrict')->onDelete('restrict');
             $table->integer('duration');
             $table->text('notes')->nullable();
-            $table->foreignId('subject_id')->constrained(
+            $table->foreignId('subject_id')->nullable()->constrained(
                 table: 'temp_user_roles', indexName: 'timesheets_subject_id',
             )->onUpdate('restrict')->onDelete('restrict');
             $table->timestamps();
