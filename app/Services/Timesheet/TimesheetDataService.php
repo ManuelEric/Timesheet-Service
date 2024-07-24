@@ -117,7 +117,7 @@ class TimesheetDataService
 
                 if ( $category == "b2c" ) {
                     /* fetch the client profile information from CRM */
-                    [$statusCode, $crm_clientInfo] = $this->make_call('get', env('CRM_DOMAIN') . 'client/information' . $studentUUID);
+                    [$statusCode, $crm_clientInfo] = $this->make_call('get', env('CRM_DOMAIN') . 'client/information/' . $studentUUID);
 
                     array_push($clients, [
                         'category' => $category,

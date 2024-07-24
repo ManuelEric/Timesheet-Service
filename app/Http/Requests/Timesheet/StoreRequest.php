@@ -67,11 +67,11 @@ class StoreRequest extends FormRequest
             ],
             'package_id' => 'required|exists:timesheet_packages,id',
             'duration' => 'required|integer',
-            'pic_id' => 'required|exists:users,id',
+            'pic_id' => 'array',
             'pic_id.*' => 'required|exists:users,id',
             'notes' => 'nullable',
             'subject_id' => [
-                'required',
+                'nullable',
                 Rule::exists('temp_user_roles', 'id')->where(function ($query) { #if selected subject is same with tempuser's
                     $tempUser = TempUser::where('email', $this->input('mentortutor_email'))->first();
                     return $query->where('id', $this->input('subject_id'))->where('temp_user_id', $tempUser->id);
@@ -92,11 +92,11 @@ class StoreRequest extends FormRequest
             ],
             'package_id' => 'required|exists:timesheet_packages,id',
             'duration' => 'required|integer',
-            'pic_id' => 'required|exists:users,id',
+            'pic_id' => 'array',
             'pic_id.*' => 'required|exists:users,id',
             'notes' => 'nullable',
             'subject_id' => [
-                'required',
+                'nullable',
                 Rule::exists('temp_user_roles', 'id')->where(function ($query) { #if selected subject is same with tempuser's
                     $tempUser = TempUser::where('email', $this->input('mentortutor_email'))->first();
                     return $query->where('id', $this->input('subject_id'))->where('temp_user_id', $tempUser->id);
@@ -126,7 +126,10 @@ class StoreRequest extends FormRequest
     {
         return [
             'ref_id' => 'programs',
-            'mentortutor_email' => 'mentor or tutor email',
+            'mentortutor_email' => 'mentor/tutor email',
+            'inhouse_id' => 'inhouse mentor/tutor',
+            'package_id' => 'package',
+            'pic_id' => 'PIC',
         ];
     }
 }
