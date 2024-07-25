@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Actions\Timesheet\CreateTimesheetAction;
 use App\Actions\Timesheet\IdentifierCheckingAction as IdentifyTimesheetIdAction;
-use App\Actions\Activity\IdentifierCheckingAction as IdentifyActivityIdAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Timesheet\StoreRequest as TimesheetStoreRequest;
 use App\Actions\Timesheet\SelectOrRegisterMentorTutorAction as SelectOrRegisterMentorTutorTimesheetAction;
@@ -15,7 +14,6 @@ use App\Models\TempUser;
 use App\Models\Timesheet;
 use App\Services\Activity\ActivityDataService;
 use App\Services\Timesheet\TimesheetDataService;
-use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -147,7 +145,6 @@ class TimesheetController extends Controller
         $timesheetId, 
         IdentifyTimesheetIdAction $identifyTimesheetIdAction,
         TimesheetDataService $timesheetDataService,
-        IdentifyActivityIdAction $identifyActivityIdAction,
         ActivityDataService $activityDataService,
         )
     {

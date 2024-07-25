@@ -6,7 +6,8 @@ use App\Http\Controllers\Api\V1\Authentication\LogoutController as V1LogoutContr
 use App\Http\Controllers\Api\V1\Authentication\ForgotPasswordController as V1ForgotPasswordController;
 use App\Http\Controllers\Api\V1\Authentication\ResetPasswordController as V1ResetPasswordController;
 use App\Http\Controllers\Api\V1\Authentication\CreatePasswordController as V1CreatePasswordController;
-use App\Http\Controllers\Api\V1\MentorTutorsController as V1MentorTutorController;
+use App\Http\Controllers\Api\V1\MentorTutor\MainController as V1MentorTutorController;
+use App\Http\Controllers\Api\V1\MentorTutor\ComponentController as V1MentorTutorComponentController;
 use App\Http\Controllers\Api\V1\Programs\ListController as V1ProgramsListController;
 use App\Http\Controllers\Api\V1\TimesheetController as V1TimesheetController;
 use App\Http\Controllers\Api\V1\ActivityController as V1ActivitiesController;
@@ -77,7 +78,9 @@ Route::prefix('user')->group(function () {
         });
 
         /* List subject by Mentor / Tutor */
-        Route::GET('mentor-tutors/{mentortutor_uuid}/subjects', [V1MentorTutorController::class, 'component']);
+        Route::GET('mentor-tutors/{mentortutor_uuid}/subjects', [V1MentorTutorComponentController::class, 'comp_subjects']);
+        /* List students mentored / tutored by Mentor / Tutor */
+        Route::GET('mentor-tutors/{mentortutor_uuid}/students', [V1MentorTutorComponentController::class, 'comp_students']);
     });
 });
 
@@ -140,16 +143,22 @@ Route::prefix('payment')->group(function () {
         Route::GET('unpaid', [V1PaymentController::class, 'index']);
         /* List of paid activities */
         Route::GET('paid', [V1PaymentController::class, 'index']);
-        /* Create cut-off */
-        Route::POST('cut-off/create', [V1CutoffController::class, 'store']);
         /* Add additional fee into the timesheet */
         Route::POST('additional-fee/create', [V1FeeController::class, 'store']);
         /* Add bonus into the timesheet */
         Route::POST('bonus/create', [V1BonusController::class, 'store']);
-        /* Add to an existing cut-off */
-        Route::POST('cut-off/add', [V1ExistingCutoffController::class, 'store']);
-        /* Remove the activity from the specified cut-off */
-        Route::PATCH('cut-off/unassign', [V1CutoffController::class, 'unassign']);
+
+        Route::prefix('cut-off')->group(function() {
+            /* Create cut-off */
+            Route::POST('create', [V1CutoffController::class, 'store']);
+            /* Add to an existing cut-off */
+            Route::POST('add', [V1ExistingCutoffController::class, 'store']);
+            /* Remove the activity from the specified cut-off */
+            Route::PATCH('unassign', [V1CutoffController::class, 'unassign']);
+            /* Export cut-off */
+            Route::GET('export/{timesheet}/{cutoff_date}', [V1CutoffController::class, 'export'])->withoutMiddleware(['auth:sanctum', 'abilities:payment-menu']);
+
+        });
     });
 });
 

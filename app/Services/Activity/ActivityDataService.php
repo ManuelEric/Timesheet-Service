@@ -3,17 +3,32 @@
 namespace App\Services\Activity;
 
 use App\Http\Traits\TranslateActivityStatus;
+use App\Models\Activity;
+use App\Models\Cutoff;
 use App\Models\Timesheet;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 
 class ActivityDataService
 {
     use TranslateActivityStatus;
 
-    public function listActivities(Timesheet $timesheet)
+    public function listActivities(Timesheet $timesheet, ?string $date)
     {
         /* fetch the entire activities */
         $activities = $timesheet->activities;
+
+        
+        /* when the argument date is filled */
+        if ( $date )
+        {
+            $cutoff = Cutoff::withinTheCutoffDateRange($date)->first();
+            $cutoffId = $cutoff->id;
+
+            $activities = $activities->where('cutoff_ref_id', $cutoffId);
+        }
+
+
         $mappedActivities = $activities->map(function ($data) {
 
             $activity = $data->activity;

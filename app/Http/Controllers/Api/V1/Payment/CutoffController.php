@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Payment;
 
 use App\Actions\Payment\CutoffAction;
+use App\Exports\PayrollExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Payment\StoreCutoffRequest;
 use App\Http\Requests\Payment\UnassignActivityRequest;
@@ -13,6 +14,11 @@ use App\Services\ResponseService;
 use Exception;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Services\Activity\ActivityDataService;
+use App\Services\Timesheet\TimesheetDataService;
+use App\Actions\Timesheet\IdentifierCheckingAction as IdentifyTimesheetIdAction;
+use App\Http\Requests\Payment\CutoffExportRequest;
 
 class CutoffController extends Controller
 {
@@ -71,5 +77,30 @@ class CutoffController extends Controller
         return response()->json([
             'message' => 'The activity was successfully unassigned',
         ]);
+    }
+
+    public function export(
+        CutoffExportRequest $request,
+        IdentifyTimesheetIdAction $identifyTimesheetIdAction,
+        TimesheetDataService $timesheetDataService,
+        ActivityDataService $activityDataService,
+        )
+    {
+        $validated = $request->safe()->only(['timesheet_id', 'cutoff_date']);
+        $validatedTimesheetId = $validated['timesheet_id'];
+        $validatedCutoffDate = $validated['cutoff_date'];
+        
+        $timesheet = $identifyTimesheetIdAction->execute($validatedTimesheetId);
+        $detailTimesheet = $timesheetDataService->detailTimesheet($timesheet);
+        $activities = $activityDataService->listActivities($timesheet, $validatedCutoffDate);
+
+
+        unset($detailTimesheet['editableColumns']);
+
+
+        // $filename = $this->generateFileName($mappedTimesheetData);
+        $filename = 'Payroll_' . date('F_Y') . '.xlsx';
+
+        return Excel::download(new PayrollExport($detailTimesheet, $activities), $filename);
     }
 }
