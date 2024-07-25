@@ -162,6 +162,7 @@ const submit = async () => {
           notes: '',
           pic_id: [],
         }
+        tutor_selected.value = []
         getData()
       }
     } catch (error) {

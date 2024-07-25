@@ -63,6 +63,31 @@ const toggleDialog = type => {
   }
 }
 
+const downloadTimesheet = async id => {
+  try {
+    const res = await ApiService.get('api/v1/timesheet/' + id + '/export', {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    })
+    if (res) {
+      // Create a temporary <a> element to trigger the download
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `timesheet_${id}.xlsx`)
+
+      // Append the <a> element to the body and click it to trigger the download
+      document.body.appendChild(link)
+      link.click()
+
+      // Clean up: remove the <a> element and revoke the blob URL
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    }
+  } catch (error) {
+    showNotif('error', error.response?.statusText, 'bottom-end')
+    console.log(error)
+  }
+}
+
 // End Function
 
 onMounted(() => {
@@ -114,7 +139,10 @@ onMounted(() => {
             </VListItem>
             <VListItem>
               <VListItemTitle>
-                <div class="cursor-pointer">
+                <div
+                  class="cursor-pointer"
+                  @click="downloadTimesheet(props.id)"
+                >
                   <VIcon
                     icon="ri-download-line"
                     class="me-2"

@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\Activity;
 use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 
 class ActivityObserver implements ShouldHandleEventsAfterCommit
@@ -42,8 +43,29 @@ class ActivityObserver implements ShouldHandleEventsAfterCommit
      */
     public function updated(Activity $activity): void
     {
+        /**
+         * Listening to 'updated cutoff_ref_id'
+         */
+        if ( $activity->wasChanged('cutoff_ref_id') ) 
+        {
+            $newValue_of_cutoffStatus = $activity->cutoff_status;
+            $newValue_of_cutoffrefId = $activity->cutoff_ref_id;
+
+            if ( $newValue_of_cutoffStatus == 'unpaid' && $newValue_of_cutoffrefId == NULL ) #1
+            {
+                $activityId = $activity->id;
+                Log::info($this->userName . ' has unassigned the activity no. ' . $activityId );
+                
+            } 
+            else if ( $newValue_of_cutoffStatus == 'paid' && $newValue_of_cutoffrefId != NULL ) #2
+            {
+                Log::info($this->userName . ' has stored into cut-off.');
+            }
+            return;
+        }
+
         $activityName = $activity->activity;
-        $endTime = $activity->end_date->format('d M Y H:i');
+        $endTime = Carbon::parse($activity->end_date)->format('d M Y H:i');
         Log::info($this->userName . ' just completed the activity *' . $activityName . '* at ' . $endTime);
     }
 

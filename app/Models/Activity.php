@@ -73,9 +73,9 @@ class Activity extends Model
                 $sub->onSearch($search);
             })->
             when( $cutoff_date, function ($sub) use ($cutoff_date) {
-                // $sub->whereHas('cutoff_history', function ($_sub_) use ($cutoff_date) {
-                //     $_sub_->withinTheCutoffDateRange($cutoff_date);
-                // });
+                $sub->whereHas('cutoff_history', function ($_sub_) use ($cutoff_date) {
+                    $_sub_->withinTheCutoffDateRange($cutoff_date);
+                });
             });
     }
 }
