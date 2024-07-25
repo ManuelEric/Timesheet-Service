@@ -8,16 +8,16 @@ use App\Services\Token\TokenService;
 use Illuminate\Support\Facades\Http;
 
 class TimesheetDataService
-{    
+{
     use HttpCall;
 
     protected $tokenService;
-    
+
     public function __construct(TokenService $tokenService)
     {
         $this->tokenService = $tokenService;
     }
-    
+
     public function listTimesheet(array $search = [])
     {
         $timesheets = Timesheet::with(
@@ -41,10 +41,7 @@ class TimesheetDataService
                     $query->select('uuid', 'full_name');
                 },
             ]
-        )->
-        onSearch($search)->
-        select('timesheets.id', 'inhouse_id', 'package_id', 'duration', 'notes')->
-        get();
+        )->onSearch($search)->select('timesheets.id', 'inhouse_id', 'package_id', 'duration', 'notes')->get();
 
         $mappedTimesheets = $timesheets->map(function ($data) {
 
@@ -52,10 +49,8 @@ class TimesheetDataService
             # we need to extract and define whether the client was b2c or b2b
             $clients = array();
             $refProgram = $data->ref_program;
-            if ( count($refProgram) > 1 )
-            {
-                foreach ( $refProgram as $ref )
-                {
+            if (count($refProgram) > 1) {
+                foreach ($refProgram as $ref) {
                     $category = $ref->category;
                     $studentName = $ref->student_name;
                     $studentSchool = $ref->student_school;
@@ -85,7 +80,7 @@ class TimesheetDataService
                 'package_type' => $packageType,
                 'detail_package' => $detailPackage,
                 'duration' => $duration,
-                'notes' => $notes, 
+                'notes' => $notes,
                 'program_name' => $programName,
                 'tutor_mentor' => $tutorMentorName,
                 'admin' => $adminName,
@@ -105,19 +100,17 @@ class TimesheetDataService
         # we need to extract and define whether the client was b2c or b2b
 
         $clients = array();
-        if ( count($refProgram) > 1 )
-        {
-            foreach ( $refProgram as $ref )
-            {
+        if (count($refProgram) > 1) {
+            foreach ($refProgram as $ref) {
                 $category = $ref->category;
                 $studentUUID = $ref->student_uuid;
                 $studentName = $ref->student_name;
                 $studentSchool = $ref->student_school;
                 $client = $category == "b2c" ? $studentName : $studentSchool;
 
-                if ( $category == "b2c" ) {
+                if ($category == "b2c") {
                     /* fetch the client profile information from CRM */
-                    [$statusCode, $crm_clientInfo] = $this->make_call('get', env('CRM_DOMAIN') . 'client/information' . $studentUUID);
+                    [$statusCode, $crm_clientInfo] = $this->make_call('get', env('CRM_DOMAIN') . 'client/information/' . $studentUUID);
 
                     array_push($clients, [
                         'category' => $category,
@@ -127,13 +120,13 @@ class TimesheetDataService
                         'client_grade' => $crm_clientInfo['st_grade'],
                     ]);
                     continue;
-                } 
+                }
 
-                if ( $category == "b2b" ) {
+                if ($category == "b2b") {
                     array_push($clients, [
                         'category' => $category,
                         'client_school' => $studentSchool
-                    ]); 
+                    ]);
                     continue;
                 }
             }
@@ -143,7 +136,7 @@ class TimesheetDataService
             $studentName = $refProgram->first()->student_name;
             $studentSchool = $refProgram->first()->student_school;
 
-            if ( $category == "b2c" ) {
+            if ($category == "b2c") {
                 /* fetch the client profile information from CRM */
                 [$statusCode, $crm_clientInfo] = $this->make_call('get', env('CRM_DOMAIN') . 'client/information/' . $studentUUID);
 
@@ -154,7 +147,7 @@ class TimesheetDataService
                     'client_school' => $studentSchool,
                     'client_grade' => $crm_clientInfo['st_grade'],
                 ]);
-            }   
+            }
         }
 
 

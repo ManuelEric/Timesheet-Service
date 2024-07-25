@@ -46,6 +46,7 @@ const checkLogin = async () => {
       }
       loading.value = false
     } catch (error) {
+      showNotif('error', error.response?.data?.errors?.email, 'bottom-end')
       loading.value = false
       console.error(error)
     }

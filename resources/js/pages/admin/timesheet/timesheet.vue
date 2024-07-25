@@ -1,6 +1,5 @@
 <script setup>
 import { showNotif } from '@/helper/notification'
-import { rules } from '@/helper/rules'
 import ApiService from '@/services/ApiService'
 
 import avatar1 from '@images/avatars/avatar-1.png'
@@ -30,12 +29,12 @@ const getData = async () => {
   const page = '?page=' + currentPage.value
   const search = keyword.value ? '&keyword=' + keyword.value : ''
   const program = program_name.value ? '&program_name=' + program_name.value : ''
-  const package_search = package_name.value ? '&timesheet_package=' + package_name.value : ''
+  const package_search = package_name.value ? '&package_id=' + package_name.value : ''
   const paginate = '&paginate=true'
   try {
     loading.value = true
     const res = await ApiService.get('api/v1/timesheet/list' + page + search + program + package_search + paginate)
-    console.log(res)
+    // console.log(res)
     if (res) {
       currentPage.value = res.current_page
       totalPage.value = res.last_page
@@ -43,6 +42,7 @@ const getData = async () => {
     }
     loading.value = false
   } catch (error) {
+    showNotif('error', error.response?.data?.message, 'bottom-end')
     console.error(error)
     loading.value = false
   }
@@ -69,6 +69,11 @@ const getPackage = async () => {
     console.error(error)
   }
 }
+
+const searchData = async () => {
+  currentPage.value = 1
+  await getData()
+}
 // End Function
 
 onMounted(() => {
@@ -76,44 +81,6 @@ onMounted(() => {
   getProgram()
   getPackage()
 })
-
-const desserts = [
-  {
-    dessert: 'Frozen Yogurt',
-    calories: 159,
-    fat: 6,
-    carbs: 24,
-    protein: 4,
-  },
-  {
-    dessert: 'Ice cream sandwich',
-    calories: 237,
-    fat: 6,
-    carbs: 24,
-    protein: 4,
-  },
-  {
-    dessert: 'Eclair',
-    calories: 262,
-    fat: 6,
-    carbs: 24,
-    protein: 4,
-  },
-  {
-    dessert: 'Cupcake',
-    calories: 305,
-    fat: 6,
-    carbs: 24,
-    protein: 4,
-  },
-  {
-    dessert: 'Gingerbread',
-    calories: 356,
-    fat: 6,
-    carbs: 24,
-    protein: 4,
-  },
-]
 </script>
 
 <template>
@@ -223,12 +190,38 @@ const desserts = [
             <td>
               {{ parseInt(index) + 1 }}
             </td>
-            <td class="text-left">
-              <VIcon
-                icon="ri-group-line"
-                class="cursor-pointer me-3"
-              />
-              {{ item.client }}
+            <td :class="item.group ? 'cursor-pointer text-left' : 'text-left'">
+              <VText v-if="item.group">
+                <VIcon
+                  icon="ri-group-line"
+                  class="me-3"
+                />
+                {{ item.clients[0] }}
+                <VBadge
+                  color="error"
+                  :content="item.clients.length - 1 + '+'"
+                  inline
+                >
+                </VBadge>
+
+                <VTooltip
+                  activator="parent"
+                  location="top"
+                  transition="scroll-y-transition"
+                  class="bg-white"
+                >
+                  <div v-for="client in item.clients">
+                    {{ client }}
+                  </div>
+                </VTooltip>
+              </VText>
+              <VText v-else>
+                <VIcon
+                  icon="ri-user-line"
+                  class="me-3"
+                />
+                {{ item.clients }}
+              </VText>
             </td>
             <td>
               <VIcon

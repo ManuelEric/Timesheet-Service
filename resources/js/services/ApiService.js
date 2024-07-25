@@ -90,5 +90,15 @@ export default {
     }
   },
 
+  async delete(url) {
+    try {
+      const response = await apiClient.delete(url)
+      
+      return response.data
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  },
+
   // Tambahkan method lain sesuai kebutuhan Anda
 }

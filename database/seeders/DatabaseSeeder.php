@@ -16,9 +16,9 @@ class DatabaseSeeder extends Seeder
         $this->call(PackageSeeder::class);
 
         /* setup data test */
-        $this->call(TempUserSeeder::class);
-        $this->call(TempUserRolesSeeder::class);
-        $this->call(TimesheetSeeder::class);
-        $this->call(ActivitySeeder::class);
+        // $this->call(TempUserSeeder::class);
+        // $this->call(TempUserRolesSeeder::class); 
+        // $this->call(TimesheetSeeder::class);
+        // $this->call(ActivitySeeder::class);
     }
 }

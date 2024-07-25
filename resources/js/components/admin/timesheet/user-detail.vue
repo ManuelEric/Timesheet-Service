@@ -2,6 +2,7 @@
 import UserEdit from '@/components/admin/timesheet/user-edit.vue'
 import DeleteDialog from '@/components/DeleteHandler.vue'
 import { showNotif } from '@/helper/notification'
+import { router } from '@/plugins/router'
 import ApiService from '@/services/ApiService'
 import moment from 'moment'
 
@@ -20,17 +21,34 @@ const isDialogVisible = ref([
 const getData = async id => {
   try {
     const res = await ApiService.get('api/v1/timesheet/' + id + '/detail')
-
+    console.log(res)
     if (res) {
       data.value = res
     }
   } catch (error) {
+    if (error.response?.status == 400) {
+      showNotif('error', error.response?.data?.errors, 'bottom-end')
+      router.push('/admin/timesheet')
+    }
     console.log(error)
   }
 }
 
-const deleteTimesheet = item => {
-  isDialogVisible.value.delete = true
+const deleteTimesheet = async () => {
+  try {
+    const res = await ApiService.delete('api/v1/timesheet/' + props.id + '/delete')
+    console.log(res)
+    if (res) {
+      data.value = res
+      showNotif('success', res.message, 'bottom-end')
+      isDialogVisible.value.delete = false
+      router.push('/admin/timesheet')
+    }
+  } catch (error) {
+    if (error.response?.status == 400) {
+      showNotif('error', error.response?.data?.errors, 'bottom-end')
+    }
+  }
 }
 
 const toggleDialog = type => {
@@ -38,6 +56,10 @@ const toggleDialog = type => {
     isDialogVisible.value[type] = true
   } else {
     isDialogVisible.value[type] = false
+  }
+
+  if (type == 'edit') {
+    getData(props.id)
   }
 }
 
@@ -60,7 +82,7 @@ onMounted(() => {
             size="25"
           ></VIcon>
         </router-link>
-        Timesheet - {{ data.clientProfile?.client_name }}
+        Timesheet - {{ data.packageDetails?.package_type }}
       </div>
       <div>
         <VMenu
@@ -130,26 +152,38 @@ onMounted(() => {
           </h4>
           <hr class="my-2" />
           <VTable density="compact">
-            <tbody>
+            <tbody v-if="data.clientProfile?.length > 1">
+              <tr class="bg-secondary">
+                <td>Name</td>
+                <td>School</td>
+                <td>Grade</td>
+              </tr>
+              <tr v-for="client in data.clientProfile">
+                <td>{{ client.client_name }}</td>
+                <td>{{ client.client_school }}</td>
+                <td>{{ client.client_grade }}</td>
+              </tr>
+            </tbody>
+            <tbody v-else-if="data.clientProfile?.length == 1">
               <tr>
                 <td width="20%">Name</td>
                 <td width="1%">:</td>
-                <td>{{ data.clientProfile?.client_name }}</td>
+                <td>{{ data.clientProfile[0].client_name }}</td>
               </tr>
               <tr>
                 <td>School Name</td>
                 <td width="1%">:</td>
-                <td>{{ data.clientProfile?.client_school }}</td>
+                <td>{{ data.clientProfile[0].client_school }}</td>
               </tr>
               <tr>
                 <td>Grade</td>
                 <td width="1%">:</td>
-                <td>11</td>
+                <td>{{ data.clientProfile[0].client_grade }}</td>
               </tr>
               <tr>
                 <td>Email</td>
                 <td width="1%">:</td>
-                <td>email@email.com</td>
+                <td>{{ data.clientProfile[0].client_mail }}</td>
               </tr>
             </tbody>
           </VTable>
@@ -173,7 +207,9 @@ onMounted(() => {
               <tr>
                 <td>Package</td>
                 <td width="1%">:</td>
-                <td>{{ data.packageDetails?.package_type }}</td>
+                <td>
+                  {{ data.packageDetails?.package_type + ' - ' + data.packageDetails?.package_name }}
+                </td>
               </tr>
               <tr>
                 <td>Person in Charge</td>
@@ -183,14 +219,14 @@ onMounted(() => {
                     class="ms-4"
                     type="1"
                   >
-                    <li>{{ data.packageDetails?.pic }}</li>
+                    <li>{{ data.packageDetails?.pic_name }}</li>
                   </ol>
                 </td>
               </tr>
               <tr>
                 <td>Tutor/Mentor</td>
                 <td width="1%">:</td>
-                <td>{{ data.packageDetails?.tutor_mentor }}</td>
+                <td>{{ data.packageDetails?.tutormentor_name }}</td>
               </tr>
               <tr>
                 <td>Update On</td>
@@ -214,7 +250,9 @@ onMounted(() => {
 
               <VCardText class="d-flex justify-between">
                 <div class="d-flex align-end w-100">
-                  <h1 class="m-0 mb-1 text-white">{{ data.packageDetails?.duration_in_hours }}</h1>
+                  <h1 class="m-0 mb-1 text-white">
+                    {{ data.packageDetails?.duration_in_minutes }}
+                  </h1>
                   <h4 class="m-0 ms-2 text-white">Minutes</h4>
                 </div>
               </VCardText>
@@ -238,7 +276,9 @@ onMounted(() => {
               </VCardItem>
               <VCardText class="d-flex justify-between">
                 <div class="d-flex align-end w-100">
-                  <h1 class="m-0 mb-1 text-white">{{ data.packageDetails?.time_spent_in_hours }}</h1>
+                  <h1 class="m-0 mb-1 text-white">
+                    {{ data.packageDetails?.time_spent_in_minutes }}
+                  </h1>
                   <h4 class="m-0 ms-2 text-white">Minutes</h4>
                 </div>
               </VCardText>
@@ -265,7 +305,7 @@ onMounted(() => {
               <VCardText class="d-flex justify-between">
                 <div class="d-flex align-end w-100">
                   <h1 class="m-0 mb-1 text-white">
-                    {{ data.packageDetails?.duration_in_hours - data.packageDetails?.time_spent_in_hours }}
+                    {{ data.packageDetails?.duration_in_minutes - data.packageDetails?.time_spent_in_minutes }}
                   </h1>
                   <h4 class="m-0 ms-2 text-white">Minutes</h4>
                 </div>
@@ -291,7 +331,9 @@ onMounted(() => {
       persistent
     >
       <UserEdit
-        item="data"
+        :item="data.editableColumns"
+        :package_id="data.packageDetails?.package_id"
+        :id="props.id"
         @close="toggleDialog('edit')"
       />
     </VDialog>
@@ -304,6 +346,7 @@ onMounted(() => {
     >
       <DeleteDialog
         title="timesheet"
+        @delete="deleteTimesheet"
         @close="toggleDialog('delete')"
       />
     </VDialog>
