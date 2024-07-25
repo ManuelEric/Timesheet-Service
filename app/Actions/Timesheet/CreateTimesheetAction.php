@@ -27,7 +27,7 @@ class CreateTimesheetAction
         string $inhouseId, 
         array $picIds, 
         string $mentortutorId, 
-        int $subjectId
+        ?int $subjectId = NULL
         )
     {
         /* define submitted package variables */
