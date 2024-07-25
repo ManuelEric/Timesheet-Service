@@ -13,7 +13,7 @@ class ActivityDataService
 {
     use TranslateActivityStatus;
 
-    public function listActivities(Timesheet $timesheet, ?string $date)
+    public function listActivities(Timesheet $timesheet, ?string $date = '')
     {
         /* fetch the entire activities */
         $activities = $timesheet->activities;
