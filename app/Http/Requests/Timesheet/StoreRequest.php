@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Timesheet;
 
 use App\Models\TempUser;
+use App\Rules\ExistSubjectPerTutormentor;
 use App\Rules\MatchingProgramName;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -72,10 +73,7 @@ class StoreRequest extends FormRequest
             'notes' => 'nullable',
             'subject_id' => [
                 'nullable',
-                Rule::exists('temp_user_roles', 'id')->where(function ($query) { #if selected subject is same with tempuser's
-                    $tempUser = TempUser::where('email', $this->input('mentortutor_email'))->first();
-                    return $query->where('id', $this->input('subject_id'))->where('temp_user_id', $tempUser->id);
-                })
+                new ExistSubjectPerTutormentor($this->input('mentortutor_email'))
             ]
         ];
     }
