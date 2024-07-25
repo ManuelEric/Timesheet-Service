@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Http\Controllers\Api\V1\MentorTutor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TempUser\UpdateRequest as TempUserUpdateRequest;
 use App\Http\Traits\HttpCall;
 use App\Models\TempUser;
-use App\Models\TempUserRoles;
 use App\Services\ResponseService;
 use App\Services\Token\TokenService;
 use Exception;
@@ -16,7 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
-class MentorTutorsController extends Controller
+class MainController extends Controller
 {
     use HttpCall;
     
@@ -111,28 +110,5 @@ class MentorTutorsController extends Controller
         return response()->json([
             'message' => 'The selected mentor/tutor has been set to inhouse'
         ]);
-    }
-
-    /**
-     * The component functions.
-     */
-    public function component(
-        Request $request, 
-        $mentorTutorsUuid,
-        ): JsonResponse
-    {
-        $subjects = TempUserRoles::tutor()->whereHas('temp_user', function ($query) use ($mentorTutorsUuid) {
-            $query->where('uuid', $mentorTutorsUuid);
-        })->get();
-
-        $mappedSubjects = $subjects->map(function ($data) {
-            return [
-                'id' => $data->id,
-                'role' => $data->role,
-                'subject' => $data->tutor_subject,
-            ];
-        });
-
-        return response()->json($mappedSubjects);
     }
 }

@@ -5,6 +5,8 @@ namespace App\Services\Timesheet;
 use App\Http\Traits\HttpCall;
 use App\Models\Timesheet;
 use App\Services\Token\TokenService;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
 
 class TimesheetDataService
@@ -209,5 +211,59 @@ class TimesheetDataService
         ];
 
         return compact('clientProfile', 'packageDetails', 'editableColumns');
+    }
+
+    public function fetchTimesheetsByHandler(string $search)
+    {
+        $timesheets = Timesheet::with([
+            'ref_program' => function ($query) {
+                $query->select('category', 'student_name', 'student_school', 'program_name', 'timesheet_id');
+            },
+        ])->
+        handleBy($search)->
+        select('timesheets.id', 'inhouse_id', 'package_id', 'duration', 'notes')->
+        get();
+
+        $mappedTimesheets = $timesheets->map(function ($data) {
+            # because timesheets consists of multiple ref programs
+            # we need to extract and define whether the client was b2c or b2b
+            $clients = array();
+            $refProgram = $data->ref_program;
+            if ( count($refProgram) > 1 )
+            {
+                foreach ( $refProgram as $ref )
+                {
+                    $category = $ref->category;
+                    $studentName = $ref->student_name;
+                    $studentSchool = $ref->student_school;
+                    $client = $category == "b2c" ? $studentName : $studentSchool;
+
+                    array_push($clients, $client);
+                }
+            } else {
+                $category = $refProgram->first()->category;
+                $studentName = $refProgram->first()->student_name;
+                $studentSchool = $refProgram->first()->student_school;
+                $clients = $category == "b2c" ? $studentName : $studentSchool;
+            }
+
+            $timesheetId = $data->id;
+            $packageType = $data->package->type_of;
+            $detailPackage = $data->package->package;
+            $notes = $data->notes;
+            $programName = $refProgram->first()->program_name;
+
+            return [
+                'id' => $timesheetId,
+                'package_type' => $packageType,
+                'detail_package' => $detailPackage,
+                'notes' => $notes, 
+                'program_name' => $programName,
+                'group' => count($refProgram) > 1 ? true : false,
+                'clients' => $clients,
+            ];
+        });
+        
+        return $mappedTimesheets;
     }
 }
