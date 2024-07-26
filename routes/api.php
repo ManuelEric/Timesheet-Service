@@ -42,12 +42,6 @@ Route::prefix('timesheet')->group(function () {
 });
 
 
-/* API Documentation */
-Route::get('api-documentation', function () {
-    return view('API-documentation');
-});
-
-
 /* Authentication */
 Route::prefix('auth')->group(function () {
 
@@ -114,7 +108,7 @@ Route::prefix('timesheet')->group(function () {
         /* Destroy Timesheet */
         Route::DELETE('{timesheet}/delete', [V1TimesheetController::class, 'destroy']);
         /* Export Timesheet */
-        Route::GET('{timesheet}/export', [V1TimesheetController::class, 'export']);
+        Route::GET('{timesheet}/export', [V1TimesheetController::class, 'export'])->withoutMiddleware(['auth:sanctum', 'abilities:timesheet-menu']);
 
         /**
          * The Components
