@@ -1,9 +1,11 @@
 <script setup>
 import ApiService from '@/services/ApiService'
-
 import AddActivity from '@/components/admin/timesheet/activity-add.vue'
 import EditActivity from '@/components/admin/timesheet/activity-edit.vue'
 import DeleteDialog from '@/components/DeleteHandler.vue'
+import { showNotif } from '@/helper/notification'
+import { router } from '@/plugins/router'
+import moment from 'moment'
 
 // Start Variable
 const props = defineProps({ id: String })
@@ -44,16 +46,27 @@ const toggleDialog = type => {
   } else {
     isDialogVisible.value[type] = false
   }
+
+  getData()
 }
 
-const editActivity = item => {
-  toggleDialog('edit')
+const selectedActivity = (type, item) => {
   selectedItem.value = item
+  toggleDialog(type)
 }
 
-const deleteActivity = item => {
-  toggleDialog('delete')
-  selectedItem.value = item
+const deleteActivity = async () => {
+  try {
+    const res = await ApiService.delete('api/v1/timesheet/' + props.id + '/activity/' + selectedItem.value.id)
+    if (res) {
+      showNotif('success', res.message, 'bottom-end')
+      toggleDialog('delete')
+    }
+  } catch (error) {
+    if (error.response?.status == 400) {
+      showNotif('error', error.response?.data?.errors, 'bottom-end')
+    }
+  }
 }
 
 // End Function
@@ -125,31 +138,38 @@ onMounted(() => {
             v-for="(item, index) in data"
             :key="index"
           >
-            <td>
+            <td width="1%">
               {{ index + 1 }}
             </td>
             <td>
-              {{ item.dessert }}
+              {{ item.activity }}
             </td>
-            <td class="text-center">Package {{ index + 1 }}</td>
-            <td>24 Feb 2024</td>
-            <td class="text-center">14:00</td>
-            <td class="text-center">15:00</td>
+            <td class="text-center">
+              {{ item.description }}
+            </td>
+            <td>
+              {{ moment(item.start_date).format('LL') }}
+            </td>
+            <td class="text-center">
+              {{ item.start_time }}
+            </td>
+            <td class="text-center">
+              {{ item.end_time }}
+            </td>
             <td class="text-center">
               <VIcon
                 icon="ri-timer-2-line"
                 class="cursor-pointer me-3"
-                v-bind="activatorProps"
               />
-              {{ 25 - (index % 5) }} Minutes
+              {{ item.estimate }} Minutes
             </td>
             <td>
               <VChip
-                :color="'#e05e5e'"
+                :color="item.status == 'Not Yet' ? '#e05e5e' : '#91C45E'"
                 class="font-weight-medium"
                 size="small"
               >
-                Not Yet
+                {{ item.status }}
               </VChip>
             </td>
             <td class="text-end">
@@ -157,7 +177,7 @@ onMounted(() => {
                 color="warning"
                 density="compact"
                 class="me-1"
-                @click="editActivity(item)"
+                @click="selectedActivity('edit', item)"
               >
                 <VIcon
                   icon="ri-edit-line"
@@ -177,7 +197,7 @@ onMounted(() => {
               <VBtn
                 color="error"
                 density="compact"
-                @click="deleteActivity(item)"
+                @click="selectedActivity('delete', item)"
               >
                 <VIcon
                   icon="ri-delete-bin-line"
@@ -206,6 +226,7 @@ onMounted(() => {
       persistent
     >
       <EditActivity
+        :timesheet_id="props?.id"
         :activity="selectedItem"
         @close="toggleDialog('edit')"
       />
@@ -218,9 +239,9 @@ onMounted(() => {
       persistent
     >
       <DeleteDialog
-        :data="selectedItem"
         title="activity"
         @close="toggleDialog('delete')"
+        @delete="deleteActivity"
       />
     </VDialog>
   </VCard>

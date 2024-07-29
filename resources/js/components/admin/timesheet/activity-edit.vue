@@ -1,20 +1,61 @@
 <script setup>
-const prop = defineProps({ activity: String })
+import { showNotif } from '@/helper/notification'
+import { rules } from '@/helper/rules'
+import ApiService from '@/services/ApiService'
+import moment from 'moment'
+
+const formData = ref()
+const prop = defineProps({ timesheet_id: Number, activity: String })
 const emit = defineEmits(['close'])
 
 const closeDialogContent = () => {
   emit('close')
 }
 
-const formInput = ref({
-  title: null,
-  description: null,
-  date: null,
-  start_time: null,
-  end_time: null,
-  status: false,
-  fee: null,
+const form = ref({
+  activity: prop?.activity.activity,
+  description: prop?.activity.description,
+  date: moment(prop?.activity.date).format('YYYY-MM-DD'),
+  start_time: prop?.activity.start_time,
+  end_time: prop?.activity.end_time,
+  start_date: moment(prop?.activity.date).format('YYYY-MM-DD') + ' ' + prop?.activity.start_time + ':00',
+  end_date:
+    prop?.activity.end_time != 0
+      ? moment(prop?.activity.date).format('YYYY-MM-DD') + ' ' + prop?.activity.end_time + ':00'
+      : null,
+  meeting_link: prop?.activity.meeting_link,
 })
+
+const submit = async () => {
+  const { valid } = await formData.value.validate()
+  if (valid) {
+    try {
+      const res = await ApiService.put(
+        'api/v1/timesheet/' + prop.timesheet_id + '/activity/' + prop.activity.id,
+        form.value,
+      )
+
+      if (res) {
+        console.log(res)
+        showNotif('success', res.message, 'bottom-end')
+        closeDialogContent()
+      }
+    } catch (error) {
+      if (error?.response?.data?.errors) {
+        const validationErrors = error.response.data.errors
+        let errorMessage = 'Validation errors:'
+
+        // Merge validation errors
+        for (const key in validationErrors) {
+          if (validationErrors.hasOwnProperty(key)) {
+            errorMessage += `\n${key}: ${validationErrors[key].join(', ')}`
+          }
+        }
+        showNotif('error', errorMessage, 'bottom-end')
+      }
+    }
+  }
+}
 </script>
 
 <template>
@@ -27,77 +68,106 @@ const formInput = ref({
     />
 
     <VCardText>
-      <VRow>
-        <VCol cols="12">
-          <VTextField
-            v-model="formInput.title"
-            label="Activity Name"
-            placeholder="Activity"
-          />
-        </VCol>
-        <VCol cols="12">
-          <VTextarea
-            v-model="formInput.description"
-            label="Description"
-            placeholder="Description"
-          />
-        </VCol>
-        <VCol
-          md="6"
-          cols="12"
-        >
-          <VTextField
-            type="date"
-            v-model="formInput.date"
-            label="Date"
-            placeholder="Date"
-          />
-        </VCol>
-        <VCol
-          md="3"
-          cols="6"
-        >
-          <VTextField
-            type="time"
-            v-model="formInput.start_time"
-            label="Start Time"
-            placeholder="Start Time"
-          />
-        </VCol>
-        <VCol
-          md="3"
-          cols="6"
-        >
-          <VTextField
-            type="time"
-            v-model="formInput.end_time"
-            label="End Time"
-            placeholder="End Time"
-          />
-        </VCol>
-      </VRow>
+      <VForm
+        @submit.prevent="submit"
+        ref="formData"
+        validate-on="input"
+        fast-fail
+      >
+        <VRow>
+          <VCol cols="12">
+            <VTextField
+              v-model="form.activity"
+              label="Activity Name"
+              :rules="rules.required"
+              placeholder="Activity"
+            />
+          </VCol>
+          <VCol cols="12">
+            <VTextarea
+              v-model="form.description"
+              label="Description"
+              :rules="rules.required"
+              placeholder="Description"
+            />
+          </VCol>
+          <VCol
+            md="6"
+            cols="12"
+          >
+            <VTextField
+              type="date"
+              v-model="form.date"
+              label="Date"
+              :rules="rules.required"
+              placeholder="Date"
+            />
+          </VCol>
+          <VCol
+            md="3"
+            cols="6"
+          >
+            <VTextField
+              type="time"
+              v-model="form.start_time"
+              label="Start Time"
+              :rules="rules.required"
+              placeholder="Start Time"
+              @change="form.start_date = form.date + ' ' + form.start_time + ':00'"
+            />
+          </VCol>
+          <VCol
+            md="3"
+            cols="6"
+          >
+            <VTextField
+              type="time"
+              v-model="form.end_time"
+              label="End Time"
+              placeholder="End Time"
+              :rules="rules.required"
+              @change="form.end_date = form.date + ' ' + form.end_time + ':00'"
+            />
+          </VCol>
+          <VCol
+            md="12"
+            cols="12"
+          >
+            <VTextField
+              type="text"
+              v-model="form.meeting_link"
+              label="Meeting Link"
+              placeholder="Meeting Link"
+              :rules="rules.url"
+            />
+          </VCol>
+        </VRow>
 
-      <VDivider class="my-3" />
-      <VCardActions>
-        <VBtn
-          color="error"
-          @click="closeDialogContent"
-        >
-          <VIcon
-            icon="ri-close-line"
-            class="me-3"
-          />
-          Close
-        </VBtn>
-        <VSpacer />
-        <VBtn color="success">
-          Save
-          <VIcon
-            icon="ri-save-line"
-            class="ms-3"
-          />
-        </VBtn>
-      </VCardActions>
+        <VDivider class="my-3" />
+        <VCardActions>
+          <VBtn
+            color="error"
+            @click="closeDialogContent"
+          >
+            <VIcon
+              icon="ri-close-line"
+              class="me-3"
+            />
+            Close
+          </VBtn>
+          <VSpacer />
+          <VBtn
+            color="success"
+            type="submit"
+          >
+            Save
+            <VIcon
+              icon="ri-save-line"
+              class="ms-3"
+            />
+          </VBtn>
+        </VCardActions>
+      </VForm>
     </VCardText>
   </VCard>
 </template>
