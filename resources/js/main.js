@@ -21,5 +21,10 @@ app.component(VueCountdown.name, VueCountdown);
 // Register plugins
 registerPlugins(app)
 
+// Turn Off Warning Log 
+app.config.warnHandler = function (msg, vm, trace) {
+    return null
+  }
+
 // Mount vue app
 app.mount('#app')

@@ -1,4 +1,17 @@
-import Swal from 'sweetalert2'
+import Swal from 'sweetalert2';
+
+export const showLoading = (message='Please wait...') => {
+  Swal.fire({
+    title: message,
+    text: 'Processing...',
+    width: '400px',
+    allowOutsideClick: false,
+    showConfirmButton: false,
+    didOpen: () => {
+      Swal.showLoading();
+    },
+  });
+}
 
 export const showNotif = (status, message, position='top-end') => {
   const Toast = Swal.mixin({
@@ -35,4 +48,4 @@ export const confirmBeforeSubmit = async message => {
   return result.isConfirmed
 }
 
-export default { showNotif, confirmBeforeSubmit }
+export default { showNotif, confirmBeforeSubmit, showLoading }

@@ -123,6 +123,7 @@ const getPIC = async () => {
 }
 
 const getSubject = async uuid => {
+  form.value.subject_id = null
   try {
     const res = await ApiService.get('api/v1/user/mentor-tutors/' + uuid + '/subjects')
     if (res) {
@@ -162,6 +163,7 @@ const submit = async () => {
           notes: '',
           pic_id: [],
         }
+        tutor_selected.value = []
         getData()
       }
     } catch (error) {
