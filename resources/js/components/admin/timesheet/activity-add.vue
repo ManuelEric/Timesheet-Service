@@ -26,14 +26,26 @@ const submit = async () => {
   const { valid } = await formData.value.validate()
   if (valid) {
     try {
-      const res = ApiService.post('api/v1/timesheet/' + props.id + '/activity', form.value)
+      const res = await ApiService.post('api/v1/timesheet/' + props.id + '/activity', form.value)
 
       if (res) {
+        // console.log(res)
         showNotif('success', res.message, 'bottom-end')
         closeDialogContent()
       }
     } catch (error) {
-      console.error(error)
+      if (error?.response?.data?.errors) {
+        const validationErrors = error.response.data.errors
+        let errorMessage = 'Validation errors:'
+
+        // Merge validation errors
+        for (const key in validationErrors) {
+          if (validationErrors.hasOwnProperty(key)) {
+            errorMessage += `\n${key}: ${validationErrors[key].join(', ')}`
+          }
+        }
+        showNotif('error', errorMessage, 'bottom-end')
+      }
     }
   }
 }
@@ -49,7 +61,6 @@ const submit = async () => {
     />
 
     <VCardText>
-      {{ form }}
       <VForm
         @submit.prevent="submit"
         ref="formData"
@@ -107,7 +118,6 @@ const submit = async () => {
               v-model="form.end_time"
               label="Meeting Link"
               placeholder="End Time"
-              :rules="rules.required"
               @change="form.end_date = form.date + ' ' + form.end_time + ':00'"
             />
           </VCol>
