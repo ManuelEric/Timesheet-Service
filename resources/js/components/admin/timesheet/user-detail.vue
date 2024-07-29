@@ -1,10 +1,11 @@
 <script setup>
 import UserEdit from '@/components/admin/timesheet/user-edit.vue'
 import DeleteDialog from '@/components/DeleteHandler.vue'
-import { showNotif } from '@/helper/notification'
+import { showLoading, showNotif } from '@/helper/notification'
 import { router } from '@/plugins/router'
 import ApiService from '@/services/ApiService'
 import moment from 'moment'
+import Swal from 'sweetalert2'
 
 // Start Variable
 const props = defineProps({ id: String })
@@ -19,12 +20,14 @@ const isDialogVisible = ref([
 
 // Start Function
 const getData = async id => {
+  showLoading()
   try {
     const res = await ApiService.get('api/v1/timesheet/' + id + '/detail')
-    console.log(res)
+    // console.log(res)
     if (res) {
       data.value = res
     }
+    Swal.close()
   } catch (error) {
     if (error.response?.status == 400) {
       showNotif('error', error.response?.data?.errors, 'bottom-end')
@@ -63,16 +66,22 @@ const toggleDialog = type => {
   }
 }
 
-const downloadTimesheet = async id => {
+const downloadTimesheet = async (id, name) => {
+  showLoading()
   try {
     const res = await ApiService.get('api/v1/timesheet/' + id + '/export', {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      responseType: 'blob',
     })
+
     if (res) {
+      const url = window.URL.createObjectURL(
+        new Blob([res], { type: '"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"' }),
+      )
+
       // Create a temporary <a> element to trigger the download
       const link = document.createElement('a')
       link.href = url
-      link.setAttribute('download', `timesheet_${id}.xlsx`)
+      link.setAttribute('download', `timesheet_${name}.xlsx`)
 
       // Append the <a> element to the body and click it to trigger the download
       document.body.appendChild(link)
@@ -81,6 +90,8 @@ const downloadTimesheet = async id => {
       // Clean up: remove the <a> element and revoke the blob URL
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
+
+      Swal.close()
     }
   } catch (error) {
     showNotif('error', error.response?.statusText, 'bottom-end')
@@ -141,7 +152,16 @@ onMounted(() => {
               <VListItemTitle>
                 <div
                   class="cursor-pointer"
-                  @click="downloadTimesheet(props.id)"
+                  @click="
+                    downloadTimesheet(
+                      props.id,
+                      data?.packageDetails?.package_type +
+                        '-' +
+                        data?.packageDetails?.package_name +
+                        '_' +
+                        data?.packageDetails?.tutormentor_name,
+                    )
+                  "
                 >
                   <VIcon
                     icon="ri-download-line"
