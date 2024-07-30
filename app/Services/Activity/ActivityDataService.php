@@ -40,6 +40,7 @@ class ActivityDataService
             $end_time = $end_date ? $end_date->format('H:i') : 0;
             $estimate = $end_date ? $start_date->diffInMinutes($end_date) : 0;
             $status = $this->translate($data->status);
+            $meeting_link = $data->meeting_link;
 
             return [
                 'id' => $data->id,
@@ -49,6 +50,7 @@ class ActivityDataService
                 'start_time' => $start_time,
                 'end_time' => $end_time,
                 'estimate' => $estimate,
+                'meeting_link' => $meeting_link,
                 'status' => $status,
             ];
         });

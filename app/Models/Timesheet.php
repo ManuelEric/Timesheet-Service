@@ -107,8 +107,7 @@ class Timesheet extends Model
     }
 
     public function scopeHandleBy(Builder $query, string $identifier): void
-    {
-        
+    {        
         $query->whereHas('handle_by', function($query) use ($identifier) {
             $query->where('uuid', $identifier);
         });

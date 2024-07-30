@@ -157,6 +157,7 @@ class TimesheetDataService
         $programName = $refProgram->first()->program_name;
         $package = $timesheet->package;
         $packageId = $timesheet->package_id;
+        $packageCategory = $timesheet->package->category;
         $packageType = $timesheet->package->type_of;
         $packageName = $timesheet->package->package;
         $detailPackage = $timesheet->detail_package;
@@ -180,6 +181,7 @@ class TimesheetDataService
         $packageDetails = [
             'program_name' => $programName,
             'package_id' => $packageId,
+            'package_category' => $packageCategory,
             'package_type' => $packageType,
             'package_name' => $packageName,
             'pic_name' => $adminName,

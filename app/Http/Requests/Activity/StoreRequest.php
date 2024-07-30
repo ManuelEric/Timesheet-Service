@@ -44,7 +44,9 @@ class StoreRequest extends FormRequest
                 'date_format:Y-m-d H:i:s',
                 new ExistStartDateActivities($this->route('timesheet'))
             ],
+            'end_date' => 'nullable',
             'meeting_link' => 'nullable|active_url',
+            'status' => 'nullable|integer|in:1,0',
         ];
     }
 }

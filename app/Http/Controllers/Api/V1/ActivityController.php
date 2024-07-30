@@ -89,7 +89,7 @@ class ActivityController extends Controller
     {
         $activity = $identifyActivityAction->execute($activityId, $timesheetId);
 
-        $validated = $request->safe()->only(['activity', 'description', 'start_date', 'end_date', 'meeting_link']);
+        $validated = $request->safe()->only(['activity', 'description', 'start_date', 'end_date', 'meeting_link', 'status']);
 
         /* calculate spending time */
         $start_date = Carbon::parse($validated['start_date']);
@@ -106,7 +106,7 @@ class ActivityController extends Controller
             $activity->end_date = $end_date;
             $activity->time_spent = $time_spent;
             $activity->meeting_link = $validated['meeting_link'];
-            $activity->status = 1;
+            $activity->status = $validated['status'];
             $activity->save();
             DB::commit();
 
