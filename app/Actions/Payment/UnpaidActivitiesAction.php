@@ -17,7 +17,8 @@ class UnpaidActivitiesAction
             $activityId = $data->id;
             $timesheetId = $data->timesheet->id;
             $activity = $data->activity;
-            $mentorTutorName = $data->timesheet->subject->full_name;
+            $package = $data->timesheet->package;
+            $mentorTutorName = $data->timesheet->subject->temp_user->full_name;
             $startDate = Carbon::parse($data->start_date);
             $endDate = $data->end_date ? Carbon::parse($data->end_date) : null;
             $timeSpent = $data->end_date ? $startDate->diffInMinutes($endDate) : 0;
@@ -28,11 +29,16 @@ class UnpaidActivitiesAction
                 'id' => $activityId,
                 'timesheet_id' => $timesheetId,
                 'activity' => $activity,
+                'package' => [
+                    'name' => $package->package,
+                    'type' => $package->type_of,
+                    'category' => $package->category,
+                ],
                 'mentor_tutor' => $mentorTutorName,
                 'date' => $this->convert($startDate, $endDate),
                 'time_spent' => $timeSpent,
                 'fee_hours' => $feeHours,
-                'cutoff_status' => $cutoffStatus
+                'cutoff_status' => $cutoffStatus,
             ];
         });
 
