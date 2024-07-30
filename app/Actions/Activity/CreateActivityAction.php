@@ -2,6 +2,7 @@
 
 namespace App\Actions\Activity;
 
+use App\Http\Traits\PackageType;
 use App\Models\Activity;
 use App\Models\Timesheet;
 use App\Services\ResponseService;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 
 class CreateActivityAction
 {
+    use PackageType;
     protected $responseService;
 
     public function __construct(ResponseService $responseService)
@@ -24,7 +26,10 @@ class CreateActivityAction
         $timesheetId = $timesheet->id;
 
         /* default variables */
-        $fee_perHours = $timesheet->subject->fee_hours;
+        $package = $timesheet->package;
+        $packageCategory = $package->category;
+        [$type, $tutor_mentor] = $this->convert($packageCategory);
+        $fee_perHours = $type == "tutoring" ? $timesheet->subject->fee_hours : 0;
         $endDate = $validated['end_date'];
         $additionalFee = $bonusFee = 0;
 
