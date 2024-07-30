@@ -64,7 +64,7 @@ class ActivityController extends Controller
     {
         $timesheet = $this->identifyTimesheetIdAction->execute($timesheetId);
 
-        $validated = $request->safe()->only(['activity', 'description', 'start_date', 'meeting_link']);
+        $validated = $request->safe()->only(['activity', 'description', 'start_date', 'end_date', 'meeting_link', 'status']);
 
         /* get the newest information about the latest tutor/mentor fee hours who signed to handle the timesheet */
         $handleBy = $timesheet->handle_by->last();
