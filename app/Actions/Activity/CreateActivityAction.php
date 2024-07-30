@@ -25,14 +25,13 @@ class CreateActivityAction
 
         /* default variables */
         $fee_perHours = $timesheet->subject->fee_hours;
-        $endDate = NULL;
+        $endDate = $validated['end_date'];
         $additionalFee = $bonusFee = 0;
 
         /* when the request comes from fee controller */
         if ( array_key_exists('additional_fee', $validated) ) 
         {
             $fee_perHours = 0;
-            $endDate = $validated['end_date'];
             $additionalFee = $validated['additional_fee'];
         } 
 
@@ -40,7 +39,6 @@ class CreateActivityAction
         if ( array_key_exists('bonus_fee', $validated) ) 
         {
             $fee_perHours = 0;
-            $endDate = $validated['end_date'];
             $bonusFee = $validated['bonus_fee'];
         } 
 
