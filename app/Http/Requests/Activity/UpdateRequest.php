@@ -38,8 +38,9 @@ class UpdateRequest extends FormRequest
             'activity' => 'required',
             'description' => 'nullable',
             'start_date' => 'required|date|date_format:Y-m-d H:i:s',
-            'end_date' => 'required|date|date_format:Y-m-d H:i:s|after:start_date',
+            'end_date' => 'nullable|date|date_format:Y-m-d H:i:s|after:start_date',
             'meeting_link' => 'nullable|active_url',
+            'status' => 'nullable|integer|in:1,0',
         ];
     }
 }

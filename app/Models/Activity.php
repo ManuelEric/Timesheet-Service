@@ -51,6 +51,11 @@ class Activity extends Model
         return $this->belongsTo(Cutoff::class, 'cutoff_ref_id', 'id');
     }
 
+    public function reminders()
+    {
+        return $this->hasMany(Reminder::class, 'activity_id', 'id');
+    }
+
     /**
      * The scopes.
      */
@@ -77,5 +82,15 @@ class Activity extends Model
                     $_sub_->withinTheCutoffDateRange($cutoff_date);
                 });
             });
+    }
+
+    public function scopeDayBeforeStart(Builder $query, int $day): void
+    {
+        $query->whereRaw("DATEDIFF(start_date, now()) = {$day}");
+    }
+
+    public function scopeHasNotBeenReminded(Builder $query): void
+    {
+        $query->doesntHave('reminders');
     }
 }

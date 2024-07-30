@@ -144,6 +144,13 @@ return new class extends Migration
             $table->text('value')->nullable();
             $table->timestamps();
         });
+
+        Schema::create('reminders', function (Blueprint $table) {
+            $table->bigInteger('activity_id');
+            $table->integer('times')->comment('how many times the reminder was sent.');
+            $table->string('type')->comment('type of reminder');
+            $table->timestamps();
+        });
     }
 
     /**

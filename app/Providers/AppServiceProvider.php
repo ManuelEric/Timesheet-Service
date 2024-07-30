@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
+use App\Services\ResponseService;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\ServiceProvider;
 
@@ -36,5 +39,13 @@ class AppServiceProvider extends ServiceProvider
     
             return $paginator->withPath(Request::url());
         });
+
+        /* catch failed queue */
+        // Queue::failing(function (JobFailed $event, ResponseService $responseService) {
+        //     $responseService->storeErrorLog('Job failed!', $event->exception, [
+        //         'queue' => $event->connectionName,
+        //         'job' => $event->job
+        //     ]);
+        // });
     }
 }
