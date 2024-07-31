@@ -22,18 +22,18 @@ use Maatwebsite\Excel\Facades\Excel;
 class TimesheetController extends Controller
 {
     use GenerateTimesheetFileName;
-    protected $timesheetService;
+    protected $timesheetDataService;
 
-    public function __construct(TimesheetDataService $timesheetService)
+    public function __construct(TimesheetDataService $timesheetDataService)
     {
-        $this->timesheetService = $timesheetService;
+        $this->timesheetDataService = $timesheetDataService;
     }
 
     public function index(Request $request): JsonResponse
     {
         /* Incoming Request */
         $search = $request->only(['program_name', 'package_id', 'keyword']);
-        $results = $this->timesheetService->listTimesheet($search);
+        $results = $this->timesheetDataService->listTimesheet($search);
         return response()->json($results);
     }
 
@@ -43,7 +43,7 @@ class TimesheetController extends Controller
         ): JsonResponse
     {
         $timesheet = $identifyTimesheetIdAction->execute($timesheetId);
-        $result = $this->timesheetService->detailTimesheet($timesheet);
+        $result = $this->timesheetDataService->detailTimesheet($timesheet);
         return response()->json($result);
     }
 

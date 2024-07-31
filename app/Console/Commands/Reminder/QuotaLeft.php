@@ -3,31 +3,28 @@
 namespace App\Console\Commands\Reminder;
 
 use App\Http\Traits\EmailReminderVariables;
-use App\Jobs\PartOf\ReminderAppointment as PartOfReminderAppointment;
-use App\Mail\ReminderAppointment;
-use App\Models\Activity;
+use App\Mail\ReminderQuota;
+use App\Models\Timesheet;
 use App\Services\Timesheet\TimesheetDataService;
 use Illuminate\Console\Command;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
 
-class Appointment extends Command
+class QuotaLeft extends Command
 {
     use EmailReminderVariables;
-
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'rem:appointment';
+    protected $signature = 'rem:quota-left';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'This command is designed to send a reminder for each activity one day before it starts.';
+    protected $description = 'This command is designed to send a reminder for each timesheet that almost reached the total duration.';
 
     protected $timesheetDataService;
 
@@ -42,9 +39,8 @@ class Appointment extends Command
      */
     public function handle()
     {
-        /* retrieve all activities one day before they start */
-        $activities = Activity::unpaid()->dayBeforeStart(1)->hasNotBeenReminded()->get();
-        $total_data = count($activities);
+        $almostExpires_timesheets = Timesheet::expiresInHours(1)->hasNotBeenReminded()->get();
+        $total_data = count($almostExpires_timesheets);
 
         /* progress bar */
         $progress = $this->output->createProgressBar($total_data);
@@ -53,30 +49,30 @@ class Appointment extends Command
         /* report variables */
         $total_mail_sent = 0;
 
-        foreach ( $activities as $activity )
+        foreach ( $almostExpires_timesheets as $almostExpires_timesheets )
         {
-            
-            [$tutormentor_email, $viewData] = $this->createVariablesUsingActivity($activity);
+            [$tutormentor_email, $viewData] = $this->createVariablesUsingTimesheet($almostExpires_timesheets);
             $this->sendTheReminder($tutormentor_email, $viewData);
 
             /* count the total mail that successfully sent */
             $total_mail_sent++;
             $progress->advance();
         }
-        
+
         /* console report */
         $this->newLine();
-        $this->info("{$total_mail_sent} Mail of reminder appointment has been stored into a job queue.");
+        $this->info("{$total_mail_sent} Mail of reminder quota has been stored into a job queue.");
 
         /* finish the progress */
         if ( $total_data > 0 )
             $progress->finish();
 
         return COMMAND::SUCCESS;
+        
     }
 
     private function sendTheReminder(string $tutormentor_email, array $viewData)
     {
-        Mail::to($tutormentor_email)->queue(new ReminderAppointment($viewData));
+        Mail::to($tutormentor_email)->queue(new ReminderQuota($viewData));
     }
 }

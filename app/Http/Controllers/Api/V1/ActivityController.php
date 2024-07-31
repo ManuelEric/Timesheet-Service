@@ -106,7 +106,10 @@ class ActivityController extends Controller
             $activity->end_date = $end_date;
             $activity->time_spent = $time_spent;
             $activity->meeting_link = $validated['meeting_link'];
-            $activity->status = $validated['status'];
+
+            if ( array_key_exists('status', $validated) )
+                $activity->status = $validated['status'];
+
             $activity->save();
             DB::commit();
 

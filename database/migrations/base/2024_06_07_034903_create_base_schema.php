@@ -146,7 +146,12 @@ return new class extends Migration
         });
 
         Schema::create('reminders', function (Blueprint $table) {
-            $table->bigInteger('activity_id');
+            $table->foreignId('timesheet_id')->nullable()->constrained(
+                table: 'timesheets', indexName: 'timesheet_id',
+            )->onUpdate('cascade')->onDelete('cascade')->comment('will be filled if the reminder was reminder quota-left');
+            $table->foreignId('activity_id')->nullable()->constrained(
+                table: 'timesheet_activities', indexName: 'activity_id'
+            )->onUpdate('cascade')->onDelete('cascade')->comment('will be filled if the reminder was reminder appointment');
             $table->integer('times')->comment('how many times the reminder was sent.');
             $table->string('type')->comment('type of reminder');
             $table->timestamps();
