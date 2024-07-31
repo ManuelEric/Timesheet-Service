@@ -12,20 +12,18 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Mail\Mailables\Headers;
 use Illuminate\Queue\SerializesModels;
 
-class ReminderAppointment extends Mailable
+class ReminderQuota extends Mailable
 {
     use Queueable, SerializesModels, PackageType;
 
     public $tries = 3; // Maximum number of retries
-    public $title = 'Reminder Appointment';
+    public $title = 'Reminder Quota';
 
-    public $activityId;
+    public $timesheetId;
     protected $programCategory;
     protected $dear;
     protected $clients;
-    protected $activityStartDate;
-    protected $activityStartTime;
-    protected $activityMeetingLink;
+    protected $duration;
 
     /**
      * Create a new message instance.
@@ -34,19 +32,16 @@ class ReminderAppointment extends Mailable
     {
         $this->afterCommit();
 
-        [$this->programCategory, $tutor_or_mentor] = $this->convert($viewData['additionalInfo']['package']['category']);
+        [$this->programCategory, $tutor_or_mentor] = $this->convert($viewData['package']['category']);
+
+        $this->timesheetId = $viewData['timesheet']->id;
 
         /* going to be send to the view */
-        $this->dear = $viewData['additionalInfo']['package']['tutormentor_name'];
-
+        $this->dear = $viewData['package']['tutormentor_name'];
+        $this->duration = round($viewData['package']['duration_in_minutes'] / 60, 2); # it should displayed as in hours
         $this->clients = implode(", ", array_map(function ($entry) {
             return $entry['client_name'];
-        }, $viewData['additionalInfo']['clients']) );
-
-        $this->activityId = $viewData['activityDetails']['id'];
-        $this->activityStartDate = $viewData['activityDetails']['date'];
-        $this->activityStartTime = $viewData['activityDetails']['start_time'];
-        $this->activityMeetingLink  = $viewData['activityDetails']['link'];
+        }, $viewData['clients']) );
     }
 
     /**
@@ -71,7 +66,7 @@ class ReminderAppointment extends Mailable
         $programCategory = ucfirst($this->programCategory);
         return new Envelope(
             from: new Address('no-reply@edu-all.com', 'No Reply'),
-            subject: "Reminder: {$programCategory} Session Tomorrow."
+            subject: "Your session of {$programCategory} is Almost Up."
         );
     }
 
@@ -81,16 +76,12 @@ class ReminderAppointment extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'mail.reminder.appointment',
+            markdown: 'mail.reminder.quota',
             with: [
                 'dear' => ucfirst($this->dear),
                 'program_category' => $this->programCategory,
+                'duration' => $this->duration,
                 'clients' => $this->clients,
-                'activity' => [
-                    'date' => $this->activityStartDate,
-                    'time' => $this->activityStartTime,
-                    'link' => $this->activityMeetingLink,
-                ]
             ]
         );
     }

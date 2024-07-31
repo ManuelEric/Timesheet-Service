@@ -64,9 +64,9 @@ class ActivityObserver implements ShouldHandleEventsAfterCommit
             return;
         }
 
-        $activityName = $activity->activity;
+        $activityId = $activity->id;
         $endTime = Carbon::parse($activity->end_date)->format('d M Y H:i');
-        Log::info($this->userName . ' just completed the activity *' . $activityName . '* at ' . $endTime);
+        Log::info($this->userName . ' just completed the activity no. ' . $activityId . ' at ' . $endTime);
     }
 
     /**

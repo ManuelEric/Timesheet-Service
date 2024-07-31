@@ -69,6 +69,16 @@ class Timesheet extends Model
         return $this->belongsTo(TempUser::class, 'inhouse_id', 'uuid');
     }
 
+    public function reminders()
+    {
+        return $this->hasMany(Reminder::class, 'timesheet_id', 'id');
+    }
+
+    public function scopeHasNotBeenReminded(Builder $query): void
+    {
+        $query->doesntHave('reminders');
+    }
+
     /**
      * The scopes.
      * 
@@ -108,8 +118,14 @@ class Timesheet extends Model
 
     public function scopeHandleBy(Builder $query, string $identifier): void
     {        
-        $query->whereHas('handle_by', function($query) use ($identifier) {
-            $query->where('uuid', $identifier);
+        $query->whereHas('handle_by', function($sub) use ($identifier) {
+            $sub->where('uuid', $identifier);
         });
+    }
+
+    public function scopeExpiresInHours(Builder $query, int $hours = 1): void
+    {
+        $minutes = $hours * 60;
+        $query->whereRaw("duration - sum_activity_time_based_on_timesheet(id) = {$minutes}");
     }
 }

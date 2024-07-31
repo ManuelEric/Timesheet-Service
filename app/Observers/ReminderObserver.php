@@ -12,7 +12,10 @@ class ReminderObserver
      */
     public function created(Reminder $reminder): void
     {
-        Log::info("Log Reminder of activity: {$reminder->activity_id} has been created.");
+        if ( $reminder->type === "appointment" )
+            Log::info("Log reminder of appointment (activity: {$reminder->activity_id}) has been created.");
+        else
+            Log::info("Log reminder of quota-left (timesheet: {$reminder->timesheet_id}) has been created");
     }
 
     /**
@@ -20,7 +23,10 @@ class ReminderObserver
      */
     public function updated(Reminder $reminder): void
     {
-        //
+        if ( $reminder->type === "appointment" )
+            Log::info("Log reminder of appointment (activitiy: {$reminder->activity_id}) has been updated.");
+        else
+            Log::info("Log Reminder of quota-left (timesheet: {$reminder->activity_id}) has been updated.");
     }
 
     /**
