@@ -31,26 +31,17 @@ class ActivityDataService
 
         $mappedActivities = $activities->map(function ($data) {
 
-            $activity = $data->activity;
-            $description = $data->description;
             $start_date = Carbon::parse($data->start_date);
             $end_date = $data->end_date ? Carbon::parse($data->end_date) : false;
-            $date = $start_date->format('d F Y');
             $start_time = $start_date->format('H:i');
             $end_time = $end_date ? $end_date->format('H:i') : 0;
             $estimate = $end_date ? $start_date->diffInMinutes($end_date) : 0;
             $status = $data->status ? true : false;
-            $meeting_link = $data->meeting_link;
 
-            return [
-                'id' => $data->id,
-                'activity' => $activity,
-                'description' => $description,
-                'date' => $date,
+            return $data->toArray() + [
                 'start_time' => $start_time,
                 'end_time' => $end_time,
                 'estimate' => $estimate,
-                'meeting_link' => $meeting_link,
                 'status' => $status,
             ];
         });
