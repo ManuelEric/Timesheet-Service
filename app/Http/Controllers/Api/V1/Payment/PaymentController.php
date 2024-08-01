@@ -25,11 +25,13 @@ class PaymentController extends Controller
         $search = $request->only(['program_name', 'package_id', 'keyword', 'cutoff_date']);
         
         switch ( $paymentStatus ) {
-            case "paid":
+            # completed meaning paid
+            case "completed":
                 $mappedActivities = $paidActivitiesAction->execute($search);
                 break;
 
-            case "unpaid":
+            # not yet meaning unpaid
+            case "not yet":
                 $mappedActivities = $unpaidActivitiesAction->execute($search);
                 break;
         }

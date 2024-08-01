@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Activity;
 
+use App\Rules\ExistStartDateActivities;
+use App\Rules\StatusActivity;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -37,10 +39,32 @@ class UpdateRequest extends FormRequest
         return [
             'activity' => 'required',
             'description' => 'nullable',
-            'start_date' => 'required|date|date_format:Y-m-d H:i:s',
+            'start_date' => [
+                'required',
+                'date',
+                'date_format:Y-m-d H:i:s',
+                new ExistStartDateActivities('PUT', $this->route('timesheet'), $this->route('activity'))
+            ],
             'end_date' => 'nullable|date|date_format:Y-m-d H:i:s|after:start_date',
             'meeting_link' => 'required|active_url',
-            'status' => 'nullable|integer',
+            'status' => [
+                'nullable', 
+                'integer',
+                new StatusActivity($this->input('end_date'))
+            ],
+        ];
+    }
+
+    /**
+     * Get the validation attributes.
+     * 
+     */
+    public function attributes(): array
+    {
+        return [
+            'start_date' => 'start date',
+            'end_date' => 'end date',
+            'meeting_link' => 'meeting link',
         ];
     }
 }

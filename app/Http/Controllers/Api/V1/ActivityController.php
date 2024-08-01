@@ -93,7 +93,7 @@ class ActivityController extends Controller
 
         /* calculate spending time */
         $start_date = Carbon::parse($validated['start_date']);
-        $end_date = Carbon::parse($validated['end_date']);
+    $end_date = Carbon::parse($validated['end_date']);
         $time_spent = $start_date->diffInMinutes($end_date);
 
         DB::beginTransaction();

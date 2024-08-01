@@ -58,7 +58,8 @@ class CutoffController extends Controller
             {
                 $requestId = $validatedActivityIds[$i];
                 $activity = Activity::find($requestId);
-                $activity->cutoff_status = "unpaid";
+                # not yet meaning unpaid
+                $activity->cutoff_status = "not yet";
                 $activity->cutoff_ref_id = NULL;
                 $activity->save();
             }

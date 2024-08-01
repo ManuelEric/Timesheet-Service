@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Activity;
 
 use App\Rules\ExistStartDateActivities;
+use App\Rules\StatusActivity;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -42,11 +43,28 @@ class StoreRequest extends FormRequest
                 'required',
                 'date',
                 'date_format:Y-m-d H:i:s',
-                new ExistStartDateActivities($this->route('timesheet'))
+                new ExistStartDateActivities('POST', $this->route('timesheet'))
             ],
-            'end_date' => 'nullable',
+            'end_date' => 'nullable|date|date_format:Y-m-d H:i:s|after:start_date',
             'meeting_link' => 'required|active_url',
-            'status' => 'nullable|integer',
+            'status' => [
+                'nullable', 
+                'integer',
+                new StatusActivity($this->input('end_date'))
+            ],
+        ];
+    }
+
+    /**
+     * Get the validation attributes.
+     * 
+     */
+    public function attributes(): array
+    {
+        return [
+            'start_date' => 'start date',
+            'end_date' => 'end date',
+            'meeting_link' => 'meeting link',
         ];
     }
 }
