@@ -39,4 +39,15 @@ class UnassignActivityRequest extends FormRequest
             'activity_id.*' => ['required', new ExistPaidActivity]
         ];
     }
+
+    /**
+     * Get the validation attributes.
+     * 
+     */
+    public function attributes(): array
+    {
+        return [
+            'activity_id' => 'activity identifier',
+        ];
+    }
 }

@@ -29,7 +29,7 @@ class ExistStartDateActivities implements ValidationRule
         $sameDate = Activity::where('timesheet_id', $this->timesheetId)->
             where('start_date', $value)->
             when($this->method == 'PUT', function ($query) {
-                $query->except($this->activityId);
+                $query->whereNot('id', $this->activityId);
             })->
             exists();
         if ( $sameDate )

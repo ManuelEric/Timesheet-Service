@@ -128,6 +128,7 @@ class StoreRequest extends FormRequest
             'inhouse_id' => 'inhouse mentor/tutor',
             'package_id' => 'package',
             'pic_id' => 'PIC',
+            'subject_id' => 'subject'
         ];
     }
 }

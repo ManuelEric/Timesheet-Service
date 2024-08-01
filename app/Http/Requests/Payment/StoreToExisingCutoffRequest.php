@@ -42,4 +42,15 @@ class StoreToExisingCutoffRequest extends FormRequest
             'date' => ['required', 'date', new CutoffMonth],
         ];
     }
+
+    /**
+     * Get the validation attributes.
+     * 
+     */
+    public function attributes(): array
+    {
+        return [
+            'activity_id' => 'activity identifier',
+        ];
+    }
 }
