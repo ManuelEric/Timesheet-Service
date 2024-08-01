@@ -19,7 +19,7 @@ class PaymentController extends Controller
         PaidActivitiesAction $paidActivitiesAction,
         ): JsonResponse
     {
-        $paymentStatus = $request->segment(4); # either unpaid / paid
+        $paymentStatus = $request->segment(4) == "paid" ? "completed" : "not yet"; # either unpaid / paid
 
         /* incoming request */
         $search = $request->only(['program_name', 'package_id', 'keyword', 'cutoff_date']);

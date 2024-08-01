@@ -49,6 +49,7 @@ class UpdateRequest extends FormRequest
             'meeting_link' => 'required|active_url',
             'status' => [
                 'nullable', 
+                'integer',
                 new StatusActivity($this->input('end_date'))
             ],
         ];
