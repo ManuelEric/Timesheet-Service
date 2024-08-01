@@ -36,13 +36,11 @@ class ActivityDataService
             $start_time = $start_date->format('H:i');
             $end_time = $end_date ? $end_date->format('H:i') : 0;
             $estimate = $end_date ? $start_date->diffInMinutes($end_date) : 0;
-            $status = $data->status ? true : false;
 
             return $data->toArray() + [
                 'start_time' => $start_time,
                 'end_time' => $end_time,
                 'estimate' => $estimate,
-                'status' => $status,
             ];
         });
 

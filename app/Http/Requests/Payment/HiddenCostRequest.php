@@ -40,4 +40,16 @@ class HiddenCostRequest extends FormRequest
             'fee' => 'required|integer',
         ];
     }
+
+    /**
+     * Get the validation attributes.
+     * 
+     */
+    public function attributes(): array
+    {
+        return [
+            'timesheet_id' => 'timesheet identifier',
+            'cutoff_date' => 'cut-off date',
+        ];
+    }
 }

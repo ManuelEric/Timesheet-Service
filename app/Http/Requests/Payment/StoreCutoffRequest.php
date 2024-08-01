@@ -47,4 +47,16 @@ class StoreCutoffRequest extends FormRequest
             ]
         ];
     }
+
+    /**
+     * Get the validation attributes.
+     * 
+     */
+    public function attributes(): array
+    {
+        return [
+            'start_date' => 'start date',
+            'end_date' => 'end date',
+        ];
+    }
 }
