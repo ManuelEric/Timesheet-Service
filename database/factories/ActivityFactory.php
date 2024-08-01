@@ -23,7 +23,7 @@ class ActivityFactory extends Factory
         $end_date = Carbon::parse($fake_dateend);
         $time_spent = $start_date->diffInMinutes($end_date);
 
-        $cutoff_status = ['paid', 'unpaid'];
+        $cutoff_status = ['not yet', 'completed'];
         return [
             'timesheet_id' => \App\Models\Timesheet::inRandomOrder()->first()->id,
             'activity' => fake()->sentence,

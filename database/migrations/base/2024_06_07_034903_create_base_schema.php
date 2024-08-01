@@ -113,7 +113,7 @@ return new class extends Migration
             $table->float('time_spent')->comment('in hours');
             $table->text('meeting_link')->nullable();
             $table->integer('status');
-            $table->enum('cutoff_status', ['paid', 'unpaid'])->default('unpaid');
+            $table->enum('cutoff_status', ['not yet', 'completed'])->default('not yet');
             $table->foreignUlid('cutoff_ref_id')->nullable()->constrained(
                 table: 'timesheet_cutoff_history', indexName: 'timesheet_activities_cutoff_ref_id'
             )->onUpdate('restrict')->onDelete('restrict');

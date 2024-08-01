@@ -51,13 +51,15 @@ class ActivityObserver implements ShouldHandleEventsAfterCommit
             $newValue_of_cutoffStatus = $activity->cutoff_status;
             $newValue_of_cutoffrefId = $activity->cutoff_ref_id;
 
-            if ( $newValue_of_cutoffStatus == 'unpaid' && $newValue_of_cutoffrefId == NULL ) #1
+            # not yet meaning unpaid
+            if ( $newValue_of_cutoffStatus == 'not yet' && $newValue_of_cutoffrefId == NULL ) #1
             {
                 $activityId = $activity->id;
                 Log::info($this->userName . ' has unassigned the activity no. ' . $activityId );
                 
             } 
-            else if ( $newValue_of_cutoffStatus == 'paid' && $newValue_of_cutoffrefId != NULL ) #2
+            # completed meaning paid
+            else if ( $newValue_of_cutoffStatus == 'completed' && $newValue_of_cutoffrefId != NULL ) #2
             {
                 Log::info($this->userName . ' has stored into cut-off.');
             }
