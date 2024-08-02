@@ -30,7 +30,7 @@ class CreateActivityAction
         $packageCategory = $package->category;
         [$type, $tutor_mentor] = $this->convert($packageCategory);
         $fee_perHours = $type == "tutoring" ? $timesheet->subject->fee_hours : 0;
-        $endDate = $validated['end_date'];
+        $endDate = array_key_exists('end_date', $validated) ? $validated['end_date'] : NULL;
         $additionalFee = $bonusFee = 0;
 
         /* when the request comes from fee controller */

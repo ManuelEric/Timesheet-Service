@@ -63,13 +63,13 @@ class Activity extends Model
     {
         # the activity has to be finished to be selected as unpaid
         # not yet meaning unpaid
-        $query->where('cutoff_status', 'not yet')->where('status', 1)->whereNotNull('end_date');
+        $query->where('status', 1)->where('cutoff_status', 'not yet')->whereNotNull('end_date');
     }
 
     public function scopePaid(Builder $query): void
     {
         # paid meaning completed
-        $query->where('cutoff_status', 'completed')->whereNotNull('cutoff_ref_id');
+        $query->where('status', 1)->where('cutoff_status', 'completed')->whereNotNull('cutoff_ref_id');
     }
 
     public function scopeOnSearch(Builder $query, array $search = []): void

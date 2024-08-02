@@ -22,28 +22,32 @@ class TimesheetDataService
 
     public function listTimesheet(array $search = [])
     {
-        $timesheets = Timesheet::with(
-            [
-                'ref_program' => function ($query) {
-                    $query->select('category', 'student_name', 'student_school', 'program_name', 'timesheet_id');
-                },
-                'handle_by' => function ($query) {
-                    $query->select('temp_users.id', 'full_name');
-                },
-                'admin' => function ($query) {
-                    $query->select('users.id', 'full_name');
-                },
-                'activities' => function ($query) {
-                    $query->select('time_spent');
-                },
-                'package' => function ($query) {
-                    $query->select('id', 'type_of', 'package');
-                },
-                'inhouse_pic' => function ($query) {
-                    $query->select('uuid', 'full_name');
-                },
-            ]
-        )->onSearch($search)->select('timesheets.id', 'inhouse_id', 'package_id', 'duration', 'notes')->get();
+        $timesheets = Timesheet::query()->
+            with(
+                [
+                    'ref_program' => function ($query) {
+                        $query->select('category', 'student_name', 'student_school', 'program_name', 'timesheet_id');
+                    },
+                    'handle_by' => function ($query) {
+                        $query->select('temp_users.id', 'full_name');
+                    },
+                    'admin' => function ($query) {
+                        $query->select('users.id', 'full_name');
+                    },
+                    'activities' => function ($query) {
+                        $query->select('time_spent');
+                    },
+                    'package' => function ($query) {
+                        $query->select('id', 'type_of', 'package');
+                    },
+                    'inhouse_pic' => function ($query) {
+                        $query->select('uuid', 'full_name');
+                    },
+                ]
+            )->
+            onSearch($search)->
+            select('timesheets.id', 'inhouse_id', 'package_id', 'duration', 'notes')->
+            get();
 
         $mappedTimesheets = $timesheets->map(function ($data) {
 
@@ -75,7 +79,7 @@ class TimesheetDataService
             $programName = $refProgram->first()->program_name;
             $tutorMentorName = $data->handle_by->first()->full_name;
             $adminName = $data->admin->first()->full_name;
-            $total_timespent = $data->activities()->sum('time_spent');
+            $total_timespent = $data->activities()->unpaid()->sum('time_spent');
 
             return [
                 'id' => $timesheetId,

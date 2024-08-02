@@ -46,7 +46,7 @@ class TutorMentorCommand extends Command
         CreateTempUserService $createTempUserService,
         )
     {
-        [$statusCode, $mentorTutors] = $this->make_call('get', env('CRM_DOMAIN') . 'user/mentor-tutors', ['role' => 'Tutor']);
+        [$statusCode, $mentorTutors] = $this->make_call('get', env('CRM_DOMAIN') . 'user/mentor-tutors');
         $progress = $this->output->createProgressBar(count($mentorTutors));
         $progress->start();
         

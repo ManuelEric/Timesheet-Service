@@ -3,11 +3,13 @@
 namespace App\Http\Requests\Activity;
 
 use App\Rules\ExistStartDateActivities;
+use App\Rules\LimitedDurationActivity;
 use App\Rules\StatusActivity;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\ValidationException;
 
 class StoreRequest extends FormRequest
@@ -36,6 +38,14 @@ class StoreRequest extends FormRequest
      */
     public function rules(): array
     {
+        $timesheet_id = $this->route('timesheet');
+        $input_startDate = $this->input('start_date');
+        $input_endDate = $this->input('end_date');
+        $dateParams = [
+            'start' => Carbon::parse($input_startDate),
+            'end' => $input_endDate ? Carbon::parse($input_endDate) : null,
+        ];
+
         return [
             'activity' => 'required',
             'description' => 'nullable',
@@ -43,14 +53,21 @@ class StoreRequest extends FormRequest
                 'required',
                 'date',
                 'date_format:Y-m-d H:i:s',
-                new ExistStartDateActivities('POST', $this->route('timesheet'))
+                new ExistStartDateActivities('POST', $timesheet_id),
+                new LimitedDurationActivity($timesheet_id, $dateParams)
             ],
-            'end_date' => 'nullable|date|date_format:Y-m-d H:i:s|after:start_date',
+            'end_date' => [
+                'nullable', 
+                'date', 
+                'date_format:Y-m-d H:i:s',
+                'after:start_date',
+                new LimitedDurationActivity($timesheet_id, $dateParams),
+            ],
             'meeting_link' => 'required|active_url',
             'status' => [
                 'nullable', 
                 'integer',
-                new StatusActivity($this->input('end_date'))
+                new StatusActivity($input_endDate)
             ],
         ];
     }
