@@ -42,7 +42,7 @@ class CutoffAction
                 /* execute */
                 $rawQuery->update([
                     'status' => 1,
-                    'cutoff_status' => 'paid',
+                    'cutoff_status' => 'completed',
                     'cutoff_ref_id' => $cutoff->id
                 ]);                
             }
