@@ -31,13 +31,14 @@ class CreateActivityAction
         [$type, $tutor_mentor] = $this->convert($packageCategory);
         $fee_perHours = $type == "tutoring" ? $timesheet->subject->fee_hours : 0;
         $endDate = array_key_exists('end_date', $validated) ? $validated['end_date'] : NULL;
-        $additionalFee = $bonusFee = 0;
+        $additionalFee = $bonusFee = $status = 0;
 
         /* when the request comes from fee controller */
         if ( array_key_exists('additional_fee', $validated) ) 
         {
             $fee_perHours = 0;
             $additionalFee = $validated['additional_fee'];
+            $status = 1;
         } 
 
         /* when the request comes from bonus controller */
@@ -45,6 +46,7 @@ class CreateActivityAction
         {
             $fee_perHours = 0;
             $bonusFee = $validated['bonus_fee'];
+            $status = 1;
         } 
 
         DB::beginTransaction();
@@ -61,7 +63,7 @@ class CreateActivityAction
                 'bonus_fee' => $bonusFee,
                 'time_spent' => 0,
                 'meeting_link' => $validated['meeting_link'],
-                'status' => 0
+                'status' => $status,
             ];
     
             Activity::create($activityDetails);
