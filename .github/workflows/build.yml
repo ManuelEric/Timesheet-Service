@@ -46,6 +46,7 @@ jobs:
         run: |
           git fetch
           git checkout -b main
+          git pull origin main
           git pull origin build
           git push origin main
         env:
