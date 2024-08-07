@@ -286,6 +286,7 @@ onMounted(() => {
         :id="selected"
         @close="isDialogVisible.add_existing = false"
         @reload="getData"
+        @reset="selected = []"
       />
     </VDialog>
   </VCard>
