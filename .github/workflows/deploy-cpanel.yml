@@ -1,0 +1,49 @@
+name: Build and Deploy to cPanel
+
+on:
+  push:
+    branches:
+      - production
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2' # Ganti dengan versi PHP yang sesuai
+
+      - name: Install Composer
+        run: composer install --no-dev --optimize-autoloader
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16' # Ganti dengan versi Node.js yang sesuai
+
+      - name: Install Node.js dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+      - name: Install lftp
+        run: sudo apt-get install lftp
+
+      - name: Deploy to cPanel FTP
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          lftp -f "
+          open ftp://$FTP_SERVER
+          user $FTP_USERNAME $FTP_PASSWORD
+          mirror -R ./ /public_html/eduall/github/timesheet
+          bye
+          "
