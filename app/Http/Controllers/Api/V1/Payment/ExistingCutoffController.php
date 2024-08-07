@@ -17,14 +17,15 @@ class ExistingCutoffController extends Controller
 {
     public function store(StoreToExisingCutoffRequest $request): JsonResponse
     {
-        $validated = $request->safe()->only(['activity_id', 'date']);
+        $validated = $request->safe()->only(['activity_id', 'start_date', 'end_date']);
 
         $validatedActivityIds = $validated['activity_id'];
-        $validatedDate = $validated['date'];
-        $validatedMonth = Carbon::parse($validatedDate)->format('F Y');
+        $validatedStartDate = $validated['start_date'];
+        $validatedEndDate = $validated['end_date'];
+        $validatedMonth = Carbon::parse($validatedStartDate)->format('F Y');
 
         /* get the cut off id by requested date */
-        $cutoff = Cutoff::where('month', $validatedMonth)->withinTheCutoffDateRange($validatedDate)->first();
+        $cutoff = Cutoff::where('month', $validatedMonth)->inBetwen($validatedStartDate, $validatedEndDate)->first();
         $cutoffId = $cutoff->id;
         
         DB::beginTransaction();

@@ -29,8 +29,12 @@ return new class extends Migration
             )->onUpdate('cascade')->onDelete('cascade');
             $table->string('role');
             $table->string('tutor_subject')->nullable();
-            $table->bigInteger('fee_hours')->default(0);
-            $table->bigInteger('fee_session')->default(0);
+            $table->integer('year')->nullable();
+            $table->integer('head')->nullable();
+            $table->float('additional_fee')->default(0.0);
+            $table->integer('grade')->nullable();
+            $table->float('fee_individual')->default(0.0);
+            $table->float('fee_group')->default(0.0);
             $table->timestamps();
         });
 

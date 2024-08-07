@@ -36,10 +36,14 @@ class StoreToExisingCutoffRequest extends FormRequest
      */
     public function rules(): array
     {
+        $start_date = $this->input('start_date');
+        $end_date = $this->input('end_date');
+
         return [
             'activity_id' => 'required|array',
             'activity_id.*' => ['required', new ExistCutoffActivity],
-            'date' => ['required', 'date', new CutoffMonth],
+            'start_date' => ['required', 'date', new CutoffMonth($start_date, $end_date)],
+            'end_date' => 'required|date|after_or_equal:start_date',
         ];
     }
 
