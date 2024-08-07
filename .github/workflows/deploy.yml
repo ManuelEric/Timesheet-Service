@@ -20,7 +20,7 @@ jobs:
 
       - name: Sync main to production
         run: |
-          git push origin --delete production
+          git push origin -d production
           git checkout -b production
           git merge main
           git push origin production
