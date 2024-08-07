@@ -21,7 +21,7 @@ jobs:
       - name: Sync main to production
         run: |
           git checkout production
-          git merge main --no-edit
+          git merge main --no-edit --allow-unrelated-histories
           git push origin production
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
