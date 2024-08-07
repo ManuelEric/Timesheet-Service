@@ -15,13 +15,13 @@ const closeDialogContent = () => {
 const form = ref({
   activity: prop?.activity.activity,
   description: prop?.activity.description,
-  date: moment(prop?.activity.date).format('YYYY-MM-DD'),
+  date: moment(prop?.activity.start_date).format('YYYY-MM-DD'),
   start_time: prop?.activity.start_time,
   end_time: prop?.activity.end_time,
-  start_date: moment(prop?.activity.date).format('YYYY-MM-DD') + ' ' + prop?.activity.start_time + ':00',
+  start_date: moment(prop?.activity.start_date).format('YYYY-MM-DD') + ' ' + prop?.activity.start_time + ':00',
   end_date:
     prop?.activity.end_time != 0
-      ? moment(prop?.activity.date).format('YYYY-MM-DD') + ' ' + prop?.activity.end_time + ':00'
+      ? moment(prop?.activity.start_date).format('YYYY-MM-DD') + ' ' + prop?.activity.end_time + ':00'
       : null,
   meeting_link: prop?.activity.meeting_link,
 })
@@ -36,7 +36,7 @@ const submit = async () => {
       )
 
       if (res) {
-        console.log(res)
+        // console.log(res)'
         showNotif('success', res.message, 'bottom-end')
         closeDialogContent()
       }
@@ -46,12 +46,16 @@ const submit = async () => {
         let errorMessage = 'Validation errors:'
 
         // Merge validation errors
-        for (const key in validationErrors) {
-          if (validationErrors.hasOwnProperty(key)) {
-            errorMessage += `\n${key}: ${validationErrors[key].join(', ')}`
+        if (typeof validationErrors != 'string') {
+          for (const key in validationErrors) {
+            if (validationErrors.hasOwnProperty(key)) {
+              errorMessage += `\n${key}: ${validationErrors[key].join(', ')}`
+            }
           }
+          showNotif('error', errorMessage, 'bottom-end')
+        } else {
+          showNotif('error', error.response.data.errors, 'bottom-end')
         }
-        showNotif('error', errorMessage, 'bottom-end')
       }
     }
   }
@@ -72,7 +76,6 @@ const submit = async () => {
         @submit.prevent="submit"
         ref="formData"
         validate-on="input"
-        fast-fail
       >
         <VRow>
           <VCol cols="12">
@@ -125,7 +128,6 @@ const submit = async () => {
               v-model="form.end_time"
               label="End Time"
               placeholder="End Time"
-              :rules="rules.required"
               @change="form.end_date = form.date + ' ' + form.end_time + ':00'"
             />
           </VCol>

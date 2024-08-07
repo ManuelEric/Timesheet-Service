@@ -1,4 +1,11 @@
 <script setup>
+import additionalFee from '@/components/admin/cut-off/additional_add.vue'
+import newCutOff from '@/components/admin/cut-off/cutoff_add.vue'
+import cutOffExisting from '@/components/admin/cut-off/cutoff_existing_add.vue'
+import ApiService from '@/services/ApiService'
+
+const loading = ref(false)
+const data = ref([])
 const isDialogVisible = ref({
   cut_off: false,
   additional_fee: false,
@@ -6,7 +13,51 @@ const isDialogVisible = ref({
   add_existing: false,
 })
 
+const currentPage = ref(1)
+const totalPage = ref()
 const selected = ref([])
+const keyword = ref(null)
+const package_id = ref(null)
+const package_list = ref([])
+
+const getData = async () => {
+  loading.value = true
+  const page = '?page=' + currentPage.value
+  const search = keyword.value ? '&keyword=' + keyword.value : ''
+  const package_select = package_id.value ? '&package_id=' + package_id.value : ''
+
+  try {
+    const res = await ApiService.get('api/v1/payment/unpaid' + page + search + package_select)
+    if (res) {
+      currentPage.value = res.current_page
+      totalPage.value = res.last_page
+      data.value = res
+    }
+  } catch (error) {
+    console.error(error)
+  } finally {
+    loading.value = false
+  }
+}
+
+const getPackage = async () => {
+  loading.value = true
+  try {
+    const res = await ApiService.get('api/v1/package/component/list')
+    if (res) {
+      package_list.value = res
+      loading.value = false
+    }
+  } catch (error) {
+    loading.value = false
+    console.error(error)
+  }
+}
+
+onMounted(() => {
+  getData()
+  getPackage()
+})
 </script>
 
 <template>
@@ -22,31 +73,42 @@ const selected = ref([])
       <VRow class="my-1">
         <VCol
           cols="3"
-          md="2"
+          md="4"
         >
           <VAutocomplete
+            :loading="loading"
+            :disabled="loading"
             clearable="true"
-            label="Program Name"
-            :items="['Program 1', 'Program 2', 'Program 3']"
-            placeholder="Select Program Name"
+            label="Package Name"
+            :items="package_list"
+            :item-title="item => item.type_of + ' - ' + item.package"
+            item-value="id"
+            v-model="package_id"
+            placeholder="Select Timesheet Package"
             density="compact"
+            @update:modelValue="getData"
           />
         </VCol>
         <VCol
           cols="3"
           md="3"
         >
-          <VAutocomplete
-            clearable="true"
-            label="Timesheet - Package"
-            :items="['Timesheet 1', 'Timesheet 2', 'Timesheet 3']"
-            placeholder="Select Timesheet - Package"
+          <VTextField
+            :loading="loading"
+            :disabled="loading"
+            append-inner-icon="ri-search-line"
             density="compact"
+            label="Search"
+            variant="solo"
+            hide-details
+            single-line
+            v-model="keyword"
+            @change="getData"
           />
         </VCol>
         <VCol
           cols="6"
-          md="7"
+          md="5"
           class="text-end"
         >
           <VBtn
@@ -112,6 +174,7 @@ const selected = ref([])
             color="secondary"
             density="compact"
             @click="isDialogVisible.cut_off = true"
+            v-if="selected.length == 0"
           >
             <VIcon
               icon="ri-scissors-cut-line"
@@ -121,7 +184,17 @@ const selected = ref([])
           </VBtn>
         </VCol>
       </VRow>
-      <VTable class="text-no-wrap">
+
+      <!-- Loader  -->
+      <vSkeletonLoader
+        class="mx-auto border"
+        type="table-thead, table-row@10"
+        v-if="loading"
+      ></vSkeletonLoader>
+      <VTable
+        class="text-no-wrap"
+        v-else
+      >
         <thead>
           <tr>
             <th
@@ -142,29 +215,36 @@ const selected = ref([])
             <th class="text-uppercase text-center">Date & Time</th>
             <th class="text-uppercase text-center">Time Spent</th>
             <th class="text-uppercase text-center">Fee/Hours</th>
+            <th class="text-uppercase text-center">Total</th>
             <th class="text-uppercase text-center">Cut-Offf Status</th>
           </tr>
         </thead>
         <tbody>
           <tr
-            v-for="i in 5"
-            :key="i"
+            v-for="(item, index) in data.data"
+            :key="index"
           >
             <td>
               <VCheckbox
                 v-model="selected"
-                :value="i"
+                :value="item.id"
               ></VCheckbox>
             </td>
-            <td>{{ i }}</td>
-            <td>Lorem Ipsum</td>
-            <td>Lorem Ipsum</td>
-            <td>Lorem Ipsum</td>
-            <td>10 Januari 2024 (14.00 - 15.00)</td>
-            <td>60 Minutes</td>
-            <td>Rp. 200.000</td>
+            <td>{{ parseInt(index) + 1 }}</td>
+            <td>{{ item.package.type + ' - ' + item.package.name }}</td>
+            <td>{{ item.activity }}</td>
+            <td>{{ item.mentor_tutor }}</td>
+            <td>{{ item.date }}</td>
+            <td>{{ item.time_spent / 60 + ' Hours' }}</td>
+            <td>Rp. {{ item.fee_hours }}</td>
+            <td>
+              Rp.
+              {{ (item.time_spent / 60) * item.fee_hours }}
+            </td>
             <td class="text-center">
-              <VChip color="#214223"> Not Yet </VChip>
+              <VChip :color="item.cutoff_status == 'not yet' ? '#ff0217' : '#91c45e'">
+                {{ item.cutoff_status.charAt(0).toUpperCase() + item.cutoff_status.slice(1).toLowerCase() }}
+              </VChip>
             </td>
           </tr>
         </tbody>
@@ -173,8 +253,12 @@ const selected = ref([])
       <div class="d-flex justify-center mt-5">
         <VPagination
           v-model="currentPage"
-          :length="5"
+          :length="totalPage"
+          :total-visible="4"
           color="primary"
+          density="compact"
+          :show-first-last-page="false"
+          @update:modelValue="getData"
         />
       </div>
     </VCardText>
@@ -185,90 +269,24 @@ const selected = ref([])
       max-width="450"
       persistent
     >
-      <VCard title="Cut-Off Date">
-        <VCardText>
-          <VRow>
-            <VCol cols="6">
-              <VTextField
-                type="date"
-                label="Start Date"
-                placeholder="Activity"
-              />
-            </VCol>
-            <VCol cols="6">
-              <VTextField
-                type="date"
-                label="End Date"
-                placeholder="Activity"
-              />
-            </VCol>
-          </VRow>
-          <VDivider class="my-3" />
-          <VCardActions>
-            <VBtn
-              color="error"
-              @click="isDialogVisible.cut_off = false"
-            >
-              <VIcon
-                icon="ri-close-line"
-                class="me-3"
-              />
-              Close
-            </VBtn>
-            <VSpacer />
-            <VBtn color="success">
-              Save
-              <VIcon
-                icon="ri-save-line"
-                class="ms-3"
-              />
-            </VBtn>
-          </VCardActions>
-        </VCardText>
-      </VCard>
+      <newCutOff
+        @close="isDialogVisible.cut_off = false"
+        @reload="getData"
+      />
     </VDialog>
 
     <!-- Add Existing Dialog -->
     <VDialog
       v-model="isDialogVisible.add_existing"
-      max-width="300"
+      max-width="450"
       persistent
       scrollable
     >
-      <VCard title="Add to Cut-Off">
-        <VCardText>
-          <VRow>
-            <VCol cols="12">
-              <VTextField
-                type="date"
-                density="compact"
-              ></VTextField>
-            </VCol>
-          </VRow>
-
-          <VDivider class="my-3" />
-          <VCardActions>
-            <VBtn
-              color="error"
-              @click="isDialogVisible.add_existing = false"
-            >
-              <VIcon
-                icon="ri-close-line"
-                class="me-3"
-              />
-              Close
-            </VBtn>
-            <VSpacer />
-            <VBtn color="success">
-              Save
-              <VIcon
-                icon="ri-save-line"
-                class="ms-3"
-              />
-            </VBtn>
-          </VCardActions>
-        </VCardText>
-      </VCard>
+      <cutOffExisting
+        :id="selected"
+        @close="isDialogVisible.add_existing = false"
+        @reload="getData"
+      />
     </VDialog>
   </VCard>
 
@@ -278,57 +296,10 @@ const selected = ref([])
     max-width="450"
     persistent
   >
-    <VCard title="Add Bonus">
-      <VCardText>
-        <VRow>
-          <VCol cols="12">
-            <VAutocomplete
-              label="Timesheet - Package"
-              density="compact"
-              placeholder="Timesheet - Package"
-              :items="['California', 'Colorado', 'Florida', 'Georgia', 'Texas', 'Wyoming']"
-            ></VAutocomplete>
-          </VCol>
-          <VCol cols="6">
-            <VTextField
-              type="date"
-              label="Date"
-              density="compact"
-              placeholder="Date"
-            />
-          </VCol>
-          <VCol cols="6">
-            <VTextField
-              type="number"
-              label="Bonus Fee"
-              density="compact"
-              placeholder="Bonus Fee"
-            />
-          </VCol>
-        </VRow>
-        <VDivider class="my-3" />
-        <VCardActions>
-          <VBtn
-            color="error"
-            @click="isDialogVisible.add_bonus = false"
-          >
-            <VIcon
-              icon="ri-close-line"
-              class="me-3"
-            />
-            Close
-          </VBtn>
-          <VSpacer />
-          <VBtn color="success">
-            Save
-            <VIcon
-              icon="ri-save-line"
-              class="ms-3"
-            />
-          </VBtn>
-        </VCardActions>
-      </VCardText>
-    </VCard>
+    <additionalFee
+      :title="'bonus'"
+      @close="isDialogVisible.add_bonus = false"
+    />
   </VDialog>
 
   <!-- Additional Fee Dialog -->
@@ -337,57 +308,10 @@ const selected = ref([])
     max-width="450"
     persistent
   >
-    <VCard title="Add Additional Fee">
-      <VCardText>
-        <VRow>
-          <VCol cols="12">
-            <VAutocomplete
-              label="Timesheet - Package"
-              placeholder="Timesheet - Package"
-              :items="['California', 'Colorado', 'Florida', 'Georgia', 'Texas', 'Wyoming']"
-              density="compact"
-            ></VAutocomplete>
-          </VCol>
-          <VCol cols="6">
-            <VTextField
-              type="date"
-              label="Date"
-              placeholder="Date"
-              density="compact"
-            />
-          </VCol>
-          <VCol cols="6">
-            <VTextField
-              type="number"
-              label="Additional Fee"
-              placeholder="Additional Fee"
-              density="compact"
-            />
-          </VCol>
-        </VRow>
-        <VDivider class="my-3" />
-        <VCardActions>
-          <VBtn
-            color="error"
-            @click="isDialogVisible.additional_fee = false"
-          >
-            <VIcon
-              icon="ri-close-line"
-              class="me-3"
-            />
-            Close
-          </VBtn>
-          <VSpacer />
-          <VBtn color="success">
-            Save
-            <VIcon
-              icon="ri-save-line"
-              class="ms-3"
-            />
-          </VBtn>
-        </VCardActions>
-      </VCardText>
-    </VCard>
+    <additionalFee
+      :title="'fee'"
+      @close="isDialogVisible.additional_fee = false"
+    />
   </VDialog>
 </template>
 

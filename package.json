@@ -1,5 +1,5 @@
 {
-  "name": "materio-vuetify-vuejs-laravel-admin-template-free",
+  "name": "external-timesheet",
   "private": true,
   "type": "module",
   "scripts": {
@@ -78,5 +78,5 @@
     "stylelint-order": "6.0.3"
   },
   "packageManager": "pnpm@8.6.2",
-  "version": "2.1.0"
+  "version": "1.0.0"
 }

@@ -27,17 +27,16 @@ const submit = async () => {
   if (valid) {
     try {
       const res = await ApiService.post('api/v1/timesheet/' + props.id + '/activity', form.value)
-
+      console.log(res)
       if (res) {
-        // console.log(res)
         showNotif('success', res.message, 'bottom-end')
         closeDialogContent()
       }
     } catch (error) {
+      // console.log(error)
       if (error?.response?.data?.errors) {
         const validationErrors = error.response.data.errors
         let errorMessage = 'Validation errors:'
-
         // Merge validation errors
         for (const key in validationErrors) {
           if (validationErrors.hasOwnProperty(key)) {
@@ -45,6 +44,8 @@ const submit = async () => {
           }
         }
         showNotif('error', errorMessage, 'bottom-end')
+      } else {
+        showNotif('error', error.response.data.message, 'bottom-end')
       }
     }
   }
@@ -65,7 +66,6 @@ const submit = async () => {
         @submit.prevent="submit"
         ref="formData"
         validate-on="input"
-        fast-fail
       >
         <VRow>
           <VCol cols="12">
@@ -116,7 +116,7 @@ const submit = async () => {
             <VTextField
               type="time"
               v-model="form.end_time"
-              label="Meeting Link"
+              label="End Time"
               placeholder="End Time"
               @change="form.end_date = form.date + ' ' + form.end_time + ':00'"
             />

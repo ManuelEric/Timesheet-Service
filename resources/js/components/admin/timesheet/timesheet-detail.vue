@@ -1,11 +1,9 @@
 <script setup>
-import ApiService from '@/services/ApiService'
 import AddActivity from '@/components/admin/timesheet/activity-add.vue'
 import EditActivity from '@/components/admin/timesheet/activity-edit.vue'
 import DeleteDialog from '@/components/DeleteHandler.vue'
 import { showNotif } from '@/helper/notification'
-import { router } from '@/plugins/router'
-import moment from 'moment'
+import ApiService from '@/services/ApiService'
 
 // Start Variable
 const props = defineProps({ id: String })
@@ -30,15 +28,13 @@ const getData = async () => {
     const res = await ApiService.get('api/v1/timesheet/' + props.id + '/activities')
     if (res) {
       data.value = res
-      loading.value = true
     }
   } catch (error) {
-    loading.value = false
     console.error(error)
+  } finally {
+    loading.value = true
   }
 }
-
-const submit = async () => {}
 
 const toggleDialog = type => {
   if (!isDialogVisible.value[type]) {
@@ -65,6 +61,34 @@ const deleteActivity = async () => {
   } catch (error) {
     if (error.response?.status == 400) {
       showNotif('error', error.response?.data?.errors, 'bottom-end')
+    }
+  }
+}
+
+const updateStatus = async item => {
+  try {
+    const res = await ApiService.put('api/v1/timesheet/' + props.id + '/activity/' + item.id, item)
+
+    if (res) {
+      showNotif('success', res.message, 'bottom-end')
+      getData()
+    }
+  } catch (error) {
+    if (error?.response?.data?.errors) {
+      const validationErrors = error.response.data.errors
+      let errorMessage = 'Validation errors:'
+
+      // Merge validation errors
+      if (typeof validationErrors != 'string') {
+        for (const key in validationErrors) {
+          if (validationErrors.hasOwnProperty(key)) {
+            errorMessage += `\n${key}: ${validationErrors[key].join(', ')}`
+          }
+        }
+        showNotif('error', errorMessage, 'bottom-end')
+      } else {
+        showNotif('error', error.response.data.errors, 'bottom-end')
+      }
     }
   }
 }
@@ -148,7 +172,7 @@ onMounted(() => {
               {{ item.description }}
             </td>
             <td>
-              {{ moment(item.start_date).format('LL') }}
+              {{ $moment(item.start_date).format('MMM Do YYYY') }}
             </td>
             <td class="text-center">
               {{ item.start_time }}
@@ -163,14 +187,24 @@ onMounted(() => {
               />
               {{ item.estimate }} Minutes
             </td>
-            <td>
-              <VChip
-                :color="item.status == 'Not Yet' ? '#e05e5e' : '#91C45E'"
-                class="font-weight-medium"
-                size="small"
+            <td nowrap>
+              <VCheckbox
+                color="success"
+                v-model="item.status"
+                :value="1"
+                :false-value="0"
+                @update:modelValue="updateStatus(item)"
               >
-                {{ item.status }}
-              </VChip>
+                <template v-slot:label>
+                  <VChip
+                    :color="item.status ? '#91C45E' : '#e05e5e'"
+                    class="font-weight-medium"
+                    size="small"
+                  >
+                    {{ item.status ? 'Completed' : 'Not Yet' }}
+                  </VChip>
+                </template>
+              </VCheckbox>
             </td>
             <td class="text-end">
               <VBtn
