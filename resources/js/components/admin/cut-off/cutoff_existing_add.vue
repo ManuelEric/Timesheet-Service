@@ -4,7 +4,7 @@ import { rules } from '@/helper/rules'
 import ApiService from '@/services/ApiService'
 
 const props = defineProps({ id: Array })
-const emit = defineEmits(['close', 'reload'])
+const emit = defineEmits(['close', 'reload', 'reset'])
 
 const formData = ref()
 const form = ref({
@@ -22,7 +22,7 @@ const submit = async () => {
       const res = await ApiService.post('api/v1/payment/cut-off/add', form.value)
 
       if (res) {
-        log
+        // console.log(res)
         showNotif('success', res.message, 'bottom-end')
       }
     } catch (error) {
@@ -41,6 +41,7 @@ const submit = async () => {
     } finally {
       emit('reload')
       emit('close')
+      emit('reset')
     }
   }
 }
@@ -49,7 +50,6 @@ const submit = async () => {
 <template>
   <VCard title="Add to Cut-Off">
     <VCardText>
-      {{ form }}
       <VForm
         @submit.prevent="submit"
         ref="formData"

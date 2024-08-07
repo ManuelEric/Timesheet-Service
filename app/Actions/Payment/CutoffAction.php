@@ -31,22 +31,23 @@ class CutoffAction
             $rawQuery = Activity::query()->unpaid()->where('start_date', '>=', "{$startDate} 00:00:00")->where('end_date', '<=', "{$endDate} 23:59:59");
             $activities = $rawQuery->select('fee_hours', 'additional_fee', 'bonus_fee')->get();
 
-            if ( count($activities) > 0 )
-            {
-                /* store cut-off as reference */
-                $cutoff = new Cutoff();
-                $cutoff->month = Carbon::parse($endDate)->format('F Y');
-                $cutoff->from = $startDate;
-                $cutoff->to = $endDate;
-                $cutoff->save();
-                
-                /* execute */
-                $rawQuery->update([
-                    // 'status' => 1,
-                    'cutoff_status' => 'completed',
-                    'cutoff_ref_id' => $cutoff->id
-                ]);                
-            }
+            if ( count($activities) == 0 )
+                throw new Exception("There are no activities to be found.");
+            
+            /* store cut-off as reference */
+            $cutoff = new Cutoff();
+            $cutoff->month = Carbon::parse($endDate)->format('F Y');
+            $cutoff->from = $startDate;
+            $cutoff->to = $endDate;
+            $cutoff->save();
+            
+            /* execute */
+            $rawQuery->update([
+                // 'status' => 1,
+                'cutoff_status' => 'completed',
+                'cutoff_ref_id' => $cutoff->id
+            ]);                
+            
             DB::commit();
         } catch (Exception $err) {
 

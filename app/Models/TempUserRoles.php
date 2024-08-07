@@ -21,8 +21,12 @@ class TempUserRoles extends Model
         'temp_user_id',
         'role',
         'tutor_subject',
-        'fee_hours',
-        'fee_session',
+        'year',
+        'head',
+        'additional_fee',
+        'grade',
+        'fee_individual',
+        'fee_group',
     ];
 
     /**

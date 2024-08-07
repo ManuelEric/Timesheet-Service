@@ -36,30 +36,40 @@ class CreateTempUserService
         foreach ($userRawInformation['roles'] as $detail)
         {
             /* create model temp_user_roles only if the role are inside acceptable roles */
-            if ( in_array($detail['role'], ['Mentor', 'Tutor']) )
+            if ( in_array($detail['role_name'], ['Mentor', 'Tutor']) )
             {
-                $role = $detail['role'];
-                $detail_subject = $detail['subjects'];
+                $role_name = $detail['role_name'];
+                $subjects = $detail['subjects'];
 
-                /* detail of the subject */
-                $subject_name = $detail_subject['name'];
-                $year = $detail_subject['year']; # an indicator that allow this user to be a tutor for only student with choosen year 
-                $head = $detail_subject['head'];
-                $additional_fee = $detail_subject['additional_fee'];
-                $grade = $detail_subject['grade'];
-                $fee_individual = $detail_subject['fee_individual'] ?? 0;
-                $fee_group = $detail_subject['fee_group'] ?? 0;
+                if ( $subjects === null || count($subjects) == 0 ) {
+                    $roleDetails[] = [
+                        'role' => $role_name,
+                    ];
+                    continue;
+                }
 
-                $roleDetails[] = [
-                    'role' => $role,
-                    'tutor_subject' => $subject_name,
-                    'year' => $year,
-                    'head' => $head,
-                    'additional_fee' => $additional_fee,
-                    'grade' => $grade,
-                    'fee_individual' => $fee_individual,
-                    'fee_group' => $fee_group,
-                ];
+                foreach ( $subjects as $subject  )
+                {
+                    /* detail of the subject */
+                    $subject_name = $subject['subject'];
+                    $year = $subject['year']; # an indicator that allow this user to be a tutor for only student with choosen year 
+                    $head = $subject['head'];
+                    $additional_fee = $subject['additional_fee'] ?? 0;
+                    $grade = $subject['grade'];
+                    $fee_individual = $subject['fee_individual'] ?? 0;
+                    $fee_group = $subject['fee_group'] ?? 0;
+    
+                    $roleDetails[] = [
+                        'role' => $role_name,
+                        'subject' => $subject_name,
+                        'year' => $year,
+                        'head' => $head,
+                        'additional_fee' => $additional_fee,
+                        'grade' => $grade,
+                        'fee_individual' => $fee_individual,
+                        'fee_group' => $fee_group,
+                    ];
+                }
             }
         }
 
@@ -126,13 +136,24 @@ class CreateTempUserService
     {
         foreach ($roleDetails as $detail) {
             $role = $detail['role'];
-            $tutor_subject = $detail['tutor_subject'];
-            $fee_hours = $detail['feehours'] ?? 0;
-            $fee_session = $detail['feesession'] ?? 0;
+            $tutor_subject = $detail['subject'] ?? null;
+            $year = $detail['year'] ?? null;
+            $head = $detail['head'] ?? null;
+            $additional_fee = $detail['additional_fee'] ?? 0;
+            $grade = $detail['grade'] ?? null;
+            $fee_individual = $detail['fee_individual'] ?? 0;
+            $fee_group = $detail['fee_group'] ?? 0;
 
             TempUserRoles::updateOrCreate(
                 ['temp_user_id' => $tempUserId, 'role' => $role, 'tutor_subject' => $tutor_subject],
-                ['fee_hours' => $fee_hours, 'fee_session' => $fee_session]
+                [
+                    'year' => $year,
+                    'head' => $head,
+                    'additional_fee' => $additional_fee,
+                    'grade' => $grade,
+                    'fee_individual' => $fee_individual,
+                    'fee_group' => $fee_group,
+                ]
             );
         }
     }
