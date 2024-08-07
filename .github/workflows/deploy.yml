@@ -22,7 +22,7 @@ jobs:
         run: |
           git fetch origin
           git checkout production || git checkout -b production
-          git merge main --no-edit
+          git merge main --no-edit --allow-unrelated-histories
           git push origin production
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
