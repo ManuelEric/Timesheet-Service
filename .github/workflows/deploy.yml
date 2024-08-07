@@ -56,7 +56,8 @@ jobs:
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         run: |
           lftp -f "
-          open ftp://$FTP_SERVER
+          set ssl:verify-certificate no
+          open $FTP_SERVER
           user $FTP_USERNAME $FTP_PASSWORD
           mirror -R ./ /public_html/eduall/github/timesheet
           bye
