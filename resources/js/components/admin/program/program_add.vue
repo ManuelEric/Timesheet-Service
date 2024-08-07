@@ -3,32 +3,28 @@ import { showNotif } from '@/helper/notification'
 import { rules } from '@/helper/rules'
 import ApiService from '@/services/ApiService'
 
-const prop = defineProps(['id', 'item', 'package_id'])
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'reload'])
 
-const tutor_selected = ref([prop.item?.tutormentor_id])
+const loading = ref(false)
+const tutor_selected = ref([])
 const tutor_list = ref([])
 const subjects = ref([])
 const package_list = ref([])
 const pic_list = ref([])
 const inhouse_mentor = ref([])
 const duration_readonly = ref(false)
-const loading = ref(true)
 
 const formData = ref()
 const form = ref({
-  mentortutor_email: prop.item?.tutormentor_email,
-  subject_id: prop.item?.subject_id,
-  inhouse_id: prop.item?.inhouse_id,
-  package_id: prop.package_id,
-  duration: prop.item?.duration,
-  notes: prop.item?.notes,
-  pic_id: prop.item?.pic_id,
+  ref_id: [],
+  mentortutor_email: null,
+  subject_id: null,
+  inhouse_id: null,
+  package_id: null,
+  duration: '',
+  notes: '',
+  pic_id: [],
 })
-
-const closeDialogContent = () => {
-  emit('close')
-}
 
 const getTutor = async (inhouse = false) => {
   const url = inhouse ? 'api/v1/user/mentor-tutors?inhouse=true' : 'api/v1/user/mentor-tutors'
@@ -82,15 +78,36 @@ const getPIC = async () => {
   }
 }
 
+const getSubject = async uuid => {
+  form.value.subject_id = null
+  try {
+    const res = await ApiService.get('api/v1/user/mentor-tutors/' + uuid + '/subjects')
+    if (res) {
+      subjects.value = res
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+
 const submit = async () => {
+  loading.value = true
+
+  form.value.mentortutor_email = tutor_selected.value.email
+  // console.log(form.value)
   const { valid } = await formData.value.validate()
   if (valid) {
+    // set ref id first
+    form.value.ref_id = selected.value
+
     try {
-      const res = await ApiService.put('api/v1/timesheet/' + prop.id + '/update', form.value)
+      const res = await ApiService.post('api/v1/timesheet/create', form.value)
       if (res) {
         showNotif('success', res.message, 'bottom-end')
-        console.log(res)
+        selected.value = []
+        dialog.value = false
         form.value = {
+          ref_id: [],
           mentortutor_email: null,
           subject_id: null,
           inhouse_id: null,
@@ -99,10 +116,10 @@ const submit = async () => {
           notes: '',
           pic_id: [],
         }
-        closeDialogContent()
+        tutor_selected.value = []
+        getData()
       }
     } catch (error) {
-      console.log(error)
       if (error?.response?.data?.errors) {
         const validationErrors = error.response.data.errors
         let errorMessage = 'Validation errors:'
@@ -115,42 +132,69 @@ const submit = async () => {
         }
         showNotif('error', errorMessage, 'bottom-end')
       }
+    } finally {
+      loading.value = false
     }
   }
 }
+// End Function
 
 onMounted(() => {
+  getTutor()
   getTutor(true)
   getPackage()
   getPIC()
-
-  setTimeout(() => {
-    loading.value = false
-  }, 2000)
 })
 </script>
 
 <template>
-  <!-- Dialog Content -->
-  <VCard title="Edit Detail">
-    <DialogCloseBtn
-      variant="text"
-      size="default"
-      @click="closeDialogContent"
-    />
-
+  <VCard
+    width="600"
+    prepend-icon="ri-send-plane-line"
+    title="Assign to Mentor/Tutor"
+  >
     <VCardText>
-      <VSkeletonLoader
-        type="heading, list-item-three-line, actions"
-        v-if="loading"
-      />
       <VForm
         @submit.prevent="submit"
         ref="formData"
         validate-on="input"
-        v-else
       >
         <VRow>
+          <VCol md="12">
+            <VAutocomplete
+              density="compact"
+              clearable
+              v-model="tutor_selected"
+              label="Mentor/Tutor"
+              :items="tutor_list"
+              :item-props="
+                item => ({
+                  title: item.first_name + ' ' + item.last_name,
+                })
+              "
+              :rules="rules.required"
+              :loading="loading"
+              :disabled="loading"
+              @update:modelValue="getSubject(tutor_selected.uuid)"
+            ></VAutocomplete>
+          </VCol>
+          <VCol
+            md="12"
+            v-if="subjects.length > 0"
+          >
+            <VAutocomplete
+              density="compact"
+              clearable
+              v-model="form.subject_id"
+              label="Subject Tutoring"
+              :items="subjects"
+              item-title="subject"
+              item-value="id"
+              :loading="loading"
+              :disabled="loading"
+              :rules="rules.required"
+            ></VAutocomplete>
+          </VCol>
           <VCol md="8">
             <VAutocomplete
               density="compact"
@@ -163,6 +207,8 @@ onMounted(() => {
               "
               item-value="id"
               :rules="rules.required"
+              :loading="loading"
+              :disabled="loading"
               @update:modelValue="checkPackage"
             ></VAutocomplete>
           </VCol>
@@ -190,6 +236,8 @@ onMounted(() => {
                 })
               "
               item-value="uuid"
+              :loading="loading"
+              :disabled="loading"
               :rules="rules.required"
             ></VAutocomplete>
           </VCol>
@@ -204,6 +252,8 @@ onMounted(() => {
               :items="pic_list"
               item-title="full_name"
               item-value="id"
+              :loading="loading"
+              :disabled="loading"
               :rules="rules.required"
             ></VAutocomplete>
           </VCol>
@@ -220,7 +270,7 @@ onMounted(() => {
           <VBtn
             color="error"
             type="button"
-            @click="closeDialogContent"
+            @click="emit('close')"
           >
             <VIcon
               icon="ri-close-line"
@@ -244,5 +294,3 @@ onMounted(() => {
     </VCardText>
   </VCard>
 </template>
-
-<style lang="scss"></style>

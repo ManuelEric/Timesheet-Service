@@ -2,6 +2,7 @@
 import { showNotif } from '@/helper/notification'
 import { rules } from '@/helper/rules'
 import ApiService from '@/services/ApiService'
+import program from '@/components/admin/program/program_add.vue'
 
 // Start Variable
 const selected = ref([])
@@ -14,13 +15,6 @@ const data = ref([])
 const loading = ref(false)
 const program_list = ref([])
 const program_name = ref()
-const tutor_selected = ref([])
-const tutor_list = ref([])
-const subjects = ref([])
-const package_list = ref([])
-const pic_list = ref([])
-const inhouse_mentor = ref([])
-const duration_readonly = ref(false)
 
 const formData = ref()
 const form = ref({
@@ -70,127 +64,16 @@ const getProgram = async () => {
   }
 }
 
-const getTutor = async (inhouse = false) => {
-  const url = inhouse ? 'api/v1/user/mentor-tutors?inhouse=true' : 'api/v1/user/mentor-tutors'
-  try {
-    const res = await ApiService.get(url)
-    if (res) {
-      if (inhouse) {
-        inhouse_mentor.value = Object.values(res)
-      } else {
-        tutor_list.value = res
-      }
-    }
-  } catch (error) {
-    console.error(error)
-  }
-}
-
-const getPackage = async () => {
-  try {
-    const res = await ApiService.get('api/v1/package/component/list')
-    if (res) {
-      package_list.value = res
-    }
-  } catch (error) {
-    console.error(error)
-  }
-}
-
-const checkPackage = () => {
-  const package_id = form.value.package_id
-  const index = package_list.value.findIndex(item => item.id === package_id)
-  let item = package_list.value[index]
-
-  if (item.detail) {
-    duration_readonly.value = true
-    form.value.duration = item.detail
-  } else {
-    duration_readonly.value = false
-    form.value.duration = null
-  }
-}
-
-const getPIC = async () => {
-  try {
-    const res = await ApiService.get('api/v1/user/component/list')
-    if (res) {
-      pic_list.value = res
-    }
-  } catch (error) {
-    console.error(error)
-  }
-}
-
-const getSubject = async uuid => {
-  form.value.subject_id = null
-  try {
-    const res = await ApiService.get('api/v1/user/mentor-tutors/' + uuid + '/subjects')
-    if (res) {
-      subjects.value = res
-    }
-  } catch (error) {
-    console.error(error)
-  }
-}
-
 const searchData = async () => {
   currentPage.value = 1
   await getData()
 }
 
-const submit = async () => {
-  form.value.mentortutor_email = tutor_selected.value.email
-  // console.log(form.value)
-  const { valid } = await formData.value.validate()
-  if (valid) {
-    // set ref id first
-    form.value.ref_id = selected.value
-
-    try {
-      const res = await ApiService.post('api/v1/timesheet/create', form.value)
-      if (res) {
-        showNotif('success', res.message, 'bottom-end')
-        selected.value = []
-        dialog.value = false
-        form.value = {
-          ref_id: [],
-          mentortutor_email: null,
-          subject_id: null,
-          inhouse_id: null,
-          package_id: null,
-          duration: '',
-          notes: '',
-          pic_id: [],
-        }
-        tutor_selected.value = []
-        getData()
-      }
-    } catch (error) {
-      if (error?.response?.data?.errors) {
-        const validationErrors = error.response.data.errors
-        let errorMessage = 'Validation errors:'
-
-        // Merge validation errors
-        for (const key in validationErrors) {
-          if (validationErrors.hasOwnProperty(key)) {
-            errorMessage += `\n${key}: ${validationErrors[key].join(', ')}`
-          }
-        }
-        showNotif('error', errorMessage, 'bottom-end')
-      }
-    }
-  }
-}
 // End Function
 
 onMounted(() => {
   getData()
   getProgram()
-  getTutor()
-  getTutor(true)
-  getPackage()
-  getPIC()
 })
 </script>
 
@@ -266,142 +149,7 @@ onMounted(() => {
         width="auto"
         persistent
       >
-        <VCard
-          width="600"
-          prepend-icon="ri-send-plane-line"
-          title="Assign to Mentor/Tutor"
-        >
-          <VCardText>
-            <VForm
-              @submit.prevent="submit"
-              ref="formData"
-              validate-on="input"
-              fast-fail
-            >
-              <VRow>
-                <VCol md="12">
-                  <VAutocomplete
-                    density="compact"
-                    clearable
-                    v-model="tutor_selected"
-                    label="Mentor/Tutor"
-                    :items="tutor_list"
-                    :item-props="
-                      item => ({
-                        title: item.first_name + ' ' + item.last_name,
-                      })
-                    "
-                    :rules="rules.required"
-                    @update:modelValue="getSubject(tutor_selected.uuid)"
-                  ></VAutocomplete>
-                </VCol>
-                <VCol
-                  md="12"
-                  v-if="subjects.length > 0"
-                >
-                  <VAutocomplete
-                    density="compact"
-                    clearable
-                    v-model="form.subject_id"
-                    label="Subject Tutoring"
-                    :items="subjects"
-                    item-title="subject"
-                    item-value="id"
-                    :rules="rules.required"
-                  ></VAutocomplete>
-                </VCol>
-                <VCol md="8">
-                  <VAutocomplete
-                    density="compact"
-                    clearable
-                    label="Package"
-                    v-model="form.package_id"
-                    :items="package_list"
-                    :item-props="
-                      item => ({ title: item.package != null ? item.type_of + ' - ' + item.package : item.type_of })
-                    "
-                    item-value="id"
-                    :rules="rules.required"
-                    @update:modelValue="checkPackage"
-                  ></VAutocomplete>
-                </VCol>
-                <VCol md="4">
-                  <VTextField
-                    type="number"
-                    density="compact"
-                    clearable
-                    :label="+form.duration / 60 ? 'Minutes (' + form.duration / 60 + ' Hours)' : 'Minutes'"
-                    :readonly="duration_readonly"
-                    v-model="form.duration"
-                    :rules="rules.required"
-                  />
-                </VCol>
-                <VCol md="12">
-                  <VAutocomplete
-                    density="compact"
-                    clearable
-                    v-model="form.inhouse_id"
-                    label="Inhouse Mentor/Tutor"
-                    :items="inhouse_mentor"
-                    :item-props="
-                      item => ({
-                        title: item.first_name + ' ' + item.last_name,
-                      })
-                    "
-                    item-value="uuid"
-                    :rules="rules.required"
-                  ></VAutocomplete>
-                </VCol>
-                <VCol md="12">
-                  <VAutocomplete
-                    density="compact"
-                    multiple
-                    clearable
-                    chips
-                    label="PIC"
-                    v-model="form.pic_id"
-                    :items="pic_list"
-                    item-title="full_name"
-                    item-value="id"
-                    :rules="rules.required"
-                  ></VAutocomplete>
-                </VCol>
-                <VCol md="12">
-                  <VTextarea
-                    label="Notes"
-                    v-model="form.notes"
-                  ></VTextarea>
-                </VCol>
-              </VRow>
-
-              <VDivider class="my-3" />
-              <VCardActions>
-                <VBtn
-                  color="error"
-                  type="button"
-                  @click="dialog = false"
-                >
-                  <VIcon
-                    icon="ri-close-line"
-                    class="me-3"
-                  />
-                  Close
-                </VBtn>
-                <VSpacer />
-                <VBtn
-                  color="success"
-                  type="submit"
-                >
-                  Save
-                  <VIcon
-                    icon="ri-save-line"
-                    class="ms-3"
-                  />
-                </VBtn>
-              </VCardActions>
-            </VForm>
-          </VCardText>
-        </VCard>
+        <program @close="dialog = false" />
       </VDialog>
       <!-- End Assign Modal  -->
 
