@@ -36,18 +36,29 @@ class CreateTempUserService
         foreach ($userRawInformation['roles'] as $detail)
         {
             /* create model temp_user_roles only if the role are inside acceptable roles */
-            if ( in_array($detail['role_name'], ['Mentor', 'Tutor']) )
+            if ( in_array($detail['role'], ['Mentor', 'Tutor']) )
             {
-                $role = $detail['role_name'];
-                $tutor_subject = $detail['tutor_subject'];
-                $fee_hours = $detail['feehours'] ?? 0;
-                $fee_session = $detail['feesession'] ?? 0;
+                $role = $detail['role'];
+                $detail_subject = $detail['subjects'];
+
+                /* detail of the subject */
+                $subject_name = $detail_subject['name'];
+                $year = $detail_subject['year']; # an indicator that allow this user to be a tutor for only student with choosen year 
+                $head = $detail_subject['head'];
+                $additional_fee = $detail_subject['additional_fee'];
+                $grade = $detail_subject['grade'];
+                $fee_individual = $detail_subject['fee_individual'] ?? 0;
+                $fee_group = $detail_subject['fee_group'] ?? 0;
 
                 $roleDetails[] = [
                     'role' => $role,
-                    'tutor_subject' => $tutor_subject,
-                    'fee_hours' => $fee_hours,
-                    'fee_session' => $fee_session,
+                    'tutor_subject' => $subject_name,
+                    'year' => $year,
+                    'head' => $head,
+                    'additional_fee' => $additional_fee,
+                    'grade' => $grade,
+                    'fee_individual' => $fee_individual,
+                    'fee_group' => $fee_group,
                 ];
             }
         }
