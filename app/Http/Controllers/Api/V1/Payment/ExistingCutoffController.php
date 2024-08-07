@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Payment\StoreToExisingCutoffRequest;
 use App\Models\Activity;
 use App\Models\Cutoff;
+use App\Services\ResponseService;
 use Exception;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
@@ -15,7 +16,10 @@ use Illuminate\Support\Facades\DB;
 
 class ExistingCutoffController extends Controller
 {
-    public function store(StoreToExisingCutoffRequest $request): JsonResponse
+    public function store(
+        StoreToExisingCutoffRequest $request,
+        ResponseService $responseService
+        ): JsonResponse
     {
         $validated = $request->safe()->only(['activity_id', 'start_date', 'end_date']);
 
@@ -25,7 +29,7 @@ class ExistingCutoffController extends Controller
         $validatedMonth = Carbon::parse($validatedStartDate)->format('F Y');
 
         /* get the cut off id by requested date */
-        $cutoff = Cutoff::where('month', $validatedMonth)->inBetwen($validatedStartDate, $validatedEndDate)->first();
+        $cutoff = Cutoff::where('month', $validatedMonth)->inBetween($validatedStartDate, $validatedEndDate)->first();
         $cutoffId = $cutoff->id;
         
         DB::beginTransaction();
@@ -34,7 +38,7 @@ class ExistingCutoffController extends Controller
             /* update the selected activity */
             Activity::whereIn('id', $validatedActivityIds)->update([
                 'status' => 1,
-                'cutoff_status' => 'paid',
+                'cutoff_status' => 'completed',
                 'cutoff_ref_id' => $cutoffId
             ]);
             DB::commit();
@@ -42,9 +46,11 @@ class ExistingCutoffController extends Controller
         } catch (Exception $e) {
 
             DB::rollBack();
+            $errorMessage = 'Failed to add activity to the specified cutoff.';
+            $responseService->storeErrorLog($errorMessage, $e->getMessage(), ['file' => $e->getFile(), 'error_line' => $e->getLine()]);
             throw new HttpResponseException(
                 response()->json([
-                    'errors' => 'An error occurred while trying to add the selected activity to the cutoff.'
+                    'errors' => $errorMessage
                 ], JsonResponse::HTTP_BAD_REQUEST)
             );
 
