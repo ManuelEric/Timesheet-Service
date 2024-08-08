@@ -1,6 +1,5 @@
 name: CICD to Production & Cpanel
 
-:
 on:
   push:
     branches:
