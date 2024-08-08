@@ -1,4 +1,4 @@
-name: CI Workflow
+name: CI Workflow Build
 
 on:
   push:
@@ -39,16 +39,5 @@ jobs:
           git checkout -b build
           git merge build
           git push origin build
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Sync staging to main
-        run: |
-          git fetch
-          git checkout -b main
-          git pull origin main
-          git push origin main
-          git pull origin build
-          git push origin main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

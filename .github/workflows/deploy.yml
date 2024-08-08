@@ -2,7 +2,7 @@ name: CICD to Production & Cpanel
 
 on:
   workflow_run:
-    workflows: ["CI Workflow"]
+    workflows: ['CI Workflow Main']
     types:
       - completed
 
