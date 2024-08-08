@@ -35,7 +35,7 @@ jobs:
       - name: Deploy via SSH
         run: |
           ssh -o StrictHostKeyChecking=no dev@156.67.213.186 << 'EOF'
-          cd /public_html/eduall/github/timesheet
-          git pull origin main
-          composer update
-        EOF
+            cd /public_html/eduall/github/timesheet
+            git pull origin main
+            composer update
+          EOF
