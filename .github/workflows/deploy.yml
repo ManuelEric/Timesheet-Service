@@ -46,4 +46,4 @@ jobs:
 
       - name: Composer Install
         run: |
-          composer install
+          composer update
