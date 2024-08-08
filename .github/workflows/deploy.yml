@@ -27,23 +27,32 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install lftp
-        run: sudo apt-get install lftp
+      # - name: Install lftp
+      #   run: sudo apt-get install lftp
 
-      - name: Deploy to cPanel FTP
-        env:
-          FTP_SERVER: ${{ secrets.FTP_SERVER }}
-          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
-          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-        run: |
-          lftp -f "
-          set ssl:verify-certificate no
-          open $FTP_SERVER
-          user $FTP_USERNAME $FTP_PASSWORD
-          mirror -R --ignore-time ./ / --verbose
-          bye
-          "
+      # - name: Deploy to cPanel FTP
+      #   env:
+      #     FTP_SERVER: ${{ secrets.FTP_SERVER }}
+      #     FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      #     FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      #   run: |
+      #     lftp -f "
+      #     set ssl:verify-certificate no
+      #     open $FTP_SERVER
+      #     user $FTP_USERNAME $FTP_PASSWORD
+      #     mirror -R --ignore-time ./ / --verbose
+      #     bye
+      #     "
 
-      - name: Composer Install
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy via SSH
         run: |
+          ssh -o StrictHostKeyChecking=no dev@156.67.213.186 << 'EOF'
+          cd /public_html/eduall/github/timesheet
+          git pull origin main
           composer update
+        EOF
