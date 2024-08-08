@@ -40,7 +40,7 @@ jobs:
           set ssl:verify-certificate no
           open $FTP_SERVER
           user $FTP_USERNAME $FTP_PASSWORD
-          mirror -R ./ /
+          mirror -R ./ / --verbose
           bye
           "
 
