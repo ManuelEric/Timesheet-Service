@@ -40,8 +40,8 @@ jobs:
           git merge build
           git push origin build
 
-          git checkout main
-          git merge main
-          git push origin main
+          git checkout main || git checkout master
+          git merge build || true
+          git push origin main || git push origin master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
