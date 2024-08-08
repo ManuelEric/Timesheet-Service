@@ -1,10 +1,10 @@
 name: CICD to Production & Cpanel
 
+:
 on:
-  workflow_run:
-    workflows: ['CI Workflow Main']
-    types:
-      - completed
+  push:
+    branches:
+      - main
 
 jobs:
   deploy:
@@ -23,29 +23,10 @@ jobs:
         run: |
           git push origin -d production
           git checkout -b production
-          git merge main
+          git merge production
           git push origin production
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2' # Ganti dengan versi PHP yang sesuai
-
-      - name: Install Composer
-        run: composer install --no-dev --optimize-autoloader
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16' # Ganti dengan versi Node.js yang sesuai
-
-      - name: Install Node.js dependencies
-        run: npm install
-
-      - name: Build project
-        run: npm run build
 
       - name: Install lftp
         run: sudo apt-get install lftp
@@ -63,3 +44,7 @@ jobs:
           mirror -R ./ /
           bye
           "
+
+      - name: Composer Install
+        run: |
+          composer install
