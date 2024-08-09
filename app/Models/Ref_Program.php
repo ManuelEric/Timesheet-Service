@@ -28,6 +28,7 @@ class Ref_Program extends Model
         'student_uuid',
         'student_name',
         'student_school',
+        'student_grade',
         'program_name',
         'require',
         'timesheet_id',

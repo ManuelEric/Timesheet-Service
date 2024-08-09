@@ -32,7 +32,7 @@ return new class extends Migration
             $table->integer('year')->nullable();
             $table->integer('head')->nullable();
             $table->float('additional_fee')->default(0.0);
-            $table->integer('grade')->nullable();
+            $table->string('grade', 10)->nullable();
             $table->float('fee_individual')->default(0.0);
             $table->float('fee_group')->default(0.0);
             $table->timestamps();
@@ -65,7 +65,7 @@ return new class extends Migration
             )->onUpdate('restrict')->onDelete('restrict');
             $table->integer('duration');
             $table->text('notes')->nullable();
-            $table->foreignId('subject_id')->nullable()->comment('must be filled with tutor subject')->constrained(
+            $table->foreignId('subject_id')->nullable()->constrained(
                 table: 'temp_user_roles', indexName: 'timesheets_subject_id',
             )->onUpdate('restrict')->onDelete('restrict');
             $table->timestamps();
@@ -111,9 +111,11 @@ return new class extends Migration
             $table->text('description');
             $table->datetime('start_date');
             $table->datetime('end_date')->nullable();
+
             $table->decimal('fee_hours');
             $table->decimal('additional_fee');
             $table->decimal('bonus_fee');
+            
             $table->float('time_spent')->comment('in hours');
             $table->text('meeting_link')->nullable();
             $table->integer('status');
@@ -133,6 +135,7 @@ return new class extends Migration
             $table->string('student_uuid');
             $table->string('student_name')->nullable();
             $table->string('student_school')->nullable();
+            $table->string('student_grade')->nullable();
             $table->string('program_name');
             $table->enum('require', ['Mentor', 'Tutor']);
             $table->foreignId('timesheet_id')->nullable()->constrained(

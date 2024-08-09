@@ -29,7 +29,20 @@ class CreateActivityAction
         $package = $timesheet->package;
         $packageCategory = $package->category;
         [$type, $tutor_mentor] = $this->convert($packageCategory);
-        $fee_perHours = $type == "tutoring" ? $timesheet->subject->fee_hours : 0;
+
+        /**
+         * before determine the fee hours 
+         * we need to check how many student that the tutor/mentor handle
+         */
+        $head = count($timesheet->ref_program);
+        $isGroup = $head > 1 ? true : false;
+        $fee_perHours = 0; # default
+
+        if ( $type == "tutoring" )
+        {
+            $fee_perHours = $isGroup ? $timesheet->subject->fee_group : $timesheet->subject->fee_individual;
+        }
+
         $endDate = array_key_exists('end_date', $validated) ? $validated['end_date'] : NULL;
         $additionalFee = $bonusFee = $status = 0;
 
