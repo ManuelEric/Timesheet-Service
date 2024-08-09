@@ -51,5 +51,7 @@ jobs:
           proxy_port: 65002
           script: |
             cd public_html/eduall/github/timesheet
-            git pull origin production || git clone --branch production https://github.com/Edu-ALL/timesheet.git
+            git init
+            git remote add origin git@github.com:Edu-ALL/timesheet.git
+            git pull origin production
             composer install
