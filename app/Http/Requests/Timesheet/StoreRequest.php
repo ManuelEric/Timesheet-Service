@@ -3,8 +3,11 @@
 namespace App\Http\Requests\Timesheet;
 
 use App\Models\TempUser;
+use App\Rules\CompatiblePackage;
+use App\Rules\CompatibleProgram;
 use App\Rules\ExistSubjectPerTutormentor;
 use App\Rules\MatchingProgramName;
+use App\Rules\SameGrade;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -57,7 +60,9 @@ class StoreRequest extends FormRequest
             'ref_id.*' => [
                 'required', 
                 'exists:ref_programs,id',
-                new MatchingProgramName
+                new MatchingProgramName,
+                new SameGrade($this->input('mentortutor_email'), $this->input('subject_id'), $this->input('package_id')),
+                new CompatibleProgram($this->input('subject_id')),
             ],
             'mentortutor_email' => 'required|email|exists:temp_users,email',
             'inhouse_id' => [
@@ -66,7 +71,11 @@ class StoreRequest extends FormRequest
                     return $query->where('uuid', $this->input('inhouse_id'))->where('inhouse', 1);
                 }) 
             ],
-            'package_id' => 'required|exists:timesheet_packages,id',
+            'package_id' => [
+                'required',
+                'exists:timesheet_packages,id',
+                new CompatiblePackage($this->input('subject_id'),)
+            ],
             'duration' => 'required|integer',
             'pic_id' => 'array',
             'pic_id.*' => 'required|exists:users,id',
