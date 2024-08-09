@@ -62,7 +62,7 @@ class SuccessProgramCommand extends Command
         {
             /* define for both b2c and b2b variables */
             $category = $crm_success_program['category'];
-            $clientprog_id = $schprog_id = $student_uuid = $student_name = NULL;
+            $clientprog_id = $schprog_id = $student_uuid = $student_name = $student_grade = NULL;
             $invoice_id = $crm_success_program['invoice_id'];
             $student_school = $crm_success_program['client']['school_name'];
             $program_name = $crm_success_program['program_name'];
@@ -73,6 +73,7 @@ class SuccessProgramCommand extends Command
                 $clientprog_id = $crm_success_program['clientprog_id'];
                 $student_uuid = $crm_success_program['client']['uuid'];
                 $student_name = $this->concat($crm_success_program['client']['first_name'], $crm_success_program['client']['last_name']);
+                $student_grade = $crm_success_program['client']['grade'];
             }
             
             if ($category == 'b2b') {
@@ -93,6 +94,7 @@ class SuccessProgramCommand extends Command
                 'student_uuid' => $student_uuid,
                 'student_name' => $student_name,
                 'student_school' => $student_school,
+                'student_grade' => $student_grade,
                 'program_name' => $program_name,
                 'require' => $require,
                 'created_at' => Carbon::now(),
