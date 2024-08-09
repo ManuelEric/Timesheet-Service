@@ -1,4 +1,4 @@
-name: CI Workflow Build
+name: CICD Workflow Timesheet
 
 on:
   push:
