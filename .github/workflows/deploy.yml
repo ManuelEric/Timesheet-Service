@@ -58,4 +58,4 @@ jobs:
               git clone --branch production https://github.com/Edu-ALL/timesheet.git
               cd timesheet
             fi
-            composer install
+            composer update
