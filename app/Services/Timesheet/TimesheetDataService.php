@@ -123,7 +123,7 @@ class TimesheetDataService
                         'client_name' => $studentName,
                         'client_mail' => $crm_clientInfo['mail'],
                         'client_school' => $studentSchool,
-                        'client_grade' => $crm_clientInfo['st_grade'],
+                        'client_grade' => $crm_clientInfo['grade'],
                     ]);
                     continue;
                 }
@@ -151,7 +151,7 @@ class TimesheetDataService
                     'client_name' => $studentName,
                     'client_mail' => $crm_clientInfo['mail'],
                     'client_school' => $studentSchool,
-                    'client_grade' => $crm_clientInfo['st_grade'],
+                    'client_grade' => $crm_clientInfo['grade'],
                 ]);
             }
         }
