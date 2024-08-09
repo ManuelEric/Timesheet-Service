@@ -1,7 +1,11 @@
-name: CICD to Production & Cpanel
+name: CI Workflow Build
 
 on:
   push:
+    branches:
+      - main
+  pull_request:
+    types: closed
     branches:
       - main
 
@@ -11,7 +15,18 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Ganti dengan versi Node.js yang sesuai
+
+      - name: Install Node.js dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
 
       - name: Set up Git
         run: |
@@ -27,15 +42,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.5.4
+      - uses: appleboy/ssh-action@v1.0.3
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Deploy via SSH
-        run: |
-          ssh -o StrictHostKeyChecking=no dev@156.67.213.186 << 'EOF'
-            cd /public_html/eduall/github/timesheet
-            git pull origin main
-            composer update
-          EOF
+          host: ${{ secrets.DEV_HOST_EDUALL }}
+          username: ${{ secrets.DEV_USER_EDUALL }}
+          key: ${{ secrets.DEV_PRIVATE_KEY_EDUALL }}
+          port: 65002
+          proxy_port: 65002
+          script: |
+            cd public_html/eduall/main
+            git pull origin production
+            composer install
