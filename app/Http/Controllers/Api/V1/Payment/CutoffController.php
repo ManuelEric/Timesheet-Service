@@ -88,6 +88,7 @@ class CutoffController extends Controller
         )
     {
         $validated = $request->safe()->only(['timesheet_id', 'cutoff_date']);
+        
         $validatedTimesheetId = $validated['timesheet_id'];
         $validatedCutoffDate = $validated['cutoff_date'];
         

@@ -22,12 +22,15 @@ class PaymentController extends Controller
         $paymentStatus = $request->segment(4) == "paid" ? "completed" : "not yet"; # either unpaid / paid
 
         /* incoming request */
-        $search = $request->only(['program_name', 'package_id', 'keyword', 'cutoff_date']);
+        $search = $request->only(['program_name', 'package_id', 'keyword', 'cutoff_start', 'cutoff_end']);
         
         switch ( $paymentStatus ) {
             # completed meaning paid
             case "completed":
                 $mappedActivities = $paidActivitiesAction->execute($search);
+
+                $totalFee = $mappedActivities->sum('subtotal'); 
+                $additionalInfo = collect(['total_fee' => $totalFee]);
                 break;
 
             # not yet meaning unpaid
@@ -35,9 +38,12 @@ class PaymentController extends Controller
                 $mappedActivities = $unpaidActivitiesAction->execute($search);
                 break;
         }
-
-        $mappedActivities = $mappedActivities->paginate(10);
-
-        return response()->json($mappedActivities);
+        
+        $paginateActivities = $mappedActivities->paginate(10);
+    
+        if ($paymentStatus == "completed")
+            $paginateActivities = $additionalInfo->merge($paginateActivities);
+    
+        return response()->json($paginateActivities);
     }
 }

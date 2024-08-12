@@ -12,6 +12,7 @@ use Exception;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
@@ -32,6 +33,8 @@ class MainController extends Controller
         $search = $request->only(['keyword', 'paginate', 'page', 'role']);
         $requestInhouse = $request->get('inhouse');
         $inhouse = $requestInhouse === "true" ? 1 : 0;
+
+        Artisan::call('sync:tutor-mentor');
 
         /* call API to get all of the mentors and tutors */
         [$statusCode, $response] = $this->make_call('get', env('CRM_DOMAIN') . 'user/mentor-tutors', $search);

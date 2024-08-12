@@ -70,8 +70,7 @@ class ActivityController extends Controller
         $handleBy = $timesheet->handle_by->last();
         $itsEmail = $handleBy->email;
 
-        [$checkingResult, $userInformation] = $checkEmailMentorTutorAction->execute($itsEmail);
-        
+        $checkEmailMentorTutorAction->execute($itsEmail);
         $createActivityAction->execute($timesheet, $validated);
 
         return response()->json([
