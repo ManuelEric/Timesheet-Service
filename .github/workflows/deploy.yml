@@ -42,7 +42,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: appleboy/ssh-action@v1.0.3
+      - name: Deploy to Production and Composer Update
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DEV_HOST_EDUALL }}
           username: ${{ secrets.DEV_USER_EDUALL }}
