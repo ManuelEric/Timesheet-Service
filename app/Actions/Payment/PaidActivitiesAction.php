@@ -17,7 +17,7 @@ class PaidActivitiesAction
             $activityId = $data->id;
             $timesheetId = $data->timesheet->id;
             $activity = $data->activity;
-            $mentorTutorName = $data->timesheet->subject->full_name;
+            $mentorTutorName = $data->timesheet->subject->temp_user->full_name;
             $startDate = Carbon::parse($data->start_date);
             $endDate = $data->end_date ? Carbon::parse($data->end_date) : null;
             $timeSpent = $data->end_date ? $startDate->diffInMinutes($endDate) : 0;
@@ -34,7 +34,8 @@ class PaidActivitiesAction
                 'time_spent' => $timeSpent,
                 'fee_hours' => $feeHours,
                 'cutoff_status' => $cutoffStatus,
-                'cutoff_date' => $cutoffDate
+                'cutoff_date' => $cutoffDate,
+                'subtotal' => ($timeSpent / 60) * $feeHours,
             ];
         });
 
