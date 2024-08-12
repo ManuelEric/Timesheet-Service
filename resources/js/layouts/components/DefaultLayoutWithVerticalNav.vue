@@ -3,9 +3,9 @@ import Footer from '@/layouts/components/Footer.vue'
 import NavItemsUser from '@/layouts/components/NavItemsUser.vue'
 import NavbarThemeSwitcher from '@/layouts/components/NavbarThemeSwitcher.vue'
 import UserProfile from '@/layouts/components/UserProfile.vue'
+import UserService from '@/services/UserService'
 import logo from '@images/eduall/eduall.png'
 import VerticalNavLayout from '@layouts/components/VerticalNavLayout.vue'
-import UserService from '@/services/UserService'
 
 const logo_navbar = logo
 
