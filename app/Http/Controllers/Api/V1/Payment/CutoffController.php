@@ -18,7 +18,9 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Services\Activity\ActivityDataService;
 use App\Services\Timesheet\TimesheetDataService;
 use App\Actions\Timesheet\IdentifierCheckingAction as IdentifyTimesheetIdAction;
+use App\Exports\PayrollExportMultipleSheets;
 use App\Http\Requests\Payment\CutoffExportRequest;
+use App\Models\Cutoff;
 
 class CutoffController extends Controller
 {
@@ -101,13 +103,47 @@ class CutoffController extends Controller
             $detailTimesheet = $timesheetDataService->detailTimesheet($timesheet);
             $activities = $activityDataService->listActivitiesByTimesheet($timesheet);
             unset($detailTimesheet['editableColumns']);
+
+            $cutoff = Cutoff::inBetween($validatedCutoffStart, $validatedCutoffEnd)->first();
+            $cutoffId = $cutoff->id;
+            $activities = $activities->where('cutoff_ref_id', $cutoffId);
             
             return Excel::download(new PayrollExport($detailTimesheet, $activities), $filename);
 
-        } else {
-            // $activities = $activityDataService->listActivitiesByCutoffDate($validatedCutoffStart, $validatedCutoffEnd);
-
-            
         }
+
+        return response()->json([
+            'message' => 'No timesheet were found.',
+        ]);
+    }
+
+    public function export_multiple(
+        CutoffExportRequest $request,
+        IdentifyTimesheetIdAction $identifyTimesheetIdAction,
+        TimesheetDataService $timesheetDataService,
+        ActivityDataService $activityDataService,
+    )
+    {
+        $validated = $request->safe()->only(['cutoff_start', 'cutoff_end']);
+        
+        $validatedCutoffStart = $validated['cutoff_start'];
+        $validatedCutoffEnd = $validated['cutoff_end'];
+        
+        // $filename = $this->generateFileName($mappedTimesheetData);
+        $filename = 'Payroll_' . date('F_Y') . '.xlsx';
+
+        $timesheets = $timesheetDataService->listTimesheetByCutoffDate($validatedCutoffStart, $validatedCutoffEnd);
+
+        foreach ( $timesheets as $timesheet )
+        {
+            $timesheet = $identifyTimesheetIdAction->execute($timesheet->id);
+            $detailTimesheet = $timesheetDataService->detailTimesheet($timesheet);
+            $activities = $activityDataService->listActivitiesByTimesheet($timesheet);
+
+            // regist into the exports
+            $exports[] = new PayrollExport($detailTimesheet, $activities);
+        }
+
+        return Excel::download(new PayrollExportMultipleSheets($exports), $filename);
     }
 }

@@ -15,6 +15,15 @@ class PayrollExport implements FromView
         $this->timesheet = $timesheet;
         $this->activities = $activities;
     }
+
+    /**
+     * @return string
+     */
+    public function title(): string
+    {
+        return $this->timesheet->id;
+    }
+
     /**
      * @return \Illuminate\Contracts\View\View
      */

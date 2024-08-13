@@ -150,7 +150,9 @@ Route::prefix('payment')->group(function () {
             /* Remove the activity from the specified cut-off */
             Route::PATCH('unassign', [V1CutoffController::class, 'unassign']);
             /* Export cut-off */
-            Route::GET('export/{timesheet}/{cutoff_date}', [V1CutoffController::class, 'export'])->withoutMiddleware(['auth:sanctum', 'abilities:payment-menu']);
+            Route::GET('export/{timesheet}/{cutoff_start}/{cutoff_end}', [V1CutoffController::class, 'export'])->withoutMiddleware(['auth:sanctum', 'abilities:payment-menu']);
+            /* Export multiple sheets at the same time */
+            Route::GET('export/{cutoff_start}/{cutoff_end}', [V1CutoffController::class, 'export_multiple'])->withoutMiddleware(['auth:sanctum', 'abilities:payment-menu']);
 
         });
     });
