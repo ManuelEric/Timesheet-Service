@@ -271,7 +271,6 @@ onMounted(() => {
                 <VBtn
                   color="secondary"
                   density="compact"
-                  v-tooltip="'Tooltip'"
                 >
                   <VIcon
                     icon="ri-timeline-view"
