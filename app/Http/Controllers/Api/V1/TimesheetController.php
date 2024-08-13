@@ -150,7 +150,7 @@ class TimesheetController extends Controller
     {
         $timesheet = $identifyTimesheetIdAction->execute($timesheetId);
         $detailTimesheet = $timesheetDataService->detailTimesheet($timesheet);
-        $timesheetActivities = $activityDataService->listActivities($timesheet);
+        $timesheetActivities = $activityDataService->listActivitiesByTimesheet($timesheet);
 
         // $filename = $this->generateFileName($mappedTimesheetData);
         $filename = 'Timesheet_' . date('YmdHis') . '.xlsx';

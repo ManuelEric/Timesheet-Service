@@ -34,7 +34,7 @@ class MainController extends Controller
         $requestInhouse = $request->get('inhouse');
         $inhouse = $requestInhouse === "true" ? 1 : 0;
 
-        Artisan::call('sync:tutor-mentor');
+        // Artisan::call('sync:tutor-mentor');
 
         /* call API to get all of the mentors and tutors */
         [$statusCode, $response] = $this->make_call('get', env('CRM_DOMAIN') . 'user/mentor-tutors', $search);
