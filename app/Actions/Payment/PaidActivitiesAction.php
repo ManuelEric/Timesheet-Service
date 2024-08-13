@@ -17,6 +17,7 @@ class PaidActivitiesAction
             $activityId = $data->id;
             $timesheetId = $data->timesheet->id;
             $activity = $data->activity;
+            $package = $data->timesheet->package;
             $mentorTutorName = $data->timesheet->subject->temp_user->full_name;
             $startDate = Carbon::parse($data->start_date);
             $endDate = $data->end_date ? Carbon::parse($data->end_date) : null;
@@ -29,6 +30,11 @@ class PaidActivitiesAction
                 'id' => $activityId,
                 'timesheet_id' => $timesheetId,
                 'activity' => $activity,
+                'package' => [
+                    'name' => $package->package,
+                    'type' => $package->type_of,
+                    'category' => $package->category,
+                ],
                 'mentor_tutor' => $mentorTutorName,
                 'date' => $this->convert($startDate, $endDate),
                 'time_spent' => $timeSpent,

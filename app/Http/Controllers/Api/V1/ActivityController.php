@@ -40,7 +40,7 @@ class ActivityController extends Controller
     {
         $timesheet = $this->identifyTimesheetIdAction->execute($timesheetId);
 
-        $activities = $activityDataService->listActivities($timesheet);
+        $activities = $activityDataService->listActivitiesByTimesheet($timesheet);
 
         return response()->json($activities);
     }
