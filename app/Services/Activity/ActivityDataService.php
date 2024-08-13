@@ -13,23 +13,11 @@ class ActivityDataService
 {
     use TranslateActivityStatus;
 
-    public function listActivities(Timesheet $timesheet, ?string $date = '')
+    public function listActivitiesByTimesheet(Timesheet $timesheet)
     {
-        /* fetch the entire activities */
+        /* fetch activities based on requested timesheet */
         $activities = $timesheet->activities;
-
-        
-        /* when the argument date is filled */
-        if ( $date )
-        {
-            $cutoff = Cutoff::withinTheCutoffDateRange($date)->first();
-            $cutoffId = $cutoff->id;
-
-            $activities = $activities->where('cutoff_ref_id', $cutoffId);
-        }
-
-
-        $mappedActivities = $activities->map(function ($data) {
+        return $activities->map(function ($data) {
 
             $start_date = Carbon::parse($data->start_date);
             $end_date = $data->end_date ? Carbon::parse($data->end_date) : false;
@@ -43,7 +31,15 @@ class ActivityDataService
                 'estimate' => $estimate,
             ];
         });
+    }
 
-        return $mappedActivities;
+    public function listTimesheetByCutoffDate(string $start_date, string $end_date)
+    {
+        /* we're gonna find timesheets using cutoff `from` and `to` */
+        $timesheets = Timesheet::with('activities')->whereHas('activities.cutoff_history', function ($query) use ($start_date, $end_date) {
+            $query->inBetween($start_date, $end_date);
+        })->get();
+
+        
     }
 }

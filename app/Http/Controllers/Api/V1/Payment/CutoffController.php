@@ -87,22 +87,27 @@ class CutoffController extends Controller
         ActivityDataService $activityDataService,
         )
     {
-        $validated = $request->safe()->only(['timesheet_id', 'cutoff_date']);
+        $validated = $request->safe()->only(['timesheet_id', 'cutoff_start', 'cutoff_end']);
         
-        $validatedTimesheetId = $validated['timesheet_id'];
-        $validatedCutoffDate = $validated['cutoff_date'];
+        $validatedTimesheetId = $validated['timesheet_id'] ?? null;
+        $validatedCutoffStart = $validated['cutoff_start'];
+        $validatedCutoffEnd = $validated['cutoff_end'];
         
-        $timesheet = $identifyTimesheetIdAction->execute($validatedTimesheetId);
-        $detailTimesheet = $timesheetDataService->detailTimesheet($timesheet);
-        $activities = $activityDataService->listActivities($timesheet, $validatedCutoffDate);
-
-
-        unset($detailTimesheet['editableColumns']);
-
-
         // $filename = $this->generateFileName($mappedTimesheetData);
         $filename = 'Payroll_' . date('F_Y') . '.xlsx';
+        
+        if ( $validatedTimesheetId ) {
+            $timesheet = $identifyTimesheetIdAction->execute($validatedTimesheetId);
+            $detailTimesheet = $timesheetDataService->detailTimesheet($timesheet);
+            $activities = $activityDataService->listActivitiesByTimesheet($timesheet);
+            unset($detailTimesheet['editableColumns']);
+            
+            return Excel::download(new PayrollExport($detailTimesheet, $activities), $filename);
 
-        return Excel::download(new PayrollExport($detailTimesheet, $activities), $filename);
+        } else {
+            // $activities = $activityDataService->listActivitiesByCutoffDate($validatedCutoffStart, $validatedCutoffEnd);
+
+            
+        }
     }
 }
