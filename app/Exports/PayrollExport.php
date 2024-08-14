@@ -4,8 +4,9 @@ namespace App\Exports;
 
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
+use Maatwebsite\Excel\Concerns\WithTitle;
 
-class PayrollExport implements FromView
+class PayrollExport implements FromView, WithTitle
 {
     protected $timesheet;
     protected $activities;
@@ -21,7 +22,7 @@ class PayrollExport implements FromView
      */
     public function title(): string
     {
-        return $this->timesheet->id;
+        return strtoupper($this->timesheet['packageDetails']['tutormentor_name']);
     }
 
     /**

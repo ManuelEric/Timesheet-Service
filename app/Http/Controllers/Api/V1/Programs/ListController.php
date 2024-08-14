@@ -12,14 +12,9 @@ class ListController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        /* trigger to sync the success-program */
-        Artisan::call('sync:success-program');
-
         /* incoming request */
         $search = $request->only(['program_name', 'keyword']); 
-
         $ref_success_programs = Ref_Program::onSearch($search)->paginate(10);
-        
         return response()->json($ref_success_programs);
     }
 
