@@ -34,6 +34,12 @@ const emit = defineEmits(['close'])
 </template>
 
 <style lang="scss">
+@media only screen and (max-width: 600px) {
+  .filter-content {
+    width: 100% !important;
+  }
+}
+
 .filter-content {
   height: 100vh;
   top: 0;

@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>External Timesheet - EduALL</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('loader.css') }}" />
+
     @vite(['resources/js/main.js'])
 
     <style>
@@ -34,6 +35,21 @@
             /* warna thumb saat dihover */
         }
     </style>
+
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    <script>
+        // Enable pusher logging - don't include this in production
+        Pusher.logToConsole = true;
+
+        var pusher = new Pusher('e69b02b944a4b7ffb31c', {
+            cluster: 'ap1'
+        });
+
+        var channel = pusher.subscribe('my-channel');
+        channel.bind('my-event', function(data) {
+            alert(data.message);
+        });
+    </script>
 </head>
 
 <body>

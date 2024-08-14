@@ -43,6 +43,8 @@ export const confirmBeforeSubmit = async message => {
     showCancelButton: true,
     confirmButtonText: 'Yes',
     cancelButtonText: 'No, Cancel',
+    confirmButtonColor: "#aac2ff",
+    cancelButtonColor: "#ffaaaa",
   })
 
   return result.isConfirmed

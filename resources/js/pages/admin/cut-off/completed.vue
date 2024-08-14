@@ -1,13 +1,19 @@
 <script setup>
+import { confirmBeforeSubmit, showNotif } from '@/helper/notification'
 import ApiService from '@/services/ApiService'
 import FilterSidebar from '@layouts/components/FilterSidebar.vue'
-import { VDateInput } from 'vuetify/labs/VDateInput'
 import moment from 'moment'
+import { VDateInput } from 'vuetify/labs/VDateInput'
 
-const isBulkDialogVisible = ref(false)
 const loading = ref(false)
 const data = ref([])
 
+const downloadDialog = ref(false)
+const formDownload = ref({
+  cut_off_date: null,
+  specific: false,
+  timesheet_id: null,
+})
 const filterActive = ref(false)
 const currentPage = ref(1)
 const totalPage = ref()
@@ -68,6 +74,31 @@ const getTutor = async () => {
   } catch (error) {
     loading.value = false
     console.error(error)
+  }
+}
+
+const cancelCutOff = async () => {
+  const isConfirmed = await confirmBeforeSubmit('Are you sure you want to cancel this activity?')
+
+  const params = {
+    activity_id: Object.keys(selected.value).map(key => selected.value[key]),
+  }
+
+  if (isConfirmed) {
+    loading.value = true
+    try {
+      const res = await ApiService.patch('api/v1/payment/cut-off/unassign', params)
+
+      if (res) {
+        showNotif('success', res.message, 'bottom-end')
+        getData()
+      }
+    } catch (error) {
+      showNotif('error', error.response.statusText, 'bottom-end')
+      // console.log(error.response)
+    } finally {
+      loading.value = false
+    }
   }
 }
 
@@ -146,6 +177,60 @@ onMounted(() => {
     </template>
   </FilterSidebar>
 
+  <!-- DOWNLOAD  -->
+  <VDialog
+    v-model="downloadDialog"
+    width="auto"
+  >
+    <VCard
+      width="450"
+      prepend-icon="ri-download-line"
+      title="Download Timesheet"
+    >
+      <VCardText>
+        <VRow>
+          <VCol cols="12">
+            <VDateInput
+              label="Start - End Date"
+              variant="solo"
+              prepend-icon=""
+              multiple="range"
+              v-model="formDownload.cut_off_date"
+            />
+            <VCheckbox
+              label="Specific Timesheet"
+              v-model="formDownload.specific"
+            ></VCheckbox>
+
+            <v-autocomplete
+              label="Timesheet - Package"
+              variant="solo"
+              class="mt-3"
+              v-model="formDownload.timesheet_id"
+              :disabled="formDownload.specific ? false : true"
+            />
+          </VCol>
+        </VRow>
+      </VCardText>
+      <template v-slot:actions>
+        <div class="flex mt-5">
+          <v-btn
+            color="error"
+            class="ms-auto"
+            text="Cancel"
+            @click="downloadDialog = false"
+          ></v-btn>
+          <v-btn
+            color="primary"
+            class="ms-auto"
+            text="Download Now"
+          ></v-btn>
+        </div>
+      </template>
+    </VCard>
+  </VDialog>
+
+  <!-- BUTTON & LIST  -->
   <VCard>
     <VCardTitle>
       <div class="d-flex justify-between align-center">
@@ -160,13 +245,10 @@ onMounted(() => {
           <VBtn
             color="info"
             @click="filterActive = !filterActive"
+            v-tooltip:end="'Filter'"
           >
-            <VIcon
-              icon="ri-search-line"
-              class="me-2"
-            />
-            Filter</VBtn
-          >
+            <VIcon icon="ri-search-line"
+          /></VBtn>
         </VCol>
         <VCol
           cols="6"
@@ -175,42 +257,19 @@ onMounted(() => {
           <VBtn
             color="error"
             class="me-1"
-            @click="isBulkDialogVisible = true"
+            @click="cancelCutOff"
             v-if="selected.length > 0"
+            v-tooltip:start="'Cancel'"
           >
-            <VIcon
-              icon="ri-close-line"
-              class="me-2"
-            />
-            Cancel
+            <VIcon icon="ri-close-line" />
           </VBtn>
-          <VMenu
-            :close-on-content-click="false"
-            location="bottom"
+          <VBtn
+            color="secondary"
+            v-tooltip:start="'Download Timesheet'"
+            @click="downloadDialog = true"
           >
-            <template v-slot:activator="{ props }">
-              <VBtn
-                color="secondary"
-                v-bind="props"
-              >
-                Action
-                <VIcon class="ri-arrow-down-s-line ms-2" />
-              </VBtn>
-            </template>
-            <VList>
-              <VListItem>
-                <VListItemTitle>
-                  <div class="cursor-pointer">
-                    <VIcon
-                      icon="ri-download-line"
-                      class="me-2"
-                    />
-                    Download Timesheet
-                  </div>
-                </VListItemTitle>
-              </VListItem>
-            </VList>
-          </VMenu>
+            <VIcon icon="ri-download-line" />
+          </VBtn>
         </VCol>
       </VRow>
       <VTable class="text-no-wrap">
@@ -261,7 +320,7 @@ onMounted(() => {
               colspan="2"
               class="text-end"
             >
-              Rp. 2.500.000
+              Rp. {{ data.total_fee }}
             </th>
           </tr>
         </thead>
@@ -269,8 +328,13 @@ onMounted(() => {
 
       <div class="d-flex justify-center mt-5">
         <VPagination
-          :length="5"
+          v-model="currentPage"
+          :length="totalPage"
+          :total-visible="4"
           color="primary"
+          density="compact"
+          :show-first-last-page="false"
+          @update:modelValue="getData"
         />
       </div>
     </VCardText>
