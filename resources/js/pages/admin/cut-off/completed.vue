@@ -272,6 +272,13 @@ onMounted(() => {
           </VBtn>
         </VCol>
       </VRow>
+
+      <!-- Loader  -->
+      <vSkeletonLoader
+        class="mx-auto border"
+        type="table-thead, table-row@10"
+        v-if="loading"
+      ></vSkeletonLoader>
       <VTable class="text-no-wrap">
         <thead>
           <tr>
