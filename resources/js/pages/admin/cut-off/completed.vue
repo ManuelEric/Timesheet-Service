@@ -3,7 +3,6 @@ import { confirmBeforeSubmit, showNotif } from '@/helper/notification'
 import ApiService from '@/services/ApiService'
 import FilterSidebar from '@layouts/components/FilterSidebar.vue'
 import moment from 'moment'
-import { VDateInput } from 'vuetify/labs/VDateInput'
 
 const loading = ref(false)
 const data = ref([])
@@ -211,22 +210,30 @@ onMounted(() => {
             />
           </VCol>
         </VRow>
-      </VCardText>
-      <template v-slot:actions>
-        <div class="flex mt-5">
-          <v-btn
+        <VCardActions class="mt-5">
+          <VBtn
             color="error"
-            class="ms-auto"
-            text="Cancel"
             @click="downloadDialog = false"
-          ></v-btn>
-          <v-btn
-            color="primary"
-            class="ms-auto"
-            text="Download Now"
-          ></v-btn>
-        </div>
-      </template>
+          >
+            <VIcon
+              icon="ri-close-line"
+              class="me-3"
+            />
+            Close
+          </VBtn>
+          <VSpacer />
+          <VBtn
+            color="success"
+            type="button"
+          >
+            Download
+            <VIcon
+              icon="ri-download-line"
+              class="ms-3"
+            />
+          </VBtn>
+        </VCardActions>
+      </VCardText>
     </VCard>
   </VDialog>
 

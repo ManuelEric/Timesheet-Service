@@ -63,10 +63,10 @@ const updateInhouse = async (uuid, value, email) => {
 
     if (res) {
       showNotif('success', res.message, 'bottom-end')
-      await getData()
     }
   } catch (error) {
     console.error(error)
+    showNotif('error', error.response?.data?.errors, 'bottom-end')
   }
 }
 // End Function
@@ -233,7 +233,12 @@ onMounted(() => {
                             >
                               <td>{{ subject.name }}</td>
                               <td class="text-end">
-                                {{ subject.fee_hours.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) }}
+                                {{
+                                  subject.fee_hours.toLocaleString('id-ID', {
+                                    style: 'currency',
+                                    currency: 'IDR',
+                                  })
+                                }}
                               </td>
                             </tr>
                           </template>
