@@ -60,10 +60,6 @@ const toggleDialog = type => {
   } else {
     isDialogVisible.value[type] = false
   }
-
-  if (type == 'edit') {
-    getData(props.id)
-  }
 }
 
 const downloadTimesheet = async (id, name) => {
@@ -124,15 +120,15 @@ onMounted(() => {
         <VMenu
           :close-on-content-click="false"
           location="bottom"
+          open-on-hover
         >
           <template v-slot:activator="{ props }">
             <VBtn
-              density="compact"
               color="secondary"
               v-bind="props"
+              v-tooltip:start="'Settings'"
             >
-              Action
-              <VIcon icon="ri-arrow-down-s-line ms-2"></VIcon>
+              <VIcon icon="ri-settings-3-line"></VIcon>
             </VBtn>
           </template>
           <VList>
@@ -383,6 +379,7 @@ onMounted(() => {
         :package_id="data.packageDetails?.package_id"
         :id="props.id"
         @close="toggleDialog('edit')"
+        @reload="getData(props.id)"
       />
     </VDialog>
 

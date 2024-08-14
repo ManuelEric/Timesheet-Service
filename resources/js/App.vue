@@ -18,4 +18,16 @@ body.swal2-toast-shown .swal2-container.swal2-bottom-right {
 .layout-wrapper.layout-nav-type-vertical .layout-navbar {
   z-index: 0 !important;
 }
+
+body .v-text-field.v-input.v-input--density-default:not(.v-textarea) .v-field__input,
+body .v-autocomplete.v-input.v-input--density-default:not(.v-textarea) .v-field__input,
+body .v-combobox.v-input.v-input--density-default:not(.v-textarea) .v-field__input,
+body .v-file-input.v-input.v-input--density-default:not(.v-textarea) .v-field__input,
+body .v-select.v-input.v-input--density-default:not(.v-textarea) .v-field__input {
+  min-block-size: 0px !important;
+}
+
+.v-text-field .v-input__details {
+  padding-inline: 0px;
+}
 </style>
