@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Ref_Program;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
 
 class ListController extends Controller
 {
