@@ -2,6 +2,7 @@
 import { showNotif } from '@/helper/notification'
 import { rules } from '@/helper/rules'
 import ApiService from '@/services/ApiService'
+import moment from 'moment'
 
 const props = defineProps({ id: Array })
 const emit = defineEmits(['close', 'reload', 'reset'])
@@ -12,6 +13,12 @@ const form = ref({
   start_date: null,
   end_date: null,
 })
+const cut_off_date = ref(null)
+
+const handleDate = () => {
+  form.value.start_date = moment(cut_off_date.value[0]).format('YYYY-MM-DD')
+  form.value.end_date = moment(cut_off_date.value[cut_off_date.value.length - 1]).format('YYYY-MM-DD')
+}
 
 const submit = async () => {
   const { valid } = await formData.value.validate()
@@ -53,23 +60,15 @@ const submit = async () => {
         ref="formData"
       >
         <VRow>
-          <VCol cols="6">
-            <VTextField
-              v-model="form.start_date"
-              type="date"
-              label="Start Date"
-              density="compact"
+          <VCol cols="12">
+            <VDateInput
+              v-model="cut_off_date"
+              label="Start - End Date"
+              variant="solo"
               :rules="rules.required"
-            ></VTextField>
-          </VCol>
-          <VCol cols="6">
-            <VTextField
-              v-model="form.end_date"
-              type="date"
-              label="End Date"
-              density="compact"
-              :rules="rules.required"
-            ></VTextField>
+              multiple="range"
+              @update:modelValue="handleDate"
+            />
           </VCol>
         </VRow>
 

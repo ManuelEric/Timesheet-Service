@@ -86,6 +86,7 @@ onMounted(() => {
             v-model="package_id"
             placeholder="Select Timesheet Package"
             density="compact"
+            variant="solo"
             @update:modelValue="getData"
           />
         </VCol>
@@ -96,7 +97,7 @@ onMounted(() => {
           <VTextField
             :loading="loading"
             :disabled="loading"
-            append-inner-icon="ri-search-line"
+            prepend-inner-icon="ri-search-line"
             density="compact"
             label="Search"
             variant="solo"
@@ -113,7 +114,6 @@ onMounted(() => {
         >
           <VBtn
             color="warning"
-            density="compact"
             class="me-1"
             @click="isDialogVisible.add_existing = true"
             v-if="selected.length > 0"
@@ -131,7 +131,6 @@ onMounted(() => {
           >
             <template v-slot:activator="{ props }">
               <VBtn
-                density="compact"
                 color="light-primary"
                 v-bind="props"
                 class="me-1"
@@ -172,7 +171,6 @@ onMounted(() => {
           </VMenu>
           <VBtn
             color="secondary"
-            density="compact"
             @click="isDialogVisible.cut_off = true"
             v-if="selected.length == 0"
           >
@@ -300,6 +298,7 @@ onMounted(() => {
     <additionalFee
       :title="'bonus'"
       @close="isDialogVisible.add_bonus = false"
+      @reload="getData"
     />
   </VDialog>
 
@@ -312,6 +311,7 @@ onMounted(() => {
     <additionalFee
       :title="'fee'"
       @close="isDialogVisible.additional_fee = false"
+      @reload="getData"
     />
   </VDialog>
 </template>

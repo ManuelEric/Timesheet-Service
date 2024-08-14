@@ -4,6 +4,7 @@ import { registerPlugins } from '@core/utils/plugins';
 import moment from 'moment';
 import { Calendar, DatePicker, setupCalendar } from 'v-calendar';
 import { createApp } from 'vue';
+import { VDateInput } from 'vuetify/labs/VDateInput';
 
 // Styles
 import '@core-scss/template/index.scss';
@@ -14,6 +15,7 @@ import 'v-calendar/style.css';
 const app = createApp(App)
 app.use(setupCalendar, {})
 // Use the components
+app.component('VDateInput', VDateInput)
 app.component('VCCalendar', Calendar)
 app.component('VCDatePicker', DatePicker)
 app.component(VueCountdown.name, VueCountdown);
