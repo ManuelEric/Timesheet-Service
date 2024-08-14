@@ -88,52 +88,55 @@ onMounted(() => {
     <VCardTitle>
       <div class="d-flex justify-between align-center">
         <div class="w-100">
-          <h4>TimeSheet</h4>
+          <h4>Timesheet List</h4>
         </div>
       </div>
     </VCardTitle>
     <VCardText>
-      <VRow class="my-1 justify-around">
+      <VRow class="my-1 justify-space-between">
         <VCol
           cols="12"
-          md="5"
+          md="6"
         >
-          <VAutocomplete
-            clearable
-            v-model="program_name"
-            label="Program Name"
-            :items="program_list"
-            item-title="program_name"
-            placeholder="Select Program Name"
-            density="compact"
-            variant="solo"
-            hide-details
-            single-line
-            :loading="loading"
-            :disabled="loading"
-            @update:modelValue="getData"
-          />
-        </VCol>
-        <VCol
-          cols="12"
-          md="4"
-        >
-          <VAutocomplete
-            clearable="true"
-            v-model="package_name"
-            label="Package"
-            :items="package_list"
-            :item-props="item => ({ title: item.package != null ? item.type_of + ' - ' + item.package : item.type_of })"
-            item-value="id"
-            placeholder="Select Package"
-            density="compact"
-            variant="solo"
-            hide-details
-            single-line
-            :loading="loading"
-            :disabled="loading"
-            @update:modelValue="getData"
-          />
+          <VRow>
+            <VCol
+              cols="12"
+              md="6"
+            >
+              <VAutocomplete
+                clearable
+                v-model="program_name"
+                label="Program Name"
+                :items="program_list"
+                item-title="program_name"
+                placeholder="Select Program Name"
+                variant="solo"
+                :loading="loading"
+                :disabled="loading"
+                @update:modelValue="getData"
+              />
+            </VCol>
+            <VCol
+              cols="12"
+              md="6"
+            >
+              <VAutocomplete
+                clearable="true"
+                v-model="package_name"
+                label="Package"
+                :items="package_list"
+                :item-props="
+                  item => ({ title: item.package != null ? item.type_of + ' - ' + item.package : item.type_of })
+                "
+                item-value="id"
+                placeholder="Select Package"
+                variant="solo"
+                :loading="loading"
+                :disabled="loading"
+                @update:modelValue="getData"
+              />
+            </VCol>
+          </VRow>
         </VCol>
         <VCol
           cols="12"
@@ -143,7 +146,6 @@ onMounted(() => {
             :loading="loading"
             :disabled="loading"
             append-inner-icon="ri-search-line"
-            density="compact"
             label="Search"
             variant="solo"
             hide-details
@@ -268,10 +270,7 @@ onMounted(() => {
             </td>
             <td>
               <router-link :to="'/admin/timesheet/' + item.id">
-                <VBtn
-                  color="secondary"
-                  density="compact"
-                >
+                <VBtn color="secondary">
                   <VIcon
                     icon="ri-timeline-view"
                     class="cursor-pointer"
@@ -307,7 +306,6 @@ onMounted(() => {
           :length="totalPage"
           :total-visible="4"
           color="primary"
-          density="compact"
           :show-first-last-page="false"
           @update:modelValue="getData"
         />

@@ -1,8 +1,7 @@
 <script setup>
-import { showNotif } from '@/helper/notification'
-import { rules } from '@/helper/rules'
-import ApiService from '@/services/ApiService'
 import program from '@/components/admin/program/program_add.vue'
+import { showNotif } from '@/helper/notification'
+import ApiService from '@/services/ApiService'
 
 // Start Variable
 const selected = ref([])
@@ -90,7 +89,7 @@ onMounted(() => {
       <VRow class="my-1">
         <VCol
           cols="12"
-          md="5"
+          md="3"
         >
           <VAutocomplete
             clearable
@@ -128,10 +127,11 @@ onMounted(() => {
 
         <VCol
           cols="12"
-          md="4"
+          md="6"
           class="text-end"
         >
           <VBtn
+            v-tooltip:start="'Generate Timesheet'"
             density="compact"
             :color="selected.length > 0 ? 'warning' : 'primary'"
             class="mb-2"

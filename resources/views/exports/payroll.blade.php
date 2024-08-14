@@ -93,8 +93,8 @@
     @foreach ( $activities as $activity )
     <tr>
         <td valign="middle" align="center" style="border: 1px solid #000;">{{ $loop->iteration }}</td>
-        <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ date('l', strtotime($activity['date'])) }}</td>
-        <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ $activity['date'] }}</td>
+        <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ date('l', strtotime($activity['start_date'])) }}</td>
+        <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ $activity['start_date'] }}</td>
         <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ $packageDetails['package_name'] }}</td>
         <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ $activity['start_time'] }}</td>
         <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ $activity['end_time'] }}</td>

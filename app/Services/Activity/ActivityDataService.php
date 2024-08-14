@@ -32,14 +32,4 @@ class ActivityDataService
             ];
         });
     }
-
-    public function listTimesheetByCutoffDate(string $start_date, string $end_date)
-    {
-        /* we're gonna find timesheets using cutoff `from` and `to` */
-        $timesheets = Timesheet::with('activities')->whereHas('activities.cutoff_history', function ($query) use ($start_date, $end_date) {
-            $query->inBetween($start_date, $end_date);
-        })->get();
-
-        
-    }
 }
