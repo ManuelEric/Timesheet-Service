@@ -30,4 +30,9 @@ body .v-select.v-input.v-input--density-default:not(.v-textarea) .v-field__input
 .v-text-field .v-input__details {
   padding-inline: 0px;
 }
+
+.v-switch--inset .v-switch__track {
+  min-width: 0px !important;
+  padding: 5px 10px;
+}
 </style>

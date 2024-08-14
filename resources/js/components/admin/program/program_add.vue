@@ -162,7 +162,7 @@ onMounted(() => {
         <VRow>
           <VCol md="12">
             <VAutocomplete
-              density="compact"
+              variant="solo"
               clearable
               v-model="tutor_selected"
               label="Mentor/Tutor"
@@ -170,6 +170,7 @@ onMounted(() => {
               :item-props="
                 item => ({
                   title: item.first_name + ' ' + item.last_name,
+                  subtitle: item.email,
                 })
               "
               :rules="rules.required"
@@ -183,7 +184,7 @@ onMounted(() => {
             v-if="subjects.length > 0"
           >
             <VAutocomplete
-              density="compact"
+              variant="solo"
               clearable
               v-model="form.subject_id"
               label="Subject Tutoring"
@@ -197,13 +198,16 @@ onMounted(() => {
           </VCol>
           <VCol md="8">
             <VAutocomplete
-              density="compact"
+              variant="solo"
               clearable
               label="Package"
               v-model="form.package_id"
               :items="package_list"
               :item-props="
-                item => ({ title: item.package != null ? item.type_of + ' - ' + item.package : item.type_of })
+                item => ({
+                  title: item.package != null ? item.type_of + ' - ' + item.package : item.type_of,
+                  subtitle: item.detail ? item.detail / 60 + ' Hours' : 'Customizable',
+                })
               "
               item-value="id"
               :rules="rules.required"
@@ -215,7 +219,7 @@ onMounted(() => {
           <VCol md="4">
             <VTextField
               type="number"
-              density="compact"
+              variant="solo"
               clearable
               :label="+form.duration / 60 ? 'Minutes (' + form.duration / 60 + ' Hours)' : 'Minutes'"
               :readonly="duration_readonly"
@@ -225,7 +229,7 @@ onMounted(() => {
           </VCol>
           <VCol md="12">
             <VAutocomplete
-              density="compact"
+              variant="solo"
               clearable
               v-model="form.inhouse_id"
               label="Inhouse Mentor/Tutor"
@@ -243,7 +247,7 @@ onMounted(() => {
           </VCol>
           <VCol md="12">
             <VAutocomplete
-              density="compact"
+              variant="solo"
               multiple
               clearable
               chips
@@ -261,12 +265,12 @@ onMounted(() => {
             <VTextarea
               label="Notes"
               v-model="form.notes"
+              variant="solo"
             ></VTextarea>
           </VCol>
         </VRow>
 
-        <VDivider class="my-3" />
-        <VCardActions>
+        <VCardActions class="mt-5">
           <VBtn
             color="error"
             type="button"
