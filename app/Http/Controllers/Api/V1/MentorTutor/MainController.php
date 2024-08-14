@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Http;
 class MainController extends Controller
 {
     use HttpCall;
-    
+
     protected $tokenService;
 
     public function __construct(TokenService $tokenService)
@@ -42,7 +42,7 @@ class MainController extends Controller
         $isPaginate = $search['paginate'] ?? false;
 
         /* only fetch the data in order to add inhouse item for each data */
-        $mentortutorsCollection = $isPaginate == true ? $response['data'] : $response; 
+        $mentortutorsCollection = $isPaginate == true ? $response['data'] : $response;
 
         /* adding new items which is inhouse */
         $mappedResponse = collect($mentortutorsCollection)->map(function ($item) {
@@ -56,13 +56,13 @@ class MainController extends Controller
 
 
         /* process the inhouse request just if using paginate param */
-        if ( $requestInhouse !== NULL ) {
+        if ($requestInhouse !== NULL) {
 
             $mappedResponse = $mappedResponse->where('inhouse', $inhouse)->toArray();
             $mappedResponse = array_values($mappedResponse);
-        }        
+        }
 
-        
+
         /* combine the processed items with the pagination */
         $results = $isPaginate == true ? array_merge($response, ['data' => $mappedResponse]) : $mappedResponse;
 
@@ -71,15 +71,14 @@ class MainController extends Controller
     }
 
     public function update(
-        TempUserUpdateRequest $request, 
+        TempUserUpdateRequest $request,
         $tempUserUuid,
-        ResponseService $responseService): JsonResponse
-    {
+        ResponseService $responseService
+    ): JsonResponse {
         /* only receive updates inhouse column */
         $validatedInhouse = $request->safe()->only(['inhouse']);
 
-        if ( !$tempUser = TempUser::where('uuid', $tempUserUuid)->first() )
-        {
+        if (!$tempUser = TempUser::where('uuid', $tempUserUuid)->first()) {
             throw new HttpResponseException(
                 response()->json([
                     'errors' => 'Invalid code provided.'
@@ -92,7 +91,6 @@ class MainController extends Controller
 
             $tempUser->update($validatedInhouse);
             DB::commit();
-
         } catch (Exception $err) {
 
             DB::rollBack();
@@ -109,7 +107,7 @@ class MainController extends Controller
                 ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY)
             );
         }
-        
+
         return response()->json([
             'message' => 'The selected mentor/tutor has been set to inhouse'
         ]);

@@ -14,8 +14,6 @@ const form = ref({
 })
 
 const submit = async () => {
-  console.log(form)
-
   const { valid } = await formData.value.validate()
   if (valid) {
     try {

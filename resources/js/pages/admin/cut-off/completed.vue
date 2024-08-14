@@ -1,11 +1,236 @@
 <script setup>
-const isBulkDialogVisible = ref(false)
-const isDialogVisible = ref(false)
+import { confirmBeforeSubmit, showNotif } from '@/helper/notification'
+import ApiService from '@/services/ApiService'
+import FilterSidebar from '@layouts/components/FilterSidebar.vue'
+import moment from 'moment'
+import { VDateInput } from 'vuetify/labs/VDateInput'
 
+const loading = ref(false)
+const data = ref([])
+
+const downloadDialog = ref(false)
+const formDownload = ref({
+  cut_off_date: null,
+  specific: false,
+  timesheet_id: null,
+})
+const filterActive = ref(false)
+const currentPage = ref(1)
+const totalPage = ref()
 const selected = ref([])
+const keyword = ref(null)
+const package_id = ref(null)
+const package_list = ref([])
+const tutor_id = ref(null)
+const tutor_list = ref([])
+const cutOffDate = ref([])
+
+const getData = async () => {
+  loading.value = true
+  const page = '?page=' + currentPage.value
+  const search = keyword.value ? '&keyword=' + keyword.value : ''
+  const package_select = package_id.value ? '&package_id=' + package_id.value : ''
+  const start_date = cutOffDate.value ? '&start_date=' + moment(cutOffDate.value[0]).format('YYYY-MM-DD') : ''
+  const end_date = cutOffDate.value
+    ? '&end_date=' + moment(cutOffDate.value[cutOffDate.value.length - 1]).format('YYYY-MM-DD')
+    : ''
+
+  try {
+    const res = await ApiService.get('api/v1/payment/paid' + page + search + package_select)
+    if (res) {
+      currentPage.value = res.current_page
+      totalPage.value = res.last_page
+      data.value = res
+    }
+  } catch (error) {
+    console.error(error)
+  } finally {
+    loading.value = false
+  }
+}
+
+const getPackage = async () => {
+  loading.value = true
+  try {
+    const res = await ApiService.get('api/v1/package/component/list')
+    if (res) {
+      package_list.value = res
+      loading.value = false
+    }
+  } catch (error) {
+    loading.value = false
+    console.error(error)
+  }
+}
+
+const getTutor = async () => {
+  loading.value = true
+  try {
+    const res = await ApiService.get('api/v1/user/mentor-tutors')
+    if (res) {
+      tutor_list.value = res
+      loading.value = false
+    }
+  } catch (error) {
+    loading.value = false
+    console.error(error)
+  }
+}
+
+const cancelCutOff = async () => {
+  const isConfirmed = await confirmBeforeSubmit('Are you sure you want to cancel this activity?')
+
+  const params = {
+    activity_id: Object.keys(selected.value).map(key => selected.value[key]),
+  }
+
+  if (isConfirmed) {
+    loading.value = true
+    try {
+      const res = await ApiService.patch('api/v1/payment/cut-off/unassign', params)
+
+      if (res) {
+        showNotif('success', res.message, 'bottom-end')
+        getData()
+      }
+    } catch (error) {
+      showNotif('error', error.response.statusText, 'bottom-end')
+      // console.log(error.response)
+    } finally {
+      loading.value = false
+    }
+  }
+}
+
+onMounted(() => {
+  getData()
+  getPackage()
+  getTutor()
+})
 </script>
 
 <template>
+  <!-- FILTER  -->
+  <FilterSidebar
+    :active="filterActive"
+    :width="450"
+    @close="filterActive = false"
+  >
+    <template v-slot:header> Filter </template>
+    <template v-slot:content>
+      <VRow class="my-1">
+        <VCol cols="12">
+          <VTextField
+            v-model="keyword"
+            placeholder="Search"
+            prepend-inner-icon="ri-search-line"
+            variant="solo"
+            @change="getData"
+          />
+        </VCol>
+        <VCol cols="12">
+          <VAutocomplete
+            clearable="true"
+            :loading="loading"
+            :disabled="loading"
+            label="Package Name"
+            :items="package_list"
+            :item-title="item => (item.package ? item.type_of + ' - ' + item.package : item.type_of)"
+            item-value="id"
+            v-model="package_id"
+            placeholder="Select Timesheet Package"
+            variant="solo"
+            @update:modelValue="getData"
+          />
+        </VCol>
+        <VCol cols="12">
+          <VAutocomplete
+            :loading="loading"
+            :disabled="loading"
+            clearable="true"
+            label="Tutor/Mentor Name"
+            :items="tutor_list"
+            :item-props="
+              item => ({
+                title: item.first_name + ' ' + item.last_name,
+                subtitle: item.roles.map(roleObj => roleObj.role).join(', '),
+              })
+            "
+            item-value="uuid"
+            v-model="tutor_id"
+            placeholder="Select Tutor/Mentor Name"
+            variant="solo"
+          />
+        </VCol>
+        <VCol cols="12">
+          <VDateInput
+            v-model="cutOffDate"
+            label="Cut-Off Date"
+            prepend-icon=""
+            multiple="range"
+            color="primary"
+            variant="solo"
+            @update:modelValue="getData"
+          ></VDateInput>
+        </VCol>
+      </VRow>
+    </template>
+  </FilterSidebar>
+
+  <!-- DOWNLOAD  -->
+  <VDialog
+    v-model="downloadDialog"
+    width="auto"
+  >
+    <VCard
+      width="450"
+      prepend-icon="ri-download-line"
+      title="Download Timesheet"
+    >
+      <VCardText>
+        <VRow>
+          <VCol cols="12">
+            <VDateInput
+              label="Start - End Date"
+              variant="solo"
+              prepend-icon=""
+              multiple="range"
+              v-model="formDownload.cut_off_date"
+            />
+            <VCheckbox
+              label="Specific Timesheet"
+              v-model="formDownload.specific"
+            ></VCheckbox>
+
+            <v-autocomplete
+              label="Timesheet - Package"
+              variant="solo"
+              class="mt-3"
+              v-model="formDownload.timesheet_id"
+              :disabled="formDownload.specific ? false : true"
+            />
+          </VCol>
+        </VRow>
+      </VCardText>
+      <template v-slot:actions>
+        <div class="flex mt-5">
+          <v-btn
+            color="error"
+            class="ms-auto"
+            text="Cancel"
+            @click="downloadDialog = false"
+          ></v-btn>
+          <v-btn
+            color="primary"
+            class="ms-auto"
+            text="Download Now"
+          ></v-btn>
+        </div>
+      </template>
+    </VCard>
+  </VDialog>
+
+  <!-- BUTTON & LIST  -->
   <VCard>
     <VCardTitle>
       <div class="d-flex justify-between align-center">
@@ -16,128 +241,75 @@ const selected = ref([])
     </VCardTitle>
     <VCardText>
       <VRow class="my-1">
-        <VCol
-          cols="12"
-          md="2"
-        >
-          <VAutocomplete
-            clearable="true"
-            label="Program Name"
-            :items="['Program 1', 'Program 2', 'Program 3']"
-            placeholder="Select Program Name"
-            density="compact"
-          />
+        <VCol cols="6">
+          <VBtn
+            color="info"
+            @click="filterActive = !filterActive"
+            v-tooltip:end="'Filter'"
+          >
+            <VIcon icon="ri-search-line"
+          /></VBtn>
         </VCol>
         <VCol
-          cols="12"
-          md="3"
-        >
-          <VAutocomplete
-            clearable="true"
-            label="Timesheet - Package"
-            :items="['Timesheet 1', 'Timesheet 2', 'Timesheet 3']"
-            placeholder="Select Timesheet"
-            density="compact"
-          />
-        </VCol>
-        <VCol
-          cols="12"
-          md="2"
-        >
-          <VTextField
-            type="date"
-            density="compact"
-            label="Cut-Off Date"
-            clearable
-          />
-        </VCol>
-        <VCol
-          cols="12"
-          md="5"
+          cols="6"
           class="text-end"
         >
           <VBtn
             color="error"
-            density="compact"
             class="me-1"
-            @click="isBulkDialogVisible = true"
+            @click="cancelCutOff"
             v-if="selected.length > 0"
+            v-tooltip:start="'Cancel'"
           >
-            <VIcon
-              icon="ri-close-line"
-              class="me-2"
-            />
-            Cancel
+            <VIcon icon="ri-close-line" />
           </VBtn>
-          <VMenu
-            :close-on-content-click="false"
-            location="bottom"
+          <VBtn
+            color="secondary"
+            v-tooltip:start="'Download Timesheet'"
+            @click="downloadDialog = true"
           >
-            <template v-slot:activator="{ props }">
-              <VBtn
-                density="compact"
-                color="secondary"
-                v-bind="props"
-              >
-                Action
-                <VIcon class="ri-arrow-down-s-line ms-2" />
-              </VBtn>
-            </template>
-            <VList>
-              <VListItem>
-                <VListItemTitle>
-                  <div class="cursor-pointer">
-                    <VIcon
-                      icon="ri-download-line"
-                      class="me-2"
-                    />
-                    Download Timesheet
-                  </div>
-                </VListItemTitle>
-              </VListItem>
-            </VList>
-          </VMenu>
+            <VIcon icon="ri-download-line" />
+          </VBtn>
         </VCol>
       </VRow>
       <VTable class="text-no-wrap">
         <thead>
           <tr>
             <th class="text-uppercase">#</th>
-            <th
-              class="text-uppercase"
-              width="1%"
-            >
-              No
-            </th>
             <th class="text-uppercase text-center">Timesheet</th>
             <th class="text-uppercase text-center">Activity</th>
+            <th class="text-uppercase text-center">Activity Date</th>
             <th class="text-uppercase text-center">Mentor/Tutor</th>
             <th class="text-uppercase text-center">Time Spent</th>
             <th class="text-uppercase text-center">Fee/Hours</th>
+            <th class="text-uppercase text-center">Total</th>
             <th class="text-uppercase text-center">Cut-Off Date</th>
             <th class="text-uppercase text-center">Cut-Off Status</th>
           </tr>
         </thead>
         <tbody>
           <tr
-            v-for="i in 5"
-            :key="i"
+            v-for="item in data.data"
+            :key="item"
           >
             <td>
               <VCheckbox
                 v-model="selected"
-                :value="i"
+                :value="item.id"
               ></VCheckbox>
             </td>
-            <td>{{ i }}</td>
             <td>Lorem Ipsum</td>
-            <td>Lorem Ipsum</td>
-            <td>Lorem Ipsum</td>
-            <td>60 Minutes</td>
-            <td>Rp. 200.000</td>
-            <td class="text-center">20 Januari 2024</td>
+            <td>{{ item.activity }}</td>
+            <td>{{ item.date }}</td>
+            <td>{{ item.mentor_tutor }}</td>
+            <td>{{ item.time_spent > 0 ? item.time_spent / 60 + ' Hours' : '-' }}</td>
+            <td>{{ item.fee_hours }}</td>
+            <td>Rp. {{ (item.time_spent / 60) * item.fee_hours }}</td>
             <td class="text-center">
-              <VChip color="success"> Paid </VChip>
+              {{ item.cutoff_date }}
+            </td>
+            <td class="text-center">
+              <VChip color="success"> {{ item.cutoff_status }} </VChip>
             </td>
           </tr>
         </tbody>
@@ -148,7 +320,7 @@ const selected = ref([])
               colspan="2"
               class="text-end"
             >
-              Rp. 2.500.000
+              Rp. {{ data.total_fee }}
             </th>
           </tr>
         </thead>
@@ -156,8 +328,13 @@ const selected = ref([])
 
       <div class="d-flex justify-center mt-5">
         <VPagination
-          :length="5"
+          v-model="currentPage"
+          :length="totalPage"
+          :total-visible="4"
           color="primary"
+          density="compact"
+          :show-first-last-page="false"
+          @update:modelValue="getData"
         />
       </div>
     </VCardText>

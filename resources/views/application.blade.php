@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>External Timesheet - EduALL</title>
     <link rel="stylesheet" type="text/css" href="{{ asset('loader.css') }}" />
+
     @vite(['resources/js/main.js'])
 
     <style>
