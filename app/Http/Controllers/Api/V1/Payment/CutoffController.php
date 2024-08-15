@@ -21,6 +21,7 @@ use App\Actions\Timesheet\IdentifierCheckingAction as IdentifyTimesheetIdAction;
 use App\Exports\PayrollExportMultipleSheets;
 use App\Http\Requests\Payment\CutoffExportRequest;
 use App\Models\Cutoff;
+use App\Services\Payment\PaymentService;
 
 class CutoffController extends Controller
 {
@@ -84,66 +85,19 @@ class CutoffController extends Controller
 
     public function export(
         CutoffExportRequest $request,
-        IdentifyTimesheetIdAction $identifyTimesheetIdAction,
-        TimesheetDataService $timesheetDataService,
-        ActivityDataService $activityDataService,
+        PaymentService $paymentService,
         )
     {
         $validated = $request->safe()->only(['timesheet_id', 'cutoff_start', 'cutoff_end']);
-        
-        $validatedTimesheetId = $validated['timesheet_id'] ?? null;
-        $validatedCutoffStart = $validated['cutoff_start'];
-        $validatedCutoffEnd = $validated['cutoff_end'];
-        
-        // $filename = $this->generateFileName($mappedTimesheetData);
-        $filename = 'Payroll_' . date('F_Y') . '.xlsx';
-        
-        if ( $validatedTimesheetId ) {
-            $timesheet = $identifyTimesheetIdAction->execute($validatedTimesheetId);
-            $detailTimesheet = $timesheetDataService->detailTimesheet($timesheet);
-            $activities = $activityDataService->listActivitiesByTimesheet($timesheet);
-            unset($detailTimesheet['editableColumns']);
-
-            $cutoff = Cutoff::inBetween($validatedCutoffStart, $validatedCutoffEnd)->first();
-            $cutoffId = $cutoff->id;
-            $activities = $activities->where('cutoff_ref_id', $cutoffId);
-            
-            return Excel::download(new PayrollExport($detailTimesheet, $activities), $filename);
-
-        }
-
-        return response()->json([
-            'message' => 'No timesheet were found.',
-        ]);
+        return $paymentService->exportPayrollAsASingleSheet($validated);
     }
 
     public function export_multiple(
         CutoffExportRequest $request,
-        IdentifyTimesheetIdAction $identifyTimesheetIdAction,
-        TimesheetDataService $timesheetDataService,
-        ActivityDataService $activityDataService,
+        PaymentService $paymentService,
     )
     {
         $validated = $request->safe()->only(['cutoff_start', 'cutoff_end']);
-        
-        $validatedCutoffStart = $validated['cutoff_start'];
-        $validatedCutoffEnd = $validated['cutoff_end'];
-        
-        // $filename = $this->generateFileName($mappedTimesheetData);
-        $filename = 'Payroll_' . date('F_Y') . '.xlsx';
-
-        $timesheets = $timesheetDataService->listTimesheetByCutoffDate($validatedCutoffStart, $validatedCutoffEnd);
-
-        foreach ( $timesheets as $timesheet )
-        {
-            $timesheet = $identifyTimesheetIdAction->execute($timesheet->id);
-            $detailTimesheet = $timesheetDataService->detailTimesheet($timesheet);
-            $activities = $activityDataService->listActivitiesByTimesheet($timesheet);
-
-            // regist into the exports
-            $exports[] = new PayrollExport($detailTimesheet, $activities);
-        }
-
-        return Excel::download(new PayrollExportMultipleSheets($exports), $filename);
+        return $paymentService->exportPayrollAsMultipleSheets($validated);
     }
 }
