@@ -149,7 +149,10 @@ onMounted(() => {
         width="auto"
         persistent
       >
-        <program @close="dialog = false" />
+        <program
+          :selected="selected"
+          @close="dialog = false"
+        />
       </VDialog>
       <!-- End Assign Modal  -->
 
