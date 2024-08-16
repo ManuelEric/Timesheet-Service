@@ -14,7 +14,10 @@ class ListController extends Controller
      */
     public function component(Request $request): JsonResponse
     {
-        $packages = Package::all();
+        /* incoming request */
+        $search = $request->only(['category']);
+
+        $packages = Package::onSearch($search)->get();
         return response()->json($packages);
     }
 }

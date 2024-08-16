@@ -12,6 +12,7 @@ use Exception;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -30,42 +31,50 @@ class MainController extends Controller
     public function index(Request $request): JsonResponse
     {
         /* incoming request */
-        $search = $request->only(['keyword', 'paginate', 'page', 'role']);
-        $requestInhouse = $request->get('inhouse');
-        $inhouse = $requestInhouse === "true" ? 1 : 0;
+        $search = $request->only(['keyword', 'role', 'inhouse']);
+        $additionalSearch = $request->only(['paginate']);
 
-        // Artisan::call('sync:tutor-mentor');
+        /* manage the variables of additional search */
+        $isPaginate = $additionalSearch['paginate'] ?? false;
 
-        /* call API to get all of the mentors and tutors */
-        [$statusCode, $response] = $this->make_call('get', env('CRM_DOMAIN') . 'user/mentor-tutors', $search);
+        $tutormentors = TempUser::with('roles')->onSearch($search)->get();
 
-        $isPaginate = $search['paginate'] ?? false;
+        /* in order to grouped the roles by role_name, we need to mapping the data */
+        $mappedTutormentors = $tutormentors->map(function ($item) {
+            $profile = [
+                'id' => $item->id,
+                'uuid' => $item->uuid,
+                'full_name' => $item->full_name,
+                'email' => $item->email,
+                'inhouse' => $item->inhouse,
+                'last_activity' => $item->last_activity,
+                'roles' => new Collection()
+            ];
 
-        /* only fetch the data in order to add inhouse item for each data */
-        $mentortutorsCollection = $isPaginate == true ? $response['data'] : $response;
+            [$mentorDetail, $tutorDetail] = $item->roles->partition(function ($value) {
+                return $value->role == 'Mentor';
+            });
+        
+            if ($mentorDetail->count() > 0)
+            {
+                $profile['roles']->push([
+                    'name' => 'Mentor',
+                    'subjects' => array_values($mentorDetail->all())
+                ]);
+            }
 
-        /* adding new items which is inhouse */
-        $mappedResponse = collect($mentortutorsCollection)->map(function ($item) {
+            if ($tutorDetail->count() > 0)
+            {
+                $profile['roles']->push([
+                    'name' => 'Tutor', 
+                    'subjects' => array_values($tutorDetail->all())
+                ]);
+            }            
 
-            $queryTempUser = TempUser::where('uuid', $item['uuid']);
-
-            return array_merge($item, [
-                'inhouse' => $queryTempUser->exists() ? (bool) $queryTempUser->first()->inhouse : false
-            ]);
+            return $profile;
         });
 
-
-        /* process the inhouse request just if using paginate param */
-        if ($requestInhouse !== NULL) {
-
-            $mappedResponse = $mappedResponse->where('inhouse', $inhouse)->toArray();
-            $mappedResponse = array_values($mappedResponse);
-        }
-
-
-        /* combine the processed items with the pagination */
-        $results = $isPaginate == true ? array_merge($response, ['data' => $mappedResponse]) : $mappedResponse;
-
+        $results = $isPaginate == true ? $mappedTutormentors->paginate(10) : $mappedTutormentors;
 
         return response()->json($results);
     }

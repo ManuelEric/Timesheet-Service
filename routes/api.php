@@ -64,13 +64,15 @@ Route::prefix('user')->group(function () {
         Route::GET('mentor-tutors', [V1MentorTutorController::class, 'index']);
         Route::PUT('mentor-tutors/{mentortutor_uuid}', [V1MentorTutorController::class, 'update']);
         
+        
         /**
-         * The Components
+         * The Components.
          */
+
+        /* List PICs */
         Route::prefix('component')->middleware(['abilities:program-menu'])->group(function () {
             Route::GET('list', [V1UserListController::class, 'component']);
         });
-
         /* List subject by Mentor / Tutor */
         Route::GET('mentor-tutors/{mentortutor_uuid}/subjects', [V1MentorTutorComponentController::class, 'comp_subjects']);
         /* List students mentored / tutored by Mentor / Tutor */

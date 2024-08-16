@@ -3,6 +3,7 @@ import { showNotif } from '@/helper/notification'
 import { rules } from '@/helper/rules'
 import ApiService from '@/services/ApiService'
 
+const props = defineProps({ selected: Object })
 const emit = defineEmits(['close', 'reload'])
 
 const loading = ref(false)
@@ -16,7 +17,7 @@ const duration_readonly = ref(false)
 
 const formData = ref()
 const form = ref({
-  ref_id: [],
+  ref_id: props.selected,
   mentortutor_email: null,
   subject_id: null,
   inhouse_id: null,
@@ -97,9 +98,6 @@ const submit = async () => {
   // console.log(form.value)
   const { valid } = await formData.value.validate()
   if (valid) {
-    // set ref id first
-    form.value.ref_id = selected.value
-
     try {
       const res = await ApiService.post('api/v1/timesheet/create', form.value)
       if (res) {

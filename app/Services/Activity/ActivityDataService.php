@@ -26,6 +26,7 @@ class ActivityDataService
             $estimate = $end_date ? $start_date->diffInMinutes($end_date) : 0;
 
             return $data->toArray() + [
+                'date' => $start_date->format('Y-m-d'),
                 'start_time' => $start_time,
                 'end_time' => $end_time,
                 'estimate' => $estimate,

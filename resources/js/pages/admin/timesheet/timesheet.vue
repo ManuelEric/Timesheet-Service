@@ -28,12 +28,13 @@ const package_name = ref()
 const getData = async () => {
   const page = '?page=' + currentPage.value
   const search = keyword.value ? '&keyword=' + keyword.value : ''
-  const program = program_name.value ? '&program_name=' + program_name.value : ''
+  const program = program_name.value ? '&program_name=' + encodeURIComponent(program_name.value) : ''
   const package_search = package_name.value ? '&package_id=' + package_name.value : ''
   const paginate = '&paginate=true'
   try {
     loading.value = true
     const res = await ApiService.get('api/v1/timesheet/list' + page + search + program + package_search + paginate)
+    console.log('api/v1/timesheet/list' + page + search + program + package_search + paginate)
     // console.log(res)
     if (res) {
       currentPage.value = res.current_page
