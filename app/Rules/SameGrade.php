@@ -7,6 +7,8 @@ use App\Models\Ref_Program;
 use App\Models\TempUser;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 
 class SameGrade implements ValidationRule
@@ -23,6 +25,17 @@ class SameGrade implements ValidationRule
         {
             $tutor = TempUser::where('email', $mentortutor_email)->first();
             $selectedTutor = $tutor->roles()->where('id', $subject_id)->where('year', Carbon::now()->format('Y'))->first();
+
+
+            /* validated if selected tutor has information needed for continue the process */
+            if ( !$selectedTutor )
+            {
+                throw new HttpResponseException(
+                    response()->json([
+                        'errors' => 'There is missing information regarding the tutor/mentor. Please contact the HR team for clarification.'
+                    ], JsonResponse::HTTP_BAD_REQUEST)
+                );
+            }
 
             # $selectedTutor->grade; # should be [11-12]
             # modify the tutor grade

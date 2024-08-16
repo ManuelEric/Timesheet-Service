@@ -62,7 +62,7 @@ class TimesheetController extends Controller
             'pic_id',
             'notes',
             'subject_id',
-        ]); 
+        ]);
 
         /* defines the validated variables */
         $validatedRefPrograms = $validated['ref_id'];
