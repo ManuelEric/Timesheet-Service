@@ -24,6 +24,7 @@ class UnpaidActivitiesAction
             $timeSpent = $data->end_date ? $startDate->diffInMinutes($endDate) : 0;
             $feeHours = $data->fee_hours;
             $cutoffStatus = $data->cutoff_status;
+            $students = implode(", ", $data->timesheet->ref_program->pluck('student_name')->toArray());
 
             return [
                 'id' => $activityId,
@@ -34,6 +35,7 @@ class UnpaidActivitiesAction
                     'type' => $package->type_of,
                     'category' => $package->category,
                 ],
+                'students' => $students,
                 'mentor_tutor' => $mentorTutorName,
                 'date' => $this->convert($startDate, $endDate),
                 'time_spent' => $timeSpent,

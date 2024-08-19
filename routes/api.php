@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\MentorTutor\ComponentController as V1MentorTutor
 use App\Http\Controllers\Api\V1\Programs\ListController as V1ProgramsListController;
 use App\Http\Controllers\Api\V1\TimesheetController as V1TimesheetController;
 use App\Http\Controllers\Api\V1\ActivityController as V1ActivitiesController;
+use App\Http\Controllers\Api\V1\LogController;
 use App\Http\Controllers\Api\V1\Packages\ListController as V1PackagesListController;
 use App\Http\Controllers\Api\V1\User\ListController as V1UserListController;
 use App\Http\Controllers\Api\V1\Payment\PaymentController as V1PaymentController;
@@ -173,3 +174,6 @@ Route::prefix('package')->group(function () {
 });
 
 Route::POST('identity/generate-token', [V1LoginController::class, 'authenticateNonAdmin']);
+
+/* log everytime user visit any pages */
+Route::middleware('auth:sanctum')->get('visit/{page_name}/{detail?}', [LogController::class, 'index']);
