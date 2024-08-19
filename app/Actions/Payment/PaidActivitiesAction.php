@@ -25,6 +25,7 @@ class PaidActivitiesAction
             $feeHours = $data->fee_hours;
             $cutoffStatus = $data->cutoff_status;
             $cutoffDate = Carbon::parse($data->cutoff_history->created_at)->format('d F Y H:i');
+            $students = implode(", ", $data->timesheet->ref_program->pluck('student_name')->toArray());
 
             return [
                 'id' => $activityId,
@@ -35,6 +36,7 @@ class PaidActivitiesAction
                     'type' => $package->type_of,
                     'category' => $package->category,
                 ],
+                'students' => $students,
                 'mentor_tutor' => $mentorTutorName,
                 'date' => $this->convert($startDate, $endDate),
                 'time_spent' => $timeSpent,
