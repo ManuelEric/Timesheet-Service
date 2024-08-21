@@ -120,15 +120,7 @@ const submit = async () => {
     } catch (error) {
       if (error?.response?.data?.errors) {
         const validationErrors = error.response.data.errors
-        let errorMessage = 'Validation errors:'
-
-        // Merge validation errors
-        for (const key in validationErrors) {
-          if (validationErrors.hasOwnProperty(key)) {
-            errorMessage += `\n${key}: ${validationErrors[key].join(', ')}`
-          }
-        }
-        showNotif('error', errorMessage, 'bottom-end')
+        showNotif('error', validationErrors, 'bottom-end')
       }
     } finally {
       loading.value = false
@@ -167,8 +159,8 @@ onMounted(() => {
               :items="tutor_list"
               :item-props="
                 item => ({
-                  title: item.first_name + ' ' + item.last_name,
-                  subtitle: item.email,
+                  title: item.full_name,
+                  subtitle: item.roles.map(role => role.name).join(', '),
                 })
               "
               :rules="rules.required"
@@ -234,7 +226,7 @@ onMounted(() => {
               :items="inhouse_mentor"
               :item-props="
                 item => ({
-                  title: item.first_name + ' ' + item.last_name,
+                  title: item.full_name,
                 })
               "
               item-value="uuid"
