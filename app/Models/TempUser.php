@@ -32,6 +32,7 @@ class TempUser extends Authenticatable implements CanResetPassword
         'uuid',
         'full_name',
         'email',
+        'phone',
         'password',
         'role',
         'inhouse',

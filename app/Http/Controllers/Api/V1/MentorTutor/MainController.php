@@ -45,6 +45,7 @@ class MainController extends Controller
                 'id' => $item->id,
                 'uuid' => $item->uuid,
                 'full_name' => $item->full_name,
+                'phone' => $item->phone,
                 'email' => $item->email,
                 'inhouse' => $item->inhouse,
                 'last_activity' => $item->last_activity,

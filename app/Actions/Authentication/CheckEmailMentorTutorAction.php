@@ -53,6 +53,7 @@ class CheckEmailMentorTutorAction
             'uuid' => $uuid,
             'full_name' => $fullName,
             'email' => $response['email'],
+            'phone' => $response['phone'],
             'password' => $response['password'],
             'roles' => collect($roles),
         ];

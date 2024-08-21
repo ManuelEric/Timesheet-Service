@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('uuid')->unique();
             $table->string('full_name');
             $table->string('email');
+            $table->bigInteger('phone', 20);
             $table->text('password')->nullable();
             $table->boolean('inhouse')->default(false);
             $table->datetime('last_activity')->nullable();
