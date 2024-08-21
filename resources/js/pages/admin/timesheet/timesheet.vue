@@ -28,7 +28,7 @@ const package_name = ref()
 const getData = async () => {
   const page = '?page=' + currentPage.value
   const search = keyword.value ? '&keyword=' + keyword.value : ''
-  const program = program_name.value ? '&program_name=' + program_name.value : ''
+  const program = program_name.value ? '&program_name=' + encodeURIComponent(program_name.value) : ''
   const package_search = package_name.value ? '&package_id=' + package_name.value : ''
   const paginate = '&paginate=true'
   try {
