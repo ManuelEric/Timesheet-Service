@@ -27,6 +27,7 @@ class CreateTempUserService
         $uuid = $userRawInformation['uuid'];
         $full_name = $userRawInformation['full_name'];
         $email = $userRawInformation['email'];
+        $phone = $userRawInformation['phone'];
         $password = $userRawInformation['password'];
 
         /* check existing temp user */
@@ -76,6 +77,10 @@ class CreateTempUserService
 
         /* if the user has existed on timesheet db */
         if ( $tempUser ) {
+            /* update the personal information from CRMs, in order to the data in timesheet db stay updated */
+            $tempUser->full_name = $full_name;
+            $tempUser->email = $email;
+            $tempUser->phone = $phone;
             /* update the password from CRMs */
             $tempUser->password = $password;
             $tempUser->save();           
@@ -96,6 +101,7 @@ class CreateTempUserService
                 'uuid' => $uuid,
                 'full_name' => $full_name,
                 'email' => $email,
+                'phone' => $phone,
                 'password' => $password,
             ];
     
