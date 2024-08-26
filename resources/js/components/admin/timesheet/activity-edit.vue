@@ -4,7 +4,6 @@ import { rules } from '@/helper/rules'
 import ApiService from '@/services/ApiService'
 import moment from 'moment'
 
-
 const formData = ref()
 const prop = defineProps({ timesheet_id: Number, activity: String })
 const emit = defineEmits(['close', 'reload'])
@@ -24,8 +23,6 @@ const form = ref({
 })
 
 const submit = async () => {
-  console.log(form.value)
-
   const { valid } = await formData.value.validate()
   if (valid) {
     try {
@@ -122,7 +119,9 @@ const submit = async () => {
               :rules="rules.required"
               placeholder="Start Time"
               variant="solo"
-              @change="form.start_date = form.date + ' ' + form.start_time + ':00'"
+              @change="
+                form.start_date = moment(prop?.activity.date).format('YYYY-MM-DD') + ' ' + form.start_time + ':00'
+              "
             />
           </VCol>
           <VCol
@@ -135,7 +134,7 @@ const submit = async () => {
               label="End Time"
               placeholder="End Time"
               variant="solo"
-              @change="form.end_date = form.date + ' ' + form.end_time + ':00'"
+              @change="form.end_date = moment(prop?.activity.date).format('YYYY-MM-DD') + ' ' + form.end_time + ':00'"
             />
           </VCol>
           <VCol

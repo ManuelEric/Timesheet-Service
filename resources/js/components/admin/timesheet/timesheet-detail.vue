@@ -42,8 +42,6 @@ const toggleDialog = type => {
   } else {
     isDialogVisible.value[type] = false
   }
-
-  getData()
 }
 
 const selectedActivity = (type, item) => {
@@ -62,6 +60,8 @@ const deleteActivity = async () => {
     if (error.response?.status == 400) {
       showNotif('error', error.response?.data?.errors, 'bottom-end')
     }
+  } finally {
+    getData()
   }
 }
 
@@ -71,7 +71,6 @@ const updateStatus = async item => {
 
     if (res) {
       showNotif('success', res.message, 'bottom-end')
-      getData()
     }
   } catch (error) {
     if (error?.response?.data?.errors) {
@@ -90,6 +89,8 @@ const updateStatus = async item => {
         showNotif('error', error.response.data.errors, 'bottom-end')
       }
     }
+  } finally {
+    getData()
   }
 }
 
@@ -121,6 +122,7 @@ onMounted(() => {
           <AddActivity
             :id="props.id"
             @close="toggleDialog('add')"
+            @reload="getData"
           />
         </VDialog>
       </div>
@@ -231,7 +233,7 @@ onMounted(() => {
         :timesheet_id="props?.id"
         :activity="selectedItem"
         @close="toggleDialog('edit')"
-        @reload="getData(props.id)"
+        @reload="getData"
       />
     </VDialog>
 

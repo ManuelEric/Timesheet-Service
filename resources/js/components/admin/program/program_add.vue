@@ -14,10 +14,11 @@ const package_list = ref([])
 const pic_list = ref([])
 const inhouse_mentor = ref([])
 const duration_readonly = ref(false)
+const require = props.selected[0]?.require?.toLowerCase()
 
 const formData = ref()
 const form = ref({
-  ref_id: props.selected,
+  ref_id: props.selected.map(item => item.id),
   mentortutor_email: null,
   subject_id: null,
   inhouse_id: null,
@@ -28,7 +29,9 @@ const form = ref({
 })
 
 const getTutor = async (inhouse = false) => {
-  const url = inhouse ? 'api/v1/user/mentor-tutors?inhouse=true' : 'api/v1/user/mentor-tutors'
+  const url = inhouse
+    ? 'api/v1/user/mentor-tutors?inhouse=true&role=' + require
+    : 'api/v1/user/mentor-tutors?role=' + require
   try {
     const res = await ApiService.get(url)
     if (res) {
@@ -45,7 +48,7 @@ const getTutor = async (inhouse = false) => {
 
 const getPackage = async () => {
   try {
-    const res = await ApiService.get('api/v1/package/component/list')
+    const res = await ApiService.get('api/v1/package/component/list?category=' + require)
     if (res) {
       package_list.value = res
     }
@@ -79,15 +82,20 @@ const getPIC = async () => {
   }
 }
 
-const getSubject = async uuid => {
+const getSubject = async (item, uuid = null) => {
   form.value.subject_id = null
-  try {
-    const res = await ApiService.get('api/v1/user/mentor-tutors/' + uuid + '/subjects')
-    if (res) {
-      subjects.value = res
+
+  if (require == 'mentor') {
+    form.value.subject_id = item[0].subjects[0].id
+  } else {
+    try {
+      const res = await ApiService.get('api/v1/user/mentor-tutors/' + uuid + '/subjects')
+      if (res) {
+        subjects.value = res
+      }
+    } catch (error) {
+      console.error(error)
     }
-  } catch (error) {
-    console.error(error)
   }
 }
 
@@ -102,8 +110,8 @@ const submit = async () => {
       const res = await ApiService.post('api/v1/timesheet/create', form.value)
       if (res) {
         showNotif('success', res.message, 'bottom-end')
+        emit('reload')
         selected.value = []
-        dialog.value = false
         form.value = {
           ref_id: [],
           mentortutor_email: null,
@@ -115,7 +123,6 @@ const submit = async () => {
           pic_id: [],
         }
         tutor_selected.value = []
-        getData()
       }
     } catch (error) {
       if (error?.response?.data?.errors) {
@@ -123,6 +130,7 @@ const submit = async () => {
         showNotif('error', validationErrors, 'bottom-end')
       }
     } finally {
+      emit('close')
       loading.value = false
     }
   }
@@ -166,12 +174,12 @@ onMounted(() => {
               :rules="rules.required"
               :loading="loading"
               :disabled="loading"
-              @update:modelValue="getSubject(tutor_selected.uuid)"
+              @update:modelValue="getSubject(tutor_selected.roles, tutor_selected.uuid)"
             ></VAutocomplete>
           </VCol>
           <VCol
             md="12"
-            v-if="subjects.length > 0"
+            v-if="props.selected[0]?.require?.toLowerCase() == 'tutor'"
           >
             <VAutocomplete
               variant="solo"
