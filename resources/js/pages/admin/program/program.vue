@@ -152,6 +152,7 @@ onMounted(() => {
         <program
           :selected="selected"
           @close="dialog = false"
+          @reload="getData"
         />
       </VDialog>
       <!-- End Assign Modal  -->
@@ -189,7 +190,10 @@ onMounted(() => {
             <td>
               <VCheckbox
                 v-model="selected"
-                :value="item.id"
+                :value="{
+                  id: item.id,
+                  require: item.require,
+                }"
                 v-if="!item.timesheet_id"
               ></VCheckbox>
               <VIcon

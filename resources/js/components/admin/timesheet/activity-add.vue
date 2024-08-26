@@ -5,11 +5,7 @@ import ApiService from '@/services/ApiService'
 import moment from 'moment'
 
 const props = defineProps({ id: String })
-const emit = defineEmits(['close'])
-
-const closeDialogContent = () => {
-  emit('close')
-}
+const emit = defineEmits(['close', 'reload'])
 
 const formData = ref()
 const form = ref({
@@ -31,7 +27,6 @@ const submit = async () => {
       // console.log(res)
       if (res) {
         showNotif('success', res.message, 'bottom-end')
-        closeDialogContent()
       }
     } catch (error) {
       // console.log(error)
@@ -48,6 +43,9 @@ const submit = async () => {
       } else {
         showNotif('error', error.response.data.message, 'bottom-end')
       }
+    } finally {
+      emit('reload')
+      emit('close')
     }
   }
 }
@@ -59,7 +57,7 @@ const submit = async () => {
     <DialogCloseBtn
       variant="text"
       size="default"
-      @click="closeDialogContent"
+      @click="emit('close')"
     />
 
     <VCardText>
@@ -146,7 +144,7 @@ const submit = async () => {
           <VBtn
             type="button"
             color="error"
-            @click="closeDialogContent"
+            @click="emit('close')"
           >
             <VIcon
               icon="ri-close-line"
