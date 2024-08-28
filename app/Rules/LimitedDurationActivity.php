@@ -9,13 +9,17 @@ use Illuminate\Support\Carbon;
 
 class LimitedDurationActivity implements ValidationRule
 {
+    protected $method;
     protected $timesheetId;
+    protected $activityId;
     protected $start_date;
     protected $end_date;
 
-    public function __construct($timesheetId, $incomingDate)
+    public function __construct($method, $timesheetId, $activityId, $incomingDate)
     {
+        $this->method = $method;
         $this->timesheetId = $timesheetId;
+        $this->activityId = $activityId;
         $this->start_date = $incomingDate['start'];
         $this->end_date = $incomingDate['end'];
     }
@@ -29,8 +33,8 @@ class LimitedDurationActivity implements ValidationRule
     {
         /* fetch the duration and sum the total time spent */
         $timesheet = Timesheet::find($this->timesheetId);
-        $duration = $timesheet->duration;
-        $total_hours_spent = $timesheet->activities()->sum('time_spent');
+        $duration = (float) $timesheet->duration; // total minutes of package
+        $total_hours_spent = $this->method == 'PUT' ? $timesheet->activities()->whereNot('id', $this->activityId)->sum('time_spent') : $timesheet->activities()->sum('time_spent');
 
         /* check the diff between start and end date
             put 0 if there isn't end_date or the user doesn't input the end_date
@@ -40,7 +44,7 @@ class LimitedDurationActivity implements ValidationRule
         /* the time spent would be */
         $total_time_spent = $total_hours_spent + $diff_in_minutes;
 
-        if ( $duration <= $total_time_spent )
+        if ( $duration < $total_time_spent )
         {
             if ( $diff_in_minutes == 0 )
                 $fail("The specified duration exceeds the maximum limit. Please adjust accordingly.");

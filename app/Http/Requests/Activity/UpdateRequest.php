@@ -55,14 +55,12 @@ class UpdateRequest extends FormRequest
                 'date',
                 'date_format:Y-m-d H:i:s',
                 new ExistStartDateActivities('PUT', $timesheet_id, $activity_id),
-                new LimitedDurationActivity($timesheet_id, $dateParams)
             ],
             'end_date' => [
                 'nullable', 
                 'date', 
                 'date_format:Y-m-d H:i:s',
                 'after_or_equal:date',
-                new LimitedDurationActivity($timesheet_id, $dateParams),
             ],
             'meeting_link' => 'nullable|active_url',
             'status' => [

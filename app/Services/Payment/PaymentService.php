@@ -19,7 +19,10 @@ class PaymentService
     protected $identifyTimesheetIdAction;
     protected $filename;
 
-    public function __construct($activityDataService, $timesheetDataService, $identifyTimesheetIdAction)
+    public function __construct(
+        ActivityDataService $activityDataService,
+        TimesheetDataService $timesheetDataService, 
+        IdentifyTimesheetIdAction $identifyTimesheetIdAction)
     {
         $this->activityDataService = $activityDataService;
         $this->timesheetDataService = $timesheetDataService;

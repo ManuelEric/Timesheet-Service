@@ -92,7 +92,7 @@ class ActivityController extends Controller
 
         /* calculate spending time */
         $start_date = Carbon::parse($validated['start_date']);
-    $end_date = Carbon::parse($validated['end_date']);
+        $end_date = Carbon::parse($validated['end_date']);
         $time_spent = $start_date->diffInMinutes($end_date);
 
         DB::beginTransaction();
@@ -106,8 +106,12 @@ class ActivityController extends Controller
             $activity->time_spent = $time_spent;
             $activity->meeting_link = $validated['meeting_link'];
 
+            /* update time_spent to 0 when user "uncheck" the status or update to "not yet" */ 
             if ( array_key_exists('status', $validated) )
+            {
                 $activity->status = $validated['status'];
+                $activity->time_spent = $validated['status'] == 0 ? 0 : $time_spent; 
+            } 
 
             $activity->save();
             DB::commit();
