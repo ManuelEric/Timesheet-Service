@@ -128,6 +128,8 @@ Route::prefix('timesheet')->group(function () {
         Route::POST('{timesheet}/activity', [V1ActivitiesController::class, 'store']);
         /* Update Activity */
         Route::PUT('{timesheet}/activity/{activity}', [V1ActivitiesController::class, 'update']);
+        /* Patch Activity */
+        Route::PATCH('{timesheet}/activity/{activity}', [V1ActivitiesController::class, 'patch']);
         /* Destroy the activity */
         Route::DELETE('{timesheet}/activity/{activity}', [V1ActivitiesController::class, 'destroy']);
     });

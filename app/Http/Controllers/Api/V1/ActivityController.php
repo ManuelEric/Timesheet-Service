@@ -12,12 +12,14 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use App\Http\Requests\Activity\StoreRequest as StoreActivityRequest;
 use App\Http\Requests\Activity\UpdateRequest as UpdateActivityRequest;
+use App\Http\Requests\Activity\PatchRequest as PatchActivityRequest;
 use App\Models\Activity;
 use App\Services\Activity\ActivityDataService;
 use App\Services\ResponseService;
 use Exception;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 
 class ActivityController extends Controller
 {
@@ -137,6 +139,53 @@ class ActivityController extends Controller
         return response()->json([
             'message' => 'The Activity has been updated successfully.'
         ]);
+    }
+
+    /* the patch method going to handle update status activity */
+    public function patch(
+        $timesheetId,
+        $activityId,
+        Request $request,
+        IdentifyActivityAction $identifyActivityAction,
+        )
+    {
+        
+        $activity = $identifyActivityAction->execute($activityId, $timesheetId);
+        $timesheet = $activity->timesheet;
+
+        $validated = $request->only(['status']);
+        $validatedStatus = $validated['status'];
+
+        if ( $validatedStatus == 1 )
+        {
+            /* initiate variables */
+            $duration = (float) $timesheet->duration; // total minutes of package
+            $total_hours_spent = $timesheet->activities()->whereNot('id', $activityId)->sum('time_spent');
+    
+            $this_activity_start_date = Carbon::parse($activity->start_date);
+            $this_activity_end_date = Carbon::parse($activity->end_date);
+            $x_minutes = $this_activity_start_date->diffInMinutes($this_activity_end_date);
+    
+            /* the time spent would be */
+            $total_time_spent = $total_hours_spent + $x_minutes;
+    
+            if ( $duration < $total_time_spent )
+            {
+                return response()->json([
+                    'message' => 'The specified duration exceeds the maximum limit. Please adjust accordingly.'
+                ], 400);
+            }
+        }
+
+
+        $activity->status = $validatedStatus;
+        $activity->save();
+        
+        return response()->json([
+            'message' => 'The activity has been marked complete.' 
+        ]);
+
+
     }
 
     public function destroy(

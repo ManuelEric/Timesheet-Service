@@ -22,7 +22,7 @@ class PaymentController extends Controller
         $paymentStatus = $request->segment(4) == "paid" ? "completed" : "not yet"; # either unpaid / paid
 
         /* incoming request */
-        $search = $request->only(['program_name', 'package_id', 'keyword', 'cutoff_start', 'cutoff_end']);
+        $search = $request->only(['program_name', 'package_id', 'mentor_uuid', 'keyword', 'cutoff_start', 'cutoff_end']);
         
         switch ( $paymentStatus ) {
             # completed meaning paid
