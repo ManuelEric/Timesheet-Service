@@ -42,10 +42,6 @@ class UpdateRequest extends FormRequest
         $activity_id = $this->route('activity');
         $input_startDate = $this->input('start_date');
         $input_endDate = $this->input('end_date');
-        $dateParams = [
-            'start' => Carbon::parse($input_startDate),
-            'end' => $input_endDate ? Carbon::parse($input_endDate) : null,
-        ];
         
         return [
             'activity' => 'required',

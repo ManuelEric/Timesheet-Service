@@ -25,6 +25,6 @@ class CompatibleProgram implements ValidationRule
     {
         $ref = Ref_Program::find($value);
         if ( $ref->require != $this->user_role ) 
-            $fail("The selected program is incompatible with the user.");        
+            $fail("The selected program is incompatible with the mentor/tutor.");        
     }
 }

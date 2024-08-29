@@ -30,6 +30,7 @@ class StoreRequest extends FormRequest
             response()->json([
                 'message' => "",
                 'errors' => $errors
+                //! TODOS = perlu di fetch agar kalau array ref_id.0 tidak perlu berbentuk array namun bisa langsung ref_id
             ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY)
         );
     }

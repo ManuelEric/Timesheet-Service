@@ -1,7 +1,7 @@
 <script setup>
-import { showNotif } from '@/helper/notification'
-import { rules } from '@/helper/rules'
-import ApiService from '@/services/ApiService'
+import { showNotif } from '@/helper/notification';
+import { rules } from '@/helper/rules';
+import ApiService from '@/services/ApiService';
 
 const props = defineProps({ selected: Object })
 const emit = defineEmits(['close', 'reload'])
@@ -125,6 +125,7 @@ const submit = async () => {
         tutor_selected.value = []
       }
     } catch (error) {
+      console.log(error);
       if (error?.response?.data?.errors) {
         const validationErrors = error.response.data.errors
         showNotif('error', validationErrors, 'bottom-end')

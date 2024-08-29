@@ -171,7 +171,7 @@ class TimesheetController extends Controller
             unset($detailTimesheet['editableColumns']);
 
             /* manipulate variables */
-            $clients = count($detailTimesheet['clientProfile']) > 1 ? "Group" : $detailTimesheet['clientProfile'][0]['client_name'];
+            $clients = count($detailTimesheet['clientProfile']) > 1 ? implode(', ', array_column($detailTimesheet['clientProfile'], 'client_name')) : $detailTimesheet['clientProfile'][0]['client_name'];
             $programName = $detailTimesheet['packageDetails']['program_name'];
             $packageType = $detailTimesheet['packageDetails']['package_type'];
             $packageName = $detailTimesheet['packageDetails']['package_name'];

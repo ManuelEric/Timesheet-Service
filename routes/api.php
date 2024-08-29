@@ -60,7 +60,7 @@ Route::prefix('auth')->group(function () {
 
 /* Mentor & Tutors */
 Route::prefix('user')->group(function () {
-    Route::middleware(['auth:sanctum', 'abilities:mentortutors-menu,program-menu'])->group(function () {
+    Route::middleware(['auth:sanctum', 'ability:mentortutors-menu,program-menu'])->group(function () {
         /* List Mentor & Tutors */
         Route::GET('mentor-tutors', [V1MentorTutorController::class, 'index']);
         Route::PUT('mentor-tutors/{mentortutor_uuid}', [V1MentorTutorController::class, 'update']);
@@ -128,6 +128,8 @@ Route::prefix('timesheet')->group(function () {
         Route::POST('{timesheet}/activity', [V1ActivitiesController::class, 'store']);
         /* Update Activity */
         Route::PUT('{timesheet}/activity/{activity}', [V1ActivitiesController::class, 'update']);
+        /* Patch Activity */
+        Route::PATCH('{timesheet}/activity/{activity}', [V1ActivitiesController::class, 'patch']);
         /* Destroy the activity */
         Route::DELETE('{timesheet}/activity/{activity}', [V1ActivitiesController::class, 'destroy']);
     });
