@@ -423,6 +423,17 @@ onMounted(() => {
             </th>
           </tr>
         </thead>
+        <!-- If Nothing Data  -->
+        <tfoot v-if="data?.data?.length == 0">
+          <tr>
+            <td
+              colspan="10"
+              class="text-center"
+            >
+              Sorry, no data found.
+            </td>
+          </tr>
+        </tfoot>
       </VTable>
 
       <div class="d-flex justify-center mt-5">

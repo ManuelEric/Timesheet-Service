@@ -9,6 +9,8 @@ import Swal from 'sweetalert2'
 
 // Start Variable
 const props = defineProps({ id: String })
+const reloadData = inject('reloadData')
+const updateReload = inject('updateReload')
 const data = ref([])
 const isDialogVisible = ref([
   {
@@ -100,6 +102,13 @@ const downloadTimesheet = async (id, name) => {
 onMounted(() => {
   getData(props.id)
 })
+
+watch(() => {
+  if (reloadData.value) {
+    getData(props.id)
+    updateReload(false)
+  }
+})
 </script>
 
 <template>
@@ -120,7 +129,6 @@ onMounted(() => {
         <VMenu
           :close-on-content-click="false"
           location="bottom"
-          open-on-hover
         >
           <template v-slot:activator="{ props }">
             <VBtn

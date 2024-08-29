@@ -7,6 +7,7 @@ import moment from 'moment'
 const formData = ref()
 const prop = defineProps({ timesheet_id: Number, activity: String })
 const emit = defineEmits(['close', 'reload'])
+const updateReload = inject('updateReload')
 
 const form = ref({
   activity: prop?.activity.activity,
@@ -55,6 +56,9 @@ const submit = async () => {
       }
     } finally {
       emit('close')
+      setTimeout(() => {
+        updateReload(true)
+      }, 3000)
     }
   }
 }

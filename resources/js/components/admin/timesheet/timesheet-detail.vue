@@ -7,6 +7,7 @@ import EditActivity from './activity-edit.vue'
 
 // Start Variable
 const props = defineProps({ id: String })
+const updateReload = inject('updateReload')
 const data = ref([])
 const loading = ref(false)
 
@@ -62,6 +63,9 @@ const deleteActivity = async () => {
     }
   } finally {
     getData()
+    setTimeout(() => {
+      updateReload(true)
+    }, 3000)
   }
 }
 
@@ -91,6 +95,9 @@ const updateStatus = async item => {
     }
   } finally {
     getData()
+    setTimeout(() => {
+      updateReload(true)
+    }, 3000)
   }
 }
 
