@@ -209,6 +209,7 @@ onMounted(() => {
             </th>
             <th class="text-uppercase text-center">Timesheet</th>
             <th class="text-uppercase text-center">Activity</th>
+            <th class="text-uppercase text-center">Students Name</th>
             <th class="text-uppercase text-center">Mentor/Tutor</th>
             <th class="text-uppercase text-center">Date & Time</th>
             <th class="text-uppercase text-center">Time Spent</th>
@@ -231,6 +232,7 @@ onMounted(() => {
             <td>{{ parseInt(index) + 1 }}</td>
             <td>{{ item.package.type + ' - ' + item.package.name }}</td>
             <td>{{ item.activity }}</td>
+            <td>{{ item.students }}</td>
             <td>{{ item.mentor_tutor }}</td>
             <td>{{ item.date }}</td>
             <td>{{ item.time_spent / 60 + ' Hours' }}</td>
