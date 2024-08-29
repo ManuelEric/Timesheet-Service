@@ -34,7 +34,6 @@ const getData = async () => {
   try {
     loading.value = true
     const res = await ApiService.get('api/v1/timesheet/list' + page + search + program + package_search + paginate)
-    console.log('api/v1/timesheet/list' + page + search + program + package_search + paginate)
     // console.log(res)
     if (res) {
       currentPage.value = res.current_page
