@@ -88,6 +88,7 @@ class Timesheet extends Model
         $program_name = $search['program_name'] ?? false;
         $package_id = $search['package_id'] ?? false;
         $keyword = $search['keyword'] ?? false;
+        $mentor_id = $search['mentor_id'] ?? false;
 
         $query->
             when( $program_name, function ($_sub_) use ($program_name) {
@@ -112,6 +113,11 @@ class Timesheet extends Model
                                 $___sub___->where('student_name', 'like', '%'.$keyword.'%')->orWhere('student_school', 'like', '%'.$keyword.'%');
                         });
                     });
+            })->
+            when( $mentor_id, function ($_sub_) use ($search) {
+                $_sub_->whereHas('subject', function ($__sub__) use ($search) {
+                    $__sub__->onSearch($search);
+                });
             });
 
     }
