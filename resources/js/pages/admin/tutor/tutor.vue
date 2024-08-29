@@ -249,13 +249,13 @@ onMounted(() => {
                               <td nowrap>{{ subject.tutor_subject }}</td>
                               <td nowrap>{{ subject.grade }}</td>
                               <td nowrap>{{ subject.head }}</td>
-                              <td nowrap>Rp. {{ subject.fee_individual.toLocaleString() }}</td>
-                              <td nowrap>Rp. {{ subject.fee_group.toLocaleString() }}</td>
+                              <td nowrap>Rp. {{ new Intl.NumberFormat('id-ID').format(subject.fee_individual) }}</td>
+                              <td nowrap>Rp. {{ new Intl.NumberFormat('id-ID').format(subject.fee_group) }}</td>
                               <td
                                 class="text-end"
                                 nowrap
                               >
-                                Rp. {{ subject.additional_fee.toLocaleString() }}
+                                Rp. {{ new Intl.NumberFormat('id-ID').format(subject.additional_fee) }}
                               </td>
                             </tr>
                           </template>

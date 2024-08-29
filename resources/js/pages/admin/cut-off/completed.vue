@@ -1,5 +1,6 @@
 <script setup>
-import { confirmBeforeSubmit, showNotif } from '@/helper/notification'
+import { confirmBeforeSubmit, showLoading, showNotif } from '@/helper/notification'
+import { rules } from '@/helper/rules'
 import ApiService from '@/services/ApiService'
 import FilterSidebar from '@layouts/components/FilterSidebar.vue'
 import moment from 'moment'
@@ -7,9 +8,10 @@ import moment from 'moment'
 const loading = ref(false)
 const data = ref([])
 
+const formData = ref()
 const downloadDialog = ref(false)
 const formDownload = ref({
-  cut_off_date: null,
+  cut_off_date: [],
   specific: false,
   timesheet_id: null,
 })
@@ -22,6 +24,7 @@ const package_id = ref(null)
 const package_list = ref([])
 const tutor_id = ref(null)
 const tutor_list = ref([])
+const timesheet = ref([])
 const cutOffDate = ref([])
 
 const getData = async () => {
@@ -76,6 +79,20 @@ const getTutor = async () => {
   }
 }
 
+const getTimesheet = async () => {
+  loading.value = true
+  try {
+    const res = await ApiService.get('api/v1/timesheet/component/list')
+    if (res) {
+      timesheet.value = res
+      loading.value = false
+    }
+  } catch (error) {
+    loading.value = false
+    console.error(error)
+  }
+}
+
 const cancelCutOff = async () => {
   const isConfirmed = await confirmBeforeSubmit('Are you sure you want to cancel this activity?')
 
@@ -101,10 +118,57 @@ const cancelCutOff = async () => {
   }
 }
 
+const downloadPayroll = async () => {
+  let cut_off_date = formDownload.value.cut_off_date
+  let start_date = moment(cut_off_date[0]).format('YYYY-MM-DD')
+  let end_date = moment(cut_off_date[cut_off_date.length - 1]).format('YYYY-MM-DD')
+  let specific = formDownload.value.specific ? '/' + formDownload.value.timesheet_id : ''
+  let url = 'api/v1/payment/cut-off/export' + specific + '/' + start_date + '/' + end_date
+
+  const { valid } = await formData.value.validate()
+  if (valid) {
+    downloadDialog.value = false
+    showLoading()
+    try {
+      const res = await ApiService.get(url, {
+        responseType: 'blob',
+      })
+
+      if (res) {
+        const url = window.URL.createObjectURL(
+          new Blob([res], { type: '"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"' }),
+        )
+
+        // Create a temporary <a> element to trigger the download
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', `payroll_${start_date}_${end_date}.xlsx`)
+
+        // Append the <a> element to the body and click it to trigger the download
+        document.body.appendChild(link)
+        link.click()
+
+        // Clean up: remove the <a> element and revoke the blob URL
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+
+        Swal.close()
+
+        formDownload.value.specific = false
+        formDownload.value.timesheet_id = null
+      }
+    } catch (error) {
+      showNotif('error', error.response?.statusText, 'bottom-end')
+      console.log(error)
+    }
+  }
+}
+
 onMounted(() => {
   getData()
   getPackage()
   getTutor()
+  getTimesheet()
 })
 </script>
 
@@ -151,8 +215,8 @@ onMounted(() => {
             :items="tutor_list"
             :item-props="
               item => ({
-                title: item.first_name + ' ' + item.last_name,
-                subtitle: item.roles.map(roleObj => roleObj.role).join(', '),
+                title: item.full_name,
+                subtitle: item.roles.map(role => role.name).join(', '),
               })
             "
             item-value="uuid"
@@ -187,52 +251,68 @@ onMounted(() => {
       title="Download Timesheet"
     >
       <VCardText>
-        <VRow>
-          <VCol cols="12">
-            <VDateInput
-              label="Start - End Date"
-              variant="solo"
-              prepend-icon=""
-              multiple="range"
-              v-model="formDownload.cut_off_date"
-            />
-            <VCheckbox
-              label="Specific Timesheet"
-              v-model="formDownload.specific"
-            ></VCheckbox>
+        <VForm
+          @submit.prevent="downloadPayroll"
+          ref="formData"
+        >
+          <VRow>
+            <VCol cols="12">
+              <VDateInput
+                label="Start - End Date"
+                variant="solo"
+                prepend-icon=""
+                multiple="range"
+                v-model="formDownload.cut_off_date"
+                :rules="rules.required"
+                class="mb-3"
+              />
+              <VCheckbox
+                label="Specific Timesheet"
+                v-model="formDownload.specific"
+              ></VCheckbox>
 
-            <v-autocomplete
-              label="Timesheet - Package"
-              variant="solo"
-              class="mt-3"
-              v-model="formDownload.timesheet_id"
-              :disabled="formDownload.specific ? false : true"
-            />
-          </VCol>
-        </VRow>
-        <VCardActions class="mt-5">
-          <VBtn
-            color="error"
-            @click="downloadDialog = false"
-          >
-            <VIcon
-              icon="ri-close-line"
-              class="me-3"
-            />
-            Close
-          </VBtn>
-          <VSpacer />
-          <VBtn
-            color="success"
-            type="button"
-          >
-            Download
-            <VIcon
-              icon="ri-download-line"
-              class="ms-3"
-            />
-          </VBtn>
-        </VCardActions>
+              <v-autocomplete
+                :loading="loading"
+                label="Timesheet - Package"
+                variant="solo"
+                :items="timesheet"
+                :item-props="
+                  item => ({
+                    title: item.package_type + ' - ' + item.package_name,
+                    subtitle: item.clients,
+                  })
+                "
+                item-value="id"
+                class="mt-3"
+                v-model="formDownload.timesheet_id"
+                :disabled="formDownload.specific ? false : true"
+              />
+            </VCol>
+          </VRow>
+          <VCardActions class="mt-5">
+            <VBtn
+              color="error"
+              @click="downloadDialog = false"
+            >
+              <VIcon
+                icon="ri-close-line"
+                class="me-3"
+              />
+              Close
+            </VBtn>
+            <VSpacer />
+            <VBtn
+              color="success"
+              type="submit"
+            >
+              Download
+              <VIcon
+                icon="ri-download-line"
+                class="ms-3"
+              />
+            </VBtn>
+          </VCardActions>
+        </VForm>
       </VCardText>
     </VCard>
   </VDialog>
@@ -286,12 +366,16 @@ onMounted(() => {
         type="table-thead, table-row@10"
         v-if="loading"
       ></vSkeletonLoader>
-      <VTable class="text-no-wrap">
+      <VTable
+        class="text-no-wrap"
+        v-else
+      >
         <thead>
           <tr>
             <th class="text-uppercase">#</th>
             <th class="text-uppercase text-center">Timesheet</th>
             <th class="text-uppercase text-center">Activity</th>
+            <th class="text-uppercase text-center">Students Name</th>
             <th class="text-uppercase text-center">Activity Date</th>
             <th class="text-uppercase text-center">Mentor/Tutor</th>
             <th class="text-uppercase text-center">Time Spent</th>
@@ -312,13 +396,14 @@ onMounted(() => {
                 :value="item.id"
               ></VCheckbox>
             </td>
-            <td>Lorem Ipsum</td>
+            <td>{{ item.package.type + ' - ' + item.package.name }}</td>
+            <td>{{ item.students }}</td>
             <td>{{ item.activity }}</td>
             <td>{{ item.date }}</td>
             <td>{{ item.mentor_tutor }}</td>
             <td>{{ item.time_spent > 0 ? item.time_spent / 60 + ' Hours' : '-' }}</td>
-            <td>{{ item.fee_hours }}</td>
-            <td>Rp. {{ (item.time_spent / 60) * item.fee_hours }}</td>
+            <td>Rp. {{ new Intl.NumberFormat('id-ID').format(item.fee_hours) }}</td>
+            <td>Rp. {{ new Intl.NumberFormat('id-ID').format((item.time_spent / 60) * item.fee_hours) }}</td>
             <td class="text-center">
               {{ item.cutoff_date }}
             </td>
@@ -329,12 +414,12 @@ onMounted(() => {
         </tbody>
         <thead>
           <tr>
-            <th colspan="8">Total Fee</th>
+            <th colspan="9">Total Fee</th>
             <th
               colspan="2"
               class="text-end"
             >
-              Rp. {{ data.total_fee }}
+              Rp. {{ new Intl.NumberFormat('id-ID').format(data.total_fee) }}
             </th>
           </tr>
         </thead>
