@@ -15,13 +15,14 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const verify = verifyAuth();
   const user = UserService.getUser()
+
   if (to.meta.middleware == "auth-user") {
     if (verify.isAuthenticated.value) {
-      if(user.role=='super_admin' || user.role=='admin' || user.role=='finance') {
+      if(user.role=='Tutor' || user.role=='Mentor') {
+        next();
+      } else {
         showNotif('error','You have not permission!','bottom-end')
         next({path:'/admin/dashboard'})
-      } else {
-        next();
       }
     } else {
       showNotif('error','Please login first!','bottom-end')
@@ -29,7 +30,7 @@ router.beforeEach((to, from, next) => {
     }
   } else if (to.meta.middleware == "auth-admin") {
     if (verify.isAuthenticated.value) {
-      if(user.role=='tutor' || user.role=='mentor') {
+      if(user.role=='Tutor' || user.role=='Mentor') {
         next({path:'/user/dashboard'})
         showNotif('error','You have not permission!','bottom-end')
       } else {
