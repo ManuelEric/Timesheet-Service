@@ -1,6 +1,7 @@
 <script setup>
 import { showNotif } from '@/helper/notification'
 import ApiService from '@/services/ApiService'
+import UserService from '@/services/UserService'
 
 import avatar1 from '@images/avatars/avatar-1.png'
 import avatar2 from '@images/avatars/avatar-2.png'
@@ -16,8 +17,6 @@ const totalPage = ref()
 const keyword = ref()
 const data = ref([])
 const loading = ref(false)
-const program_list = ref([])
-const program_name = ref()
 const package_list = ref([])
 const package_name = ref()
 
@@ -27,12 +26,12 @@ const package_name = ref()
 const getData = async () => {
   const page = '?page=' + currentPage.value
   const search = keyword.value ? '&keyword=' + keyword.value : ''
-  const program = program_name.value ? '&program_name=' + encodeURIComponent(program_name.value) : ''
   const package_search = package_name.value ? '&package_id=' + package_name.value : ''
   const paginate = '&paginate=true'
+
   try {
     loading.value = true
-    const res = await ApiService.get('api/v1/timesheet/list' + page + search + program + package_search + paginate)
+    const res = await ApiService.get('api/v1/timesheet/list' + page + search + package_search + paginate)
     // console.log(res)
     if (res) {
       currentPage.value = res.current_page
@@ -47,20 +46,15 @@ const getData = async () => {
   }
 }
 
-const getProgram = async () => {
-  try {
-    const res = await ApiService.get('api/v1/program/component/list')
-    if (res) {
-      program_list.value = res
-    }
-  } catch (error) {
-    console.error(error)
-  }
-}
-
 const getPackage = async () => {
+  // Check Role
+  const role =
+    UserService.getUser().role_detail.length == 1
+      ? '?category=' + UserService.getUser().role_detail[0].role.toLowerCase()
+      : ''
+
   try {
-    const res = await ApiService.get('api/v1/package/component/list')
+    const res = await ApiService.get('api/v1/package/component/list' + role)
     if (res) {
       package_list.value = res
     }
@@ -77,7 +71,6 @@ const searchData = async () => {
 
 onMounted(() => {
   getData()
-  getProgram()
   getPackage()
 })
 </script>
@@ -98,23 +91,6 @@ onMounted(() => {
           md="6"
         >
           <VRow>
-            <VCol
-              cols="12"
-              md="6"
-            >
-              <VAutocomplete
-                clearable
-                v-model="program_name"
-                label="Program Name"
-                :items="program_list"
-                item-title="program_name"
-                placeholder="Select Program Name"
-                variant="solo"
-                :loading="loading"
-                :disabled="loading"
-                @update:modelValue="getData"
-              />
-            </VCol>
             <VCol
               cols="12"
               md="6"
