@@ -26,7 +26,7 @@ class TimesheetDataService
             with(
                 [
                     'ref_program' => function ($query) {
-                        $query->select('category', 'student_name', 'student_school', 'program_name', 'timesheet_id');
+                        $query->select('category', 'student_name', 'student_school', 'program_name', 'timesheet_id', 'require');
                     },
                     'handle_by' => function ($query) {
                         $query->select('temp_users.id', 'full_name');
@@ -78,6 +78,7 @@ class TimesheetDataService
             $duration = $data->duration;
             $notes = $data->notes;
             $programName = $refProgram->first()->program_name;
+            $requirements = $refProgram->first()->require;
             $tutorMentorName = $data->handle_by->first()->full_name;
             $adminName = $data->admin->first()->full_name;
             $total_timespent = $data->activities()->paid()->sum('time_spent');
@@ -89,6 +90,7 @@ class TimesheetDataService
                 'duration' => $duration,
                 'notes' => $notes,
                 'program_name' => $programName,
+                'require' => $requirements,
                 'tutor_mentor' => $tutorMentorName,
                 'admin' => $adminName,
                 'spent' => $total_timespent,

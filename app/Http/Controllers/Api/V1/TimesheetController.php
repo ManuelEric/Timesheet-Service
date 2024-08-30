@@ -31,7 +31,6 @@ class TimesheetController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        // return response()->json(auth('sanctum')->user()->is_admin);
         /* Incoming Request */
         $search = $request->only(['program_name', 'package_id', 'keyword']);
         $results = $this->timesheetDataService->listTimesheet($search);
