@@ -63,7 +63,8 @@ class GenerateTokenService
         return [
             'full_name' => $tempUser->full_name,
             'email' => $tempUser->email,
-            'role' => $tempUser->roles[0]->role,
+            'role' => $tempUser->roles->first()->role,
+            'role_detail' => $tempUser->roles,
             'granted_token' => $token
         ];
     }

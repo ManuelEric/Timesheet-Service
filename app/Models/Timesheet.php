@@ -134,4 +134,21 @@ class Timesheet extends Model
         $minutes = $hours * 60;
         $query->whereRaw("duration - sum_activity_time_based_on_timesheet(id) = {$minutes}");
     }
+
+    public function scopeOnSession(Builder $query): void
+    {
+        /* user auth information */
+        $isAdmin = auth('sanctum')->user()->is_admin;
+        
+        $query->when( !$isAdmin, function ($_sub_) {
+
+            $tempUserUuid = auth('sanctum')->user()->uuid;
+
+            $_sub_->
+                where('inhouse_id', $tempUserUuid)->
+                orWhere(function ($__sub__) use ($tempUserUuid) {
+                    $__sub__->handleBy($tempUserUuid);
+                });
+        });
+    }
 }
