@@ -1,14 +1,16 @@
 <script setup>
-import AddActivity from '@/components/admin/timesheet/activity-add.vue'
 import DeleteDialog from '@/components/DeleteHandler.vue'
-import avatar1 from '@images/avatars/avatar-1.png'
-import avatar2 from '@images/avatars/avatar-2.png'
-import avatar3 from '@images/avatars/avatar-3.png'
-import avatar4 from '@images/avatars/avatar-4.png'
-import avatar5 from '@images/avatars/avatar-5.png'
+import { showNotif } from '@/helper/notification'
+import ApiService from '@/services/ApiService'
+import debounce from 'lodash/debounce'
+import AddActivity from './activity-add.vue'
 
-const avatars = [avatar1, avatar2, avatar3, avatar4, avatar5]
-const currentPage = ref(1)
+// Start Variable
+const props = defineProps({ id: String, require: String })
+const updateReload = inject('updateReload')
+const data = ref([])
+const loading = ref(false)
+
 const isDialogVisible = ref([
   {
     add: false,
@@ -17,7 +19,23 @@ const isDialogVisible = ref([
 ])
 
 const selectedItem = ref([])
-const status = ref([])
+// End Variable
+
+// Start Function
+const getData = async () => {
+  loading.value = false
+  try {
+    const res = await ApiService.get('api/v1/timesheet/' + props.id + '/activities')
+
+    if (res) {
+      data.value = res
+    }
+  } catch (error) {
+    console.error(error)
+  } finally {
+    loading.value = true
+  }
+}
 
 const toggleDialog = type => {
   if (!isDialogVisible.value[type]) {
@@ -27,50 +45,70 @@ const toggleDialog = type => {
   }
 }
 
-const deleteActivity = item => {
-  toggleDialog('delete')
+const selectedActivity = (type, item) => {
   selectedItem.value = item
+  toggleDialog(type)
 }
 
-const updateTime = item => {}
+const deleteActivity = async () => {
+  try {
+    const res = await ApiService.delete('api/v1/timesheet/' + props.id + '/activity/' + selectedItem.value.id)
+    if (res) {
+      showNotif('success', res.message, 'bottom-end')
+      toggleDialog('delete')
+    }
+  } catch (error) {
+    if (error.response?.status == 400) {
+      showNotif('error', error.response?.data?.errors, 'bottom-end')
+    }
+  } finally {
+    getData()
+    setTimeout(() => {
+      updateReload(true)
+    }, 3000)
+  }
+}
 
-const desserts = [
-  {
-    dessert: 'Frozen Yogurt',
-    calories: 159,
-    fat: 6,
-    carbs: 24,
-    protein: 4,
-  },
-  {
-    dessert: 'Ice cream sandwich',
-    calories: 237,
-    fat: 6,
-    carbs: 24,
-    protein: 4,
-  },
-  {
-    dessert: 'Eclair',
-    calories: 262,
-    fat: 6,
-    carbs: 24,
-    protein: 4,
-  },
-  {
-    dessert: 'Cupcake',
-    calories: 305,
-    fat: 6,
-    carbs: 24,
-    protein: 4,
-  },
-  {
-    dessert: 'Gingerbread',
-    calories: 356,
-    fat: 6,
-    carbs: 24,
-    protein: 4,
-  },
-]
+const updateTime = debounce(async item => {
+  item.end_date = item.date + ' ' + item.end_time + ':00'
+
+  try {
+    const res = await ApiService.put('api/v1/timesheet/' + props.id + '/activity/' + item.id, item)
+
+    if (res) {
+      showNotif('success', res.message, 'bottom-end')
+    }
+  } catch (error) {
+    console.error(error)
+  } finally {
+    getData()
+    setTimeout(() => {
+      updateReload(true)
+    }, 3000)
+  }
+}, 500)
+
+const updateStatus = async item => {
+  try {
+    const res = await ApiService.put('api/v1/timesheet/' + props.id + '/activity/' + item.id, item)
+
+    if (res) {
+      showNotif('success', res.message, 'bottom-end')
+    }
+  } catch (error) {
+    console.error(error)
+  } finally {
+    getData()
+    setTimeout(() => {
+      updateReload(true)
+    }, 3000)
+  }
+}
+
+// End Function
+onMounted(() => {
+  getData()
+})
 </script>
 
 <template>
@@ -81,17 +119,11 @@ const desserts = [
           <h4>Activity</h4>
         </div>
         <VBtn
-          density="compact"
+          v-tooltip:start="'New Activity'"
           @click="toggleDialog('add')"
+          v-if="props.require == 'mentor'"
         >
           <VIcon icon="ri-add-line" />
-          <VTooltip
-            activator="parent"
-            location="bottom"
-            transition="scroll-x-transition"
-          >
-            New Activity
-          </VTooltip>
         </VBtn>
         <!-- Add Dialog -->
         <VDialog
@@ -99,7 +131,11 @@ const desserts = [
           max-width="600"
           persistent
         >
-          <AddActivity @close="toggleDialog('add')" />
+          <AddActivity
+            :id="props.id"
+            @close="toggleDialog('add')"
+            @reload="getData"
+          />
         </VDialog>
       </div>
     </VCardTitle>
@@ -123,19 +159,15 @@ const desserts = [
             <th class="text-uppercase text-center">Start Time</th>
             <th
               class="text-uppercase text-center"
-              width="8%"
+              style="width: 200px !important"
             >
               End Time
             </th>
-            <th
-              class="text-uppercase text-center"
-              width="8%"
-            >
-              Status
-            </th>
+            <th class="text-uppercase text-center">Time Spent</th>
+            <th class="text-uppercase text-center">Status</th>
             <th
               class="text-uppercase text-end"
-              width="8%"
+              v-if="props.require == 'mentor'"
             >
               #
             </th>
@@ -144,53 +176,72 @@ const desserts = [
 
         <tbody>
           <tr
-            v-for="(item, index) in desserts"
+            v-for="(item, index) in data"
             :key="index"
           >
-            <td>
+            <td width="1%">
               {{ index + 1 }}
             </td>
             <td>
-              {{ item.dessert }}
+              {{ item.activity }}
+              <small v-if="item.meeting_link">
+                |
+                <a
+                  :href="item.meeting_link"
+                  target="_blank"
+                  class="me-2"
+                >
+                  <VIcon icon="ri ri-link" />
+                  Join Now
+                </a>
+              </small>
             </td>
-            <td class="text-center">Package {{ index + 1 }}</td>
-            <td class="text-center">24 Feb 2024</td>
-            <td class="text-center">14:00</td>
+            <td class="text-start">
+              {{ item.description }}
+            </td>
+            <td>
+              {{ $moment(item.start_date).format('MMM Do YYYY') }}
+            </td>
             <td class="text-center">
-              <VTextField
+              {{ item.start_time }}
+            </td>
+            <td class="text-start">
+              <input
                 type="time"
-                density="compact"
-                placeholder="Date"
-                variant="underlined"
+                class="form-control px-2 py-2 border rounded cursor-pointer"
+                v-model="item.end_time"
                 @change="updateTime(item)"
+                :disabled="item.start_time == '00:00' || item.cutoff_status == 'completed'"
+                v-tooltip:start="item.cutoff_status == 'completed' ? 'Already Cut-Off' : 'End Time'"
               />
             </td>
-            <td class="d-flex justify-center align-center">
+            <td class="text-center">{{ item.estimate }} Minutes</td>
+            <td>
               <VCheckbox
                 color="success"
-                v-model="status"
-                :value="item"
-              ></VCheckbox>
+                v-model="item.status"
+                :value="1"
+                :false-value="0"
+                :disabled="item.start_time == '00:00' || item.cutoff_status == 'completed'"
+                v-tooltip:start="item.status ? 'Completed' : 'Not Yet'"
+                @update:modelValue="updateStatus(item)"
+              />
             </td>
-            <td class="text-end">
+            <td
+              class="text-end"
+              v-if="props.require == 'mentor'"
+            >
               <VBtn
                 color="error"
                 density="compact"
-                @click="deleteActivity(item)"
+                :disabled="item.start_time == '00:00' || item.cutoff_status == 'completed'"
+                v-tooltip:start="item.status ? 'Already Cut-Off' : 'Delete Activity'"
+                @click="selectedActivity('delete', item)"
               >
                 <VIcon
                   icon="ri-delete-bin-line"
                   class="cursor-pointer"
-                  v-bind="activatorProps"
                 />
-
-                <VTooltip
-                  activator="parent"
-                  location="right"
-                  transition="scroll-x-transition"
-                >
-                  Delete Activity
-                </VTooltip>
               </VBtn>
             </td>
           </tr>
@@ -205,10 +256,16 @@ const desserts = [
       persistent
     >
       <DeleteDialog
-        :data="selectedItem"
         title="activity"
         @close="toggleDialog('delete')"
+        @delete="deleteActivity"
       />
     </VDialog>
   </VCard>
 </template>
+
+<style lang="scss">
+.v-field__field {
+  grid-area: auto;
+}
+</style>

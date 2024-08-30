@@ -25,6 +25,7 @@ declare module 'vue' {
     Security: typeof import('./resources/js/components/admin/setting/security.vue')['default']
     ThemeSwitcher: typeof import('./resources/js/@core/components/ThemeSwitcher.vue')['default']
     TimesheetDetail: typeof import('./resources/js/components/admin/timesheet/timesheet-detail.vue')['default']
+    TimesheetDetail_user: typeof import('./resources/js/components/user/timesheet/timesheet-detail_user.vue')['default']
     UpgradeToPro: typeof import('./resources/js/components/UpgradeToPro.vue')['default']
     UserDetail: typeof import('./resources/js/components/admin/timesheet/user-detail.vue')['default']
     UserEdit: typeof import('./resources/js/components/admin/timesheet/user-edit.vue')['default']
