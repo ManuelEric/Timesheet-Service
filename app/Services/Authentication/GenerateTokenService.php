@@ -19,7 +19,7 @@ class GenerateTokenService
     use HttpCall;
 
     protected $tokenService;
-    
+
     public function __construct(TokenService $tokenService)
     {
         $this->tokenService = $tokenService;
@@ -29,7 +29,7 @@ class GenerateTokenService
     {
         /* call API to identify the user information */
         [$statusCode, $response] = $this->make_call('post', env('CRM_DOMAIN') . 'auth/token', $validated);
-        if ( !$response )
+        if (!$response)
             return response()->json($response, JsonResponse::HTTP_BAD_REQUEST);
 
 

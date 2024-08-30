@@ -17,6 +17,9 @@ export default [
       },
       {
         path: '/user/timesheet/:id',
+        props: route => ({
+          id:route.params.id,
+        }),
         component: () => import('@/pages/user/timesheet/timesheet-detail.vue'),
       },
       {

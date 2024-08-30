@@ -1,4 +1,6 @@
 <script setup>
+import DeleteDialog from '@/components/DeleteHandler.vue'
+import UserEdit from '@/components/user/timesheet/user-edit.vue'
 import { showLoading, showNotif } from '@/helper/notification'
 import { router } from '@/plugins/router'
 import ApiService from '@/services/ApiService'
@@ -10,6 +12,12 @@ const props = defineProps({ id: String })
 const reloadData = inject('reloadData')
 const updateReload = inject('updateReload')
 const data = ref([])
+const isDialogVisible = ref([
+  {
+    edit: false,
+    delete: false,
+  },
+])
 // End Variable
 
 // Start Function
@@ -27,6 +35,64 @@ const getData = async id => {
       showNotif('error', error.response?.data?.errors, 'bottom-end')
       router.push('/admin/timesheet')
     }
+    console.log(error)
+  }
+}
+
+const deleteTimesheet = async () => {
+  try {
+    const res = await ApiService.delete('api/v1/timesheet/' + props.id + '/delete')
+    console.log(res)
+    if (res) {
+      data.value = res
+      showNotif('success', res.message, 'bottom-end')
+      isDialogVisible.value.delete = false
+      router.push('/admin/timesheet')
+    }
+  } catch (error) {
+    if (error.response?.status == 400) {
+      showNotif('error', error.response?.data?.errors, 'bottom-end')
+    }
+  }
+}
+
+const toggleDialog = type => {
+  if (!isDialogVisible.value[type]) {
+    isDialogVisible.value[type] = true
+  } else {
+    isDialogVisible.value[type] = false
+  }
+}
+
+const downloadTimesheet = async (id, name) => {
+  showLoading()
+  try {
+    const res = await ApiService.get('api/v1/timesheet/' + id + '/export', {
+      responseType: 'blob',
+    })
+
+    if (res) {
+      const url = window.URL.createObjectURL(
+        new Blob([res], { type: '"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"' }),
+      )
+
+      // Create a temporary <a> element to trigger the download
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `timesheet_${name}.xlsx`)
+
+      // Append the <a> element to the body and click it to trigger the download
+      document.body.appendChild(link)
+      link.click()
+
+      // Clean up: remove the <a> element and revoke the blob URL
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+
+      Swal.close()
+    }
+  } catch (error) {
+    showNotif('error', error.response?.statusText, 'bottom-end')
     console.log(error)
   }
 }
@@ -49,7 +115,7 @@ watch(() => {
   <VCard class="mb-3">
     <VCardTitle class="d-flex justify-between align-center">
       <div class="w-100">
-        <router-link to="/user/timesheet">
+        <router-link to="/admin/timesheet">
           <VIcon
             icon="ri-arrow-left-line"
             color="secondary"
@@ -58,6 +124,71 @@ watch(() => {
           ></VIcon>
         </router-link>
         Timesheet - {{ data.packageDetails?.package_type }}
+      </div>
+      <div>
+        <VMenu
+          :close-on-content-click="false"
+          location="bottom"
+        >
+          <template v-slot:activator="{ props }">
+            <VBtn
+              color="secondary"
+              v-bind="props"
+              v-tooltip:start="'Settings'"
+            >
+              <VIcon icon="ri-settings-3-line"></VIcon>
+            </VBtn>
+          </template>
+          <VList>
+            <VListItem>
+              <div
+                class="cursor-pointer"
+                @click="toggleDialog('edit')"
+              >
+                <VIcon
+                  icon="ri-pencil-line"
+                  class="me-2"
+                />
+                Edit TimeSheet
+              </div>
+            </VListItem>
+            <VListItem>
+              <VListItemTitle>
+                <div
+                  class="cursor-pointer"
+                  @click="
+                    downloadTimesheet(
+                      props.id,
+                      data?.packageDetails?.package_type +
+                        '-' +
+                        data?.packageDetails?.package_name +
+                        '_' +
+                        data?.packageDetails?.tutormentor_name,
+                    )
+                  "
+                >
+                  <VIcon
+                    icon="ri-download-line"
+                    class="me-2"
+                  />
+                  Download TimeSheet
+                </div>
+              </VListItemTitle>
+            </VListItem>
+            <VListItem>
+              <div
+                class="cursor-pointer"
+                @click="toggleDialog('delete')"
+              >
+                <VIcon
+                  icon="ri-delete-bin-line"
+                  class="me-2"
+                />
+                Delete TimeSheet
+              </div>
+            </VListItem>
+          </VList>
+        </VMenu>
       </div>
     </VCardTitle>
     <VCardText>
@@ -244,5 +375,33 @@ watch(() => {
         </VCol>
       </VRow>
     </VCardText>
+
+    <!-- Edit Dialog -->
+    <VDialog
+      v-model="isDialogVisible.edit"
+      max-width="600"
+      persistent
+    >
+      <UserEdit
+        :item="data.editableColumns"
+        :package_id="data.packageDetails?.package_id"
+        :id="props.id"
+        @close="toggleDialog('edit')"
+        @reload="getData(props.id)"
+      />
+    </VDialog>
+
+    <!-- Delete Dialog -->
+    <VDialog
+      v-model="isDialogVisible.delete"
+      max-width="400"
+      persistent
+    >
+      <DeleteDialog
+        title="timesheet"
+        @delete="deleteTimesheet"
+        @close="toggleDialog('delete')"
+      />
+    </VDialog>
   </VCard>
 </template>
