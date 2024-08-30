@@ -46,6 +46,7 @@ class TimesheetDataService
                 ]
             )->
             onSearch($search)->
+            onSession()->
             select('timesheets.id', 'inhouse_id', 'package_id', 'duration', 'notes')->
             get();
 
