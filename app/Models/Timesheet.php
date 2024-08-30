@@ -151,4 +151,16 @@ class Timesheet extends Model
                 });
         });
     }
+
+    public function scopeFilterCutoff(Builder $query, array $search = []): void
+    {
+        $cutoff_start = $search['cutoff_start'] ?? false;
+        $cutoff_end = $search['cutoff_end'] ?? false;
+
+        $query->when( $cutoff_start && $cutoff_end, function ($_sub_) use ($search) {
+            $_sub_->whereHas('activities', function ($__sub__) use ($search) {
+                $__sub__->onSearch($search);
+            });
+        });
+    }
 }
