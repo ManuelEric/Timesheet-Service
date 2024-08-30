@@ -162,9 +162,13 @@ class TimesheetController extends Controller
     /**
      * The components.
      */
-    public function component(TimesheetDataService $timesheetDataService): JsonResponse
+    public function component(
+        Request $request,
+        TimesheetDataService $timesheetDataService,
+        ): JsonResponse
     {
-        $timesheets = Timesheet::has('ref_program')->get();
+        $search = $request->only(['cutoff_start', 'cutoff_end']);
+        $timesheets = Timesheet::has('ref_program')->filterCutoff($search)->get();
         $mappedComponents = $timesheets->map(function ($data) use ($timesheetDataService)
         {
             /* initialize variables */
