@@ -22,33 +22,28 @@ class TimesheetDataService
 
     public function listTimesheet(array $search = [])
     {
-        $timesheets = Timesheet::query()->
-            with(
-                [
-                    'ref_program' => function ($query) {
-                        $query->select('category', 'student_name', 'student_school', 'program_name', 'timesheet_id', 'require');
-                    },
-                    'handle_by' => function ($query) {
-                        $query->select('temp_users.id', 'full_name');
-                    },
-                    'admin' => function ($query) {
-                        $query->select('users.id', 'full_name');
-                    },
-                    'activities' => function ($query) {
-                        $query->select('time_spent');
-                    },
-                    'package' => function ($query) {
-                        $query->select('id', 'type_of', 'package');
-                    },
-                    'inhouse_pic' => function ($query) {
-                        $query->select('uuid', 'full_name');
-                    },
-                ]
-            )->
-            onSearch($search)->
-            onSession()->
-            select('timesheets.id', 'inhouse_id', 'package_id', 'duration', 'notes')->
-            get();
+        $timesheets = Timesheet::query()->with(
+            [
+                'ref_program' => function ($query) {
+                    $query->select('category', 'student_name', 'student_school', 'program_name', 'timesheet_id', 'require');
+                },
+                'handle_by' => function ($query) {
+                    $query->select('temp_users.id', 'full_name');
+                },
+                'admin' => function ($query) {
+                    $query->select('users.id', 'full_name');
+                },
+                'activities' => function ($query) {
+                    $query->select('time_spent');
+                },
+                'package' => function ($query) {
+                    $query->select('id', 'type_of', 'package');
+                },
+                'inhouse_pic' => function ($query) {
+                    $query->select('uuid', 'full_name');
+                },
+            ]
+        )->onSearch($search)->onSession()->select('timesheets.id', 'inhouse_id', 'package_id', 'duration', 'notes')->get();
 
         $mappedTimesheets = $timesheets->map(function ($data) {
 
@@ -221,20 +216,15 @@ class TimesheetDataService
             'ref_program' => function ($query) {
                 $query->select('category', 'student_name', 'student_school', 'program_name', 'timesheet_id');
             },
-        ])->
-        handleBy($search)->
-        select('timesheets.id', 'inhouse_id', 'package_id', 'duration', 'notes')->
-        get();
+        ])->handleBy($search)->select('timesheets.id', 'inhouse_id', 'package_id', 'duration', 'notes')->get();
 
         $mappedTimesheets = $timesheets->map(function ($data) {
             # because timesheets consists of multiple ref programs
             # we need to extract and define whether the client was b2c or b2b
             $clients = array();
             $refProgram = $data->ref_program;
-            if ( count($refProgram) > 1 )
-            {
-                foreach ( $refProgram as $ref )
-                {
+            if (count($refProgram) > 1) {
+                foreach ($refProgram as $ref) {
                     $category = $ref->category;
                     $studentName = $ref->student_name;
                     $studentSchool = $ref->student_school;
@@ -259,13 +249,13 @@ class TimesheetDataService
                 'id' => $timesheetId,
                 'package_type' => $packageType,
                 'detail_package' => $detailPackage,
-                'notes' => $notes, 
+                'notes' => $notes,
                 'program_name' => $programName,
                 'group' => count($refProgram) > 1 ? true : false,
                 'clients' => $clients,
             ];
         });
-        
+
         return $mappedTimesheets;
     }
 

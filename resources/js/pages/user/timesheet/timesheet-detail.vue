@@ -1,7 +1,7 @@
 <script setup>
 import TimesheetDetail from '@/components/user/timesheet/timesheet-detail.vue'
 import UserDetail from '@/components/user/timesheet/user-detail.vue'
-const props = defineProps({ id: Number })
+const props = defineProps({ id: Number, require: String })
 const timesheet_id = props.id
 const reload = ref(false)
 
@@ -13,5 +13,8 @@ provide('updateReload', value => {
 
 <template>
   <UserDetail :id="timesheet_id" />
-  <TimesheetDetail :id="timesheet_id" />
+  <TimesheetDetail
+    :id="timesheet_id"
+    :require="props.require"
+  />
 </template>

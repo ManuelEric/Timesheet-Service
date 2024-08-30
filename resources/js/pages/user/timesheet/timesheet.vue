@@ -244,7 +244,7 @@ onMounted(() => {
               {{ item.spent / 60 }} Hours
             </td>
             <td>
-              <router-link :to="'/user/timesheet/' + item.id">
+              <router-link :to="'/user/timesheet/' + item.id + '/' + item.require.toLowerCase()">
                 <VBtn color="secondary">
                   <VIcon
                     icon="ri-timeline-view"
