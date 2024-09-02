@@ -3,6 +3,7 @@ import additionalFee from '@/components/admin/cut-off/additional_add.vue'
 import newCutOff from '@/components/admin/cut-off/cutoff_add.vue'
 import cutOffExisting from '@/components/admin/cut-off/cutoff_existing_add.vue'
 import ApiService from '@/services/ApiService'
+import debounce from 'lodash/debounce'
 
 const loading = ref(false)
 const data = ref([])
@@ -39,6 +40,10 @@ const getData = async () => {
     loading.value = false
   }
 }
+
+const searchData = debounce(async () => {
+  await getData()
+}, 500)
 
 const getPackage = async () => {
   loading.value = true
@@ -104,7 +109,7 @@ onMounted(() => {
             hide-details
             single-line
             v-model="keyword"
-            @change="getData"
+            @input="searchData"
           />
         </VCol>
         <VCol

@@ -3,7 +3,9 @@ import { confirmBeforeSubmit, showLoading, showNotif } from '@/helper/notificati
 import { rules } from '@/helper/rules'
 import ApiService from '@/services/ApiService'
 import FilterSidebar from '@layouts/components/FilterSidebar.vue'
+import debounce from 'lodash/debounce'
 import moment from 'moment'
+import Swal from 'sweetalert2'
 
 const loading = ref(false)
 const data = ref([])
@@ -25,20 +27,23 @@ const package_list = ref([])
 const tutor_id = ref(null)
 const tutor_list = ref([])
 const timesheet = ref([])
-const cutOffDate = ref([])
+const cutOffDate = ref(null)
 
 const getData = async () => {
   loading.value = true
   const page = '?page=' + currentPage.value
   const search = keyword.value ? '&keyword=' + keyword.value : ''
   const package_select = package_id.value ? '&package_id=' + package_id.value : ''
-  const start_date = cutOffDate.value ? '&start_date=' + moment(cutOffDate.value[0]).format('YYYY-MM-DD') : ''
+  const start_date = cutOffDate.value ? '&cutoff_start=' + moment(cutOffDate.value[0]).format('YYYY-MM-DD') : ''
   const end_date = cutOffDate.value
-    ? '&end_date=' + moment(cutOffDate.value[cutOffDate.value.length - 1]).format('YYYY-MM-DD')
+    ? '&cutoff_end=' + moment(cutOffDate.value[cutOffDate.value.length - 1]).format('YYYY-MM-DD')
     : ''
+  const tutor = tutor_id.value ? '&mentor_id=' + tutor_id.value : ''
+
+  const url = 'api/v1/payment/paid' + page + search + package_select + start_date + end_date + tutor
 
   try {
-    const res = await ApiService.get('api/v1/payment/paid' + page + search + package_select)
+    const res = await ApiService.get(url)
     if (res) {
       currentPage.value = res.current_page
       totalPage.value = res.last_page
@@ -50,6 +55,10 @@ const getData = async () => {
     loading.value = false
   }
 }
+
+const searchData = debounce(async () => {
+  await getData()
+}, 500)
 
 const getPackage = async () => {
   loading.value = true
@@ -71,20 +80,6 @@ const getTutor = async () => {
     const res = await ApiService.get('api/v1/user/mentor-tutors')
     if (res) {
       tutor_list.value = res
-      loading.value = false
-    }
-  } catch (error) {
-    loading.value = false
-    console.error(error)
-  }
-}
-
-const getTimesheet = async () => {
-  loading.value = true
-  try {
-    const res = await ApiService.get('api/v1/timesheet/component/list')
-    if (res) {
-      timesheet.value = res
       loading.value = false
     }
   } catch (error) {
@@ -115,6 +110,26 @@ const cancelCutOff = async () => {
     } finally {
       loading.value = false
     }
+  }
+}
+
+const getTimesheet = async () => {
+  let cut_off_date = formDownload.value.cut_off_date
+  let start_date = moment(cut_off_date[0]).format('YYYY-MM-DD')
+  let end_date = moment(cut_off_date[cut_off_date.length - 1]).format('YYYY-MM-DD')
+
+  const url = 'api/v1/timesheet/component/list?cutoff_start=' + start_date + '&cutoff_end=' + end_date
+
+  loading.value = true
+  try {
+    const res = await ApiService.get(url)
+    if (res) {
+      timesheet.value = res
+      loading.value = false
+    }
+  } catch (error) {
+    loading.value = false
+    console.error(error)
   }
 }
 
@@ -168,7 +183,6 @@ onMounted(() => {
   getData()
   getPackage()
   getTutor()
-  getTimesheet()
 })
 </script>
 
@@ -188,7 +202,7 @@ onMounted(() => {
             placeholder="Search"
             prepend-inner-icon="ri-search-line"
             variant="solo"
-            @change="getData"
+            @input="searchData"
           />
         </VCol>
         <VCol cols="12">
@@ -219,10 +233,11 @@ onMounted(() => {
                 subtitle: item.roles.map(role => role.name).join(', '),
               })
             "
-            item-value="uuid"
+            item-value="id"
             v-model="tutor_id"
             placeholder="Select Tutor/Mentor Name"
             variant="solo"
+            @update:modelValue="getData"
           />
         </VCol>
         <VCol cols="12">
@@ -265,6 +280,7 @@ onMounted(() => {
                 v-model="formDownload.cut_off_date"
                 :rules="rules.required"
                 class="mb-3"
+                @update:model-value="getTimesheet"
               />
               <VCheckbox
                 label="Specific Timesheet"

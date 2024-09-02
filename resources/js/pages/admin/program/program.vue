@@ -2,6 +2,7 @@
 import program from '@/components/admin/program/program_add.vue'
 import { showNotif } from '@/helper/notification'
 import ApiService from '@/services/ApiService'
+import debounce from 'lodash/debounce'
 
 // Start Variable
 const selected = ref([])
@@ -63,10 +64,10 @@ const getProgram = async () => {
   }
 }
 
-const searchData = async () => {
+const searchData = debounce(async () => {
   currentPage.value = 1
   await getData()
-}
+}, 500)
 
 // End Function
 
@@ -121,7 +122,7 @@ onMounted(() => {
             hide-details
             single-line
             v-model="keyword"
-            @change="searchData"
+            @input="searchData"
           />
         </VCol>
 

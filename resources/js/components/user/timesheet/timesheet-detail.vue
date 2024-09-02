@@ -63,9 +63,7 @@ const deleteActivity = async () => {
     }
   } finally {
     getData()
-    setTimeout(() => {
-      updateReload(true)
-    }, 3000)
+    updateReload(true)
   }
 }
 
@@ -82,9 +80,7 @@ const updateTime = debounce(async item => {
     console.error(error)
   } finally {
     getData()
-    setTimeout(() => {
-      updateReload(true)
-    }, 3000)
+    updateReload(true)
   }
 }, 500)
 
@@ -99,9 +95,7 @@ const updateStatus = async item => {
     console.error(error)
   } finally {
     getData()
-    setTimeout(() => {
-      updateReload(true)
-    }, 3000)
+    updateReload(true)
   }
 }
 
