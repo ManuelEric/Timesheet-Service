@@ -179,10 +179,12 @@ class TimesheetController extends Controller
             $programName = $detailTimesheet['packageDetails']['program_name'];
             $packageType = $detailTimesheet['packageDetails']['package_type'];
             $packageName = $detailTimesheet['packageDetails']['package_name'];
+            $tutormentorName = $detailTimesheet['packageDetails']['tutormentor_name'];
 
             return [
                 'id' => $data->id,
                 'clients' => $clients,
+                'tutormentor_name' => $tutormentorName,
                 'program_name' => $programName,
                 'package_type' => $packageType,
                 'package_name' => $packageName,
