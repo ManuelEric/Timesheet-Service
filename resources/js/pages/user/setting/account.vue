@@ -1,5 +1,5 @@
 <script setup>
-import AccountSettingsSecurity from '@/components/admin/setting/security.vue'
+import AccountSettingsSecurity from '@/components/user/setting/security.vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
