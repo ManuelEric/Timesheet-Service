@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\V1\MentorTutor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TempUser\UpdateRequest as TempUserUpdateRequest;
-use App\Http\Requests\TempUser\PatchRequest as TempUserPatchRequest;
 use App\Http\Traits\HttpCall;
 use App\Models\TempUser;
 use App\Services\ResponseService;
@@ -14,10 +13,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Http;
 
 class MainController extends Controller
 {
@@ -122,43 +118,6 @@ class MainController extends Controller
 
         return response()->json([
             'message' => 'The selected mentor/tutor has been set to inhouse'
-        ]);
-    }
-
-    public function patch(TempUserPatchRequest $request)
-    {
-        $incomingRequest = $request->safe()->only(['current_password', 'new_password']);
-        $validatedCurrentPassword = $incomingRequest['current_password'];
-        $validatedNewPassword = $incomingRequest['new_password'];
-
-        $authUser = auth('sanctum')->user();
-        $currentAuthPassword = $authUser->password;
-
-        /* check if the passwords matches */
-        if ( !Hash::check($validatedCurrentPassword, $currentAuthPassword) )
-        {
-            throw new HttpResponseException(
-                response()->json([
-                    'errors' => 'Current password is Invalid.'
-                ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY)
-            );
-        }
-
-        /* check if the current password and the new password are same */
-        if ( strcmp($validatedCurrentPassword, $validatedNewPassword) == 0 )
-        {
-            throw new HttpResponseException(
-                response()->json([
-                    'errors' => 'New Password cannot be same as your current password.'
-                ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY)
-            );
-        }
-
-        $authUser->password = Hash::make($validatedNewPassword);
-        $authUser->save();
-
-        return response()->json([
-            'message' => 'Password changed successfully',
         ]);
     }
 }
