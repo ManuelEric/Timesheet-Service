@@ -64,7 +64,7 @@ Route::prefix('user')->group(function () {
         /* List Mentor & Tutors */
         Route::GET('mentor-tutors', [V1MentorTutorController::class, 'index']);
         Route::PUT('mentor-tutors/{mentortutor_uuid}', [V1MentorTutorController::class, 'update']);
-        
+        Route::PATCH('mentor-tutors/change/password', [V1MentorTutorController::class, 'patch']);
         
         /**
          * The Components.
