@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Models\Cutoff;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\WithTitle;
@@ -40,8 +41,17 @@ class PayrollExport implements FromView, WithTitle
         # store the activities data into activities variable, so that viewData can allow to be inside compact()
         $activities = $this->activities;
 
+        # because there is possibilites, activities in 1 month could have different cutoff history
+        # then we only take 1 cutoff history ID as reference for the whole month
+        $cutoff_ref_id = $this->activities[0]['cutoff_ref_id'];
+        $cutoff = Cutoff::find($cutoff_ref_id);
+
+        $total_hour = $this->activities->sum('time_spent');
+        $total_fee = $this->activities->sum('fee_hours') + $this->activities->sum('additional_fee') + $this->activities->sum('bonus_fee');
+
+
         # merge all variables that going to show in view 
-        $viewData = compact('isGroup', 'clients', 'activities');
+        $viewData = compact('isGroup', 'clients', 'activities', 'cutoff', 'total_hour', 'total_fee');
 
         return view('exports.payroll', $this->timesheet + $viewData);
     }
