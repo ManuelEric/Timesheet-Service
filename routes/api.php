@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\V1\Payment\CutoffController as V1CutoffController;
 use App\Http\Controllers\Api\V1\Payment\FeeController as V1FeeController;
 use App\Http\Controllers\Api\V1\Payment\BonusController as V1BonusController;
 use App\Http\Controllers\Api\V1\Payment\ExistingCutoffController as V1ExistingCutoffController;
+use App\Http\Controllers\Api\V1\ChangePasswordController as V1ChangePasswordController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -55,6 +56,9 @@ Route::prefix('auth')->group(function () {
     Route::middleware(['auth:sanctum'])->group(function () {
         /* Logout */
         Route::GET('terminate', [V1LogoutController::class, 'execute']);
+        
+        /* admin user change password */
+        Route::PATCH('change-password', [V1ChangePasswordController::class, 'patch']);
     });
 });
 
@@ -64,7 +68,6 @@ Route::prefix('user')->group(function () {
         /* List Mentor & Tutors */
         Route::GET('mentor-tutors', [V1MentorTutorController::class, 'index']);
         Route::PUT('mentor-tutors/{mentortutor_uuid}', [V1MentorTutorController::class, 'update']);
-        Route::PATCH('mentor-tutors/change/password', [V1MentorTutorController::class, 'patch']);
         
         /**
          * The Components.
