@@ -18,31 +18,32 @@ const isDialogVisible = ref([
     delete: false,
   },
 ])
+const loading = ref(false)
 // End Variable
 
 // Start Function
 const getData = async id => {
-  showLoading()
+  loading.value = true
   try {
     const res = await ApiService.get('api/v1/timesheet/' + id + '/detail')
     // console.log(res)
     if (res) {
       data.value = res
     }
-    Swal.close()
   } catch (error) {
     if (error.response?.status == 400) {
       showNotif('error', error.response?.data?.errors, 'bottom-end')
       router.push('/admin/timesheet')
     }
     console.log(error)
+  } finally {
+    loading.value = false
   }
 }
 
 const deleteTimesheet = async () => {
   try {
     const res = await ApiService.delete('api/v1/timesheet/' + props.id + '/delete')
-    console.log(res)
     if (res) {
       data.value = res
       showNotif('success', res.message, 'bottom-end')
@@ -192,7 +193,10 @@ watch(() => {
       </div>
     </VCardTitle>
     <VCardText>
-      <VRow align="center">
+      <VRow
+        align="center"
+        v-if="!loading"
+      >
         <VCol md="7">
           <h4 class="mt-3 font-weight-light">
             <VIcon
@@ -372,6 +376,33 @@ watch(() => {
               </div>
             </VCardText>
           </VCard>
+        </VCol>
+      </VRow>
+
+      <!-- Skeleton Loader  -->
+      <VRow v-else>
+        <VCol md="7">
+          <vSkeletonLoader
+            type="heading, paragraph, heading, paragraph"
+            class="mb-3"
+          />
+        </VCol>
+        <VCol md="5">
+          <vSkeletonLoader
+            type="text@3"
+            color="#16B1FF"
+            class="mb-3"
+          />
+          <vSkeletonLoader
+            type="text@3"
+            color="#91c45e"
+            class="mb-3"
+          />
+          <vSkeletonLoader
+            type="text@3"
+            color="#e05e5e"
+            class="mb-3"
+          />
         </VCol>
       </VRow>
     </VCardText>

@@ -1,12 +1,12 @@
 <script setup>
 import { showNotif } from '@/helper/notification'
 import ApiService from '@/services/ApiService'
-
 import avatar1 from '@images/avatars/avatar-1.png'
 import avatar2 from '@images/avatars/avatar-2.png'
 import avatar3 from '@images/avatars/avatar-3.png'
 import avatar4 from '@images/avatars/avatar-4.png'
 import avatar5 from '@images/avatars/avatar-5.png'
+import debounce from 'lodash/debounce'
 
 // Start Variable
 const avatars = [avatar1, avatar2, avatar3, avatar4, avatar5]
@@ -70,10 +70,10 @@ const getPackage = async () => {
   }
 }
 
-const searchData = async () => {
+const searchData = debounce(async () => {
   currentPage.value = 1
   await getData()
-}
+}, 500)
 // End Function
 
 onMounted(() => {
@@ -151,7 +151,7 @@ onMounted(() => {
             hide-details
             single-line
             v-model="keyword"
-            @change="searchData"
+            @input="searchData"
           />
         </VCol>
       </VRow>
