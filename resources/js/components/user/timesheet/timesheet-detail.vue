@@ -23,7 +23,7 @@ const selectedItem = ref([])
 
 // Start Function
 const getData = async () => {
-  loading.value = false
+  loading.value = true
   try {
     const res = await ApiService.get('api/v1/timesheet/' + props.id + '/activities')
 
@@ -33,7 +33,7 @@ const getData = async () => {
   } catch (error) {
     console.error(error)
   } finally {
-    loading.value = true
+    loading.value = false
   }
 }
 
@@ -144,6 +144,7 @@ onMounted(() => {
         class="text-no-wrap"
         height="400"
         fixed-header
+        v-if="!loading"
       >
         <thead>
           <tr>
@@ -247,6 +248,11 @@ onMounted(() => {
           </tr>
         </tbody>
       </VTable>
+
+      <VSkeletonLoader
+        type="table"
+        v-else
+      />
     </VCardText>
 
     <!-- Delete Dialog -->
