@@ -57,7 +57,7 @@ Route::prefix('auth')->group(function () {
         /* Logout */
         Route::GET('terminate', [V1LogoutController::class, 'execute']);
         
-        /* admin user change password */
+        /* for tutor mentor only that able to change password */
         Route::PATCH('change-password', [V1ChangePasswordController::class, 'patch']);
     });
 });
