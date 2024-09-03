@@ -9,8 +9,11 @@ use App\Http\Controllers\Api\V1\Authentication\CreatePasswordController as V1Cre
 use App\Http\Controllers\Api\V1\MentorTutor\MainController as V1MentorTutorController;
 use App\Http\Controllers\Api\V1\MentorTutor\ComponentController as V1MentorTutorComponentController;
 use App\Http\Controllers\Api\V1\Programs\ListController as V1ProgramsListController;
-use App\Http\Controllers\Api\V1\TimesheetController as V1TimesheetController;
-use App\Http\Controllers\Api\V1\ActivityController as V1ActivitiesController;
+use App\Http\Controllers\Api\V1\Programs\ComponentController as V1ProgramsComponentController;
+use App\Http\Controllers\Api\V1\Timesheet\MainController as V1TimesheetController;
+use App\Http\Controllers\Api\V1\Timesheet\ComponentController as V1TimesheetComponentController;
+use App\Http\Controllers\Api\V1\Activity\MainController as V1ActivitiesController;
+use App\Http\Controllers\Api\V1\Activity\ComponentController as V1ActivitiesComponentController;
 use App\Http\Controllers\Api\V1\LogController;
 use App\Http\Controllers\Api\V1\Packages\ListController as V1PackagesListController;
 use App\Http\Controllers\Api\V1\User\ListController as V1UserListController;
@@ -20,6 +23,7 @@ use App\Http\Controllers\Api\V1\Payment\FeeController as V1FeeController;
 use App\Http\Controllers\Api\V1\Payment\BonusController as V1BonusController;
 use App\Http\Controllers\Api\V1\Payment\ExistingCutoffController as V1ExistingCutoffController;
 use App\Http\Controllers\Api\V1\ChangePasswordController as V1ChangePasswordController;
+use App\Http\Controllers\Api\V1\DashboardBaseController as V1DashboardBaseController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -39,9 +43,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::prefix('timesheet')->group(function () {
-
     Route::GET('{timesheet}/export', [V1TimesheetController::class, 'export']);
 });
+
+Route::middleware('auth:sanctum')->get('/summarize/{month}', [V1DashboardBaseController::class, 'index']);
 
 
 /* Authentication */
@@ -95,7 +100,8 @@ Route::prefix('program')->group(function () {
          * The Components
          */
         Route::prefix('component')->group(function () {
-            Route::GET('list', [V1ProgramsListController::class, 'component']);
+            Route::GET('list', [V1ProgramsComponentController::class, 'list']);
+            Route::GET('summary/{month}', [V1ProgramsComponentController::class, 'summaryMonthlyPrograms'])->withoutMiddleware(['abilities:program-menu']);
         });
     });
 });
@@ -120,7 +126,13 @@ Route::prefix('timesheet')->group(function () {
          * The Components
          */
         Route::prefix('component')->group(function () {
-            Route::GET('list', [V1TimesheetController::class, 'component']);
+            /* timesheet */
+            Route::GET('list', [V1TimesheetComponentController::class, 'list']);
+            Route::GET('summary/{month}', [V1TimesheetComponentController::class, 'summaryMonthlyTimesheet']);
+            
+            /* activity */
+            Route::GET('activity/{month}', [V1ActivitiesComponentController::class, 'monthlyActivities']);
+            Route::GET('activity/summary/{month}', [V1ActivitiesComponentController::class, 'summaryMonthlyActivities']);
         });
 
         /* List Activities of the Timesheet */

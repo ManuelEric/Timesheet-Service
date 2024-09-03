@@ -97,4 +97,23 @@ class Activity extends Model
     {
         $query->doesntHave('reminders');
     }
+
+    public function scopeOnSession(Builder $query): void
+    {
+        /* user auth information */
+        $isAdmin = (bool) auth('sanctum')->user()->is_admin;
+        
+        $query->when( !$isAdmin, function ($_sub_) {
+
+            $tempUserUuid = auth('sanctum')->user()->uuid;
+
+            $_sub_->whereHas('timesheet', function ($__sub__) use ($tempUserUuid) {
+                $__sub__->
+                    where('inhouse_id', $tempUserUuid)->
+                    orWhere(function ($__sub__) use ($tempUserUuid) {
+                        $__sub__->handleBy($tempUserUuid);
+                    });
+            });
+        });
+    }
 }

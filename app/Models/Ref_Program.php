@@ -76,4 +76,11 @@ class Ref_Program extends Model
                     });
             });
     }
+
+    public function scopeOnSession(Builder $query): void
+    {
+        $query->whereHas('timesheet', function ($_sub_) {
+            $_sub_->onSession();
+        });
+    }
 }

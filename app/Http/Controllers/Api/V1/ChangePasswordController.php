@@ -12,7 +12,7 @@ class ChangePasswordController extends Controller
     public function patch(
         PaswordPatchRequest $request,
         ChangePasswordAction $changePasswordAction,
-        )
+        ): JsonResponse
     {
         $incomingRequest = $request->safe()->only(['current_password', 'new_password']);
 
