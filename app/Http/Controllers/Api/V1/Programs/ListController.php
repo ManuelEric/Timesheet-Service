@@ -17,12 +17,4 @@ class ListController extends Controller
         return response()->json($ref_success_programs);
     }
 
-    /**
-     * The component functions
-     */
-    public function component(Request $request): JsonResponse
-    {
-        $programs = Ref_Program::groupBy('program_name')->select('program_name')->get();
-        return response()->json($programs);
-    }
 }

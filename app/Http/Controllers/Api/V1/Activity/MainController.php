@@ -1,27 +1,25 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Http\Controllers\Api\V1\Activity;
 
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use App\Actions\Activity\CreateActivityAction;
 use App\Actions\Activity\IdentifierCheckingAction as IdentifyActivityAction;
 use App\Actions\Authentication\CheckEmailMentorTutorAction;
 use App\Actions\Timesheet\IdentifierCheckingAction as IdentifyTimesheetIdAction;
-use App\Http\Controllers\Controller;
 use App\Http\Traits\TranslateActivityStatus;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use App\Http\Requests\Activity\StoreRequest as StoreActivityRequest;
 use App\Http\Requests\Activity\UpdateRequest as UpdateActivityRequest;
-use App\Http\Requests\Activity\PatchRequest as PatchActivityRequest;
-use App\Models\Activity;
 use App\Services\Activity\ActivityDataService;
 use App\Services\ResponseService;
 use Exception;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Http\Request;
 
-class ActivityController extends Controller
+class MainController extends Controller
 {
     use TranslateActivityStatus;
 
