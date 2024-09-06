@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class ComponentController extends Controller
 {
@@ -35,8 +36,8 @@ class ComponentController extends Controller
                 'title' => $item->activity,
                 'with' => $item->timesheet->handle_by->first()->full_name,
                 'time' => [
-                    'start' => $item->start_date,
-                    'end' => $item->end_date
+                    'start' => Carbon::parse($item->start_date)->format('Y-m-d H:i'),
+                    'end' => Carbon::parse($item->end_date)->format('Y-m-d H:i'),
                 ],
                 'isEditable' => false,
                 'description' => $item->description
