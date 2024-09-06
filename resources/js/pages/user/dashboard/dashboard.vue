@@ -1,55 +1,14 @@
 <script setup>
-import AnalyticsAward from '@/views/dashboard/AnalyticsAward.vue'
-import AnalyticsBarCharts from '@/views/dashboard/AnalyticsBarCharts.vue'
-import AnalyticsDepositWithdraw from '@/views/dashboard/AnalyticsDepositWithdraw.vue'
-import AnalyticsSalesByCountries from '@/views/dashboard/AnalyticsSalesByCountries.vue'
-import AnalyticsTotalEarning from '@/views/dashboard/AnalyticsTotalEarning.vue'
-import AnalyticsTotalProfitLineCharts from '@/views/dashboard/AnalyticsTotalProfitLineCharts.vue'
-import AnalyticsTransactions from '@/views/dashboard/AnalyticsTransactions.vue'
-import AnalyticsUserTable from '@/views/dashboard/AnalyticsUserTable.vue'
-import AnalyticsWeeklyOverview from '@/views/dashboard/AnalyticsWeeklyOverview.vue'
-import CardStatisticsVertical from '@core/components/cards/CardStatisticsVertical.vue'
-
+import ApiService from '@/services/ApiService'
+import moment from 'moment'
 import { Qalendar } from 'qalendar'
 
-const totalProfit = {
-  title: 'Total Profit',
-  color: 'secondary',
-  icon: 'ri-pie-chart-2-line',
-  stats: '$25.6k',
-  change: 42,
-  subtitle: 'Weekly Project',
-}
+const monthNow = ref(moment().format('MMMM'))
+const monthModel = ref(moment().format('YYYY-MM'))
 
-const newProject = {
-  title: 'New Project',
-  color: 'primary',
-  icon: 'ri-file-word-2-line',
-  stats: '862',
-  change: -18,
-  subtitle: 'Yearly Project',
-}
-
-const events = ref([
-  {
-    title: 'Advanced algebra',
-    with: 'Chandler Bing',
-    time: { start: '2024-05-16 12:05', end: '2024-05-16 13:35' },
-    colorScheme: 'eduall',
-    isEditable: false,
-    id: '753944708f0f',
-    description:
-      'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Asperiores assumenda corporis doloremque et expedita molestias necessitatibus quam quas temporibus veritatis. Deserunt excepturi illum nobis perferendis praesentium repudiandae saepe sapiente voluptatem!',
-  },
-  {
-    title: 'Ralph on holiday',
-    with: 'Rachel Greene',
-    time: { start: '2024-05-10', end: '2024-05-22' },
-    colorScheme: 'eduall',
-    isEditable: false,
-    id: '5602b6f589fc',
-  },
-])
+const loading = ref(false)
+const events = ref([])
+const summarize = ref(null)
 
 const config = ref({
   defaultMode: 'month',
@@ -61,6 +20,55 @@ const config = ref({
       },
     },
   },
+})
+
+const getActivity = async month => {
+  loading.value = true
+  try {
+    const res = await ApiService.get('api/v1/timesheet/component/activity/' + month.toLowerCase())
+
+    if (res) {
+      events.value = res
+    }
+  } catch (error) {
+    console.log(error.response)
+  } finally {
+    loading.value = false
+  }
+}
+
+const getSummarize = async month => {
+  month = moment(month).format('MMMM')
+  loading.value = true
+  try {
+    const res = await ApiService.get('api/v1/summarize/' + month.toLowerCase())
+
+    if (res) {
+      summarize.value = res
+    }
+  } catch (error) {
+    console.log(error.response)
+  } finally {
+    loading.value = false
+  }
+}
+
+const changePeriod = item => {
+  if (moment(item.start).format('YYYY-MM-DD') != moment(item.end).format('YYYY-MM-DD')) {
+    // Add 7 Days
+    const dateNew = new Date(item.start)
+    dateNew.setDate(dateNew.getDate() + 7)
+
+    // Format to Month
+    const month = moment(dateNew).format('MMMM')
+
+    getActivity(month)
+  }
+}
+
+onMounted(() => {
+  getActivity(monthNow.value)
+  getSummarize(monthModel.value)
 })
 </script>
 
@@ -75,6 +83,8 @@ const config = ref({
           <Qalendar
             :events="events"
             :config="config"
+            :is-loading="loading"
+            @updated-period="changePeriod"
           />
         </VCardText>
       </VCard>
@@ -88,17 +98,27 @@ const config = ref({
           <div class="d-flex justify-between align-center">
             <h3 class="font-weight-light w-100">Summaries</h3>
             <div>
-              <VTextField
+              <input
                 type="month"
-                density="compact"
-                label="Search"
-                variant="underlined"
-              ></VTextField>
+                class="py-1 px-2 border rounded mb-2"
+                v-model="monthModel"
+                @change="getSummarize(monthModel)"
+              />
             </div>
           </div>
           <VRow>
-            <VCol>
+            <VCol cols="6">
+              <VCard title="Total Activity">
+                <VCardText>
+                  <h2 class="text-primary">{{ summarize?.activity }} Activities</h2>
+                </VCardText>
+              </VCard>
+            </VCol>
+            <VCol cols="6">
               <VCard title="Total Hours">
+                <VCardText>
+                  <h2 class="text-primary">{{ summarize?.total_hours / 60 }} Hours</h2>
+                </VCardText>
               </VCard>
             </VCol>
           </VRow>
@@ -108,10 +128,28 @@ const config = ref({
   </VRow>
 </template>
 
-<style>
+<style lang="scss">
 @import 'qalendar/dist/style.css';
 
-.calendar-month__event {
-  background: #bbffa0;
+.qalendar-is-small .calendar-month__weekday.is-today .calendar-month__day-date {
+  padding: 2px 9px !important;
+}
+
+.qalendar-is-small .calendar-month__event {
+  background: rgb(var(--v-theme-primary)) !important;
+  width: 8px !important;
+  height: 8px !important;
+}
+
+.agenda__wrapper .agenda__header .agenda__header-date,
+.calendar-month__weekday.is-today .calendar-month__day-date,
+.agenda__event {
+  background: rgb(var(--v-theme-primary)) !important;
+  padding: 5px 10px !important;
+}
+
+.agenda__wrapper {
+  max-height: 150px;
+  overflow: auto;
 }
 </style>

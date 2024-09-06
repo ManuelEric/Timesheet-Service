@@ -1,15 +1,4 @@
 <script setup>
-import AnalyticsAward from '@/views/dashboard/AnalyticsAward.vue'
-import AnalyticsBarCharts from '@/views/dashboard/AnalyticsBarCharts.vue'
-import AnalyticsDepositWithdraw from '@/views/dashboard/AnalyticsDepositWithdraw.vue'
-import AnalyticsSalesByCountries from '@/views/dashboard/AnalyticsSalesByCountries.vue'
-import AnalyticsTotalEarning from '@/views/dashboard/AnalyticsTotalEarning.vue'
-import AnalyticsTotalProfitLineCharts from '@/views/dashboard/AnalyticsTotalProfitLineCharts.vue'
-import AnalyticsTransactions from '@/views/dashboard/AnalyticsTransactions.vue'
-import AnalyticsUserTable from '@/views/dashboard/AnalyticsUserTable.vue'
-import AnalyticsWeeklyOverview from '@/views/dashboard/AnalyticsWeeklyOverview.vue'
-import CardStatisticsVertical from '@core/components/cards/CardStatisticsVertical.vue'
-
 import { Qalendar } from 'qalendar'
 
 const totalProfit = {
@@ -34,7 +23,7 @@ const events = ref([
   {
     title: 'Advanced algebra',
     with: 'Chandler Bing',
-    time: { start: '2024-05-16 12:05', end: '2024-05-16 13:35' },
+    time: { start: '2024-09-16 12:05', end: '2024-09-16 13:35' },
     colorScheme: 'eduall',
     isEditable: false,
     id: '753944708f0f',
@@ -44,7 +33,7 @@ const events = ref([
   {
     title: 'Ralph on holiday',
     with: 'Rachel Greene',
-    time: { start: '2024-05-10', end: '2024-05-22' },
+    time: { start: '2024-09-10', end: '2024-09-22' },
     colorScheme: 'eduall',
     isEditable: false,
     id: '5602b6f589fc',
