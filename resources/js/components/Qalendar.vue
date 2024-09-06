@@ -2,13 +2,13 @@
 import ApiService from '@/services/ApiService'
 import moment from 'moment'
 import { Qalendar } from 'qalendar'
+import { showNotif } from '@/helper/notification'
 
 const config = ref({
   defaultMode: 'month',
 })
 
-const monthNow = ref(moment().format('MMMM'))
-const monthModel = ref(moment().format('YYYY-MM'))
+const monthNow = ref(moment().format('YYYY-MM'))
 
 const loading = ref(false)
 const events = ref([])
@@ -17,12 +17,13 @@ const summarize = ref(null)
 const getActivity = async month => {
   loading.value = true
   try {
-    const res = await ApiService.get('api/v1/timesheet/component/activity/' + month.toLowerCase())
+    const res = await ApiService.get('api/v1/timesheet/component/activity/' + month)
 
     if (res) {
       events.value = res
     }
   } catch (error) {
+    showNotif('error', error.response.data.message, 'bottom-end')
     console.log(error.response)
   } finally {
     loading.value = false
@@ -36,7 +37,7 @@ const changePeriod = item => {
     dateNew.setDate(dateNew.getDate() + 7)
 
     // Format to Month
-    const month = moment(dateNew).format('MMMM')
+    const month = moment(dateNew).format('YYYY-MM')
 
     getActivity(month)
   }
