@@ -8,61 +8,46 @@ use App\Models\Ref_Program;
 use App\Models\Timesheet;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Carbon;
 
 class SummaryService
 {
     use MonthCollection;
 
-    public function summaryMonthlyPrograms(string $month): int
+    public function summaryMonthlyPrograms(string $requestedMonthYear): int
     {
-        /* validate */
-        $this->validateMonth($month);
-
-        $index = array_search($month, $this->month()) + 1;
-        $programs = Ref_Program::onSession()->whereMonth('created_at', $index)->count();
+        [$year, $month] = $this->fetchMonthAndYear($requestedMonthYear);
+        $programs = Ref_Program::onSession()->whereMonth('created_at', $month)->whereYear('created_at', $year)->count();
         return $programs;
     }
 
-    public function summaryMonthlyTimesheets(string $month): int
+    public function summaryMonthlyTimesheets(string $requestedMonthYear): int
     {
-        /* validate */
-        $this->validateMonth($month);
-        
-        $index = array_search($month, $this->month()) + 1;
-        $timesheet = Timesheet::onSession()->whereMonth('created_at', $index)->count();
+        [$year, $month] = $this->fetchMonthAndYear($requestedMonthYear);
+        $timesheet = Timesheet::onSession()->whereMonth('created_at', $month)->whereYear('created_at', $year)->count();
         return $timesheet;
     }
 
-    public function summaryMonthlyActivities(string $month): int
+    public function summaryMonthlyActivities(string $requestedMonthYear): int
     {
-        /* validate */
-        $this->validateMonth($month);
-
-        $index = array_search($month, $this->month()) + 1;
-        $activity = Activity::onSession()->whereMonth('created_at', $index)->count();
+        [$year, $month] = $this->fetchMonthAndYear($requestedMonthYear);
+        $activity = Activity::onSession()->whereMonth('created_at', $month)->whereYear('created_at', $year)->count();
         return $activity;
     }
 
-    public function summaryTotalSpentMonthlyActivities(string $month): float
+    public function summaryTotalSpentMonthlyActivities(string $requestedMonthYear): float
     {
-        /* validate */
-        $this->validateMonth($month);
-
-        $index = array_search($month, $this->month()) + 1;
-        $totalHours = Activity::onSession()->whereMonth('created_at', $index)->sum('time_spent');
+        [$year, $month] = $this->fetchMonthAndYear($requestedMonthYear);
+        $totalHours = Activity::onSession()->whereMonth('created_at', $month)->whereYear('created_at', $year)->sum('time_spent');
         return $totalHours;
     }
 
 
-    private function validateMonth(string $month)
+    private function fetchMonthAndYear(string $requestedMonthYear)
     {
-        if ( !in_array(strtolower($month), $this->month()) )
-        {
-            throw new HttpResponseException(
-                response()->json([
-                    'message' => 'Invalid month provided.'
-                ], JsonResponse::HTTP_BAD_REQUEST)
-            );
-        }
+        $year = Carbon::parse($requestedMonthYear)->format('Y');
+        $month = Carbon::parse($requestedMonthYear)->format('m');
+
+        return [$year, $month];
     }
 }
