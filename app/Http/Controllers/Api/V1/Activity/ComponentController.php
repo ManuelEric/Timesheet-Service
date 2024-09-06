@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\V1\Activity;
 
 use App\Http\Controllers\Controller;
-use App\Http\Traits\MonthCollection;
 use App\Models\Activity;
 use App\Services\SummaryService;
 use Illuminate\Database\Eloquent\Collection;
@@ -13,23 +12,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
 class ComponentController extends Controller
-{
-    use MonthCollection;
-    
-    public function monthlyActivities(string $month): JsonResponse
+{    
+    public function monthlyActivities(
+        string $requestedMonthYear,
+        SummaryService $summaryService,
+        ): JsonResponse
     {
-        if ( !in_array(strtolower($month), $this->month()) )
-        {
-            throw new HttpResponseException(
-                response()->json([
-                    'message' => 'Invalid month provided.'
-                ], JsonResponse::HTTP_BAD_REQUEST)
-            );
-        }
-
-        $index = array_search($month, $this->month()) + 1;
-
-        $activities = Activity::onSession()->whereMonth('start_date', $index)->get();
+        [$year, $month] = $summaryService->fetchMonthAndYear($requestedMonthYear);
+        $activities = Activity::onSession()->whereMonth('start_date', $month)->whereYear('start_date', $year)->get();
         $mappedActivities = $activities->map(function ($item) {
             return [
                 'id' => $item->id,

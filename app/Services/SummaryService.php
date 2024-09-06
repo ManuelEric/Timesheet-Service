@@ -2,18 +2,13 @@
 
 namespace App\Services;
 
-use App\Http\Traits\MonthCollection;
 use App\Models\Activity;
 use App\Models\Ref_Program;
 use App\Models\Timesheet;
-use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 
 class SummaryService
 {
-    use MonthCollection;
-
     public function summaryMonthlyPrograms(string $requestedMonthYear): int
     {
         [$year, $month] = $this->fetchMonthAndYear($requestedMonthYear);
@@ -43,7 +38,7 @@ class SummaryService
     }
 
 
-    private function fetchMonthAndYear(string $requestedMonthYear)
+    public function fetchMonthAndYear(string $requestedMonthYear)
     {
         $year = Carbon::parse($requestedMonthYear)->format('Y');
         $month = Carbon::parse($requestedMonthYear)->format('m');
