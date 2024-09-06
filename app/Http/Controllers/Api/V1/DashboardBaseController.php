@@ -15,21 +15,21 @@ class DashboardBaseController extends Controller
     use MonthCollection;
 
     public function index(
-        string $month,
+        string $requestedMonthYear, # going to be like '2024-09'
         SummaryService $summaryService
         )
     {
         
         $summary_of = [
-            'program' => $summaryService->summaryMonthlyPrograms($month),
-            'timesheet' => $summaryService->summaryMonthlyTimesheets($month),
-            'activity' => $summaryService->summaryMonthlyActivities($month),
+            'program' => $summaryService->summaryMonthlyPrograms($requestedMonthYear),
+            'timesheet' => $summaryService->summaryMonthlyTimesheets($requestedMonthYear),
+            'activity' => $summaryService->summaryMonthlyActivities($requestedMonthYear),
         ];
 
         /* additional information only for non-admin */
         if ( !auth('sanctum')->user()->is_admin )
         {
-            $additional = [ 'total_hours' => $summaryService->summaryTotalSpentMonthlyActivities($month) ];
+            $additional = [ 'total_hours' => $summaryService->summaryTotalSpentMonthlyActivities($requestedMonthYear) ];
             $summary_of = array_merge($summary_of, $additional);
         }
         
