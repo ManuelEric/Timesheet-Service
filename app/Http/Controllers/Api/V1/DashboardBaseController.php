@@ -2,18 +2,12 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Api\V1\Programs\ComponentController as V1ProgramsComponentController;
 use App\Http\Controllers\Controller;
-use App\Http\Traits\MonthCollection;
-use App\Models\Timesheet;
 use App\Services\SummaryService;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 
 class DashboardBaseController extends Controller
 {
-    use MonthCollection;
-
     public function index(
         string $requestedMonthYear, # going to be like '2024-09'
         SummaryService $summaryService

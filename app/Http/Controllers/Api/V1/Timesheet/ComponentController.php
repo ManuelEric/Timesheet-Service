@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\V1\Timesheet;
 
 use App\Http\Controllers\Controller;
-use App\Http\Traits\MonthCollection;
 use App\Models\Timesheet;
 use App\Services\SummaryService;
 use App\Services\Timesheet\TimesheetDataService;
@@ -13,9 +12,6 @@ use Illuminate\Http\Request;
 
 class ComponentController extends Controller
 {
-    use MonthCollection;
-
-
     public function list(
         Request $request,
         TimesheetDataService $timesheetDataService,
