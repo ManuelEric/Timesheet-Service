@@ -1,58 +1,5 @@
 <script setup>
-import { Qalendar } from 'qalendar'
-
-const totalProfit = {
-  title: 'Total Profit',
-  color: 'secondary',
-  icon: 'ri-pie-chart-2-line',
-  stats: '$25.6k',
-  change: 42,
-  subtitle: 'Weekly Project',
-}
-
-const newProject = {
-  title: 'New Project',
-  color: 'primary',
-  icon: 'ri-file-word-2-line',
-  stats: '862',
-  change: -18,
-  subtitle: 'Yearly Project',
-}
-
-const events = ref([
-  {
-    title: 'Advanced algebra',
-    with: 'Chandler Bing',
-    time: { start: '2024-09-16 12:05', end: '2024-09-16 13:35' },
-    colorScheme: 'eduall',
-    isEditable: false,
-    id: '753944708f0f',
-    description:
-      'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Asperiores assumenda corporis doloremque et expedita molestias necessitatibus quam quas temporibus veritatis. Deserunt excepturi illum nobis perferendis praesentium repudiandae saepe sapiente voluptatem!',
-  },
-  {
-    title: 'Ralph on holiday',
-    with: 'Rachel Greene',
-    time: { start: '2024-09-10', end: '2024-09-22' },
-    colorScheme: 'eduall',
-    isEditable: false,
-    id: '5602b6f589fc',
-  },
-])
-
-const config = ref({
-  defaultMode: 'month',
-  style: {
-    colorSchemes: {
-      eduall: {
-        color: '#fff',
-        backgroundColor: '#0000FF',
-      },
-    },
-  },
-})
-
-const date = ref(new Date())
+import VQalendar from '@/components/Qalendar.vue'
 </script>
 
 <template>
@@ -63,10 +10,7 @@ const date = ref(new Date())
     >
       <VCard title="My Calendar">
         <VCardText>
-          <Qalendar
-            :events="events"
-            :config="config"
-          />
+          <VQalendar />
         </VCardText>
       </VCard>
     </VCol>

@@ -20,6 +20,7 @@ declare module 'vue' {
     ErrorHeader: typeof import('./resources/js/components/ErrorHeader.vue')['default']
     MoreBtn: typeof import('./resources/js/@core/components/MoreBtn.vue')['default']
     Program_add: typeof import('./resources/js/components/admin/program/program_add.vue')['default']
+    Qalendar: typeof import('./resources/js/components/Qalendar.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Security: typeof import('./resources/js/components/user/setting/security.vue')['default']
