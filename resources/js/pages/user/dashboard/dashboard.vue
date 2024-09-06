@@ -9,10 +9,11 @@ const loading = ref(false)
 const summarize = ref(null)
 
 const getSummarize = async month => {
-  month = moment(month).format('MMMM')
+  // month = moment(month).format('MMMM')
+
   loading.value = true
   try {
-    const res = await ApiService.get('api/v1/summarize/' + month.toLowerCase())
+    const res = await ApiService.get('api/v1/summarize/' + month)
 
     if (res) {
       summarize.value = res
