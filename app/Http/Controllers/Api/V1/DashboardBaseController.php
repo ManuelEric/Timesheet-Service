@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Api\V1\Programs\ComponentController as V1ProgramsComponentController;
 use App\Http\Controllers\Controller;
 use App\Http\Traits\MonthCollection;
+use App\Models\Timesheet;
 use App\Services\SummaryService;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
@@ -22,8 +23,15 @@ class DashboardBaseController extends Controller
         $summary_of = [
             'program' => $summaryService->summaryMonthlyPrograms($month),
             'timesheet' => $summaryService->summaryMonthlyTimesheets($month),
-            'activity' => $summaryService->summaryMonthlyActivities($month)
+            'activity' => $summaryService->summaryMonthlyActivities($month),
         ];
+
+        /* additional information only for non-admin */
+        if ( !auth('sanctum')->user()->is_admin )
+        {
+            $additional = [ 'total_hours' => $summaryService->summaryTotalSpentMonthlyActivities($month) ];
+            $summary_of = array_merge($summary_of, $additional);
+        }
         
         return response()->json($summary_of, JsonResponse::HTTP_OK);
     }

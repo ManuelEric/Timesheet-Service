@@ -43,6 +43,16 @@ class SummaryService
         return $activity;
     }
 
+    public function summaryTotalSpentMonthlyActivities(string $month): float
+    {
+        /* validate */
+        $this->validateMonth($month);
+
+        $index = array_search($month, $this->month()) + 1;
+        $totalHours = Activity::onSession()->whereMonth('created_at', $index)->sum('time_spent');
+        return $totalHours;
+    }
+
 
     private function validateMonth(string $month)
     {
