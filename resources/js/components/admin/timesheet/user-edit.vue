@@ -188,7 +188,7 @@ onMounted(() => {
               :items="inhouse_mentor"
               :item-props="
                 item => ({
-                  title: item.first_name + ' ' + item.last_name,
+                  title: item.full_name,
                 })
               "
               item-value="uuid"

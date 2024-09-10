@@ -176,9 +176,8 @@ onMounted(() => {
       <VCardText>
         <VForm
           ref="formData"
-          @submit.prevent="checkLogin"
-          validate-on="input"
-          fast-fail
+          @submit.prevent="checkEmail"
+          v-if="!exist_email"
         >
           <VRow>
             <!-- email -->
@@ -193,22 +192,38 @@ onMounted(() => {
 
               <VBtn
                 block
-                type="button"
-                @click="checkEmail"
+                type="submit"
                 class="mt-4"
-                v-if="!exist_email"
                 :loading="loading"
                 :disabled="loading"
               >
                 Check Email
               </VBtn>
             </VCol>
+          </VRow>
+        </VForm>
+
+        <VForm
+          ref="formData"
+          @submit.prevent="checkLogin"
+          validate-on="input"
+          fast-fail
+          v-else
+        >
+          <VRow>
+            <!-- email -->
+            <VCol cols="12">
+              <VTextField
+                v-model="form.email"
+                label="Email"
+                type="email"
+                :disabled="exist_email"
+                :rules="rules.email"
+              />
+            </VCol>
 
             <!-- exist password -->
-            <VCol
-              cols="12"
-              v-if="exist_email && exist_password"
-            >
+            <VCol cols="12">
               <VTextField
                 v-model="form.password"
                 label="Password"
