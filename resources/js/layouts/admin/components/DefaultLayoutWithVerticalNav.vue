@@ -1,11 +1,12 @@
 <script setup>
-import Footer from '@/layouts/components/Footer.vue'
-import NavbarThemeSwitcher from '@/layouts/components/NavbarThemeSwitcher.vue'
 import NavItemsAdmin from '@/layouts/admin/components/NavItemsAdmin.vue'
 import UserProfile from '@/layouts/admin/components/UserProfile.vue'
-import logo from '@images/eduall/eduall.png'
-import VerticalNavLayout from '@layouts/components/VerticalNavLayout.vue'
+import Footer from '@/layouts/components/Footer.vue'
+import NavbarThemeSwitcher from '@/layouts/components/NavbarThemeSwitcher.vue'
 import UserService from '@/services/UserService'
+import logo from '@images/eduall/eduall.png'
+
+import VerticalNavLayout from '@layouts/components/VerticalNavLayout.vue'
 
 const logo_navbar = logo
 

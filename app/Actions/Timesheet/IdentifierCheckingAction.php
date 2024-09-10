@@ -19,8 +19,8 @@ class IdentifierCheckingAction
                     $query->wherePivot('active', 1);
                 }
             ]
-        )->
-        find($timesheetId);
+        )->find($timesheetId);
+        
         if ( !$timesheet ) {
             throw new HttpResponseException(
                 response()->json([

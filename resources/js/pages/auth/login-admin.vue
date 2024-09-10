@@ -46,7 +46,11 @@ const checkLogin = async () => {
       }
       loading.value = false
     } catch (error) {
-      showNotif('error', error.response?.data?.errors?.email, 'bottom-end')
+      if (typeof error.response.data.errors == 'object') {
+        showNotif('error', error.response?.data?.errors?.email, 'bottom-end')
+      } else {
+        showNotif('error', error.response?.data?.errors, 'bottom-end')
+      }
       loading.value = false
       console.error(error)
     }

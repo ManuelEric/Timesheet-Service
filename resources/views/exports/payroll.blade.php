@@ -93,14 +93,37 @@
     @foreach ( $activities as $activity )
     <tr>
         <td valign="middle" align="center" style="border: 1px solid #000;">{{ $loop->iteration }}</td>
-        <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ date('l', strtotime($activity['date'])) }}</td>
-        <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ $activity['date'] }}</td>
+        <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ date('l', strtotime($activity['start_date'])) }}</td>
+        <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ date('Y-m-d', strtotime($activity['start_date'])) }}</td>
         <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ $packageDetails['package_name'] }}</td>
         <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ $activity['start_time'] }}</td>
         <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ $activity['end_time'] }}</td>
-        <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ $activity['estimate'] }}</td>
-        <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ $activity['status'] }}</td>
+        <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ minutesToTimeFormat($activity['estimate']) }}</td>
+        <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ $activity['status'] == 1 ? "done" : "-" }}</td>
     </tr>
     @endforeach
     <!-- Activities end here -->
+
+    <!-- Total cut off date start here -->
+    <tr>
+        <td colspan="8" valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word; background-color: yellow; font-weight: bold;">CUT OFF DATE: {{ strtoupper(date('M d, Y', strtotime($cutoff->created_at))) }}</td>
+    </tr>
+    <!-- Total cut off date end here -->
+
+    <!-- Total hour start here -->
+    <tr>
+        <td colspan="6" valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Total hour</td>
+        <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ minutesToTimeFormat($total_hour) }}</td>
+        <td style="border: 1px solid #000; word-wrap: break-word;"></td>
+    </tr>
+    <!-- Total hour end here -->
+
+    <!-- Total fee start here -->
+    <tr>
+        <td colspan="6" valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Total fee</td>
+        <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Rp {{ number_format($total_fee, 2, ',', '.') }}</td>
+        <td style="border: 1px solid #000; word-wrap: break-word;"></td>
+    </tr>
+    <!-- Total fee end here -->
+
 </table>

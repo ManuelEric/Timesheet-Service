@@ -1,10 +1,11 @@
 <script setup>
-import ApiService from '@/services/ApiService'
-import { rules } from '@/helper/rules'
 import { showNotif } from '@/helper/notification'
+import { rules } from '@/helper/rules'
+import ApiService from '@/services/ApiService'
+import moment from 'moment'
 
 const props = defineProps({ title: String })
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'reload'])
 
 const formData = ref()
 const form = ref({
@@ -33,9 +34,9 @@ const submit = async () => {
   const url = props.title == 'bonus' ? 'api/v1/payment/bonus/create' : 'api/v1/payment/additional-fee/create'
   const { valid } = await formData.value.validate()
   if (valid) {
+    form.value.date = moment(form.value.date).format('YYYY-MM-DD')
     try {
       const res = await ApiService.post(url, form.value)
-      console.log(res)
       if (res) {
         showNotif('success', res.message, 'bottom-end')
       }
@@ -45,6 +46,7 @@ const submit = async () => {
       showNotif('error', err, 'bottom-end')
     } finally {
       emit('close')
+      emit('reload')
     }
   }
 }
@@ -70,29 +72,27 @@ onMounted(() => {
               :items="timesheet_list"
               :item-title="item => item.package_type + ' - ' + item.package_name + ' | ' + item.clients"
               item-value="id"
-              density="compact"
+              variant="solo"
               :rules="rules.required"
               :loading="loading"
               :disabled="loading"
             ></VAutocomplete>
           </VCol>
-          <VCol cols="6">
-            <VTextField
+          <VCol cols="12">
+            <VDateInput
               v-model="form.date"
-              type="date"
+              prepend-icon=""
               label="Date"
               placeholder="Date"
-              density="compact"
+              variant="solo"
               :rules="rules.required"
             />
-          </VCol>
-          <VCol cols="6">
             <VTextField
               v-model="form.fee"
               type="number"
               label="Additional Fee"
               placeholder="Additional Fee"
-              density="compact"
+              variant="solo"
               :rules="rules.required"
             />
           </VCol>

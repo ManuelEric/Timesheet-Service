@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('temp_users', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->string('uuid')->unique();
+            $table->char('uuid', 36)->index();
             $table->string('full_name');
             $table->string('email');
+            $table->string('phone', 15);
             $table->text('password')->nullable();
             $table->boolean('inhouse')->default(false);
             $table->datetime('last_activity')->nullable();

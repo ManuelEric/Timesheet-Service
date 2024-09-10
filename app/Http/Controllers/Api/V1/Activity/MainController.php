@@ -1,25 +1,25 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Http\Controllers\Api\V1\Activity;
 
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use App\Actions\Activity\CreateActivityAction;
 use App\Actions\Activity\IdentifierCheckingAction as IdentifyActivityAction;
 use App\Actions\Authentication\CheckEmailMentorTutorAction;
 use App\Actions\Timesheet\IdentifierCheckingAction as IdentifyTimesheetIdAction;
-use App\Http\Controllers\Controller;
 use App\Http\Traits\TranslateActivityStatus;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use App\Http\Requests\Activity\StoreRequest as StoreActivityRequest;
 use App\Http\Requests\Activity\UpdateRequest as UpdateActivityRequest;
-use App\Models\Activity;
 use App\Services\Activity\ActivityDataService;
 use App\Services\ResponseService;
 use Exception;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\DB;
 
-class ActivityController extends Controller
+class MainController extends Controller
 {
     use TranslateActivityStatus;
 
@@ -40,7 +40,7 @@ class ActivityController extends Controller
     {
         $timesheet = $this->identifyTimesheetIdAction->execute($timesheetId);
 
-        $activities = $activityDataService->listActivities($timesheet);
+        $activities = $activityDataService->listActivitiesByTimesheet($timesheet);
 
         return response()->json($activities);
     }
@@ -70,8 +70,7 @@ class ActivityController extends Controller
         $handleBy = $timesheet->handle_by->last();
         $itsEmail = $handleBy->email;
 
-        [$checkingResult, $userInformation] = $checkEmailMentorTutorAction->execute($itsEmail);
-        
+        $checkEmailMentorTutorAction->execute($itsEmail);
         $createActivityAction->execute($timesheet, $validated);
 
         return response()->json([
@@ -93,7 +92,7 @@ class ActivityController extends Controller
 
         /* calculate spending time */
         $start_date = Carbon::parse($validated['start_date']);
-    $end_date = Carbon::parse($validated['end_date']);
+        $end_date = Carbon::parse($validated['end_date']);
         $time_spent = $start_date->diffInMinutes($end_date);
 
         DB::beginTransaction();
@@ -107,8 +106,12 @@ class ActivityController extends Controller
             $activity->time_spent = $time_spent;
             $activity->meeting_link = $validated['meeting_link'];
 
+            /* update time_spent to 0 when user "uncheck" the status or update to "not yet" */ 
             if ( array_key_exists('status', $validated) )
+            {
                 $activity->status = $validated['status'];
+                $activity->time_spent = $validated['status'] == 0 ? 0 : $time_spent; 
+            } 
 
             $activity->save();
             DB::commit();
@@ -134,6 +137,53 @@ class ActivityController extends Controller
         return response()->json([
             'message' => 'The Activity has been updated successfully.'
         ]);
+    }
+
+    /* the patch method going to handle update status activity */
+    public function patch(
+        $timesheetId,
+        $activityId,
+        Request $request,
+        IdentifyActivityAction $identifyActivityAction,
+        )
+    {
+        
+        $activity = $identifyActivityAction->execute($activityId, $timesheetId);
+        $timesheet = $activity->timesheet;
+
+        $validated = $request->only(['status']);
+        $validatedStatus = $validated['status'];
+
+        if ( $validatedStatus == 1 )
+        {
+            /* initiate variables */
+            $duration = (float) $timesheet->duration; // total minutes of package
+            $total_hours_spent = $timesheet->activities()->whereNot('id', $activityId)->sum('time_spent');
+    
+            $this_activity_start_date = Carbon::parse($activity->start_date);
+            $this_activity_end_date = Carbon::parse($activity->end_date);
+            $x_minutes = $this_activity_start_date->diffInMinutes($this_activity_end_date);
+    
+            /* the time spent would be */
+            $total_time_spent = $total_hours_spent + $x_minutes;
+    
+            if ( $duration < $total_time_spent )
+            {
+                return response()->json([
+                    'message' => 'The specified duration exceeds the maximum limit. Please adjust accordingly.'
+                ], 400);
+            }
+        }
+
+
+        $activity->status = $validatedStatus;
+        $activity->save();
+        
+        return response()->json([
+            'message' => 'The activity has been marked complete.' 
+        ]);
+
+
     }
 
     public function destroy(

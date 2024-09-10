@@ -54,6 +54,13 @@ class User extends Authenticatable
         'logged_out',
     ];
 
+    /**
+     * The attributes that should be appended.
+     * 
+     * 
+     */
+    protected $appends = ['is_admin'];
+
     public static function boot()
     {
         parent::boot();
@@ -93,6 +100,31 @@ class User extends Authenticatable
     public function pivot_user()
     {
         return $this->hasMany(Pic::class, 'user_id', 'id');
+    }
+
+    /**
+     * Custom attributes.
+     * 
+     * 
+     */
+    protected function isAdmin(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => true
+        );
+    }
+
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'is_admin' => 'boolean',
+        ];
     }
 
 }

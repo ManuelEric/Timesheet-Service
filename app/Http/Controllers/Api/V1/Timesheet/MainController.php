@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Http\Controllers\Api\V1\Timesheet;
 
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use App\Actions\Timesheet\CreateTimesheetAction;
 use App\Actions\Timesheet\IdentifierCheckingAction as IdentifyTimesheetIdAction;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\Timesheet\StoreRequest as TimesheetStoreRequest;
 use App\Actions\Timesheet\SelectOrRegisterMentorTutorAction as SelectOrRegisterMentorTutorTimesheetAction;
 use App\Actions\Timesheet\UpdateTimesheetAction;
@@ -15,11 +16,10 @@ use App\Models\Timesheet;
 use App\Services\Activity\ActivityDataService;
 use App\Services\Timesheet\TimesheetDataService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
-class TimesheetController extends Controller
+class MainController extends Controller
 {
     use GenerateTimesheetFileName;
     protected $timesheetDataService;
@@ -62,7 +62,7 @@ class TimesheetController extends Controller
             'pic_id',
             'notes',
             'subject_id',
-        ]); 
+        ]);
 
         /* defines the validated variables */
         $validatedRefPrograms = $validated['ref_id'];
@@ -150,42 +150,11 @@ class TimesheetController extends Controller
     {
         $timesheet = $identifyTimesheetIdAction->execute($timesheetId);
         $detailTimesheet = $timesheetDataService->detailTimesheet($timesheet);
-        $timesheetActivities = $activityDataService->listActivities($timesheet);
+        $timesheetActivities = $activityDataService->listActivitiesByTimesheet($timesheet);
 
         // $filename = $this->generateFileName($mappedTimesheetData);
         $filename = 'Timesheet_' . date('YmdHis') . '.xlsx';
 
         return Excel::download(new TimesheetExport($detailTimesheet, $timesheetActivities), $filename);
-    }
-
-    /**
-     * The components.
-     */
-    public function component(TimesheetDataService $timesheetDataService): JsonResponse
-    {
-        $timesheets = Timesheet::has('ref_program')->get();
-        $mappedComponents = $timesheets->map(function ($data) use ($timesheetDataService)
-        {
-            /* initialize variables */
-            $detailTimesheet = $timesheetDataService->detailTimesheet($data);
-            unset($detailTimesheet['editableColumns']);
-
-            /* manipulate variables */
-            $clients = count($detailTimesheet['clientProfile']) > 1 ? "Group" : $detailTimesheet['clientProfile'][0]['client_name'];
-            $programName = $detailTimesheet['packageDetails']['program_name'];
-            $packageType = $detailTimesheet['packageDetails']['package_type'];
-            $packageName = $detailTimesheet['packageDetails']['package_name'];
-
-            return [
-                'id' => $data->id,
-                'clients' => $clients,
-                'program_name' => $programName,
-                'package_type' => $packageType,
-                'package_name' => $packageName,
-            ];
-        }); 
-
-    
-        return response()->json($mappedComponents);
     }
 }

@@ -42,10 +42,6 @@ class UpdateRequest extends FormRequest
         $activity_id = $this->route('activity');
         $input_startDate = $this->input('start_date');
         $input_endDate = $this->input('end_date');
-        $dateParams = [
-            'start' => Carbon::parse($input_startDate),
-            'end' => $input_endDate ? Carbon::parse($input_endDate) : null,
-        ];
         
         return [
             'activity' => 'required',
@@ -54,17 +50,15 @@ class UpdateRequest extends FormRequest
                 'required',
                 'date',
                 'date_format:Y-m-d H:i:s',
-                new ExistStartDateActivities('POST', $timesheet_id, $activity_id),
-                new LimitedDurationActivity($timesheet_id, $dateParams)
+                new ExistStartDateActivities('PUT', $timesheet_id, $activity_id),
             ],
             'end_date' => [
                 'nullable', 
                 'date', 
                 'date_format:Y-m-d H:i:s',
-                'after:start_date',
-                new LimitedDurationActivity($timesheet_id, $dateParams),
+                'after_or_equal:date',
             ],
-            'meeting_link' => 'required|active_url',
+            'meeting_link' => 'nullable|active_url',
             'status' => [
                 'nullable', 
                 'integer',

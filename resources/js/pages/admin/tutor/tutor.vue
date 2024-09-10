@@ -6,6 +6,7 @@ import avatar2 from '@images/avatars/avatar-2.png'
 import avatar3 from '@images/avatars/avatar-3.png'
 import avatar4 from '@images/avatars/avatar-4.png'
 import avatar5 from '@images/avatars/avatar-5.png'
+import debounce from 'lodash/debounce'
 
 // Start Variable
 const avatars = [avatar1, avatar2, avatar3, avatar4, avatar5]
@@ -38,10 +39,10 @@ const getData = async () => {
   }
 }
 
-const searchData = async () => {
+const searchData = debounce(async () => {
   currentPage.value = 1
   await getData()
-}
+}, 500)
 
 const checkEmail = async email => {
   try {
@@ -63,10 +64,10 @@ const updateInhouse = async (uuid, value, email) => {
 
     if (res) {
       showNotif('success', res.message, 'bottom-end')
-      await getData()
     }
   } catch (error) {
     console.error(error)
+    showNotif('error', error.response?.data?.errors, 'bottom-end')
   }
 }
 // End Function
@@ -95,7 +96,7 @@ onMounted(() => {
             variant="solo"
             hide-details
             single-line
-            @change="searchData"
+            @input="searchData"
           ></VTextField>
         </div>
       </div>
@@ -139,7 +140,7 @@ onMounted(() => {
                 class="avatar-center me-3"
                 :image="avatars[index % 5]"
               />
-              {{ item.first_name + ' ' + item.last_name }}
+              {{ item.full_name }}
             </td>
             <td
               class="text-start"
@@ -163,7 +164,7 @@ onMounted(() => {
                 v-for="(role, index) in item.roles"
                 :key="index"
               >
-                {{ role.role }}
+                {{ role.name }}
                 <!-- Menambahkan koma jika bukan item terakhir -->
                 <span v-if="index < item.roles.length - 1">, </span>
               </span>
@@ -172,6 +173,7 @@ onMounted(() => {
               <VSwitch
                 v-model="item.inhouse"
                 @update:modelValue="updateInhouse(item.uuid, item.inhouse, item.email)"
+                :value="1"
               ></VSwitch>
             </td>
             <td
@@ -213,12 +215,26 @@ onMounted(() => {
                       <!-- Start Tutor  -->
                       <VTable
                         density="compact"
-                        v-if="item.roles.findIndex(role => role.role === 'Tutor') >= 0"
+                        v-if="item.roles.findIndex(role => role.name === 'Tutor') >= 0"
                       >
                         <thead>
                           <tr>
-                            <th class="text-left">Subject Tutoring</th>
-                            <th class="text-end">Fee/Hours</th>
+                            <th
+                              class="text-left"
+                              nowrap
+                            >
+                              Subject Tutoring
+                            </th>
+                            <th nowrap>Grade</th>
+                            <th nowrap>Head</th>
+                            <th nowrap>Fee Individual</th>
+                            <th nowrap>Fee Group</th>
+                            <th
+                              nowrap
+                              class="text-end"
+                            >
+                              Additional Fee
+                            </th>
                           </tr>
                         </thead>
                         <tbody>
@@ -227,13 +243,20 @@ onMounted(() => {
                             :key="index"
                           >
                             <tr
-                              v-if="sub_item.role == 'Tutor'"
-                              v-for="(subject, index) in sub_item.subjects"
-                              :key="index"
+                              v-if="sub_item.name == 'Tutor'"
+                              v-for="subject in sub_item.subjects"
+                              :key="subject"
                             >
-                              <td>{{ subject.name }}</td>
-                              <td class="text-end">
-                                {{ subject.fee_hours.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' }) }}
+                              <td nowrap>{{ subject.tutor_subject }}</td>
+                              <td nowrap>{{ subject.grade }}</td>
+                              <td nowrap>{{ subject.head }}</td>
+                              <td nowrap>Rp. {{ new Intl.NumberFormat('id-ID').format(subject.fee_individual) }}</td>
+                              <td nowrap>Rp. {{ new Intl.NumberFormat('id-ID').format(subject.fee_group) }}</td>
+                              <td
+                                class="text-end"
+                                nowrap
+                              >
+                                Rp. {{ new Intl.NumberFormat('id-ID').format(subject.additional_fee) }}
                               </td>
                             </tr>
                           </template>

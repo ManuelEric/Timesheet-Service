@@ -51,4 +51,13 @@ class TempUserRoles extends Model
     {
         $query->where('role', 'Tutor')->whereNotNull('tutor_subject');
     }
+
+    public function scopeOnSearch(Builder $query, $search = []): void
+    {
+        $mentor_id = $search['mentor_id'] ?? false;
+        $query->
+            when( $mentor_id, function ($_sub_) use ($mentor_id) {
+                $_sub_->where('temp_user_id', $mentor_id);
+            });
+    }
 }

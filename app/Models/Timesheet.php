@@ -88,6 +88,7 @@ class Timesheet extends Model
         $program_name = $search['program_name'] ?? false;
         $package_id = $search['package_id'] ?? false;
         $keyword = $search['keyword'] ?? false;
+        $mentor_id = $search['mentor_id'] ?? false;
 
         $query->
             when( $program_name, function ($_sub_) use ($program_name) {
@@ -112,6 +113,11 @@ class Timesheet extends Model
                                 $___sub___->where('student_name', 'like', '%'.$keyword.'%')->orWhere('student_school', 'like', '%'.$keyword.'%');
                         });
                     });
+            })->
+            when( $mentor_id, function ($_sub_) use ($search) {
+                $_sub_->whereHas('subject', function ($__sub__) use ($search) {
+                    $__sub__->onSearch($search);
+                });
             });
 
     }
@@ -127,5 +133,34 @@ class Timesheet extends Model
     {
         $minutes = $hours * 60;
         $query->whereRaw("duration - sum_activity_time_based_on_timesheet(id) = {$minutes}");
+    }
+
+    public function scopeOnSession(Builder $query): void
+    {
+        /* user auth information */
+        $isAdmin = auth('sanctum')->user()->is_admin;
+        
+        $query->when( !$isAdmin, function ($_sub_) {
+
+            $tempUserUuid = auth('sanctum')->user()->uuid;
+
+            $_sub_->
+                where('inhouse_id', $tempUserUuid)->
+                orWhere(function ($__sub__) use ($tempUserUuid) {
+                    $__sub__->handleBy($tempUserUuid);
+                });
+        });
+    }
+
+    public function scopeFilterCutoff(Builder $query, array $search = []): void
+    {
+        $cutoff_start = $search['cutoff_start'] ?? false;
+        $cutoff_end = $search['cutoff_end'] ?? false;
+
+        $query->when( $cutoff_start && $cutoff_end, function ($_sub_) use ($search) {
+            $_sub_->whereHas('activities', function ($__sub__) use ($search) {
+                $__sub__->onSearch($search);
+            });
+        });
     }
 }

@@ -1,8 +1,9 @@
 <script setup>
-import { showNotif } from '@/helper/notification'
-import { rules } from '@/helper/rules'
-import ApiService from '@/services/ApiService'
+import { showNotif } from '@/helper/notification';
+import { rules } from '@/helper/rules';
+import ApiService from '@/services/ApiService';
 
+const props = defineProps({ selected: Object })
 const emit = defineEmits(['close', 'reload'])
 
 const loading = ref(false)
@@ -13,10 +14,11 @@ const package_list = ref([])
 const pic_list = ref([])
 const inhouse_mentor = ref([])
 const duration_readonly = ref(false)
+const require = props.selected[0]?.require?.toLowerCase()
 
 const formData = ref()
 const form = ref({
-  ref_id: [],
+  ref_id: props.selected.map(item => item.id),
   mentortutor_email: null,
   subject_id: null,
   inhouse_id: null,
@@ -27,7 +29,9 @@ const form = ref({
 })
 
 const getTutor = async (inhouse = false) => {
-  const url = inhouse ? 'api/v1/user/mentor-tutors?inhouse=true' : 'api/v1/user/mentor-tutors'
+  const url = inhouse
+    ? 'api/v1/user/mentor-tutors?inhouse=true&role=' + require
+    : 'api/v1/user/mentor-tutors?role=' + require
   try {
     const res = await ApiService.get(url)
     if (res) {
@@ -44,7 +48,7 @@ const getTutor = async (inhouse = false) => {
 
 const getPackage = async () => {
   try {
-    const res = await ApiService.get('api/v1/package/component/list')
+    const res = await ApiService.get('api/v1/package/component/list?category=' + require)
     if (res) {
       package_list.value = res
     }
@@ -78,15 +82,20 @@ const getPIC = async () => {
   }
 }
 
-const getSubject = async uuid => {
+const getSubject = async (item, uuid = null) => {
   form.value.subject_id = null
-  try {
-    const res = await ApiService.get('api/v1/user/mentor-tutors/' + uuid + '/subjects')
-    if (res) {
-      subjects.value = res
+
+  if (require == 'mentor') {
+    form.value.subject_id = item[0].subjects[0].id
+  } else {
+    try {
+      const res = await ApiService.get('api/v1/user/mentor-tutors/' + uuid + '/subjects')
+      if (res) {
+        subjects.value = res
+      }
+    } catch (error) {
+      console.error(error)
     }
-  } catch (error) {
-    console.error(error)
   }
 }
 
@@ -97,15 +106,12 @@ const submit = async () => {
   // console.log(form.value)
   const { valid } = await formData.value.validate()
   if (valid) {
-    // set ref id first
-    form.value.ref_id = selected.value
-
     try {
       const res = await ApiService.post('api/v1/timesheet/create', form.value)
       if (res) {
         showNotif('success', res.message, 'bottom-end')
+        emit('reload')
         selected.value = []
-        dialog.value = false
         form.value = {
           ref_id: [],
           mentortutor_email: null,
@@ -117,22 +123,15 @@ const submit = async () => {
           pic_id: [],
         }
         tutor_selected.value = []
-        getData()
       }
     } catch (error) {
+      console.log(error);
       if (error?.response?.data?.errors) {
         const validationErrors = error.response.data.errors
-        let errorMessage = 'Validation errors:'
-
-        // Merge validation errors
-        for (const key in validationErrors) {
-          if (validationErrors.hasOwnProperty(key)) {
-            errorMessage += `\n${key}: ${validationErrors[key].join(', ')}`
-          }
-        }
-        showNotif('error', errorMessage, 'bottom-end')
+        showNotif('error', validationErrors, 'bottom-end')
       }
     } finally {
+      emit('close')
       loading.value = false
     }
   }
@@ -162,28 +161,29 @@ onMounted(() => {
         <VRow>
           <VCol md="12">
             <VAutocomplete
-              density="compact"
+              variant="solo"
               clearable
               v-model="tutor_selected"
               label="Mentor/Tutor"
               :items="tutor_list"
               :item-props="
                 item => ({
-                  title: item.first_name + ' ' + item.last_name,
+                  title: item.full_name,
+                  subtitle: item.roles.map(role => role.name).join(', '),
                 })
               "
               :rules="rules.required"
               :loading="loading"
               :disabled="loading"
-              @update:modelValue="getSubject(tutor_selected.uuid)"
+              @update:modelValue="getSubject(tutor_selected.roles, tutor_selected.uuid)"
             ></VAutocomplete>
           </VCol>
           <VCol
             md="12"
-            v-if="subjects.length > 0"
+            v-if="props.selected[0]?.require?.toLowerCase() == 'tutor'"
           >
             <VAutocomplete
-              density="compact"
+              variant="solo"
               clearable
               v-model="form.subject_id"
               label="Subject Tutoring"
@@ -197,13 +197,16 @@ onMounted(() => {
           </VCol>
           <VCol md="8">
             <VAutocomplete
-              density="compact"
+              variant="solo"
               clearable
               label="Package"
               v-model="form.package_id"
               :items="package_list"
               :item-props="
-                item => ({ title: item.package != null ? item.type_of + ' - ' + item.package : item.type_of })
+                item => ({
+                  title: item.package != null ? item.type_of + ' - ' + item.package : item.type_of,
+                  subtitle: item.detail ? item.detail / 60 + ' Hours' : 'Customizable',
+                })
               "
               item-value="id"
               :rules="rules.required"
@@ -215,7 +218,7 @@ onMounted(() => {
           <VCol md="4">
             <VTextField
               type="number"
-              density="compact"
+              variant="solo"
               clearable
               :label="+form.duration / 60 ? 'Minutes (' + form.duration / 60 + ' Hours)' : 'Minutes'"
               :readonly="duration_readonly"
@@ -225,14 +228,14 @@ onMounted(() => {
           </VCol>
           <VCol md="12">
             <VAutocomplete
-              density="compact"
+              variant="solo"
               clearable
               v-model="form.inhouse_id"
               label="Inhouse Mentor/Tutor"
               :items="inhouse_mentor"
               :item-props="
                 item => ({
-                  title: item.first_name + ' ' + item.last_name,
+                  title: item.full_name,
                 })
               "
               item-value="uuid"
@@ -243,7 +246,7 @@ onMounted(() => {
           </VCol>
           <VCol md="12">
             <VAutocomplete
-              density="compact"
+              variant="solo"
               multiple
               clearable
               chips
@@ -261,12 +264,12 @@ onMounted(() => {
             <VTextarea
               label="Notes"
               v-model="form.notes"
+              variant="solo"
             ></VTextarea>
           </VCol>
         </VRow>
 
-        <VDivider class="my-3" />
-        <VCardActions>
+        <VCardActions class="mt-5">
           <VBtn
             color="error"
             type="button"

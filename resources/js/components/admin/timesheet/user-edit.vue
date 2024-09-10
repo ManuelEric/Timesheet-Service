@@ -4,16 +4,15 @@ import { rules } from '@/helper/rules'
 import ApiService from '@/services/ApiService'
 
 const prop = defineProps(['id', 'item', 'package_id'])
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'reload'])
 
-const tutor_selected = ref([prop.item?.tutormentor_id])
 const tutor_list = ref([])
-const subjects = ref([])
 const package_list = ref([])
 const pic_list = ref([])
 const inhouse_mentor = ref([])
 const duration_readonly = ref(false)
 const loading = ref(true)
+const loading_select = ref(true)
 
 const formData = ref()
 const form = ref({
@@ -26,11 +25,8 @@ const form = ref({
   pic_id: prop.item?.pic_id,
 })
 
-const closeDialogContent = () => {
-  emit('close')
-}
-
 const getTutor = async (inhouse = false) => {
+  loading_select.value = true
   const url = inhouse ? 'api/v1/user/mentor-tutors?inhouse=true' : 'api/v1/user/mentor-tutors'
   try {
     const res = await ApiService.get(url)
@@ -43,10 +39,13 @@ const getTutor = async (inhouse = false) => {
     }
   } catch (error) {
     console.error(error)
+  } finally {
+    loading_select.value = false
   }
 }
 
 const getPackage = async () => {
+  loading_select.value = true
   try {
     const res = await ApiService.get('api/v1/package/component/list')
     if (res) {
@@ -54,6 +53,8 @@ const getPackage = async () => {
     }
   } catch (error) {
     console.error(error)
+  } finally {
+    loading_select.value = false
   }
 }
 
@@ -72,6 +73,7 @@ const checkPackage = () => {
 }
 
 const getPIC = async () => {
+  loading_select.value = true
   try {
     const res = await ApiService.get('api/v1/user/component/list')
     if (res) {
@@ -79,6 +81,8 @@ const getPIC = async () => {
     }
   } catch (error) {
     console.error(error)
+  } finally {
+    loading_select.value = false
   }
 }
 
@@ -88,8 +92,6 @@ const submit = async () => {
     try {
       const res = await ApiService.put('api/v1/timesheet/' + prop.id + '/update', form.value)
       if (res) {
-        showNotif('success', res.message, 'bottom-end')
-        console.log(res)
         form.value = {
           mentortutor_email: null,
           subject_id: null,
@@ -99,10 +101,11 @@ const submit = async () => {
           notes: '',
           pic_id: [],
         }
-        closeDialogContent()
+        showNotif('success', res.message, 'bottom-end')
+        emit('reload')
       }
     } catch (error) {
-      console.log(error)
+      // console.log(error)
       if (error?.response?.data?.errors) {
         const validationErrors = error.response.data.errors
         let errorMessage = 'Validation errors:'
@@ -115,6 +118,8 @@ const submit = async () => {
         }
         showNotif('error', errorMessage, 'bottom-end')
       }
+    } finally {
+      emit('close')
     }
   }
 }
@@ -136,24 +141,19 @@ onMounted(() => {
     <DialogCloseBtn
       variant="text"
       size="default"
-      @click="closeDialogContent"
+      @click="emit('close')"
     />
 
     <VCardText>
-      <VSkeletonLoader
-        type="heading, list-item-three-line, actions"
-        v-if="loading"
-      />
       <VForm
         @submit.prevent="submit"
         ref="formData"
         validate-on="input"
-        v-else
       >
         <VRow>
           <VCol md="8">
             <VAutocomplete
-              density="compact"
+              variant="solo"
               clearable
               label="Package"
               v-model="form.package_id"
@@ -164,12 +164,14 @@ onMounted(() => {
               item-value="id"
               :rules="rules.required"
               @update:modelValue="checkPackage"
+              :loading="loading_select"
+              :disabled="loading_select"
             ></VAutocomplete>
           </VCol>
           <VCol md="4">
             <VTextField
               type="number"
-              density="compact"
+              variant="solo"
               clearable
               :label="+form.duration / 60 ? 'Minutes (' + form.duration / 60 + ' Hours)' : 'Minutes'"
               :readonly="duration_readonly"
@@ -179,23 +181,25 @@ onMounted(() => {
           </VCol>
           <VCol md="12">
             <VAutocomplete
-              density="compact"
+              variant="solo"
               clearable
               v-model="form.inhouse_id"
               label="Inhouse Mentor/Tutor"
               :items="inhouse_mentor"
               :item-props="
                 item => ({
-                  title: item.first_name + ' ' + item.last_name,
+                  title: item.full_name,
                 })
               "
               item-value="uuid"
               :rules="rules.required"
+              :loading="loading_select"
+              :disabled="loading_select"
             ></VAutocomplete>
           </VCol>
           <VCol md="12">
             <VAutocomplete
-              density="compact"
+              variant="solo"
               multiple
               clearable
               chips
@@ -205,12 +209,15 @@ onMounted(() => {
               item-title="full_name"
               item-value="id"
               :rules="rules.required"
+              :loading="loading_select"
+              :disabled="loading_select"
             ></VAutocomplete>
           </VCol>
           <VCol md="12">
             <VTextarea
               label="Notes"
               v-model="form.notes"
+              variant="solo"
             ></VTextarea>
           </VCol>
         </VRow>
@@ -220,7 +227,7 @@ onMounted(() => {
           <VBtn
             color="error"
             type="button"
-            @click="closeDialogContent"
+            @click="emit('close')"
           >
             <VIcon
               icon="ri-close-line"

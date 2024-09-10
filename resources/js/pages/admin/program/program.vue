@@ -1,8 +1,8 @@
 <script setup>
-import { showNotif } from '@/helper/notification'
-import { rules } from '@/helper/rules'
-import ApiService from '@/services/ApiService'
 import program from '@/components/admin/program/program_add.vue'
+import { showNotif } from '@/helper/notification'
+import ApiService from '@/services/ApiService'
+import debounce from 'lodash/debounce'
 
 // Start Variable
 const selected = ref([])
@@ -64,10 +64,10 @@ const getProgram = async () => {
   }
 }
 
-const searchData = async () => {
+const searchData = debounce(async () => {
   currentPage.value = 1
   await getData()
-}
+}, 500)
 
 // End Function
 
@@ -90,7 +90,7 @@ onMounted(() => {
       <VRow class="my-1">
         <VCol
           cols="12"
-          md="5"
+          md="3"
         >
           <VAutocomplete
             clearable
@@ -122,16 +122,17 @@ onMounted(() => {
             hide-details
             single-line
             v-model="keyword"
-            @change="searchData"
+            @input="searchData"
           />
         </VCol>
 
         <VCol
           cols="12"
-          md="4"
+          md="6"
           class="text-end"
         >
           <VBtn
+            v-tooltip:start="'Generate Timesheet'"
             density="compact"
             :color="selected.length > 0 ? 'warning' : 'primary'"
             class="mb-2"
@@ -149,7 +150,11 @@ onMounted(() => {
         width="auto"
         persistent
       >
-        <program @close="dialog = false" />
+        <program
+          :selected="selected"
+          @close="dialog = false"
+          @reload="getData"
+        />
       </VDialog>
       <!-- End Assign Modal  -->
 
@@ -186,7 +191,10 @@ onMounted(() => {
             <td>
               <VCheckbox
                 v-model="selected"
-                :value="item.id"
+                :value="{
+                  id: item.id,
+                  require: item.require,
+                }"
                 v-if="!item.timesheet_id"
               ></VCheckbox>
               <VIcon

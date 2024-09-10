@@ -1,7 +1,14 @@
 <script setup>
 import VerticalNavSectionTitle from '@/@layouts/components/VerticalNavSectionTitle.vue'
+import UserService from '@/services/UserService'
 import VerticalNavGroup from '@layouts/components/VerticalNavGroup.vue'
 import VerticalNavLink from '@layouts/components/VerticalNavLink.vue'
+
+const role = ref(null)
+onMounted(() => {
+  const user = UserService.getUser()
+  role.value = user.role
+})
 </script>
 
 <template>
@@ -35,6 +42,7 @@ import VerticalNavLink from '@layouts/components/VerticalNavLink.vue'
       icon: 'ri-honour-line',
       to: '/admin/program',
     }"
+    v-if="role == 'admin' || role == 'super_admin'"
   />
 
   <VerticalNavLink
@@ -50,6 +58,7 @@ import VerticalNavLink from '@layouts/components/VerticalNavLink.vue'
       title: 'Cut-Off',
       icon: 'ri-scissors-cut-line',
     }"
+    v-if="role == 'finance' || role == 'super_admin'"
   >
     <VerticalNavLink
       :item="{
@@ -67,12 +76,4 @@ import VerticalNavLink from '@layouts/components/VerticalNavLink.vue'
       }"
     />
   </VerticalNavGroup>
-
-  <VerticalNavLink
-    :item="{
-      title: 'Account Settings',
-      icon: 'ri-user-settings-line',
-      to: '/admin/account-settings',
-    }"
-  />
 </template>
