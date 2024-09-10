@@ -1,1 +1,0 @@
-import{au as t,C as e,v as s,aN as n}from"./main-BamGvAjg.js";function u(){const o=t(!1);return e(()=>{window.requestAnimationFrame(()=>{o.value=!0})}),{ssrBootStyles:s(()=>o.value?void 0:{transition:"none !important"}),isBooted:n(o)}}export{u};

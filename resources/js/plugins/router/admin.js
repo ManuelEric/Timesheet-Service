@@ -37,11 +37,7 @@ export default [
       {
         path: '/admin/cut-off/completed',
         component: () => import('@/pages/admin/cut-off/completed.vue'),
-      },
-      {
-        path: '/admin/account-settings',
-        component: () => import('@/pages/admin/setting/account.vue'),
-      },
+      }
     ],
   },
   {
