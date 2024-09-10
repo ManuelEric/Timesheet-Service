@@ -8,7 +8,7 @@ import userRoutes from "./user";
 const routes = [...adminRoutes, ...userRoutes];
 
 const router = createRouter({
-  history: createWebHistory("/"),
+  history: createWebHistory('/'),
   routes,
 });
 
