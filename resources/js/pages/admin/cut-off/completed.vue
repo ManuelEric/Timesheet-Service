@@ -417,7 +417,7 @@ onMounted(() => {
             <td>{{ item.activity }}</td>
             <td>{{ item.date }}</td>
             <td>{{ item.mentor_tutor }}</td>
-            <td>{{ item.time_spent > 0 ? item.time_spent / 60 + ' Hours' : '-' }}</td>
+            <td>{{ item.time_spent > 0 ? (item.time_spent / 60).toFixed(2) + ' Hours' : '-' }}</td>
             <td>Rp. {{ new Intl.NumberFormat('id-ID').format(item.fee_hours) }}</td>
             <td>Rp. {{ new Intl.NumberFormat('id-ID').format((item.time_spent / 60) * item.fee_hours) }}</td>
             <td class="text-center">
