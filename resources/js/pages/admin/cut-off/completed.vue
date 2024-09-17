@@ -58,7 +58,7 @@ const getData = async () => {
 
 const searchData = debounce(async () => {
   await getData()
-}, 500)
+}, 1000)
 
 const getPackage = async () => {
   loading.value = true
@@ -133,6 +133,12 @@ const getTimesheet = async () => {
   }
 }
 
+const resetForm = () => {
+  formDownload.value.cut_off_date = []
+  formDownload.value.specific = false
+  formDownload.value.timesheet_id = null
+}
+
 const downloadPayroll = async () => {
   let cut_off_date = formDownload.value.cut_off_date
   let start_date = moment(cut_off_date[0]).format('YYYY-MM-DD')
@@ -168,13 +174,14 @@ const downloadPayroll = async () => {
         window.URL.revokeObjectURL(url)
 
         Swal.close()
-
-        formDownload.value.specific = false
-        formDownload.value.timesheet_id = null
+        showNotif('success', 'Successfully downloaded', 'bottom-end')
       }
     } catch (error) {
-      showNotif('error', error.response?.statusText, 'bottom-end')
+      downloadDialog.value = true
+      showNotif('error', 'Cut-Off date is not found!', 'bottom-end')
       console.log(error)
+    } finally {
+      resetForm()
     }
   }
 }
@@ -198,16 +205,18 @@ onMounted(() => {
       <VRow class="my-1">
         <VCol cols="12">
           <VTextField
+            :clearable="true"
             v-model="keyword"
             placeholder="Search"
             prepend-inner-icon="ri-search-line"
             variant="solo"
+            @click:clear="searchData"
             @input="searchData"
           />
         </VCol>
         <VCol cols="12">
           <VAutocomplete
-            clearable="true"
+            :clearable="true"
             :loading="loading"
             :disabled="loading"
             label="Package Name"
@@ -248,6 +257,7 @@ onMounted(() => {
             multiple="range"
             color="primary"
             variant="solo"
+            :clearable="true"
             @update:modelValue="getData"
           ></VDateInput>
         </VCol>
@@ -413,8 +423,8 @@ onMounted(() => {
               ></VCheckbox>
             </td>
             <td>{{ item.package.type + ' - ' + item.package.name }}</td>
-            <td>{{ item.students }}</td>
             <td>{{ item.activity }}</td>
+            <td>{{ item.students }}</td>
             <td>{{ item.date }}</td>
             <td>{{ item.mentor_tutor }}</td>
             <td>{{ item.time_spent > 0 ? (item.time_spent / 60).toFixed(2) + ' Hours' : '-' }}</td>

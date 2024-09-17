@@ -73,7 +73,7 @@ const getPackage = async () => {
 const searchData = debounce(async () => {
   currentPage.value = 1
   await getData()
-}, 500)
+}, 1000)
 // End Function
 
 onMounted(() => {

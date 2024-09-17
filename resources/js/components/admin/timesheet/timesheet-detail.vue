@@ -190,7 +190,7 @@ onMounted(() => {
               <VCheckbox
                 color="success"
                 v-model="item.status"
-                :value="1"
+                value="1"
                 :false-value="0"
                 v-tooltip:start="item.status ? 'Completed' : 'Not Yet'"
                 @update:modelValue="updateStatus(item)"

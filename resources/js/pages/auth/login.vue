@@ -223,7 +223,10 @@ onMounted(() => {
             </VCol>
 
             <!-- exist password -->
-            <VCol cols="12">
+            <VCol
+              cols="12"
+              v-if="exist_password"
+            >
               <VTextField
                 v-model="form.password"
                 label="Password"

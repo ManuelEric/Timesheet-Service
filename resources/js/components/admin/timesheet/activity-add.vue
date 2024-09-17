@@ -19,6 +19,19 @@ const form = ref({
   meeting_link: null,
 })
 
+const resetForm = () => {
+  form.value = {
+    activity: null,
+    description: null,
+    date: null,
+    start_time: null,
+    end_time: null,
+    start_date: null,
+    end_date: null,
+    meeting_link: null,
+  }
+}
+
 const submit = async () => {
   const { valid } = await formData.value.validate()
   if (valid) {
@@ -44,6 +57,7 @@ const submit = async () => {
         showNotif('error', error.response.data.message, 'bottom-end')
       }
     } finally {
+      resetForm()
       emit('reload')
       emit('close')
     }
