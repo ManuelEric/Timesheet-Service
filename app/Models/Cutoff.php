@@ -56,9 +56,9 @@ class Cutoff extends Model
     {
         $query->where(function ($sub) use ($start, $end) {
             $sub->
-                withinTheCutoffDateRange($start)->
-                orWhere(function ($_sub_) use ($start, $end) {
-                    $_sub_->where('from', $start)->where('to', $end);
+                // withinTheCutoffDateRange($start)->
+                where(function ($_sub_) use ($start, $end) {
+                    $_sub_->where('from', '>=', $start)->where('to', '<=', $end);
                 });
         });
     }

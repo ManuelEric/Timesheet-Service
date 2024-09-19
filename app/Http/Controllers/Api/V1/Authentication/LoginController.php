@@ -22,7 +22,7 @@ class LoginController extends Controller
         ): JsonResponse
     {
         $validated = $request->safe()->only(['email', 'password']);
-
+        
         $authenticate = $this->generateTokenService->createNonAdminToken($validated);
 
         return response()->json($authenticate, JsonResponse::HTTP_OK);

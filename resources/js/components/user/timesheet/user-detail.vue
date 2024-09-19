@@ -1,10 +1,56 @@
-<script setup></script>
+<script setup>
+import { showNotif } from '@/helper/notification'
+import { router } from '@/plugins/router'
+import ApiService from '@/services/ApiService'
+import moment from 'moment'
+
+// Start Variable
+const props = defineProps({ id: String })
+const reloadData = inject('reloadData')
+const updateReload = inject('updateReload')
+const data = ref([])
+const loading = ref(false)
+// End Variable
+
+// Start Function
+const getData = async id => {
+  loading.value = true
+  try {
+    const res = await ApiService.get('api/v1/timesheet/' + id + '/detail')
+    // console.log(res)
+    if (res) {
+      data.value = res
+    }
+  } catch (error) {
+    if (error.response?.status == 400) {
+      showNotif('error', error.response?.data?.errors, 'bottom-end')
+      router.push('/admin/timesheet')
+    }
+    console.log(error)
+  } finally {
+    loading.value = false
+  }
+}
+
+// End Function
+
+onMounted(() => {
+  getData(props.id)
+})
+
+watch(() => {
+  if (reloadData.value) {
+    getData(props.id)
+    updateReload(false)
+  }
+})
+</script>
 
 <template>
   <VCard class="mb-3">
     <VCardTitle class="d-flex justify-between align-center">
       <div class="w-100">
-        <router-link to="/admin/timesheet">
+        <router-link to="/user/timesheet">
           <VIcon
             icon="ri-arrow-left-line"
             color="secondary"
@@ -12,11 +58,14 @@
             size="25"
           ></VIcon>
         </router-link>
-        Timesheet - Student Name
+        Timesheet - {{ data.packageDetails?.package_type }}
       </div>
     </VCardTitle>
     <VCardText>
-      <VRow align="center">
+      <VRow
+        align="center"
+        v-if="!loading"
+      >
         <VCol md="7">
           <h4 class="mt-3 font-weight-light">
             <VIcon
@@ -28,26 +77,38 @@
           </h4>
           <hr class="my-2" />
           <VTable density="compact">
-            <tbody>
+            <tbody v-if="data.clientProfile?.length > 1">
+              <tr class="bg-secondary">
+                <td>Name</td>
+                <td>School</td>
+                <td>Grade</td>
+              </tr>
+              <tr v-for="client in data.clientProfile">
+                <td>{{ client.client_name }}</td>
+                <td>{{ client.client_school }}</td>
+                <td>{{ client.client_grade }}</td>
+              </tr>
+            </tbody>
+            <tbody v-else-if="data.clientProfile?.length == 1">
               <tr>
                 <td width="20%">Name</td>
                 <td width="1%">:</td>
-                <td>Student Name</td>
+                <td>{{ data.clientProfile[0].client_name }}</td>
               </tr>
               <tr>
                 <td>School Name</td>
                 <td width="1%">:</td>
-                <td>School Name</td>
+                <td>{{ data.clientProfile[0].client_school }}</td>
               </tr>
               <tr>
                 <td>Grade</td>
                 <td width="1%">:</td>
-                <td>11</td>
+                <td>{{ data.clientProfile[0].client_grade }}</td>
               </tr>
               <tr>
                 <td>Email</td>
                 <td width="1%">:</td>
-                <td>email@email.com</td>
+                <td>{{ data.clientProfile[0].client_mail }}</td>
               </tr>
             </tbody>
           </VTable>
@@ -66,12 +127,14 @@
               <tr>
                 <td width="20%">Program</td>
                 <td width="1%">:</td>
-                <td>Program Name</td>
+                <td>{{ data.packageDetails?.program_name }}</td>
               </tr>
               <tr>
                 <td>Package</td>
                 <td width="1%">:</td>
-                <td>Package Name</td>
+                <td>
+                  {{ data.packageDetails?.package_type + ' - ' + data.packageDetails?.package_name }}
+                </td>
               </tr>
               <tr>
                 <td>Person in Charge</td>
@@ -81,20 +144,21 @@
                     class="ms-4"
                     type="1"
                   >
-                    <li>Intan Prasanty</li>
-                    <li>Nicholas Hendra</li>
+                    <li>{{ data.packageDetails?.pic_name }}</li>
                   </ol>
                 </td>
               </tr>
               <tr>
                 <td>Tutor/Mentor</td>
                 <td width="1%">:</td>
-                <td>Tutor Name</td>
+                <td>{{ data.packageDetails?.tutormentor_name }}</td>
               </tr>
               <tr>
                 <td>Update On</td>
                 <td width="1%">:</td>
-                <td>27 Feb 2024</td>
+                <td>
+                  {{ moment().format('LLL') }}
+                </td>
               </tr>
             </tbody>
           </VTable>
@@ -111,7 +175,9 @@
 
               <VCardText class="d-flex justify-between">
                 <div class="d-flex align-end w-100">
-                  <h1 class="m-0 mb-1 text-white">450</h1>
+                  <h1 class="m-0 mb-1 text-white">
+                    {{ data.packageDetails?.duration_in_minutes }}
+                  </h1>
                   <h4 class="m-0 ms-2 text-white">Minutes</h4>
                 </div>
               </VCardText>
@@ -135,7 +201,9 @@
               </VCardItem>
               <VCardText class="d-flex justify-between">
                 <div class="d-flex align-end w-100">
-                  <h1 class="m-0 mb-1 text-white">240</h1>
+                  <h1 class="m-0 mb-1 text-white">
+                    {{ data.packageDetails?.time_spent_in_minutes }}
+                  </h1>
                   <h4 class="m-0 ms-2 text-white">Minutes</h4>
                 </div>
               </VCardText>
@@ -150,7 +218,6 @@
               </div>
             </VCardText>
           </VCard>
-
           <VCard
             color="#e05e5e"
             class="mb-2 d-flex align-center"
@@ -161,7 +228,9 @@
               </VCardItem>
               <VCardText class="d-flex justify-between">
                 <div class="d-flex align-end w-100">
-                  <h1 class="m-0 mb-1 text-white">230</h1>
+                  <h1 class="m-0 mb-1 text-white">
+                    {{ data.packageDetails?.duration_in_minutes - data.packageDetails?.time_spent_in_minutes }}
+                  </h1>
                   <h4 class="m-0 ms-2 text-white">Minutes</h4>
                 </div>
               </VCardText>
@@ -175,6 +244,33 @@
               </div>
             </VCardText>
           </VCard>
+        </VCol>
+      </VRow>
+
+      <!-- Skeleton Loader  -->
+      <VRow v-else>
+        <VCol md="7">
+          <vSkeletonLoader
+            type="heading, paragraph, heading, paragraph"
+            class="mb-3"
+          />
+        </VCol>
+        <VCol md="5">
+          <vSkeletonLoader
+            type="text@3"
+            color="#16B1FF"
+            class="mb-3"
+          />
+          <vSkeletonLoader
+            type="text@3"
+            color="#91c45e"
+            class="mb-3"
+          />
+          <vSkeletonLoader
+            type="text@3"
+            color="#e05e5e"
+            class="mb-3"
+          />
         </VCol>
       </VRow>
     </VCardText>

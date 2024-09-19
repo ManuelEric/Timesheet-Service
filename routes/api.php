@@ -9,8 +9,12 @@ use App\Http\Controllers\Api\V1\Authentication\CreatePasswordController as V1Cre
 use App\Http\Controllers\Api\V1\MentorTutor\MainController as V1MentorTutorController;
 use App\Http\Controllers\Api\V1\MentorTutor\ComponentController as V1MentorTutorComponentController;
 use App\Http\Controllers\Api\V1\Programs\ListController as V1ProgramsListController;
-use App\Http\Controllers\Api\V1\TimesheetController as V1TimesheetController;
-use App\Http\Controllers\Api\V1\ActivityController as V1ActivitiesController;
+use App\Http\Controllers\Api\V1\Programs\ComponentController as V1ProgramsComponentController;
+use App\Http\Controllers\Api\V1\Timesheet\MainController as V1TimesheetController;
+use App\Http\Controllers\Api\V1\Timesheet\ComponentController as V1TimesheetComponentController;
+use App\Http\Controllers\Api\V1\Activity\MainController as V1ActivitiesController;
+use App\Http\Controllers\Api\V1\Activity\ComponentController as V1ActivitiesComponentController;
+use App\Http\Controllers\Api\V1\LogController;
 use App\Http\Controllers\Api\V1\Packages\ListController as V1PackagesListController;
 use App\Http\Controllers\Api\V1\User\ListController as V1UserListController;
 use App\Http\Controllers\Api\V1\Payment\PaymentController as V1PaymentController;
@@ -18,6 +22,8 @@ use App\Http\Controllers\Api\V1\Payment\CutoffController as V1CutoffController;
 use App\Http\Controllers\Api\V1\Payment\FeeController as V1FeeController;
 use App\Http\Controllers\Api\V1\Payment\BonusController as V1BonusController;
 use App\Http\Controllers\Api\V1\Payment\ExistingCutoffController as V1ExistingCutoffController;
+use App\Http\Controllers\Api\V1\ChangePasswordController as V1ChangePasswordController;
+use App\Http\Controllers\Api\V1\DashboardBaseController as V1DashboardBaseController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -37,9 +43,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::prefix('timesheet')->group(function () {
-
     Route::GET('{timesheet}/export', [V1TimesheetController::class, 'export']);
 });
+
+Route::middleware('auth:sanctum')->get('/summarize/{month}', [V1DashboardBaseController::class, 'index']);
 
 
 /* Authentication */
@@ -54,23 +61,27 @@ Route::prefix('auth')->group(function () {
     Route::middleware(['auth:sanctum'])->group(function () {
         /* Logout */
         Route::GET('terminate', [V1LogoutController::class, 'execute']);
+        
+        /* for tutor mentor only that able to change password */
+        Route::PATCH('change-password', [V1ChangePasswordController::class, 'patch']);
     });
 });
 
 /* Mentor & Tutors */
 Route::prefix('user')->group(function () {
-    Route::middleware(['auth:sanctum', 'abilities:mentortutors-menu,program-menu'])->group(function () {
+    Route::middleware(['auth:sanctum', 'ability:mentortutors-menu,program-menu'])->group(function () {
         /* List Mentor & Tutors */
         Route::GET('mentor-tutors', [V1MentorTutorController::class, 'index']);
         Route::PUT('mentor-tutors/{mentortutor_uuid}', [V1MentorTutorController::class, 'update']);
         
         /**
-         * The Components
+         * The Components.
          */
+
+        /* List PICs */
         Route::prefix('component')->middleware(['abilities:program-menu'])->group(function () {
             Route::GET('list', [V1UserListController::class, 'component']);
         });
-
         /* List subject by Mentor / Tutor */
         Route::GET('mentor-tutors/{mentortutor_uuid}/subjects', [V1MentorTutorComponentController::class, 'comp_subjects']);
         /* List students mentored / tutored by Mentor / Tutor */
@@ -89,7 +100,8 @@ Route::prefix('program')->group(function () {
          * The Components
          */
         Route::prefix('component')->group(function () {
-            Route::GET('list', [V1ProgramsListController::class, 'component']);
+            Route::GET('list', [V1ProgramsComponentController::class, 'list']);
+            Route::GET('summary/{month}', [V1ProgramsComponentController::class, 'summaryMonthlyPrograms'])->withoutMiddleware(['abilities:program-menu']);
         });
     });
 });
@@ -114,7 +126,13 @@ Route::prefix('timesheet')->group(function () {
          * The Components
          */
         Route::prefix('component')->group(function () {
-            Route::GET('list', [V1TimesheetController::class, 'component']);
+            /* timesheet */
+            Route::GET('list', [V1TimesheetComponentController::class, 'list']);
+            Route::GET('summary/{month}', [V1TimesheetComponentController::class, 'summaryMonthlyTimesheet']);
+            
+            /* activity */
+            Route::GET('activity/{month}', [V1ActivitiesComponentController::class, 'monthlyActivities']);
+            Route::GET('activity/summary/{month}', [V1ActivitiesComponentController::class, 'summaryMonthlyActivities']);
         });
 
         /* List Activities of the Timesheet */
@@ -125,6 +143,8 @@ Route::prefix('timesheet')->group(function () {
         Route::POST('{timesheet}/activity', [V1ActivitiesController::class, 'store']);
         /* Update Activity */
         Route::PUT('{timesheet}/activity/{activity}', [V1ActivitiesController::class, 'update']);
+        /* Patch Activity */
+        Route::PATCH('{timesheet}/activity/{activity}', [V1ActivitiesController::class, 'patch']);
         /* Destroy the activity */
         Route::DELETE('{timesheet}/activity/{activity}', [V1ActivitiesController::class, 'destroy']);
     });
@@ -150,7 +170,9 @@ Route::prefix('payment')->group(function () {
             /* Remove the activity from the specified cut-off */
             Route::PATCH('unassign', [V1CutoffController::class, 'unassign']);
             /* Export cut-off */
-            Route::GET('export/{timesheet}/{cutoff_date}', [V1CutoffController::class, 'export'])->withoutMiddleware(['auth:sanctum', 'abilities:payment-menu']);
+            Route::GET('export/{timesheet}/{cutoff_start}/{cutoff_end}', [V1CutoffController::class, 'export'])->withoutMiddleware(['auth:sanctum', 'abilities:payment-menu']);
+            /* Export multiple sheets at the same time */
+            Route::GET('export/{cutoff_start}/{cutoff_end}', [V1CutoffController::class, 'export_multiple'])->withoutMiddleware(['auth:sanctum', 'abilities:payment-menu']);
 
         });
     });
@@ -169,3 +191,6 @@ Route::prefix('package')->group(function () {
 });
 
 Route::POST('identity/generate-token', [V1LoginController::class, 'authenticateNonAdmin']);
+
+/* log everytime user visit any pages */
+Route::middleware('auth:sanctum')->get('visit/{page_name}/{detail?}', [LogController::class, 'index']);

@@ -74,15 +74,16 @@ class Activity extends Model
 
     public function scopeOnSearch(Builder $query, array $search = []): void
     {
-        $cutoff_date = $search['cutoff_date'] ?? false;
+        $cutoff_start = $search['cutoff_start'] ?? false;
+        $cutoff_end = $search['cutoff_end'] ?? false;
 
         $query->
             whereHas('timesheet', function ($sub) use ($search) {
                 $sub->onSearch($search);
             })->
-            when( $cutoff_date, function ($sub) use ($cutoff_date) {
-                $sub->whereHas('cutoff_history', function ($_sub_) use ($cutoff_date) {
-                    $_sub_->withinTheCutoffDateRange($cutoff_date);
+            when( $cutoff_start && $cutoff_end, function ($sub) use ($cutoff_start, $cutoff_end) {
+                $sub->whereHas('cutoff_history', function ($_sub_) use ($cutoff_start, $cutoff_end) {
+                    $_sub_->inBetween($cutoff_start, $cutoff_end);
                 });
             });
     }
@@ -95,5 +96,24 @@ class Activity extends Model
     public function scopeHasNotBeenReminded(Builder $query): void
     {
         $query->doesntHave('reminders');
+    }
+
+    public function scopeOnSession(Builder $query): void
+    {
+        /* user auth information */
+        $isAdmin = (bool) auth('sanctum')->user()->is_admin;
+        
+        $query->when( !$isAdmin, function ($_sub_) {
+
+            $tempUserUuid = auth('sanctum')->user()->uuid;
+
+            $_sub_->whereHas('timesheet', function ($__sub__) use ($tempUserUuid) {
+                $__sub__->
+                    where('inhouse_id', $tempUserUuid)->
+                    orWhere(function ($__sub__) use ($tempUserUuid) {
+                        $__sub__->handleBy($tempUserUuid);
+                    });
+            });
+        });
     }
 }

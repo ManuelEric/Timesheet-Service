@@ -32,7 +32,8 @@ class CutoffExportRequest extends FormRequest
     {
         $data = parent::all();
         $data['timesheet_id'] = $this->route('timesheet');
-        $data['cutoff_date'] = $this->route('cutoff_date');
+        $data['cutoff_start'] = $this->route('cutoff_start');
+        $data['cutoff_end'] = $this->route('cutoff_end');
         return $data;
     }
 
@@ -44,12 +45,9 @@ class CutoffExportRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'timesheet_id' => 'required|exists:timesheets,id',
-            'cutoff_date' => [
-                'required', 
-                'date', 
-                new CutoffMonth
-            ]
+            'timesheet_id' => 'nullable|exists:timesheets,id', # this param is optional
+            'cutoff_start' => 'required|date',
+            'cutoff_end' => 'required|date|after:cutoff_start',
         ];
     }
 
@@ -61,7 +59,8 @@ class CutoffExportRequest extends FormRequest
     {
         return [
             'timesheet_id' => 'timesheet identifier',
-            'cutoff_date' => 'cut-off date',
+            'cutoff_start' => 'cut-off start date',
+            'cutoff_end' => 'cut-off end date',
         ];
     }
 }

@@ -43,6 +43,8 @@ class ActivityObserver implements ShouldHandleEventsAfterCommit
      */
     public function updated(Activity $activity): void
     {
+        $activityId = $activity->id;
+
         /**
          * Listening to 'updated cutoff_ref_id'
          */
@@ -54,7 +56,6 @@ class ActivityObserver implements ShouldHandleEventsAfterCommit
             # not yet meaning unpaid
             if ( $newValue_of_cutoffStatus == 'not yet' && $newValue_of_cutoffrefId == NULL ) #1
             {
-                $activityId = $activity->id;
                 Log::info($this->userName . ' has unassigned the activity no. ' . $activityId );
                 
             } 
@@ -66,9 +67,28 @@ class ActivityObserver implements ShouldHandleEventsAfterCommit
             return;
         }
 
-        $activityId = $activity->id;
-        $endTime = Carbon::parse($activity->end_date)->format('d M Y H:i');
-        Log::info($this->userName . ' just completed the activity no. ' . $activityId . ' at ' . $endTime);
+        /**
+         * Listening to 'updated end_date
+         */
+        if ( $activity->wasChanged('end_date') )
+        {
+            $endTime = $activity->end_date != NULL ? Carbon::parse($activity->end_date)->format('d M Y H:i') : 'NULL';
+            Log::info($this->userName . ' has just updated the end date to ' . $endTime . ' of activity no. ' . $activityId);
+        }
+
+        /**
+         * Listening to 'updated status'
+         */
+        if ( $activity->wasChanged('status') )
+        {
+            if ( $activity->status == 1 )
+                Log::info($this->userName . ' has just completed the activity no. ' . $activityId);
+            else
+                Log::info($this->userName . ' has just undone the completed activity no. ' . $activityId);
+        }
+
+        Log::info($this->userName . ' has just update the activity.');
+
     }
 
     /**

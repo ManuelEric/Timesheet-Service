@@ -1,7 +1,8 @@
 <script setup>
-import ApiService from '@/services/ApiService'
-import { rules } from '@/helper/rules'
 import { showNotif } from '@/helper/notification'
+import { rules } from '@/helper/rules'
+import ApiService from '@/services/ApiService'
+import moment from 'moment'
 
 const emit = defineEmits(['close', 'reload'])
 
@@ -10,6 +11,13 @@ const form = ref({
   start_date: null,
   end_date: null,
 })
+const cut_off_date = ref(null)
+
+const handleDate = () => {
+  form.value.start_date = moment(cut_off_date.value[0]).format('YYYY-MM-DD')
+  form.value.end_date = moment(cut_off_date.value[cut_off_date.value.length - 1]).format('YYYY-MM-DD')
+  console.log(form.value)
+}
 
 const submit = async () => {
   const { valid } = await formData.value.validate()
@@ -20,7 +28,11 @@ const submit = async () => {
         showNotif('success', res.message, 'bottom-end')
       }
     } catch (error) {
-      const err = error?.response?.data?.errors
+      var err = error?.response?.data?.errors
+      if (error?.response?.data?.errors?.end_date) {
+        err = error?.response?.data?.errors?.end_date[0]
+      }
+
       showNotif('error', err, 'bottom-end')
     } finally {
       emit('close')
@@ -37,22 +49,14 @@ const submit = async () => {
         ref="formData"
       >
         <VRow>
-          <VCol cols="6">
-            <VTextField
-              v-model="form.start_date"
-              type="date"
-              label="Start Date"
+          <VCol cols="12">
+            <VDateInput
+              v-model="cut_off_date"
+              variant="solo"
+              label="Start - End Date"
               :rules="rules.required"
-              placeholder="Activity"
-            />
-          </VCol>
-          <VCol cols="6">
-            <VTextField
-              v-model="form.end_date"
-              type="date"
-              label="End Date"
-              :rules="rules.required"
-              placeholder="Activity"
+              multiple="range"
+              @update:modelValue="handleDate"
             />
           </VCol>
         </VRow>

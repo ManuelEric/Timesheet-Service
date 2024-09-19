@@ -19,7 +19,7 @@ class GenerateTokenService
     use HttpCall;
 
     protected $tokenService;
-    
+
     public function __construct(TokenService $tokenService)
     {
         $this->tokenService = $tokenService;
@@ -29,7 +29,7 @@ class GenerateTokenService
     {
         /* call API to identify the user information */
         [$statusCode, $response] = $this->make_call('post', env('CRM_DOMAIN') . 'auth/token', $validated);
-        if ( !$response )
+        if (!$response)
             return response()->json($response, JsonResponse::HTTP_BAD_REQUEST);
 
 
@@ -57,13 +57,14 @@ class GenerateTokenService
 
         /* generate token */
         $tempUser->authenticate();
-        $granted_access = ['timesheet-menu'];
+        $granted_access = ['timesheet-menu', 'program-menu']; #program-menu needed for summary on dashboard
         $token = $tempUser->createToken('user-access', $granted_access)->plainTextToken;
 
         return [
             'full_name' => $tempUser->full_name,
             'email' => $tempUser->email,
-            'role' => $tempUser->role,
+            'role' => $tempUser->roles->first()->role,
+            'role_detail' => $tempUser->roles,
             'granted_token' => $token
         ];
     }

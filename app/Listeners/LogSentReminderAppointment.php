@@ -27,13 +27,19 @@ class LogSentReminderAppointment
     {
         $eventData = $event->data;
 
+        /* when the title was not setup by the mail provider */
+        if ( !array_key_exists('title', $eventData))
+            return;
+        
+            
+
         /* if the email sent was the reminder of appointment */
         switch ( $eventData['title'] )
         {
             case 'Reminder Appointment':
                 if ( !array_key_exists('activityId', $eventData) )
                 {
-                    Log::error('Failed to create a log reminder of appointment cause of activity Id doesn\'t exists.', $eventData);
+                    Log::error('[EMAIL:REMINDER APPOINTMENT] Failed to create a log reminder of appointment cause of activity Id doesn\'t exists.', $eventData);
                     return;
                 }
 
@@ -52,7 +58,7 @@ class LogSentReminderAppointment
                     ]);
                     DB::commit();
                 } catch (Exception $e) {
-                    Log::error('Failed to create a log reminder of appointment cause of the unprocessable entity.', $eventData);
+                    Log::error('[EMAIL:REMINDER APPOINTMENT] Failed to create a log reminder of appointment cause of the unprocessable entity.', $eventData);
                     DB::rollBack();
                     return;
                 }
@@ -61,7 +67,7 @@ class LogSentReminderAppointment
             case 'Reminder Quota':
                 if ( !array_key_exists('timesheetId', $eventData) )
                 {
-                    Log::error('Failed to create a log reminder of quota left cause of timesheet Id doesn\'t exists.', $eventData);
+                    Log::error('[EMAIL:REMINDER QUOTA] Failed to create a log reminder of quota left cause of timesheet Id doesn\'t exists.', $eventData);
                     return;
                 }
 
@@ -80,7 +86,7 @@ class LogSentReminderAppointment
                     ]);
                     DB::commit();
                 } catch (Exception $e) {
-                    Log::error('Failed to create a log reminder of quota-left cause of the unprocessable entity.', $eventData);
+                    Log::error('[EMAIL:REMINDER QUOTA] Failed to create a log reminder of quota-left cause of the unprocessable entity.', $eventData);
                     DB::rollBack();
                     return;
                 }

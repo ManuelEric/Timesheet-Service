@@ -1,12 +1,12 @@
 <script setup>
 import { showNotif } from '@/helper/notification'
 import ApiService from '@/services/ApiService'
-
 import avatar1 from '@images/avatars/avatar-1.png'
 import avatar2 from '@images/avatars/avatar-2.png'
 import avatar3 from '@images/avatars/avatar-3.png'
 import avatar4 from '@images/avatars/avatar-4.png'
 import avatar5 from '@images/avatars/avatar-5.png'
+import debounce from 'lodash/debounce'
 
 // Start Variable
 const avatars = [avatar1, avatar2, avatar3, avatar4, avatar5]
@@ -28,7 +28,7 @@ const package_name = ref()
 const getData = async () => {
   const page = '?page=' + currentPage.value
   const search = keyword.value ? '&keyword=' + keyword.value : ''
-  const program = program_name.value ? '&program_name=' + program_name.value : ''
+  const program = program_name.value ? '&program_name=' + encodeURIComponent(program_name.value) : ''
   const package_search = package_name.value ? '&package_id=' + package_name.value : ''
   const paginate = '&paginate=true'
   try {
@@ -70,10 +70,10 @@ const getPackage = async () => {
   }
 }
 
-const searchData = async () => {
+const searchData = debounce(async () => {
   currentPage.value = 1
   await getData()
-}
+}, 1000)
 // End Function
 
 onMounted(() => {
@@ -88,52 +88,55 @@ onMounted(() => {
     <VCardTitle>
       <div class="d-flex justify-between align-center">
         <div class="w-100">
-          <h4>TimeSheet</h4>
+          <h4>Timesheet List</h4>
         </div>
       </div>
     </VCardTitle>
     <VCardText>
-      <VRow class="my-1 justify-around">
+      <VRow class="my-1 justify-space-between">
         <VCol
           cols="12"
-          md="5"
+          md="6"
         >
-          <VAutocomplete
-            clearable
-            v-model="program_name"
-            label="Program Name"
-            :items="program_list"
-            item-title="program_name"
-            placeholder="Select Program Name"
-            density="compact"
-            variant="solo"
-            hide-details
-            single-line
-            :loading="loading"
-            :disabled="loading"
-            @update:modelValue="getData"
-          />
-        </VCol>
-        <VCol
-          cols="12"
-          md="4"
-        >
-          <VAutocomplete
-            clearable="true"
-            v-model="package_name"
-            label="Package"
-            :items="package_list"
-            :item-props="item => ({ title: item.package != null ? item.type_of + ' - ' + item.package : item.type_of })"
-            item-value="id"
-            placeholder="Select Package"
-            density="compact"
-            variant="solo"
-            hide-details
-            single-line
-            :loading="loading"
-            :disabled="loading"
-            @update:modelValue="getData"
-          />
+          <VRow>
+            <VCol
+              cols="12"
+              md="6"
+            >
+              <VAutocomplete
+                clearable
+                v-model="program_name"
+                label="Program Name"
+                :items="program_list"
+                item-title="program_name"
+                placeholder="Select Program Name"
+                variant="solo"
+                :loading="loading"
+                :disabled="loading"
+                @update:modelValue="getData"
+              />
+            </VCol>
+            <VCol
+              cols="12"
+              md="6"
+            >
+              <VAutocomplete
+                clearable="true"
+                v-model="package_name"
+                label="Package"
+                :items="package_list"
+                :item-props="
+                  item => ({ title: item.package != null ? item.type_of + ' - ' + item.package : item.type_of })
+                "
+                item-value="id"
+                placeholder="Select Package"
+                variant="solo"
+                :loading="loading"
+                :disabled="loading"
+                @update:modelValue="getData"
+              />
+            </VCol>
+          </VRow>
         </VCol>
         <VCol
           cols="12"
@@ -143,13 +146,12 @@ onMounted(() => {
             :loading="loading"
             :disabled="loading"
             append-inner-icon="ri-search-line"
-            density="compact"
             label="Search"
             variant="solo"
             hide-details
             single-line
             v-model="keyword"
-            @change="searchData"
+            @input="searchData"
           />
         </VCol>
       </VRow>
@@ -268,11 +270,7 @@ onMounted(() => {
             </td>
             <td>
               <router-link :to="'/admin/timesheet/' + item.id">
-                <VBtn
-                  color="secondary"
-                  density="compact"
-                  v-tooltip="'Tooltip'"
-                >
+                <VBtn color="secondary">
                   <VIcon
                     icon="ri-timeline-view"
                     class="cursor-pointer"
@@ -308,7 +306,6 @@ onMounted(() => {
           :length="totalPage"
           :total-visible="4"
           color="primary"
-          density="compact"
           :show-first-last-page="false"
           @update:modelValue="getData"
         />

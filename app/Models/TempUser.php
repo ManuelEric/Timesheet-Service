@@ -8,6 +8,8 @@ use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
@@ -31,6 +33,7 @@ class TempUser extends Authenticatable implements CanResetPassword
         'uuid',
         'full_name',
         'email',
+        'phone',
         'password',
         'role',
         'inhouse',
@@ -56,6 +59,13 @@ class TempUser extends Authenticatable implements CanResetPassword
         'logged_out',
     ];
 
+    /**
+     * The attributes that should be appended.
+     * 
+     * 
+     */
+    protected $appends = ['is_admin'];
+
     public static function boot()
     {
         parent::boot();
@@ -70,6 +80,7 @@ class TempUser extends Authenticatable implements CanResetPassword
         });
 
     }
+
 
     /**
      * Authenticate & fire custom event
@@ -86,6 +97,7 @@ class TempUser extends Authenticatable implements CanResetPassword
     {
         $this->fireModelEvent('logged_out', false);
     }
+
 
     /**
      * The relations.
@@ -113,4 +125,62 @@ class TempUser extends Authenticatable implements CanResetPassword
         return $this->hasMany(HandleBy::class, 'temp_user_id', 'id');
     }
 
+
+    /**
+     * The scopes.
+     */
+    public function scopeIsInhouse(Builder $query, $inhouse): void
+    {
+        $query->where('inhouse', $inhouse);
+    }
+
+    public function scopeOnSearch(Builder $query, array $search = []): void
+    {
+        $keyword = array_key_exists('keyword', $search) ? $search['keyword'] : false;
+        $role = array_key_exists('role', $search) ? $search['role'] : false;
+        $inhouse = array_key_exists('inhouse', $search) ? $search['inhouse'] === 'true' ? 1 : 0  : null;
+        
+        $query->
+            when($keyword, function ($sub) use ($keyword) {
+                $sub->
+                    whereRaw("full_name LIKE '%{$keyword}%'")->
+                    orWhereRaw("email LIKE '%{$keyword}%'");
+            })->
+            when($role, function ($sub) use ($role) {
+                $sub->whereHas('roles', function ($_sub_) use ($role) {
+                    $_sub_->whereRaw("LOWER(role) = '{$role}'");
+                });
+            })->
+            # for boolean check, its a bit tricky
+            # so the trick is to compared to null value here
+            when($inhouse !== null, function ($sub) use ($inhouse) {
+                $sub->isInhouse($inhouse);
+            });
+    }
+
+
+    /**
+     * Custom attributes.
+     * 
+     * 
+     */
+    protected function isAdmin(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => false
+        );
+    }
+
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'is_admin' => 'boolean',
+        ];
+    }
 }

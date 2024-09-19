@@ -1,12 +1,13 @@
 <script setup>
-import AddActivity from '@/components/admin/timesheet/activity-add.vue'
-import EditActivity from '@/components/admin/timesheet/activity-edit.vue'
 import DeleteDialog from '@/components/DeleteHandler.vue'
 import { showNotif } from '@/helper/notification'
 import ApiService from '@/services/ApiService'
+import AddActivity from './activity-add.vue'
+import EditActivity from './activity-edit.vue'
 
 // Start Variable
 const props = defineProps({ id: String })
+const updateReload = inject('updateReload')
 const data = ref([])
 const loading = ref(false)
 
@@ -23,7 +24,7 @@ const selectedItem = ref([])
 
 // Start Function
 const getData = async () => {
-  loading.value = false
+  loading.value = true
   try {
     const res = await ApiService.get('api/v1/timesheet/' + props.id + '/activities')
     if (res) {
@@ -32,7 +33,7 @@ const getData = async () => {
   } catch (error) {
     console.error(error)
   } finally {
-    loading.value = true
+    loading.value = false
   }
 }
 
@@ -42,8 +43,6 @@ const toggleDialog = type => {
   } else {
     isDialogVisible.value[type] = false
   }
-
-  getData()
 }
 
 const selectedActivity = (type, item) => {
@@ -62,6 +61,9 @@ const deleteActivity = async () => {
     if (error.response?.status == 400) {
       showNotif('error', error.response?.data?.errors, 'bottom-end')
     }
+  } finally {
+    getData()
+    updateReload(true)
   }
 }
 
@@ -71,7 +73,6 @@ const updateStatus = async item => {
 
     if (res) {
       showNotif('success', res.message, 'bottom-end')
-      getData()
     }
   } catch (error) {
     if (error?.response?.data?.errors) {
@@ -90,6 +91,9 @@ const updateStatus = async item => {
         showNotif('error', error.response.data.errors, 'bottom-end')
       }
     }
+  } finally {
+    getData()
+    updateReload(true)
   }
 }
 
@@ -107,17 +111,10 @@ onMounted(() => {
           <h4>Activity</h4>
         </div>
         <VBtn
-          density="compact"
+          v-tooltip:start="'New Activity'"
           @click="toggleDialog('add')"
         >
           <VIcon icon="ri-add-line" />
-          <VTooltip
-            activator="parent"
-            location="bottom"
-            transition="scroll-x-transition"
-          >
-            New Activity
-          </VTooltip>
         </VBtn>
         <!-- Add Dialog -->
         <VDialog
@@ -128,6 +125,7 @@ onMounted(() => {
           <AddActivity
             :id="props.id"
             @close="toggleDialog('add')"
+            @reload="getData"
           />
         </VDialog>
       </div>
@@ -137,6 +135,7 @@ onMounted(() => {
         class="text-no-wrap"
         height="400"
         fixed-header
+        v-if="!loading"
       >
         <thead>
           <tr>
@@ -187,70 +186,50 @@ onMounted(() => {
               />
               {{ item.estimate }} Minutes
             </td>
-            <td nowrap>
+            <td>
               <VCheckbox
                 color="success"
                 v-model="item.status"
-                :value="1"
+                value="1"
                 :false-value="0"
+                v-tooltip:start="item.status ? 'Completed' : 'Not Yet'"
                 @update:modelValue="updateStatus(item)"
-              >
-                <template v-slot:label>
-                  <VChip
-                    :color="item.status ? '#91C45E' : '#e05e5e'"
-                    class="font-weight-medium"
-                    size="small"
-                  >
-                    {{ item.status ? 'Completed' : 'Not Yet' }}
-                  </VChip>
-                </template>
-              </VCheckbox>
+              />
             </td>
             <td class="text-end">
               <VBtn
                 color="warning"
                 density="compact"
                 class="me-1"
+                v-tooltip:start="'Edit Activity'"
                 @click="selectedActivity('edit', item)"
               >
                 <VIcon
                   icon="ri-edit-line"
                   class="cursor-pointer"
-                  v-bind="activatorProps"
                 />
-
-                <VTooltip
-                  activator="parent"
-                  location="left"
-                  transition="scroll-x-transition"
-                >
-                  Edit Activity
-                </VTooltip>
               </VBtn>
 
               <VBtn
                 color="error"
                 density="compact"
+                v-tooltip:start="'Delete Activity'"
                 @click="selectedActivity('delete', item)"
               >
                 <VIcon
                   icon="ri-delete-bin-line"
                   class="cursor-pointer"
-                  v-bind="activatorProps"
                 />
-
-                <VTooltip
-                  activator="parent"
-                  location="right"
-                  transition="scroll-x-transition"
-                >
-                  Delete Activity
-                </VTooltip>
               </VBtn>
             </td>
           </tr>
         </tbody>
       </VTable>
+
+      <VSkeletonLoader
+        type="table"
+        v-else
+      />
     </VCardText>
 
     <!-- Edit Dialog -->
@@ -263,6 +242,7 @@ onMounted(() => {
         :timesheet_id="props?.id"
         :activity="selectedItem"
         @close="toggleDialog('edit')"
+        @reload="getData"
       />
     </VDialog>
 

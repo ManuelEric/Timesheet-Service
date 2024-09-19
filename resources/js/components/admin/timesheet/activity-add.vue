@@ -2,13 +2,10 @@
 import { showNotif } from '@/helper/notification'
 import { rules } from '@/helper/rules'
 import ApiService from '@/services/ApiService'
+import moment from 'moment'
 
 const props = defineProps({ id: String })
-const emit = defineEmits(['close'])
-
-const closeDialogContent = () => {
-  emit('close')
-}
+const emit = defineEmits(['close', 'reload'])
 
 const formData = ref()
 const form = ref({
@@ -22,15 +19,27 @@ const form = ref({
   meeting_link: null,
 })
 
+const resetForm = () => {
+  form.value = {
+    activity: null,
+    description: null,
+    date: null,
+    start_time: null,
+    end_time: null,
+    start_date: null,
+    end_date: null,
+    meeting_link: null,
+  }
+}
+
 const submit = async () => {
   const { valid } = await formData.value.validate()
   if (valid) {
     try {
       const res = await ApiService.post('api/v1/timesheet/' + props.id + '/activity', form.value)
-      console.log(res)
+      // console.log(res)
       if (res) {
         showNotif('success', res.message, 'bottom-end')
-        closeDialogContent()
       }
     } catch (error) {
       // console.log(error)
@@ -47,6 +56,10 @@ const submit = async () => {
       } else {
         showNotif('error', error.response.data.message, 'bottom-end')
       }
+    } finally {
+      resetForm()
+      emit('reload')
+      emit('close')
     }
   }
 }
@@ -58,7 +71,7 @@ const submit = async () => {
     <DialogCloseBtn
       variant="text"
       size="default"
-      @click="closeDialogContent"
+      @click="emit('close')"
     />
 
     <VCardText>
@@ -73,6 +86,7 @@ const submit = async () => {
               v-model="form.activity"
               label="Activity Name"
               placeholder="Activity"
+              variant="solo"
               :rules="rules.required"
             />
           </VCol>
@@ -81,6 +95,7 @@ const submit = async () => {
               v-model="form.description"
               label="Description"
               placeholder="Description"
+              variant="solo"
               :rules="rules.required"
             />
           </VCol>
@@ -88,11 +103,12 @@ const submit = async () => {
             md="6"
             cols="12"
           >
-            <VTextField
-              type="date"
+            <VDateInput
               v-model="form.date"
               label="Date"
-              placeholder="Date"
+              placeholder="Select Date"
+              prepend-icon=""
+              variant="solo"
               :rules="rules.required"
             />
           </VCol>
@@ -106,7 +122,9 @@ const submit = async () => {
               label="Start Time"
               placeholder="Start Time"
               :rules="rules.required"
-              @change="form.start_date = form.date + ' ' + form.start_time + ':00'"
+              variant="solo"
+              class="mb-3"
+              @change="form.start_date = moment(form.date).format('YYYY-MM-DD') + ' ' + form.start_time + ':00'"
             />
           </VCol>
           <VCol
@@ -118,7 +136,8 @@ const submit = async () => {
               v-model="form.end_time"
               label="End Time"
               placeholder="End Time"
-              @change="form.end_date = form.date + ' ' + form.end_time + ':00'"
+              variant="solo"
+              @change="form.end_date = moment(form.date).format('YYYY-MM-DD') + ' ' + form.end_time + ':00'"
             />
           </VCol>
           <VCol
@@ -130,16 +149,16 @@ const submit = async () => {
               v-model="form.meeting_link"
               label="Meeting Link"
               placeholder="Meeting Link"
+              variant="solo"
               :rules="rules.url"
             />
           </VCol>
         </VRow>
-        <VDivider class="my-3" />
-        <VCardActions>
+        <VCardActions class="mt-5">
           <VBtn
             type="button"
             color="error"
-            @click="closeDialogContent"
+            @click="emit('close')"
           >
             <VIcon
               icon="ri-close-line"

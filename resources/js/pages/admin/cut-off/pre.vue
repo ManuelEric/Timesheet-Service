@@ -3,6 +3,7 @@ import additionalFee from '@/components/admin/cut-off/additional_add.vue'
 import newCutOff from '@/components/admin/cut-off/cutoff_add.vue'
 import cutOffExisting from '@/components/admin/cut-off/cutoff_existing_add.vue'
 import ApiService from '@/services/ApiService'
+import debounce from 'lodash/debounce'
 
 const loading = ref(false)
 const data = ref([])
@@ -39,6 +40,10 @@ const getData = async () => {
     loading.value = false
   }
 }
+
+const searchData = debounce(async () => {
+  await getData()
+}, 500)
 
 const getPackage = async () => {
   loading.value = true
@@ -86,6 +91,7 @@ onMounted(() => {
             v-model="package_id"
             placeholder="Select Timesheet Package"
             density="compact"
+            variant="solo"
             @update:modelValue="getData"
           />
         </VCol>
@@ -96,14 +102,14 @@ onMounted(() => {
           <VTextField
             :loading="loading"
             :disabled="loading"
-            append-inner-icon="ri-search-line"
+            prepend-inner-icon="ri-search-line"
             density="compact"
             label="Search"
             variant="solo"
             hide-details
             single-line
             v-model="keyword"
-            @change="getData"
+            @input="searchData"
           />
         </VCol>
         <VCol
@@ -113,7 +119,6 @@ onMounted(() => {
         >
           <VBtn
             color="warning"
-            density="compact"
             class="me-1"
             @click="isDialogVisible.add_existing = true"
             v-if="selected.length > 0"
@@ -131,7 +136,6 @@ onMounted(() => {
           >
             <template v-slot:activator="{ props }">
               <VBtn
-                density="compact"
                 color="light-primary"
                 v-bind="props"
                 class="me-1"
@@ -172,7 +176,6 @@ onMounted(() => {
           </VMenu>
           <VBtn
             color="secondary"
-            density="compact"
             @click="isDialogVisible.cut_off = true"
             v-if="selected.length == 0"
           >
@@ -211,6 +214,7 @@ onMounted(() => {
             </th>
             <th class="text-uppercase text-center">Timesheet</th>
             <th class="text-uppercase text-center">Activity</th>
+            <th class="text-uppercase text-center">Students Name</th>
             <th class="text-uppercase text-center">Mentor/Tutor</th>
             <th class="text-uppercase text-center">Date & Time</th>
             <th class="text-uppercase text-center">Time Spent</th>
@@ -233,13 +237,14 @@ onMounted(() => {
             <td>{{ parseInt(index) + 1 }}</td>
             <td>{{ item.package.type + ' - ' + item.package.name }}</td>
             <td>{{ item.activity }}</td>
+            <td>{{ item.students }}</td>
             <td>{{ item.mentor_tutor }}</td>
             <td>{{ item.date }}</td>
-            <td>{{ item.time_spent / 60 + ' Hours' }}</td>
+            <td>{{ (item.time_spent / 60).toFixed(2) + ' Hours' }}</td>
             <td>Rp. {{ item.fee_hours }}</td>
             <td>
               Rp.
-              {{ (item.time_spent / 60) * item.fee_hours }}
+              {{ (item.time_spent / 60).toFixed(2) * item.fee_hours }}
             </td>
             <td class="text-center">
               <VChip :color="item.cutoff_status == 'not yet' ? '#ff0217' : '#91c45e'">
@@ -248,6 +253,16 @@ onMounted(() => {
             </td>
           </tr>
         </tbody>
+        <tfoot v-if="data?.data?.length == 0">
+          <tr>
+            <td
+              colspan="10"
+              class="text-center"
+            >
+              Sorry, no data found.
+            </td>
+          </tr>
+        </tfoot>
       </VTable>
 
       <div class="d-flex justify-center mt-5">
@@ -300,6 +315,7 @@ onMounted(() => {
     <additionalFee
       :title="'bonus'"
       @close="isDialogVisible.add_bonus = false"
+      @reload="getData"
     />
   </VDialog>
 
@@ -312,6 +328,7 @@ onMounted(() => {
     <additionalFee
       :title="'fee'"
       @close="isDialogVisible.additional_fee = false"
+      @reload="getData"
     />
   </VDialog>
 </template>

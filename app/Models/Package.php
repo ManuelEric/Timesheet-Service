@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Http\Traits\TranslatePackageCategory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Package extends Model
 {
-    use HasFactory;
+    use HasFactory, TranslatePackageCategory;
 
     protected $table = 'timesheet_packages';
 
@@ -31,5 +33,17 @@ class Package extends Model
     public function timesheets()
     {
         return $this->hasMany(Timesheet::class, 'package_id', 'id');
+    }
+
+    /**
+     * The scopes.
+     */
+    public function scopeOnSearch(Builder $query, array $search = []): void
+    {
+        $category = array_key_exists('category', $search) ? $this->convert($search['category']) : false;
+
+        $query->when($category, function ($sub) use ($category) {
+            $sub->where('category', $category);
+        });
     }
 }

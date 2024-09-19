@@ -9,6 +9,8 @@ import Swal from 'sweetalert2'
 
 // Start Variable
 const props = defineProps({ id: String })
+const reloadData = inject('reloadData')
+const updateReload = inject('updateReload')
 const data = ref([])
 const isDialogVisible = ref([
   {
@@ -16,31 +18,32 @@ const isDialogVisible = ref([
     delete: false,
   },
 ])
+const loading = ref(false)
 // End Variable
 
 // Start Function
 const getData = async id => {
-  showLoading()
+  loading.value = true
   try {
     const res = await ApiService.get('api/v1/timesheet/' + id + '/detail')
     // console.log(res)
     if (res) {
       data.value = res
     }
-    Swal.close()
   } catch (error) {
     if (error.response?.status == 400) {
       showNotif('error', error.response?.data?.errors, 'bottom-end')
       router.push('/admin/timesheet')
     }
     console.log(error)
+  } finally {
+    loading.value = false
   }
 }
 
 const deleteTimesheet = async () => {
   try {
     const res = await ApiService.delete('api/v1/timesheet/' + props.id + '/delete')
-    console.log(res)
     if (res) {
       data.value = res
       showNotif('success', res.message, 'bottom-end')
@@ -59,10 +62,6 @@ const toggleDialog = type => {
     isDialogVisible.value[type] = true
   } else {
     isDialogVisible.value[type] = false
-  }
-
-  if (type == 'edit') {
-    getData(props.id)
   }
 }
 
@@ -104,6 +103,13 @@ const downloadTimesheet = async (id, name) => {
 onMounted(() => {
   getData(props.id)
 })
+
+watch(() => {
+  if (reloadData.value) {
+    getData(props.id)
+    updateReload(false)
+  }
+})
 </script>
 
 <template>
@@ -127,12 +133,11 @@ onMounted(() => {
         >
           <template v-slot:activator="{ props }">
             <VBtn
-              density="compact"
               color="secondary"
               v-bind="props"
+              v-tooltip:start="'Settings'"
             >
-              Action
-              <VIcon icon="ri-arrow-down-s-line ms-2"></VIcon>
+              <VIcon icon="ri-settings-3-line"></VIcon>
             </VBtn>
           </template>
           <VList>
@@ -188,7 +193,10 @@ onMounted(() => {
       </div>
     </VCardTitle>
     <VCardText>
-      <VRow align="center">
+      <VRow
+        align="center"
+        v-if="!loading"
+      >
         <VCol md="7">
           <h4 class="mt-3 font-weight-light">
             <VIcon
@@ -370,6 +378,33 @@ onMounted(() => {
           </VCard>
         </VCol>
       </VRow>
+
+      <!-- Skeleton Loader  -->
+      <VRow v-else>
+        <VCol md="7">
+          <vSkeletonLoader
+            type="heading, paragraph, heading, paragraph"
+            class="mb-3"
+          />
+        </VCol>
+        <VCol md="5">
+          <vSkeletonLoader
+            type="text@3"
+            color="#16B1FF"
+            class="mb-3"
+          />
+          <vSkeletonLoader
+            type="text@3"
+            color="#91c45e"
+            class="mb-3"
+          />
+          <vSkeletonLoader
+            type="text@3"
+            color="#e05e5e"
+            class="mb-3"
+          />
+        </VCol>
+      </VRow>
     </VCardText>
 
     <!-- Edit Dialog -->
@@ -383,6 +418,7 @@ onMounted(() => {
         :package_id="data.packageDetails?.package_id"
         :id="props.id"
         @close="toggleDialog('edit')"
+        @reload="getData(props.id)"
       />
     </VDialog>
 
