@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\V1\Programs;
 use App\Http\Controllers\Controller;
 use App\Models\Ref_Program;
 use App\Services\SummaryService;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 

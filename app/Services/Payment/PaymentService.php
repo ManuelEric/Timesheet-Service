@@ -38,10 +38,18 @@ class PaymentService
         $validatedCutoffStart = $validated['cutoff_start'];
         $validatedCutoffEnd = $validated['cutoff_end'];
         
-        
-        
         if ( $validatedTimesheetId ) {
             $timesheet = $this->identifyTimesheetIdAction->execute($validatedTimesheetId);
+            if ( !$timesheet )
+            {
+                throw new HttpResponseException(
+                    response()->json([
+                        'errors' => 'No downloadable activities were found.'
+                    ], JsonResponse::HTTP_BAD_REQUEST)
+                );
+            }
+
+
             $detailTimesheet = $this->timesheetDataService->detailTimesheet($timesheet);
             $activities = $this->activityDataService->listActivitiesByTimesheet($timesheet);
             unset($detailTimesheet['editableColumns']);
@@ -57,7 +65,7 @@ class PaymentService
         throw new HttpResponseException(
             response()->json([
                 'message' => 'No timesheet were found.'
-            ], JsonResponse::HTTP_OK)
+            ], JsonResponse::HTTP_BAD_REQUEST)
         );
     }
 
@@ -67,6 +75,14 @@ class PaymentService
         $validatedCutoffEnd = $validated['cutoff_end'];
 
         $timesheets = $this->timesheetDataService->listTimesheetByCutoffDate($validatedCutoffStart, $validatedCutoffEnd);
+        if ( count($timesheets) == 0 )
+        {
+            throw new HttpResponseException(
+                response()->json([
+                    'errors' => 'No downloadable activities were found.'
+                ], JsonResponse::HTTP_BAD_REQUEST)
+            );
+        }
 
         foreach ( $timesheets as $timesheet )
         {
