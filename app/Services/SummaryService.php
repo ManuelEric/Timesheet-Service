@@ -26,14 +26,14 @@ class SummaryService
     public function summaryMonthlyActivities(string $requestedMonthYear): int
     {
         [$year, $month] = $this->fetchMonthAndYear($requestedMonthYear);
-        $activity = Activity::onSession()->whereMonth('created_at', $month)->whereYear('created_at', $year)->count();
+        $activity = Activity::onSession()->whereMonth('start_date', $month)->whereYear('start_date', $year)->count();
         return $activity;
     }
 
     public function summaryTotalSpentMonthlyActivities(string $requestedMonthYear): float
     {
         [$year, $month] = $this->fetchMonthAndYear($requestedMonthYear);
-        $totalHours = Activity::onSession()->whereMonth('created_at', $month)->whereYear('created_at', $year)->sum('time_spent');
+        $totalHours = Activity::onSession()->whereMonth('start_date', $month)->whereYear('start_date', $year)->sum('time_spent');
         return $totalHours;
     }
 

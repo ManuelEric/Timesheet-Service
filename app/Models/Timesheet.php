@@ -163,4 +163,9 @@ class Timesheet extends Model
             });
         });
     }
+
+    public function scopeNewest(Builder $query): void
+    {
+        $query->orderBy('created_at', 'DESC');
+    }
 }
