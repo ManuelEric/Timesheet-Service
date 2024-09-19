@@ -34,7 +34,7 @@ class TimesheetDataService
                     $query->select('users.id', 'full_name');
                 },
                 'activities' => function ($query) {
-                    $query->select('time_spent');
+                    $query->select('timesheet_id', 'time_spent');
                 },
                 'package' => function ($query) {
                     $query->select('id', 'type_of', 'package');

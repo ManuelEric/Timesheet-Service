@@ -148,6 +148,8 @@ const downloadPayroll = async () => {
       const res = await ApiService.get(url, {
         responseType: 'blob',
       })
+        
+      
 
       if (res) {
         const url = window.URL.createObjectURL(
@@ -171,10 +173,37 @@ const downloadPayroll = async () => {
 
         formDownload.value.specific = false
         formDownload.value.timesheet_id = null
+
       }
     } catch (error) {
-      showNotif('error', error.response?.statusText, 'bottom-end')
-      console.log(error)
+      const isJsonBlob = (data) => data instanceof Blob && data.type === 'application/json'
+      const responseData = isJsonBlob(error.response?.data) ? await (error.response?.data)?.text() : error.response?.data || {};
+      const responseJson = (typeof responseData === "string") ? JSON.parse(responseData) : responseData;
+
+      if ( responseJson.errors.timesheet_id || responseJson.errors.cutoff_start || responseJson.errors.cutoff_end )
+      {
+        
+        if ( responseJson.errors.timesheet_id )
+        {
+          showNotif('error', responseJson.errors.timesheet_id, 'bottom-end') 
+        }
+  
+        if ( responseJson.errors.cutoff_start )
+        {
+          showNotif('error', responseJson.errors.cutoff_start, 'bottom-end') 
+        }
+        
+        if ( responseJson.errors.cutoff_end )
+        {
+          showNotif('error', responseJson.errors.cutoff_end, 'bottom-end') 
+        }
+      }
+      else
+      {
+        showNotif('error', responseJson.errors, 'bottom-end')
+      }
+
+      
     }
   }
 }

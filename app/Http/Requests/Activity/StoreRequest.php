@@ -41,10 +41,10 @@ class StoreRequest extends FormRequest
         $timesheet_id = $this->route('timesheet');
         $input_startDate = $this->input('start_date');
         $input_endDate = $this->input('end_date');
-        $dateParams = [
-            'start' => Carbon::parse($input_startDate),
-            'end' => $input_endDate ? Carbon::parse($input_endDate) : null,
-        ];
+        // $dateParams = [
+        //     'start' => Carbon::parse($input_startDate),
+        //     'end' => $input_endDate ? Carbon::parse($input_endDate) : null,
+        // ];
 
         return [
             'activity' => 'required',

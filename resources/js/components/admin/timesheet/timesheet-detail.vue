@@ -69,7 +69,7 @@ const deleteActivity = async () => {
 
 const updateStatus = async item => {
   try {
-    const res = await ApiService.put('api/v1/timesheet/' + props.id + '/activity/' + item.id, item)
+    const res = await ApiService.patch('api/v1/timesheet/' + props.id + '/activity/' + item.id, item)
 
     if (res) {
       showNotif('success', res.message, 'bottom-end')
