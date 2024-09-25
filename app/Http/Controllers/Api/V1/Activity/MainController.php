@@ -64,7 +64,8 @@ class MainController extends Controller
     {
         $timesheet = $this->identifyTimesheetIdAction->execute($timesheetId);
 
-        $validated = $request->safe()->only(['activity', 'description', 'start_date', 'end_date', 'meeting_link', 'status']);
+        $validated = $request->safe()->only(['description', 'start_date', 'end_date', 'meeting_link', 'status']);
+
 
         /* get the newest information about the latest tutor/mentor fee hours who signed to handle the timesheet */
         $handleBy = $timesheet->handle_by->last();
@@ -88,7 +89,7 @@ class MainController extends Controller
     {
         $activity = $identifyActivityAction->execute($activityId, $timesheetId);
 
-        $validated = $request->safe()->only(['activity', 'description', 'start_date', 'end_date', 'meeting_link', 'status']);
+        $validated = $request->safe()->only(['description', 'start_date', 'end_date', 'meeting_link', 'status']);
 
         /* calculate spending time */
         $start_date = Carbon::parse($validated['start_date']);
@@ -99,7 +100,6 @@ class MainController extends Controller
         try {
 
             /* Update the activity */
-            $activity->activity = $validated['activity'];
             $activity->description = $validated['description'];
             $activity->start_date = $start_date;
             $activity->end_date = $end_date;
