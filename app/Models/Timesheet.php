@@ -26,6 +26,7 @@ class Timesheet extends Model
         'duration',
         'notes',
         'subject_id',
+        'void', 
     ];
     
     /**

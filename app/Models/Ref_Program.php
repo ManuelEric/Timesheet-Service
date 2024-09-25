@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 #[ObservedBy([Ref_ProgramObserver::class])]
 class Ref_Program extends Model
@@ -82,5 +83,14 @@ class Ref_Program extends Model
         $query->whereHas('timesheet', function ($_sub_) {
             $_sub_->onSession();
         });
+    }
+
+    public function scopeNewest(Builder $query): void
+    {
+        $query->
+            orderByRaw('SUBSTRING_INDEX(`invoice_id`, "/", -1) DESC')-> // for year
+            orderByRaw('SUBSTRING_INDEX(SUBSTRING_INDEX(`invoice_id`, "/", 4), "/", -1) DESC')-> // for month
+            orderByRaw('SUBSTRING_INDEX(`invoice_id`, "/", 1) DESC'); // for number 
+
     }
 }

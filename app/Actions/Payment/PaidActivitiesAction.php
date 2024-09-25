@@ -41,6 +41,7 @@ class PaidActivitiesAction
                 'students' => $students,
                 'mentor_tutor' => $mentorTutorName,
                 'date' => $this->convert($startDate, $endDate),
+                'start_date' => $data->start_date,
                 'time_spent' => $timeSpent,
                 'fee_hours' => $feeHours,
                 'cutoff_status' => $cutoffStatus,
@@ -49,6 +50,6 @@ class PaidActivitiesAction
             ];
         });
 
-        return $mappedActivities;
+        return $mappedActivities->sortByDesc('start_date')->values();
     }
 }
