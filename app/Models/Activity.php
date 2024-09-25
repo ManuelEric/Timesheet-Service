@@ -72,6 +72,11 @@ class Activity extends Model
         $query->where('status', 1)->where('cutoff_status', 'completed')->whereNotNull('cutoff_ref_id');
     }
 
+    public function scopeCompleted(Builder $query): void
+    {
+        $query->where('status', 1);
+    }
+
     public function scopeOnSearch(Builder $query, array $search = []): void
     {
         $cutoff_start = $search['cutoff_start'] ?? false;

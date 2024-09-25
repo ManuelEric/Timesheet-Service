@@ -165,8 +165,7 @@
     <!-- Activities start here -->
     <tr height="35">
         <td valign="middle" align="center" style="border: 1px solid #000; font-weight: bold;" width="15">No</td>
-        <td valign="middle" align="center" style="border: 1px solid #000; font-weight: bold;" width="15">Activity</td>
-        <td valign="middle" align="center" style="border: 1px solid #000; font-weight: bold;" width="70">Description</td>
+        <td valign="middle" align="center" style="border: 1px solid #000; font-weight: bold;" width="70">Meeting Discussion</td>
         <td valign="middle" align="center" style="border: 1px solid #000; font-weight: bold;" width="15">Date</td>
         <td valign="middle" align="center" style="border: 1px solid #000; font-weight: bold;" width="15">Start (WIB)</td>
         <td valign="middle" align="center" style="border: 1px solid #000; font-weight: bold;" width="15">End (WIB)</td>
@@ -175,7 +174,6 @@
     @foreach ( $activities as $activity )
     <tr>
         <td valign="middle" align="center" style="border: 1px solid #000;">{{ $loop->iteration }}</td>
-        <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ $activity['activity'] }}</td>
         <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ $activity['description'] }}</td>
         <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ $activity['date'] }}</td>
         <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ $activity['start_time'] }}</td>

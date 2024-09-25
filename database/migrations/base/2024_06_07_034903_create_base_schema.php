@@ -69,6 +69,7 @@ return new class extends Migration
             $table->foreignId('subject_id')->nullable()->constrained(
                 table: 'temp_user_roles', indexName: 'timesheets_subject_id',
             )->onUpdate('restrict')->onDelete('restrict');
+            $table->enum('void', ['true', 'false'])->default('false');
             $table->timestamps();
         });
 
@@ -108,7 +109,7 @@ return new class extends Migration
             $table->foreignId('timesheet_id')->constrained(
                 table: 'timesheets', indexName: 'timesheet_activities_timesheet_id'
             )->onUpdate('restrict')->onDelete('restrict');
-            $table->string('activity');
+            $table->string('activity')->nullable();
             $table->text('description');
             $table->datetime('start_date');
             $table->datetime('end_date')->nullable();

@@ -76,7 +76,7 @@ class TimesheetDataService
             $requirements = $refProgram->first()->require;
             $tutorMentorName = $data->handle_by->first()->full_name;
             $adminName = $data->admin->first()->full_name;
-            $total_timespent = $data->activities()->paid()->sum('time_spent');
+            $total_timespent = $data->activities()->completed()->sum('time_spent');
 
             return [
                 'id' => $timesheetId,
@@ -90,11 +90,12 @@ class TimesheetDataService
                 'admin' => $adminName,
                 'spent' => $total_timespent,
                 'group' => count($refProgram) > 1 ? true : false,
-                'clients' => $clients
+                'clients' => $clients,
+                'created_at' => $data->created_at,
             ];
         });
 
-        return $mappedTimesheets->paginate(10);
+        return $mappedTimesheets->sortByDesc('created_at')->values()->paginate(10);
     }
 
     public function detailTimesheet(Timesheet $timesheet)

@@ -47,7 +47,7 @@ class StoreRequest extends FormRequest
         // ];
 
         return [
-            'activity' => 'required',
+            'activity' => 'nullable',
             'description' => 'nullable',
             'start_date' => [
                 'required',

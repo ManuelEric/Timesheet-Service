@@ -141,6 +141,20 @@ class MainController extends Controller
 
     }
 
+    public function patch (
+        $timesheetId,
+        IdentifyTimesheetIdAction $identifyTimesheetIdAction,
+    )
+    {
+        $timesheet = $identifyTimesheetIdAction->execute($timesheetId);
+
+        $timesheet->void = true;
+        $timesheet->save();
+
+        //! to be continue
+
+    }
+
     public function export(
         $timesheetId, 
         IdentifyTimesheetIdAction $identifyTimesheetIdAction,

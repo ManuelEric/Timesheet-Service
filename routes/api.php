@@ -123,6 +123,8 @@ Route::prefix('timesheet')->group(function () {
         Route::PUT('{timesheet}/update', [V1TimesheetController::class, 'update']);
         /* Destroy Timesheet */
         Route::DELETE('{timesheet}/delete', [V1TimesheetController::class, 'destroy']);
+        /* Void Timesheet */
+        Route::PATCH('{timesheet}/void', [V1TimesheetController::class, 'void']);
         /* Export Timesheet */
         Route::GET('{timesheet}/export', [V1TimesheetController::class, 'export'])->withoutMiddleware(['auth:sanctum', 'abilities:timesheet-menu']);
 

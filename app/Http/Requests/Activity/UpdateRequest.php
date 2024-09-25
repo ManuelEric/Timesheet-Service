@@ -44,7 +44,7 @@ class UpdateRequest extends FormRequest
         $input_endDate = $this->input('end_date');
         
         return [
-            'activity' => 'required',
+            'activity' => 'nullable',
             'description' => 'nullable',
             'start_date' => [
                 'required',
