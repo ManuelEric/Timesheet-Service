@@ -42,20 +42,21 @@ const submit = async () => {
         showNotif('success', res.message, 'bottom-end')
       }
     } catch (error) {
-      // console.log(error)
-      if (error?.response?.data?.errors) {
-        const validationErrors = error.response.data.errors
-        let errorMessage = 'Validation errors:'
-        // Merge validation errors
-        for (const key in validationErrors) {
-          if (validationErrors.hasOwnProperty(key)) {
-            errorMessage += `\n${key}: ${validationErrors[key].join(', ')}`
-          }
-        }
-        showNotif('error', errorMessage, 'bottom-end')
-      } else {
-        showNotif('error', error.response.data.message, 'bottom-end')
-      }
+      // console.log(error.response.data.errors)
+      showNotif('error', error.response.data.errors, 'bottom-end')
+      // if (error?.response?.data?.errors) {
+      //   const validationErrors = error.response.data.errors
+      //   let errorMessage = 'Validation errors:'
+      //   // Merge validation errors
+      //   for (const key in validationErrors) {
+      //     if (validationErrors.hasOwnProperty(key)) {
+      //       errorMessage += `\n${key}: ${validationErrors[key].join(', ')}`
+      //     }
+      //   }
+      //   showNotif('error', errorMessage, 'bottom-end')
+      // } else {
+      //   showNotif('error', error.response.data.message, 'bottom-end')
+      // }
     } finally {
       resetForm()
       emit('reload')
