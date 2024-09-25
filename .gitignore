@@ -5,6 +5,7 @@
 /public/storage
 /storage/*.key
 /vendor
+.htaccess
 .env
 .env.backup
 .env.production
@@ -31,6 +32,9 @@ node_modules
 dist
 dist-ssr
 *.local
+
+# composer
+composer.lock
 
 /cypress/videos/
 /cypress/screenshots/

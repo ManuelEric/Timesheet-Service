@@ -149,7 +149,7 @@ onMounted(() => {
               No
             </th>
             <!-- <th class="text-uppercase text-center">Activity</th> -->
-            <th class="text-uppercase text-center">Description</th>
+            <th class="text-uppercase text-center">Meeting Discussion</th>
             <th class="text-uppercase text-center">Date</th>
             <th class="text-uppercase text-center">Start Time</th>
             <th
