@@ -40,12 +40,13 @@ class UnpaidActivitiesAction
                 'students' => $students,
                 'mentor_tutor' => $mentorTutorName,
                 'date' => $this->convert($startDate, $endDate),
+                'start_date' => $data->start_date,
                 'time_spent' => $timeSpent,
                 'fee_hours' => $fee,
                 'cutoff_status' => $cutoffStatus,
             ];
         });
 
-        return $mappedActivities;
+        return $mappedActivities->sortByDesc('start_date')->values();
     }
 }
