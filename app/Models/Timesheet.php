@@ -93,7 +93,7 @@ class Timesheet extends Model
         $query->
             when( $program_name, function ($_sub_) use ($program_name) {
                 $_sub_->whereHas('ref_program', function ($__sub__) use ($program_name) {
-                    $__sub__->where('program_name', 'like', '%'.$program_name.'%');
+                    $__sub__->where('program_name', 'like', '%'.urldecode($program_name).'%');
                 });
             })->
             when( $package_id, function ($_sub_) use ($package_id) {
@@ -162,5 +162,10 @@ class Timesheet extends Model
                 $__sub__->onSearch($search);
             });
         });
+    }
+
+    public function scopeNewest(Builder $query): void
+    {
+        $query->orderBy('created_at', 'DESC');
     }
 }

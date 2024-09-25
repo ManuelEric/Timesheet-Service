@@ -154,6 +154,8 @@ const downloadPayroll = async () => {
       const res = await ApiService.get(url, {
         responseType: 'blob',
       })
+        
+      
 
       if (res) {
         const url = window.URL.createObjectURL(

@@ -34,7 +34,7 @@ class TimesheetDataService
                     $query->select('users.id', 'full_name');
                 },
                 'activities' => function ($query) {
-                    $query->select('time_spent');
+                    $query->select('timesheet_id', 'time_spent');
                 },
                 'package' => function ($query) {
                     $query->select('id', 'type_of', 'package');
@@ -43,7 +43,7 @@ class TimesheetDataService
                     $query->select('uuid', 'full_name');
                 },
             ]
-        )->onSearch($search)->onSession()->select('timesheets.id', 'inhouse_id', 'package_id', 'duration', 'notes')->get();
+        )->onSearch($search)->onSession()->newest()->select('timesheets.id', 'inhouse_id', 'package_id', 'duration', 'notes')->get();
 
         $mappedTimesheets = $timesheets->map(function ($data) {
 

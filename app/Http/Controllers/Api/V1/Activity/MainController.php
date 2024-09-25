@@ -149,6 +149,15 @@ class MainController extends Controller
     {
         
         $activity = $identifyActivityAction->execute($activityId, $timesheetId);
+        if ( $activity->has('cutoff_history') )
+        {
+            throw new HttpResponseException(
+                response()->json([
+                    'errors' => 'This activity is now closed and cannot be modified.'
+                ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY)
+            );
+        }
+
         $timesheet = $activity->timesheet;
 
         $validated = $request->only(['status']);

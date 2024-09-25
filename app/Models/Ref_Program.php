@@ -65,7 +65,7 @@ class Ref_Program extends Model
 
         $query->
             when( $program_name, function ($_sub_) use ($program_name) {
-                $_sub_->where('program_name', 'like', '%'.$program_name.'%');
+                $_sub_->where('program_name', 'like', '%'.urldecode($program_name).'%');
             })->
             when( $keyword, function ($_sub_) use ($keyword) {
                 $_sub_->
