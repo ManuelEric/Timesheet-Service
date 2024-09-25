@@ -149,7 +149,7 @@ class MainController extends Controller
     {
         
         $activity = $identifyActivityAction->execute($activityId, $timesheetId);
-        if ( $activity->has('cutoff_history') )
+        if ( $activity->cutoff_history !== null )
         {
             throw new HttpResponseException(
                 response()->json([
@@ -157,6 +157,7 @@ class MainController extends Controller
                 ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY)
             );
         }
+
 
         $timesheet = $activity->timesheet;
 
@@ -172,6 +173,7 @@ class MainController extends Controller
             $this_activity_start_date = Carbon::parse($activity->start_date);
             $this_activity_end_date = Carbon::parse($activity->end_date);
             $x_minutes = $this_activity_start_date->diffInMinutes($this_activity_end_date);
+            $activity->time_spent = $x_minutes;
     
             /* the time spent would be */
             $total_time_spent = $total_hours_spent + $x_minutes;
@@ -183,7 +185,6 @@ class MainController extends Controller
                 ], 400);
             }
         }
-
 
         $activity->status = $validatedStatus;
         $activity->save();

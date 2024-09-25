@@ -47,7 +47,14 @@ class PayrollExport implements FromView, WithTitle
         $cutoff = Cutoff::find($cutoff_ref_id);
 
         $total_hour = $this->activities->sum('time_spent');
-        $total_fee = $this->activities->sum('fee_hours') + $this->activities->sum('additional_fee') + $this->activities->sum('bonus_fee');
+
+        $fee = $this->activities->map(function ($item) {
+            return [
+                'total_fee_per_activity' => ($item['time_spent'] / 60) * $item['fee_hours']
+            ];
+        });
+
+        $total_fee = $fee->sum('total_fee_per_activity') + $this->activities->sum('additional_fee') + $this->activities->sum('bonus_fee');
 
 
         # merge all variables that going to show in view 

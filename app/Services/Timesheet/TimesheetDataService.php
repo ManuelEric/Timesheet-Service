@@ -76,7 +76,7 @@ class TimesheetDataService
             $requirements = $refProgram->first()->require;
             $tutorMentorName = $data->handle_by->first()->full_name;
             $adminName = $data->admin->first()->full_name;
-            $total_timespent = $data->activities()->paid()->sum('time_spent');
+            $total_timespent = $data->activities()->completed()->sum('time_spent');
 
             return [
                 'id' => $timesheetId,
