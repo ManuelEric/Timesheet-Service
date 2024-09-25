@@ -23,7 +23,7 @@ class ComponentController extends Controller
         $mappedActivities = $activities->map(function ($item) {
             return [
                 'id' => $item->id,
-                'title' => $item->activity,
+                'title' => $item->description,
                 'with' => $item->timesheet->handle_by->first()->full_name,
                 'time' => [
                     'start' => Carbon::parse($item->start_date)->format('Y-m-d H:i'),
