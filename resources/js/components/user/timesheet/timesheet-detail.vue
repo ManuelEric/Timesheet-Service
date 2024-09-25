@@ -148,7 +148,7 @@ onMounted(() => {
             >
               No
             </th>
-            <th class="text-uppercase text-center">Activity</th>
+            <!-- <th class="text-uppercase text-center">Activity</th> -->
             <th class="text-uppercase text-center">Description</th>
             <th class="text-uppercase text-center">Date</th>
             <th class="text-uppercase text-center">Start Time</th>
@@ -160,12 +160,7 @@ onMounted(() => {
             </th>
             <th class="text-uppercase text-center">Time Spent</th>
             <th class="text-uppercase text-center">Status</th>
-            <th
-              class="text-uppercase text-end"
-              v-if="props.require == 'mentor'"
-            >
-              #
-            </th>
+            <th class="text-uppercase text-end">#</th>
           </tr>
         </thead>
 
@@ -177,24 +172,14 @@ onMounted(() => {
             <td width="1%">
               {{ index + 1 }}
             </td>
-            <td>
+            <!-- <td>
               {{ item.activity }}
-              <small v-if="item.meeting_link">
-                |
-                <a
-                  :href="item.meeting_link"
-                  target="_blank"
-                  class="me-2"
-                >
-                  <VIcon icon="ri ri-link" />
-                  Join Now
-                </a>
-              </small>
-            </td>
+            </td> -->
             <td class="text-start">
               {{ item.description }}
             </td>
             <td>
+              {{ $moment(item.start_date).format('dddd') }},
               {{ $moment(item.start_date).format('MMM Do YYYY') }}
             </td>
             <td class="text-center">
@@ -222,10 +207,21 @@ onMounted(() => {
                 @update:modelValue="updateStatus(item)"
               />
             </td>
-            <td
-              class="text-end"
-              v-if="props.require == 'mentor'"
-            >
+            <td class="text-end">
+              <VBtn
+                color="primary"
+                density="compact"
+                class="me-1"
+              >
+                <a
+                  :href="item.meeting_link"
+                  target="_blank"
+                  class="bg-primary"
+                >
+                  <VIcon icon="ri ri-link" />
+                  Join
+                </a>
+              </VBtn>
               <VBtn
                 color="error"
                 density="compact"

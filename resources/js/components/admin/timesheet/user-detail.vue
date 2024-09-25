@@ -256,7 +256,7 @@ watch(() => {
           <VTable density="compact">
             <tbody>
               <tr>
-                <td width="20%">Program</td>
+                <td width="30%">Program</td>
                 <td width="1%">:</td>
                 <td>{{ data.packageDetails?.program_name }}</td>
               </tr>
@@ -283,6 +283,11 @@ watch(() => {
                 <td>Tutor/Mentor</td>
                 <td width="1%">:</td>
                 <td>{{ data.packageDetails?.tutormentor_name }}</td>
+              </tr>
+              <tr>
+                <td>Inhouse Tutor/Mentor</td>
+                <td width="1%">:</td>
+                <td>{{ data.packageDetails?.inhouse_name }}</td>
               </tr>
               <tr>
                 <td>Update On</td>

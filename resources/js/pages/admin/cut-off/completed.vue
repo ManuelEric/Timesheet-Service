@@ -154,8 +154,6 @@ const downloadPayroll = async () => {
       const res = await ApiService.get(url, {
         responseType: 'blob',
       })
-        
-      
 
       if (res) {
         const url = window.URL.createObjectURL(
@@ -435,7 +433,7 @@ onMounted(() => {
             <td class="text-center">
               {{ item.cutoff_date }}
             </td>
-            <td class="text-center">
+            <td class="text-center text-capitalize">
               <VChip color="success"> {{ item.cutoff_status }} </VChip>
             </td>
           </tr>
