@@ -75,15 +75,16 @@ class Timesheet extends Model
         return $this->hasMany(Reminder::class, 'timesheet_id', 'id');
     }
 
-    public function scopeHasNotBeenReminded(Builder $query): void
-    {
-        $query->doesntHave('reminders');
-    }
-
+    
     /**
      * The scopes.
      * 
      */
+    public function scopeHasNotBeenReminded(Builder $query): void
+    {
+        $query->doesntHave('reminders');
+    }
+    
     public function scopeOnSearch(Builder $query, array $search = []): void
     {
         $program_name = $search['program_name'] ?? false;
