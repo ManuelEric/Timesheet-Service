@@ -67,7 +67,7 @@ class CreateActivityAction
 
             $activityDetails = [
                 'timesheet_id' => $timesheetId,
-                'activity' => $validated['activity'],
+                'activity' => $timesheet->ref_program[0]->program_name,
                 'description' => $validated['description'],
                 'start_date' => $validated['start_date'],
                 'end_date' => $endDate,
@@ -89,7 +89,7 @@ class CreateActivityAction
             $this->responseService->storeErrorLog($errors, $err->getMessage(), [
                 'file' => $err->getFile(),
                 'error_line' => $err->getLine(),
-                'value' => $activityDetails
+                'value' => []
             ]);
 
             throw new HttpResponseException(
