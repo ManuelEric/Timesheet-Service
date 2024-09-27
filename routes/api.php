@@ -120,7 +120,7 @@ Route::prefix('timesheet')->group(function () {
         /* Destroy Timesheet */
         Route::DELETE('{timesheet}/delete', [V1TimesheetController::class, 'destroy']);
         /* Void Timesheet */
-        Route::PATCH('{timesheet}/void', [V1TimesheetController::class, 'void']);
+        Route::PATCH('{timesheet}/void', [V1TimesheetController::class, 'patch']);
         /* Export Timesheet */
         Route::GET('{timesheet}/export', [V1TimesheetController::class, 'export'])->withoutMiddleware(['auth:sanctum', 'abilities:timesheet-menu']);
 
