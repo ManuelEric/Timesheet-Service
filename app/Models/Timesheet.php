@@ -7,6 +7,7 @@ use App\Models\Pivot\Pic;
 use App\Observers\TimesheetObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -28,6 +29,27 @@ class Timesheet extends Model
         'subject_id',
         'void', 
     ];
+
+    /**
+     * The mutators.
+     * Get the timesheet's available time
+     */
+    protected function timeLeft(): Attribute
+    {
+        return new Attribute(
+            get: fn () => $this->calculateTimeLeft()
+        );
+
+    }
+
+    private function calculateTimeLeft()
+    {
+        $full_duration = $this->duration;
+        $used_duration = $this->activities()->sum('time_spent');
+        
+        return $full_duration - $used_duration;
+    }
+
     
     /**
      * The relations.
@@ -73,6 +95,11 @@ class Timesheet extends Model
     public function reminders()
     {
         return $this->hasMany(Reminder::class, 'timesheet_id', 'id');
+    }
+
+    public function voided()
+    {
+        return $this->hasMany(LogRef_Program::class, 'timesheet_id', 'id');
     }
 
     

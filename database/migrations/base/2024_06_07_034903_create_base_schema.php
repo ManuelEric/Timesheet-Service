@@ -146,14 +146,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('logging', function (Blueprint $table) {
-            $table->string('id')->nullable()->comment('user identity');
-            $table->text('user')->nullable();
-            $table->text('activity');
-            $table->text('value')->nullable();
-            $table->timestamps();
-        });
-
         Schema::create('reminders', function (Blueprint $table) {
             $table->foreignId('timesheet_id')->nullable()->constrained(
                 table: 'timesheets', indexName: 'timesheet_id',
