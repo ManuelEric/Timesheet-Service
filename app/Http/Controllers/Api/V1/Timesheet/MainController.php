@@ -4,16 +4,17 @@ namespace App\Http\Controllers\Api\V1\Timesheet;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Actions\Timesheet\CreateTimesheetAction;
 use App\Actions\Timesheet\IdentifierCheckingAction as IdentifyTimesheetIdAction;
 use App\Http\Requests\Timesheet\StoreRequest as TimesheetStoreRequest;
 use App\Actions\Timesheet\SelectOrRegisterMentorTutorAction as SelectOrRegisterMentorTutorTimesheetAction;
 use App\Actions\Timesheet\UpdateTimesheetAction;
+use App\Actions\Timesheet\VoidTimesheetAction;
 use App\Exports\TimesheetExport;
 use App\Http\Traits\GenerateTimesheetFileName;
 use App\Models\TempUser;
 use App\Models\Timesheet;
 use App\Services\Activity\ActivityDataService;
+use App\Services\Timesheet\CreateTimesheetService;
 use App\Services\Timesheet\TimesheetDataService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -37,6 +38,8 @@ class MainController extends Controller
         return response()->json($results);
     }
 
+    # parameter needed 
+    # timesheet id, program id, new tutor, reason 
     public function show(
         $timesheetId,
         IdentifyTimesheetIdAction $identifyTimesheetIdAction, 
@@ -50,7 +53,7 @@ class MainController extends Controller
     public function store(
         TimesheetStoreRequest $request,
         SelectOrRegisterMentorTutorTimesheetAction $selectOrRegisterMentorTutorTimesheetAction,
-        CreateTimesheetAction $createTimesheetAction,
+        CreateTimesheetService $createTimesheetService,
         ): JsonResponse
     {
         $validated = $request->safe()->only([
@@ -77,7 +80,7 @@ class MainController extends Controller
         $newPackageDetails = compact('validatedPackageId', 'validatedDuration');
 
         $mentorTutorId = $selectOrRegisterMentorTutorTimesheetAction->handle($validatedEmail);
-        $createTimesheetAction->execute($validatedRefPrograms, $newPackageDetails, $validatedNotes, $validatedInhouse, $validatedPics, $mentorTutorId, $validatedSubject);
+        $createTimesheetService->storeTimesheet($validatedRefPrograms, $newPackageDetails, $validatedNotes, $validatedInhouse, $validatedPics, $mentorTutorId, $validatedSubject);
     
         return response()->json([
             'message' => "Timesheet has been created successfully."
@@ -143,15 +146,44 @@ class MainController extends Controller
 
     public function patch (
         $timesheetId,
+        TimesheetStoreRequest $request,
         IdentifyTimesheetIdAction $identifyTimesheetIdAction,
-    )
+        VoidTimesheetAction $voidTimesheetAction,
+        CreateTimesheetService $createTimesheetService,
+        SelectOrRegisterMentorTutorTimesheetAction $selectOrRegisterMentorTutorTimesheetAction,
+    ): JsonResponse
     {
         $timesheet = $identifyTimesheetIdAction->execute($timesheetId);
+        $validated = $request->safe()->only([
+            'ref_id',
+            'mentortutor_email',
+            'inhouse_id',
+            'package_id',
+            'pic_id',
+            'notes',
+            'subject_id',
+        ]);
 
-        $timesheet->void = true;
-        $timesheet->save();
+        /* defines the validated variables */
+        $validatedRefPrograms = $validated['ref_id'];
+        $validatedEmail = $validated['mentortutor_email'];
+        $validatedInhouse = $validated['inhouse_id'];
+        $validatedPics = $validated['pic_id'];
+        $validatedPackageId = $validated['package_id'];
+        $validatedDuration = $timesheet->time_left;
+        $validatedNotes = $validated['notes'];
+        $validatedSubject = $validated['subject_id'];
+        $newPackageDetails = compact('validatedPackageId', 'validatedDuration');
+        $mentorTutorId = $selectOrRegisterMentorTutorTimesheetAction->handle($validatedEmail);
+        $createTimesheetService->replaceTimesheet($validatedRefPrograms, $newPackageDetails, $validatedNotes, $validatedInhouse, $validatedPics, $mentorTutorId, $validatedSubject);
 
-        //! to be continue
+
+        # put the log into log_ref_programs
+        $voidTimesheetAction->execute($timesheet);
+
+        return response()->json([
+            'message' => 'The timesheet has been successfully voided.'
+        ], JsonResponse::HTTP_OK);
 
     }
 
