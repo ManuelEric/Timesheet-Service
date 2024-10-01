@@ -202,7 +202,7 @@ class TimesheetDataService
             'pic_id' => $adminId,
             'tutormentor_id' => $tutorMentorUuid,
             'tutormentor_email' => $tutorMentorEmail,
-            'tutormentor_role' => $tutorMentor->role,
+            'tutormentor_role' => $timesheet->subject->role,
             'duration' => $duration,
             'notes' => $notes,
             'subject_id' => $subjectId,
