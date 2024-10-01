@@ -120,7 +120,7 @@ class CreateTimesheetService
             'notes' => $notes,
             'subject_id' => $subjectId,
         ];
-        
+
         DB::beginTransaction();
         try {
 
