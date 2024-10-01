@@ -202,10 +202,11 @@ class TimesheetDataService
             'pic_id' => $adminId,
             'tutormentor_id' => $tutorMentorUuid,
             'tutormentor_email' => $tutorMentorEmail,
+            'tutormentor_role' => $tutorMentor->role,
             'duration' => $duration,
             'notes' => $notes,
             'subject_id' => $subjectId,
-            'inhouse_id' => $inhouseUuid
+            'inhouse_id' => $inhouseUuid,
         ];
 
         return compact('clientProfile', 'packageDetails', 'editableColumns');
