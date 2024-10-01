@@ -170,14 +170,17 @@ class MainController extends Controller
 
         $newPackageDetails = compact('validatedPackageId', 'validatedDuration');
         $mentorTutorId = $selectOrRegisterMentorTutorTimesheetAction->handle($validatedEmail);
-        $createTimesheetService->replaceTimesheet($validatedRefPrograms, $newPackageDetails, $validatedNotes, $validatedInhouse, $validatedPics, $mentorTutorId, $validatedSubject);
+        $newTimesheetId = $createTimesheetService->replaceTimesheet($validatedRefPrograms, $newPackageDetails, $validatedNotes, $validatedInhouse, $validatedPics, $mentorTutorId, $validatedSubject);
 
 
         # put the log into log_ref_programs
         $voidTimesheetAction->execute($timesheet);
 
         return response()->json([
-            'message' => 'The timesheet has been successfully voided.'
+            'message' => 'The timesheet has been successfully voided.',
+            'data' => [
+                'timesheet_id' => $newTimesheetId
+            ]
         ], JsonResponse::HTTP_OK);
 
     }

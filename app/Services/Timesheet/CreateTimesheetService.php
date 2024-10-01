@@ -106,7 +106,7 @@ class CreateTimesheetService
         array $picIds, 
         string $mentortutorId, 
         ?int $subjectId = NULL
-    )
+    ): int
     {
         /* define submitted package variables */
         $packageId = $storePackageDetails['validatedPackageId'];
@@ -161,5 +161,7 @@ class CreateTimesheetService
             ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
 
         }
+
+        return $createdTimesheet->id;
     }
 }
