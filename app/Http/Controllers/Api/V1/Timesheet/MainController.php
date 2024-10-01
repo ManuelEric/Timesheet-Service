@@ -155,24 +155,19 @@ class MainController extends Controller
     {
         $timesheet = $identifyTimesheetIdAction->execute($timesheetId);
         $validated = $request->safe()->only([
-            'ref_id',
             'mentortutor_email',
-            'inhouse_id',
-            'package_id',
-            'pic_id',
-            'notes',
-            'subject_id',
         ]);
 
         /* defines the validated variables */
-        $validatedRefPrograms = $validated['ref_id'];
+        $validatedRefPrograms = $timesheet->ref_program()->pluck('id')->toArray();
         $validatedEmail = $validated['mentortutor_email'];
-        $validatedInhouse = $validated['inhouse_id'];
-        $validatedPics = $validated['pic_id'];
-        $validatedPackageId = $validated['package_id'];
+        $validatedInhouse = $timesheet->inhouse_id;
+        $validatedPics = $timesheet->admin()->pluck('users.id')->toArray();
+        $validatedPackageId = $timesheet->package_id;
         $validatedDuration = $timesheet->time_left;
-        $validatedNotes = $validated['notes'];
-        $validatedSubject = $validated['subject_id'];
+        $validatedNotes = $timesheet->notes;
+        $validatedSubject = $timesheet->subject->id;
+
         $newPackageDetails = compact('validatedPackageId', 'validatedDuration');
         $mentorTutorId = $selectOrRegisterMentorTutorTimesheetAction->handle($validatedEmail);
         $createTimesheetService->replaceTimesheet($validatedRefPrograms, $newPackageDetails, $validatedNotes, $validatedInhouse, $validatedPics, $mentorTutorId, $validatedSubject);
