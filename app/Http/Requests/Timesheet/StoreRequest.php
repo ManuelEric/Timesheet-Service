@@ -51,6 +51,10 @@ class StoreRequest extends FormRequest
             case "PUT":
                 return $this->update();
                 break;
+
+            case "PATCH":
+                return $this->patch();
+                break;
         }
     }
 
@@ -110,6 +114,13 @@ class StoreRequest extends FormRequest
                     return $query->where('id', $this->input('subject_id'))->where('temp_user_id', $tempUser->id);
                 })
             ]
+        ];
+    }
+
+    public function patch(): array
+    {
+        return [
+            'mentortutor_email' => 'required|email|exists:temp_users,email',
         ];
     }
 
