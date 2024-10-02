@@ -140,7 +140,7 @@ class CreateTimesheetService
         }
 
         /* insert timesheet into the success-program */
-        $ref_Programs = Ref_Program::doesntHave('timesheet')->whereIn('id', $ref_programId)->get();
+        $ref_Programs = Ref_Program::whereIn('id', $ref_programId)->get();
                 
         try {
 
