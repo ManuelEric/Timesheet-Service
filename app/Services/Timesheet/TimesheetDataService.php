@@ -27,6 +27,9 @@ class TimesheetDataService
                 'ref_program' => function ($query) {
                     $query->select('category', 'student_name', 'student_school', 'program_name', 'timesheet_id', 'require');
                 },
+                'transferred' => function ($query) {
+                    $query->select('category', 'student_name', 'student_school', 'program_name', 'require');
+                },
                 'handle_by' => function ($query) {
                     $query->select('temp_users.id', 'full_name');
                 },
@@ -43,38 +46,52 @@ class TimesheetDataService
                     $query->select('uuid', 'full_name');
                 },
             ]
-        )->onSearch($search)->onSession()->newest()->select('timesheets.id', 'inhouse_id', 'package_id', 'duration', 'notes')->get();
+        )->onSearch($search)->onSession()->newest()->select('timesheets.id', 'inhouse_id', 'package_id', 'duration', 'void', 'notes', 'created_at')->get();
 
         $mappedTimesheets = $timesheets->map(function ($data) {
 
             # because timesheets consists of multiple ref programs
             # we need to extract and define whether the client was b2c or b2b
             $clients = array();
+            $programName = $requirements = null;
+
+
             $refProgram = $data->ref_program;
-            if (count($refProgram) > 1) {
+            if ( count($refProgram) > 0 )
+            {
                 foreach ($refProgram as $ref) {
                     $category = $ref->category;
                     $studentName = $ref->student_name;
                     $studentSchool = $ref->student_school;
                     $client = $category == "b2c" ? $studentName : $studentSchool;
-
+    
                     array_push($clients, $client);
                 }
-            } else {
-                $category = $refProgram->first()->category;
-                $studentName = $refProgram->first()->student_name;
-                $studentSchool = $refProgram->first()->student_school;
-                $clients = $category == "b2c" ? $studentName : $studentSchool;
+                $programName = $refProgram->first()->program_name;
+                $requirements = $refProgram->first()->require;
             }
+
+            // $logRefProgram = $data->transferred;
+            // if ( count($logRefProgram) > 0 )
+            // {
+            //     foreach ($logRefProgram as $ref) {
+            //         $category = $ref->category;
+            //         $studentName = $ref->student_name;
+            //         $studentSchool = $ref->student_school;
+            //         $client = $category == "b2c" ? $studentName : $studentSchool;
+    
+            //         array_push($clients, $client);
+            //     }
+            //     $programName = $logRefProgram->first()->program_name;
+            //     $requirements = $logRefProgram->first()->require;
+            // }
 
             $timesheetId = $data->id;
             $packageType = $data->package->type_of;
             $detailPackage = $data->package->package;
             $duration = $data->duration;
             $notes = $data->notes;
-            $programName = $refProgram->first()->program_name;
-            $requirements = $refProgram->first()->require;
-            $tutorMentorName = $data->handle_by->first()->full_name;
+            $tutorMentorName = $data->handle_by()->wherePivot('active', 1)->first()->full_name;
             $adminName = $data->admin->first()->full_name;
             $total_timespent = $data->activities()->completed()->sum('time_spent');
 
@@ -91,6 +108,7 @@ class TimesheetDataService
                 'spent' => $total_timespent,
                 'group' => count($refProgram) > 1 ? true : false,
                 'clients' => $clients,
+                'void' => $data->void,
                 'created_at' => $data->created_at,
             ];
         });
@@ -105,7 +123,7 @@ class TimesheetDataService
         # we need to extract and define whether the client was b2c or b2b
 
         $clients = array();
-        if (count($refProgram) > 1) {
+        if (count($refProgram) > 0) {
             foreach ($refProgram as $ref) {
                 $category = $ref->category;
                 $studentUUID = $ref->student_uuid;
@@ -134,24 +152,6 @@ class TimesheetDataService
                     ]);
                     continue;
                 }
-            }
-        } else {
-            $category = $refProgram->first()->category;
-            $studentUUID = $refProgram->first()->student_uuid;
-            $studentName = $refProgram->first()->student_name;
-            $studentSchool = $refProgram->first()->student_school;
-
-            if ($category == "b2c") {
-                /* fetch the client profile information from CRM */
-                [$statusCode, $crm_clientInfo] = $this->make_call('get', env('CRM_DOMAIN') . 'client/information/' . $studentUUID);
-
-                array_push($clients, [
-                    'category' => $category,
-                    'client_name' => $studentName,
-                    'client_mail' => $crm_clientInfo['mail'],
-                    'client_school' => $studentSchool,
-                    'client_grade' => $crm_clientInfo['grade'],
-                ]);
             }
         }
 
