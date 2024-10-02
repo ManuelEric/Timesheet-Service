@@ -5,6 +5,7 @@ namespace App\Models\Pivot;
 use App\Models\TempUser;
 use App\Observers\HandleByObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
@@ -14,6 +15,7 @@ class HandleBy extends Pivot
     use HasFactory;
 
     protected $table = 'timesheet_handle_by';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -38,7 +40,6 @@ class HandleBy extends Pivot
      *
      * @var array<int, string>
      */
-
     public function mentor_tutor()
     {
         return $this->belongsTo(TempUser::class, 'temp_user_id', 'id');

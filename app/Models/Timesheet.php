@@ -97,9 +97,9 @@ class Timesheet extends Model
         return $this->hasMany(Reminder::class, 'timesheet_id', 'id');
     }
 
-    public function voided()
+    public function transferred()
     {
-        return $this->hasMany(LogRef_Program::class, 'timesheet_id', 'id');
+        return $this->belongsToMany(Ref_Program::class, 'log_ref_programs', 'timesheet_id', 'ref_program_id')->withTimestamps();
     }
 
     
