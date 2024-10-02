@@ -104,7 +104,6 @@ const submit = async () => {
             md="6"
             cols="12"
           >
-            {{ activityDate }}
             <VDateInput
               v-model="form.date"
               label="Date"

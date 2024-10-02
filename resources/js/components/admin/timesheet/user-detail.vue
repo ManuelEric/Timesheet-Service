@@ -1,4 +1,5 @@
 <script setup>
+import TimesheetTransfer from '@/components/admin/timesheet/timesheet-transfer.vue'
 import UserEdit from '@/components/admin/timesheet/user-edit.vue'
 import DeleteDialog from '@/components/DeleteHandler.vue'
 import { showLoading, showNotif } from '@/helper/notification'
@@ -15,6 +16,7 @@ const data = ref([])
 const isDialogVisible = ref([
   {
     edit: false,
+    void: false,
     delete: false,
   },
 ])
@@ -151,6 +153,18 @@ watch(() => {
                   class="me-2"
                 />
                 Edit TimeSheet
+              </div>
+            </VListItem>
+            <VListItem>
+              <div
+                class="cursor-pointer"
+                @click="toggleDialog('void')"
+              >
+                <VIcon
+                  icon="ri-exchange-2-line"
+                  class="me-2"
+                />
+                Timesheet Ownership Transfer
               </div>
             </VListItem>
             <VListItem>
@@ -437,6 +451,19 @@ watch(() => {
         title="timesheet"
         @delete="deleteTimesheet"
         @close="toggleDialog('delete')"
+      />
+    </VDialog>
+
+    <!-- Void Dialog -->
+    <VDialog
+      v-model="isDialogVisible.void"
+      max-width="400"
+      persistent
+    >
+      <TimesheetTransfer
+        :timesheet_id="props.id"
+        :require="data.editableColumns.tutormentor_role"
+        @close="toggleDialog('void')"
       />
     </VDialog>
   </VCard>
