@@ -156,6 +156,7 @@ class MainController extends Controller
         $timesheet = $identifyTimesheetIdAction->execute($timesheetId);
         $validated = $request->safe()->only([
             'mentortutor_email',
+            'subject_id',
         ]);
 
         /* defines the validated variables */
@@ -166,7 +167,7 @@ class MainController extends Controller
         $validatedPackageId = $timesheet->package_id;
         $validatedDuration = $timesheet->time_left;
         $validatedNotes = $timesheet->notes;
-        $validatedSubject = $timesheet->subject->id;
+        $validatedSubject = $validated['subject_id'];
 
         $newPackageDetails = compact('validatedPackageId', 'validatedDuration');
         $mentorTutorId = $selectOrRegisterMentorTutorTimesheetAction->handle($validatedEmail);
