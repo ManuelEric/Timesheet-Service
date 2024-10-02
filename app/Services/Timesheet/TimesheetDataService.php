@@ -151,6 +151,7 @@ class TimesheetDataService
         $duration = $timesheet->duration;
         $timeSpent = $timesheet->activities()->sum('time_spent');
         $notes = $timesheet->notes;
+        $void = $timesheet->void;
 
 
         /* fetch the person in charge */
@@ -167,6 +168,7 @@ class TimesheetDataService
         $clientProfile = $clients;
         $packageDetails = [
             'program_name' => $programName,
+            'void' => $timesheet->void,
             'package_id' => $packageId,
             'package_category' => $packageCategory,
             'package_type' => $packageType,
