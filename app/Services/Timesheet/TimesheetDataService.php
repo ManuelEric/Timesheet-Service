@@ -123,7 +123,7 @@ class TimesheetDataService
         # we need to extract and define whether the client was b2c or b2b
 
         $clients = array();
-        if (count($refProgram) > 1) {
+        if (count($refProgram) > 0) {
             foreach ($refProgram as $ref) {
                 $category = $ref->category;
                 $studentUUID = $ref->student_uuid;
@@ -152,24 +152,6 @@ class TimesheetDataService
                     ]);
                     continue;
                 }
-            }
-        } else {
-            $category = $refProgram->first()->category;
-            $studentUUID = $refProgram->first()->student_uuid;
-            $studentName = $refProgram->first()->student_name;
-            $studentSchool = $refProgram->first()->student_school;
-
-            if ($category == "b2c") {
-                /* fetch the client profile information from CRM */
-                [$statusCode, $crm_clientInfo] = $this->make_call('get', env('CRM_DOMAIN') . 'client/information/' . $studentUUID);
-
-                array_push($clients, [
-                    'category' => $category,
-                    'client_name' => $studentName,
-                    'client_mail' => $crm_clientInfo['mail'],
-                    'client_school' => $studentSchool,
-                    'client_grade' => $crm_clientInfo['grade'],
-                ]);
             }
         }
 

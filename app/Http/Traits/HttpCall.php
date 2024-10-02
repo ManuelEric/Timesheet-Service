@@ -28,7 +28,7 @@ trait HttpCall
             }
         } catch (ConnectionException $err) {
 
-            Log::error("The server isn't responding to host : {$endpoint}");
+            Log::error("The server isn't responding to host : {$endpoint} | {$err->getMessage()}");
             throw new HttpResponseException(
                 response()->json(['errors' => "The server isn't responding." ])
             );
