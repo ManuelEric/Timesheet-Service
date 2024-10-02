@@ -71,6 +71,7 @@ const submit = async () => {
           subject_id: null,
         }
         tutor_selected.value = []
+        router.go(0)
       }
     } catch (error) {
       console.log(error)

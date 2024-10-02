@@ -188,6 +188,7 @@ onMounted(() => {
           <tr
             v-for="(item, index) in data.data"
             :key="index"
+            :class="item.void == 'true' ? 'bg-secondary' : ''"
           >
             <td>
               {{ parseInt(index) + 1 }}
@@ -270,7 +271,7 @@ onMounted(() => {
             </td>
             <td>
               <router-link :to="'/admin/timesheet/' + item.id">
-                <VBtn color="secondary">
+                <VBtn :color="item.void == 'true' ? 'light' : 'secondary'">
                   <VIcon
                     icon="ri-timeline-view"
                     class="cursor-pointer"
