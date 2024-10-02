@@ -5,10 +5,10 @@ namespace App\Models;
 use App\Observers\LogRef_ProgramObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
 #[ObservedBy([LogRef_ProgramObserver::class])]
-class LogRef_Program extends Model
+class LogRef_Program extends Pivot
 {
     use HasFactory;
 

@@ -178,7 +178,7 @@ class MainController extends Controller
         $voidTimesheetAction->execute($timesheet);
 
         return response()->json([
-            'message' => 'The timesheet has been successfully voided.',
+            'message' => 'The timesheet has been successfully transferred.',
             'data' => [
                 'timesheet_id' => $newTimesheetId
             ]
