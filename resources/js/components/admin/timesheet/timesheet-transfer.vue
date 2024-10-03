@@ -1,5 +1,5 @@
 <script setup>
-import { showNotif } from '@/helper/notification'
+import { confirmBeforeSubmit, showNotif } from '@/helper/notification'
 import { rules } from '@/helper/rules'
 import { router } from '@/plugins/router'
 import ApiService from '@/services/ApiService'
@@ -54,24 +54,27 @@ const getSubject = async (item, uuid = null) => {
 }
 
 const submit = async () => {
+  emit('close')
   form.value.mentortutor_email = tutor_selected.value.email
   const { valid } = await formData.value.validate()
-  if (valid) {
+  const confirm = await confirmBeforeSubmit('Are you sure you want to change the owner?')
+  if (valid && confirm) {
     loading.value = true
     try {
-      const res = await ApiService.patch('api/v1/timesheet/' + prop.timesheet_id + '/void', form.value)
+      const res = await ApiService.patch('api/v1/timesheet/' + prop.timesheet_id + '/void/', form.value)
       if (res) {
-        console.log(res)
-
         showNotif('success', res.message, 'bottom-end')
-        emit('reload')
-        router.push('/admin/timesheet/' + res.data.timesheet_id)
+        router.push({ path: '/admin/timesheet/' + res.data.timesheet_id })
+        // emit('reload')
         form.value = {
           mentortutor_email: null,
           subject_id: null,
         }
         tutor_selected.value = []
-        router.go(0)
+
+        setTimeout(() => {
+          router.go(0)
+        }, 1000)
       }
     } catch (error) {
       console.log(error)

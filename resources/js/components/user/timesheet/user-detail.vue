@@ -6,6 +6,7 @@ import moment from 'moment'
 
 // Start Variable
 const props = defineProps({ id: String })
+const emit = defineEmits(['void'])
 const reloadData = inject('reloadData')
 const updateReload = inject('updateReload')
 const data = ref([])
@@ -20,6 +21,7 @@ const getData = async id => {
     // console.log(res)
     if (res) {
       data.value = res
+      emit('void', res.packageDetails.void)
     }
   } catch (error) {
     if (error.response?.status == 400) {
