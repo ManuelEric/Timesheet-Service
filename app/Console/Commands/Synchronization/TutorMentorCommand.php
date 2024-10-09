@@ -58,7 +58,6 @@ class TutorMentorCommand extends Command
                 $email = $mentorTutor['email'];
                 [$emailCheckingResult, $userRawInformation] = $checkEmailMentorTutorAction->execute($email);
                 $this->newLine();
-                $this->info(json_encode($userRawInformation));
 
                 $createTempUserService->execute($userRawInformation);
                 $progress->advance();
