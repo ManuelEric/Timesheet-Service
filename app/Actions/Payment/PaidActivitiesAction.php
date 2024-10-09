@@ -27,7 +27,7 @@ class PaidActivitiesAction
             $feeHours = $this->selectFee($activity, $data);
             $cutoffStatus = $data->cutoff_status;
             $cutoffDate = Carbon::parse($data->cutoff_history->created_at)->format('d F Y H:i');
-            $students = implode(", ", $data->timesheet->ref_program->pluck('student_name')->toArray());
+            $students = $this->getStudents($data);
 
             return [
                 'id' => $activityId,
@@ -51,5 +51,12 @@ class PaidActivitiesAction
         });
 
         return $mappedActivities->sortByDesc('start_date')->values();
+    }
+
+    private function getStudents(Activity $activity): string
+    {
+        return ( $activity->timesheet->ref_program()->exists() ) 
+            ? implode(", ", $activity->timesheet->ref_program->pluck('student_name')->toArray()) 
+            : implode(", ", $activity->timesheet->transferred->pluck('student_name')->toArray());
     }
 }

@@ -35,7 +35,7 @@ class MainController extends Controller
         /* manage the variables of additional search */
         $isPaginate = $additionalSearch['paginate'] ?? false;
 
-        $tutormentors = TempUser::with('roles')->onSearch($search)->get();
+        $tutormentors = TempUser::with('roles')->onSearch($search)->orderBy('full_name', 'ASC')->get();
 
         /* in order to grouped the roles by role_name, we need to mapping the data */
         $mappedTutormentors = $tutormentors->map(function ($item) {
