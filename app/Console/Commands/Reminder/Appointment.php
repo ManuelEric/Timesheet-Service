@@ -3,12 +3,10 @@
 namespace App\Console\Commands\Reminder;
 
 use App\Http\Traits\EmailReminderVariables;
-use App\Jobs\PartOf\ReminderAppointment as PartOfReminderAppointment;
 use App\Mail\ReminderAppointment;
 use App\Models\Activity;
 use App\Services\Timesheet\TimesheetDataService;
 use Illuminate\Console\Command;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
 
 class Appointment extends Command
