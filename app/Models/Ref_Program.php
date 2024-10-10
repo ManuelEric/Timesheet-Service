@@ -89,9 +89,9 @@ class Ref_Program extends Model
     {
         $query->
             orderByRaw('(CASE 
-                            WHEN SUBSTRING_INDEX(`inv_id`, "/", -1) REGEXP "^-?[0-9]+$"
+                            WHEN SUBSTRING_INDEX(`invoice_id`, "/", -1) REGEXP "^-?[0-9]+$"
                             THEN SUBSTRING_INDEX(`invoice_id`, "/", -1)
-                            ELSE SUBSTRING_INDEX(SUBSTRING_INDEX(`inv_id`, "/", 5), "/", -1)
+                            ELSE SUBSTRING_INDEX(SUBSTRING_INDEX(`invoice_id`, "/", 5), "/", -1)
                         END) DESC')-> // for year
             orderByRaw('SUBSTRING_INDEX(SUBSTRING_INDEX(`invoice_id`, "/", 4), "/", -1) DESC')-> // for month
             orderByRaw('SUBSTRING_INDEX(`invoice_id`, "/", 1) DESC'); // for number 
