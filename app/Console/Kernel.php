@@ -21,7 +21,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('auth:clear-resets')->everyFifteenMinutes();
 
         /* synchronize success program from CRMs */
-        $schedule->command('sync:success-program')->everyTwoMinutes()->withoutOverlapping();
+        $schedule->command('sync:success-program')->dailyAt('06:00')->withoutOverlapping();
         $schedule->command('sync:tutor-mentor')->everyThreeHours()->withoutOverlapping(); # adjust the throttling frequency at the CRM routes
     }
 
