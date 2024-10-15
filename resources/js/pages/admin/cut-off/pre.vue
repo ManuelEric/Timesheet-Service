@@ -240,11 +240,11 @@ onMounted(() => {
             <td>{{ item.students }}</td>
             <td>{{ item.mentor_tutor }}</td>
             <td>{{ item.date }}</td>
-            <td>{{ item.time_spent / 60 + ' Hours' }}</td>
+            <td>{{ (item.time_spent / 60).toFixed(2) + ' Hours' }}</td>
             <td>Rp. {{ item.fee_hours }}</td>
             <td>
               Rp.
-              {{ (item.time_spent / 60) * item.fee_hours }}
+              {{ (item.time_spent / 60).toFixed(2) * item.fee_hours }}
             </td>
             <td class="text-center">
               <VChip :color="item.cutoff_status == 'not yet' ? '#ff0217' : '#91c45e'">

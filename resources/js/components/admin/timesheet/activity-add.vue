@@ -19,6 +19,19 @@ const form = ref({
   meeting_link: null,
 })
 
+const resetForm = () => {
+  form.value = {
+    activity: null,
+    description: null,
+    date: null,
+    start_time: null,
+    end_time: null,
+    start_date: null,
+    end_date: null,
+    meeting_link: null,
+  }
+}
+
 const submit = async () => {
   const { valid } = await formData.value.validate()
   if (valid) {
@@ -29,21 +42,23 @@ const submit = async () => {
         showNotif('success', res.message, 'bottom-end')
       }
     } catch (error) {
-      // console.log(error)
-      if (error?.response?.data?.errors) {
-        const validationErrors = error.response.data.errors
-        let errorMessage = 'Validation errors:'
-        // Merge validation errors
-        for (const key in validationErrors) {
-          if (validationErrors.hasOwnProperty(key)) {
-            errorMessage += `\n${key}: ${validationErrors[key].join(', ')}`
-          }
-        }
-        showNotif('error', errorMessage, 'bottom-end')
-      } else {
-        showNotif('error', error.response.data.message, 'bottom-end')
-      }
+      // console.log(error.response.data.errors)
+      showNotif('error', error.response.data.errors, 'bottom-end')
+      // if (error?.response?.data?.errors) {
+      //   const validationErrors = error.response.data.errors
+      //   let errorMessage = 'Validation errors:'
+      //   // Merge validation errors
+      //   for (const key in validationErrors) {
+      //     if (validationErrors.hasOwnProperty(key)) {
+      //       errorMessage += `\n${key}: ${validationErrors[key].join(', ')}`
+      //     }
+      //   }
+      //   showNotif('error', errorMessage, 'bottom-end')
+      // } else {
+      //   showNotif('error', error.response.data.message, 'bottom-end')
+      // }
     } finally {
+      resetForm()
       emit('reload')
       emit('close')
     }
@@ -67,20 +82,22 @@ const submit = async () => {
         validate-on="input"
       >
         <VRow>
-          <VCol cols="12">
+          <VCol
+            cols="12"
+            class="d-none"
+          >
             <VTextField
               v-model="form.activity"
               label="Activity Name"
               placeholder="Activity"
               variant="solo"
-              :rules="rules.required"
             />
           </VCol>
           <VCol cols="12">
             <VTextarea
               v-model="form.description"
-              label="Description"
-              placeholder="Description"
+              label="Meeting Discussion"
+              placeholder="Meeting Discussion"
               variant="solo"
               :rules="rules.required"
             />

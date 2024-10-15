@@ -80,11 +80,13 @@ const submit = async () => {
         validate-on="input"
       >
         <VRow>
-          <VCol cols="12">
+          <VCol
+            cols="12"
+            class="d-none"
+          >
             <VTextField
               v-model="form.activity"
               label="Activity Name"
-              :rules="rules.required"
               placeholder="Activity"
               variant="solo"
             />
@@ -92,9 +94,9 @@ const submit = async () => {
           <VCol cols="12">
             <VTextarea
               v-model="form.description"
-              label="Description"
+              label="Meeting Discussion"
               :rules="rules.required"
-              placeholder="Description"
+              placeholder="Meeting Discussion"
               variant="solo"
             />
           </VCol>
@@ -102,7 +104,6 @@ const submit = async () => {
             md="6"
             cols="12"
           >
-            {{ activityDate }}
             <VDateInput
               v-model="form.date"
               label="Date"

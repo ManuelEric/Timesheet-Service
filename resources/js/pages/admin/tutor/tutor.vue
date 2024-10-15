@@ -42,7 +42,7 @@ const getData = async () => {
 const searchData = debounce(async () => {
   currentPage.value = 1
   await getData()
-}, 500)
+}, 1000)
 
 const checkEmail = async email => {
   try {
@@ -173,7 +173,7 @@ onMounted(() => {
               <VSwitch
                 v-model="item.inhouse"
                 @update:modelValue="updateInhouse(item.uuid, item.inhouse, item.email)"
-                :value="1"
+                value="1"
               ></VSwitch>
             </td>
             <td

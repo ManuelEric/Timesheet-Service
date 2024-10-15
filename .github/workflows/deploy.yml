@@ -1,0 +1,62 @@
+name: CICD Workflow Timesheet
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: closed
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Ganti dengan versi Node.js yang sesuai
+
+      - name: Install Node.js dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+      - name: Set up Git
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+
+      - name: Sync main to production
+        run: |
+          git push origin -d production
+          git checkout -b production
+          git merge production
+          git push origin production
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy to Production and Composer Update
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEV_HOST_EDUALL }}
+          username: ${{ secrets.DEV_USER_EDUALL }}
+          key: ${{ secrets.DEV_PRIVATE_KEY_EDUALL }}
+          port: 65002
+          proxy_port: 65002
+          script: |
+            cd public_html/eduall/github
+            if [ -d "timesheet" ]; then
+              cd timesheet
+              git pull origin production
+            else
+              git clone --branch production https://github.com/Edu-ALL/timesheet.git
+              cd timesheet
+            fi
+            composer update

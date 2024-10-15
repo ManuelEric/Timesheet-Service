@@ -1,4 +1,5 @@
 <script setup>
+import TimesheetTransfer from '@/components/admin/timesheet/timesheet-transfer.vue'
 import UserEdit from '@/components/admin/timesheet/user-edit.vue'
 import DeleteDialog from '@/components/DeleteHandler.vue'
 import { showLoading, showNotif } from '@/helper/notification'
@@ -9,12 +10,14 @@ import Swal from 'sweetalert2'
 
 // Start Variable
 const props = defineProps({ id: String })
+const emit = defineEmits(['void'])
 const reloadData = inject('reloadData')
 const updateReload = inject('updateReload')
 const data = ref([])
 const isDialogVisible = ref([
   {
     edit: false,
+    void: false,
     delete: false,
   },
 ])
@@ -29,6 +32,7 @@ const getData = async id => {
     // console.log(res)
     if (res) {
       data.value = res
+      emit('void', res.packageDetails.void)
     }
   } catch (error) {
     if (error.response?.status == 400) {
@@ -154,6 +158,18 @@ watch(() => {
               </div>
             </VListItem>
             <VListItem>
+              <div
+                class="cursor-pointer"
+                @click="toggleDialog('void')"
+              >
+                <VIcon
+                  icon="ri-exchange-2-line"
+                  class="me-2"
+                />
+                Timesheet Ownership Transfer
+              </div>
+            </VListItem>
+            <VListItem>
               <VListItemTitle>
                 <div
                   class="cursor-pointer"
@@ -256,7 +272,7 @@ watch(() => {
           <VTable density="compact">
             <tbody>
               <tr>
-                <td width="20%">Program</td>
+                <td width="30%">Program</td>
                 <td width="1%">:</td>
                 <td>{{ data.packageDetails?.program_name }}</td>
               </tr>
@@ -283,6 +299,11 @@ watch(() => {
                 <td>Tutor/Mentor</td>
                 <td width="1%">:</td>
                 <td>{{ data.packageDetails?.tutormentor_name }}</td>
+              </tr>
+              <tr>
+                <td>Inhouse Tutor/Mentor</td>
+                <td width="1%">:</td>
+                <td>{{ data.packageDetails?.inhouse_name }}</td>
               </tr>
               <tr>
                 <td>Update On</td>
@@ -432,6 +453,19 @@ watch(() => {
         title="timesheet"
         @delete="deleteTimesheet"
         @close="toggleDialog('delete')"
+      />
+    </VDialog>
+
+    <!-- Void Dialog -->
+    <VDialog
+      v-model="isDialogVisible.void"
+      max-width="400"
+      persistent
+    >
+      <TimesheetTransfer
+        :timesheet_id="props.id"
+        :require="data.editableColumns.tutormentor_role"
+        @close="toggleDialog('void')"
       />
     </VDialog>
   </VCard>

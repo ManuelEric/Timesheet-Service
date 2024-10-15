@@ -38,6 +38,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('a', function() {
+    abort(404);
+});
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });

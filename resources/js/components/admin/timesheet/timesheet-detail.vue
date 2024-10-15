@@ -145,8 +145,8 @@ onMounted(() => {
             >
               No
             </th>
-            <th class="text-uppercase text-center">Activity</th>
-            <th class="text-uppercase text-center">Description</th>
+            <!-- <th class="text-uppercase text-center">Activity</th> -->
+            <th class="text-uppercase text-center">Meeting Discussion</th>
             <th class="text-uppercase text-center">Date</th>
             <th class="text-uppercase text-center">Start Time</th>
             <th class="text-uppercase text-center">End Time</th>
@@ -164,13 +164,14 @@ onMounted(() => {
             <td width="1%">
               {{ index + 1 }}
             </td>
-            <td>
+            <td class="d-none">
               {{ item.activity }}
             </td>
-            <td class="text-center">
+            <td class="text-start">
               {{ item.description }}
             </td>
             <td>
+              {{ $moment(item.start_date).format('dddd') }},
               {{ $moment(item.start_date).format('MMM Do YYYY') }}
             </td>
             <td class="text-center">
@@ -190,13 +191,27 @@ onMounted(() => {
               <VCheckbox
                 color="success"
                 v-model="item.status"
-                :value="1"
+                value="1"
                 :false-value="0"
                 v-tooltip:start="item.status ? 'Completed' : 'Not Yet'"
                 @update:modelValue="updateStatus(item)"
               />
             </td>
             <td class="text-end">
+              <VBtn
+                color="primary"
+                density="compact"
+                class="me-1"
+              >
+                <a
+                  :href="item.meeting_link"
+                  target="_blank"
+                  class="bg-primary"
+                >
+                  <VIcon icon="ri ri-link" />
+                  Join
+                </a>
+              </VBtn>
               <VBtn
                 color="warning"
                 density="compact"

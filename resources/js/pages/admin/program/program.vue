@@ -32,6 +32,9 @@ const form = ref({
 
 // Start Function
 const getData = async () => {
+  // reset selected
+  selected.value = []
+
   const page = '?page=' + currentPage.value
   const search = keyword.value ? '&keyword=' + keyword.value : ''
   const program = program_name.value ? '&program_name=' + encodeURIComponent(program_name.value) : ''
@@ -67,7 +70,7 @@ const getProgram = async () => {
 const searchData = debounce(async () => {
   currentPage.value = 1
   await getData()
-}, 500)
+}, 1000)
 
 // End Function
 
