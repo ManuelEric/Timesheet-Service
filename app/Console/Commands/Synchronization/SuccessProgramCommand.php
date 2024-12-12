@@ -58,6 +58,7 @@ class SuccessProgramCommand extends Command
         $progress->start();
 
         $refs = array();
+        $no = 1;
         foreach ($response as $crm_success_program) #both b2c & b2b 
         {
             /* define for both b2c and b2b variables */
