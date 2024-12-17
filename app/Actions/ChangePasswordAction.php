@@ -34,7 +34,7 @@ class ChangePasswordAction
         $validatedNewPassword = $request['new_password'];
 
         $authUser = auth('sanctum')->user();
-        $authUserUuid = $authUser->id;
+        $authUserUuid = $authUser->uuid;
         $authUserEmail = $authUser->email;
 
         /* check if the passwords matches */
