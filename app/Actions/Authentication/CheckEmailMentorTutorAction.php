@@ -35,7 +35,7 @@ class CheckEmailMentorTutorAction
         }
 
         /* initialize the data */
-        $uuid = $response['uuid'];
+        $uuid = $response['id'];
         $fullName = $this->concat($response['first_name'], $response['last_name']);
         $roles = $response['roles'];
         $emailExist = $response['email'] ? true : false;
