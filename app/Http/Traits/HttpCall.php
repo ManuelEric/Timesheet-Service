@@ -19,7 +19,8 @@ trait HttpCall
             withHeaders([
                 'Header-ET' => $this->tokenService->get(),
             ])->
-            withOptions(['verify' => false])->{$method}( $endpoint, $params );
+            withOptions(['verify' => false])->
+            timeout(30)->{$method}( $endpoint, $params );
     
             if ( $request->failed() ) {
                 Log::error('Failed to make a call to ' . $endpoint);
