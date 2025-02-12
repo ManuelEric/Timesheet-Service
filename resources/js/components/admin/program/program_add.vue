@@ -8,7 +8,9 @@ const emit = defineEmits(['close', 'reload'])
 
 const loading = ref(false)
 const tutor_selected = ref([])
+const curriculum_selected = ref([])
 const tutor_list = ref([])
+const curriculum_list = ref([])
 const subjects = ref([])
 const package_list = ref([])
 const pic_list = ref([])
@@ -89,6 +91,7 @@ const getSubject = async (item, uuid = null) => {
     form.value.subject_id = item[0].subjects[0].id
   } else {
     try {
+
       const res = await ApiService.get('api/v1/user/mentor-tutors/' + uuid + '/subjects')
       if (res) {
         subjects.value = res
@@ -96,6 +99,18 @@ const getSubject = async (item, uuid = null) => {
     } catch (error) {
       console.error(error)
     }
+  }
+}
+
+const getCurriculum = async () => {
+  try {
+    const res = await ApiService.get('api/v1/curriculum/component/list')
+    if (res) 
+      curriculum_list.value = res
+
+    console.log(res)
+  } catch (error) {
+    console.error(error)
   }
 }
 
@@ -115,12 +130,14 @@ const submit = async () => {
         form.value = {
           ref_id: [],
           mentortutor_email: null,
-          subject_id: null,
+          subject_id: null, // used when subject fetched from the server
+          subject_name: null, // used when subject fetched from own db
           inhouse_id: null,
           package_id: null,
           duration: '',
           notes: '',
           pic_id: [],
+          individual_fee: '',
         }
         tutor_selected.value = []
       }
@@ -143,6 +160,7 @@ onMounted(() => {
   getTutor(true)
   getPackage()
   getPIC()
+  getCurriculum()
 })
 </script>
 
@@ -178,11 +196,28 @@ onMounted(() => {
               @update:modelValue="getSubject(tutor_selected.roles, tutor_selected.uuid)"
             ></VAutocomplete>
           </VCol>
+          <VCol md="12">
+            <VAutocomplete
+              variant="solo"
+              clearable
+              v-model="curriculum_selected"
+              label="Curriculum"
+              :items="curriculum_list"
+              :item-props="
+                item => ({
+                  title: item.name,
+                })
+              "
+              :rules="rules.required"
+              :loading="loading"
+              :disabled="loading"
+            ></VAutocomplete>
+          </VCol>
           <VCol
             md="12"
             v-if="props.selected[0]?.require?.toLowerCase() == 'tutor'"
           >
-            <VAutocomplete
+            <!-- <VAutocomplete
               variant="solo"
               clearable
               v-model="form.subject_id"
@@ -190,6 +225,16 @@ onMounted(() => {
               :items="subjects"
               item-title="subject"
               item-value="id"
+              :loading="loading"
+              :disabled="loading"
+              :rules="rules.required"
+            ></VAutocomplete> -->
+            <VAutocomplete
+              variant="solo"
+              clearable
+              v-model="form.subject_name"
+              label="Subject Tutoring"
+              :items="subjects"
               :loading="loading"
               :disabled="loading"
               :rules="rules.required"
@@ -223,6 +268,16 @@ onMounted(() => {
               :label="+form.duration / 60 ? 'Minutes (' + form.duration / 60 + ' Hours)' : 'Minutes'"
               :readonly="duration_readonly"
               v-model="form.duration"
+              :rules="rules.required"
+            />
+          </VCol>
+          <VCol md="12">
+            <VTextField
+              type="number"
+              variant="solo"
+              clearable
+              label="Fee/hours"
+              v-model="form.individual_fee"
               :rules="rules.required"
             />
           </VCol>

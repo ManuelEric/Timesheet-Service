@@ -6,12 +6,43 @@ use App\Http\Controllers\Controller;
 use App\Models\TempUserRoles;
 use App\Models\Timesheet;
 use App\Services\Timesheet\TimesheetDataService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 
 class ComponentController extends Controller
 {
-    public function comp_subjects($mentorTutorsUuid): JsonResponse
+    public function comp_subjects()
     {
+# because there were changes to the creation of timesheet
+        # like: subjects now fetched from its own database instead of CRM
+        # so I'll put the change here
+
+        # after changes
+        $subjects = [
+            'Chemistry Tutor',
+            'Biology Tutor',
+            'SAT English Tutor',
+            'SAT Math & English Tutor',
+            'SAT Math Tutor',
+            'TOEFL Tutor',
+            'IELTS Tutor',
+            'IB Writing',
+            'Mathematics Tutor',
+            'Environmental Sciences & Society (ESS) Tutor',
+            'Physics Tutor',
+            'Economics Tutor',
+            'Computer Science Tutor',
+            'Programming Tutor',
+'            Life Science Tutor'
+        ];
+        $subject_collections = collect($subjects);
+        return response()->json($subject_collections);
+    }
+    
+    public function former_comp_subjects($mentorTutorsUuid): JsonResponse
+    {
+        # before changes
+
         $subjects = TempUserRoles::tutor()->whereHas('temp_user', function ($query) use ($mentorTutorsUuid) {
             $query->where('uuid', $mentorTutorsUuid);
         })->get();

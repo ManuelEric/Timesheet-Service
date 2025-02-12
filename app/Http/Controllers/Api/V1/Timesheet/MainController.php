@@ -12,11 +12,13 @@ use App\Actions\Timesheet\VoidTimesheetAction;
 use App\Exports\TimesheetExport;
 use App\Http\Traits\GenerateTimesheetFileName;
 use App\Models\TempUser;
+use App\Models\TempUserRoles;
 use App\Models\Timesheet;
 use App\Services\Activity\ActivityDataService;
 use App\Services\Timesheet\CreateTimesheetService;
 use App\Services\Timesheet\TimesheetDataService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -64,7 +66,9 @@ class MainController extends Controller
             'duration',
             'pic_id',
             'notes',
-            'subject_id',
+            'subject_id', # used when subject fetched from the server
+            'subject_name', # used when subject fetched from own db
+            'individual_fee',
         ]);
 
         /* defines the validated variables */
@@ -75,11 +79,33 @@ class MainController extends Controller
         $validatedPackageId = $validated['package_id'];
         $validatedDuration = $validated['duration'];
         $validatedNotes = $validated['notes'];
-        $validatedSubject = $validated['subject_id'];
+        // $validatedSubject = $validated['subject_id'];
+        $validatedSubjectName = $validated['subject_name'];
+        $validatedFeeIndividual = $validated['individual_fee'];
 
         $newPackageDetails = compact('validatedPackageId', 'validatedDuration');
 
         $mentorTutorId = $selectOrRegisterMentorTutorTimesheetAction->handle($validatedEmail);
+        
+        /************************* changes ***********************/
+        # before the data stored into timesheet
+        # need to check if tutor has already subject on temp_user_roles
+        # if tutor doesn't have subject, then create a new one
+        if (! $validatedSubject = TempUserRoles::where('temp_user_id', $mentorTutorId)->where('tutor_subject', 'like', "%{$validatedSubjectName}%")->first() )
+        {
+            $tempUserRoles = TempUserRoles::create([
+                'temp_user_id' => $mentorTutorId,
+                'role' => 'Tutor',
+                'tutor_subject' => $validatedSubjectName,
+                'year' => Carbon::now()->format('Y'),
+                'head' => 1, # hardcoded into 1
+                'grade' => '[9-12]', # hardcoded in order to cover all grades
+                'fee_individual' => $validatedFeeIndividual,
+            ]);
+        }
+        $validatedSubject = $tempUserRoles->id;
+        /************************* changes ***********************/
+
         $createTimesheetService->storeTimesheet($validatedRefPrograms, $newPackageDetails, $validatedNotes, $validatedInhouse, $validatedPics, $mentorTutorId, $validatedSubject);
     
         return response()->json([

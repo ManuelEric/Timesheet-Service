@@ -24,6 +24,7 @@ use App\Http\Controllers\Api\V1\Payment\BonusController as V1BonusController;
 use App\Http\Controllers\Api\V1\Payment\ExistingCutoffController as V1ExistingCutoffController;
 use App\Http\Controllers\Api\V1\ChangePasswordController as V1ChangePasswordController;
 use App\Http\Controllers\Api\V1\DashboardBaseController as V1DashboardBaseController;
+use App\Http\Controllers\Api\V1\Curriculums\ListController as V1CurriculumListController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -192,6 +193,18 @@ Route::prefix('package')->group(function () {
          */
         Route::prefix('component')->group(function () {
             Route::GET('list', [V1PackagesListController::class, 'component']);
+        });
+    });
+});
+
+/* Curriculum */
+Route::prefix('curriculum')->group(function () {
+    Route::middleware(['auth:sanctum', 'abilities:timesheet-menu'])->group(function () {
+        /**
+         * The Components
+         */
+        Route::prefix('component')->group(function () {
+            Route::GET('list', [V1CurriculumListController::class, 'component']);
         });
     });
 });

@@ -65,9 +65,9 @@ class StoreRequest extends FormRequest
             'ref_id.*' => [
                 'required', 
                 'exists:ref_programs,id',
-                new MatchingProgramName,
-                new SameGrade($this->input('mentortutor_email'), $this->input('subject_id'), $this->input('package_id')),
-                new CompatibleProgram($this->input('subject_id')),
+                //new MatchingProgramName,
+                //new SameGrade($this->input('mentortutor_email'), $this->input('subject_id'), $this->input('package_id')),
+                //new CompatibleProgram($this->input('subject_id')),
             ],
             'mentortutor_email' => 'required|email|exists:temp_users,email',
             'inhouse_id' => [
@@ -79,7 +79,7 @@ class StoreRequest extends FormRequest
             'package_id' => [
                 'required',
                 'exists:timesheet_packages,id',
-                new CompatiblePackage($this->input('subject_id'),)
+                //new CompatiblePackage($this->input('subject_id'),)
             ],
             'duration' => 'required|integer',
             'pic_id' => 'array',
@@ -87,8 +87,10 @@ class StoreRequest extends FormRequest
             'notes' => 'nullable',
             'subject_id' => [
                 'nullable',
-                new ExistSubjectPerTutormentor($this->input('mentortutor_email'))
-            ]
+                //new ExistSubjectPerTutormentor($this->input('mentortutor_email'))
+            ],
+            'subject_name' => 'required',
+            'individual_fee' => 'required',
         ];
     }
 
@@ -113,7 +115,7 @@ class StoreRequest extends FormRequest
                     $tempUser = TempUser::where('email', $this->input('mentortutor_email'))->first();
                     return $query->where('id', $this->input('subject_id'))->where('temp_user_id', $tempUser->id);
                 })
-            ]
+            ],
         ];
     }
 
