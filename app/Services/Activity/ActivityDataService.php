@@ -38,7 +38,7 @@ class ActivityDataService
                 'bonus_fee' => $data->bonus_fee,
                 'time_spent' => $data->time_spent,
                 'meeting_link' => $data->meeting_link,
-                'status' => $data->status,
+                'status' => $data->status == 1 ? true : false,
                 'cutoff_status' => $data->cutoff_status,
                 'cutoff_ref_id' => $data->cutoff_ref_id,
                 'date' => $start_date->format('Y-m-d'),

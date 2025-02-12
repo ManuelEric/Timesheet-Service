@@ -28,6 +28,7 @@ class Timesheet extends Model
         'notes',
         'subject_id',
         'void', 
+        'individual_fee',
     ];
 
     /**
