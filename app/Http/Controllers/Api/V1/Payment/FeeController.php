@@ -5,10 +5,24 @@ namespace App\Http\Controllers\Api\V1\Payment;
 use App\Actions\Payment\HiddenCostAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Payment\HiddenCostRequest;
+use App\Models\TempUserRoles;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Carbon;
 
 class FeeController extends Controller
 {
+    public function component($tutor_uuid, $subject_name)
+    {
+        $details = TempUserRoles::query()->
+            select(['fee_individual', 'fee_group'])->
+            where('temp_user_id', $tutor_uuid)->
+            where('tutor_subject', $subject_name)->
+            where('year', Carbon::now()->format('Y'))->
+            where('head', 1)->
+            first();
+        return response()->json($details);
+    }
+
     public function store(
         HiddenCostRequest $request,
         HiddenCostAction $hiddenCostAction,

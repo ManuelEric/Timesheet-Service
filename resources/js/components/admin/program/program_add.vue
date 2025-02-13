@@ -102,6 +102,19 @@ const getSubject = async (item, uuid = null) => {
   }
 }
 
+const getIndividualFee = async (tutor_id, subject_name) => {
+  try {
+
+    const res = await ApiService.get('api/v1/component/fee/' + tutor_id + '/' + subject_name )
+    if (res) {
+      form.value.individual_fee = res.fee_individual
+    }
+
+  } catch (error) {
+    console.error(error)
+  }
+}
+
 const getCurriculum = async () => {
   try {
     const res = await ApiService.get('api/v1/curriculum/component/list')
@@ -238,6 +251,7 @@ onMounted(() => {
               :loading="loading"
               :disabled="loading"
               :rules="rules.required"
+              @update:modelValue="getIndividualFee(tutor_selected.id, form.subject_name)"
             ></VAutocomplete>
           </VCol>
           <VCol md="8">
