@@ -211,5 +211,15 @@ Route::prefix('curriculum')->group(function () {
 
 Route::POST('identity/generate-token', [V1LoginController::class, 'authenticateNonAdmin']);
 
+/* Fee */
+Route::middleware(['auth:sanctum', 'abilities:program-menu'])->group(function () {
+    /**
+     * The Components
+     */
+    Route::prefix('component')->group(function () {
+        Route::GET('fee/{tutor_id}/{subject_name}', [V1FeeController::class, 'component']);
+    });
+});
+
 /* log everytime user visit any pages */
 Route::middleware('auth:sanctum')->get('visit/{page_name}/{detail?}', [LogController::class, 'index']);

@@ -91,7 +91,7 @@ class MainController extends Controller
         # before the data stored into timesheet
         # need to check if tutor has already subject on temp_user_roles
         # if tutor doesn't have subject, then create a new one
-        if (! $validatedSubject = TempUserRoles::where('temp_user_id', $mentorTutorId)->where('tutor_subject', 'like', "%{$validatedSubjectName}%")->first() )
+        if (! $validatedSubject = TempUserRoles::where('temp_user_id', operator: $mentorTutorId)->where('tutor_subject', 'like', "%{$validatedSubjectName}%")->first() )
         {
             $tempUserRoles = TempUserRoles::create([
                 'temp_user_id' => $mentorTutorId,
