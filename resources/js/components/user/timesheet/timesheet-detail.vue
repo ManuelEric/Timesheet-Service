@@ -200,7 +200,7 @@ onMounted(() => {
               <VCheckbox
                 color="success"
                 v-model="item.status"
-                value="1"
+                :value="true"
                 :false-value="0"
                 :disabled="item.start_time == '00:00' || item.cutoff_status == 'completed'"
                 v-tooltip:start="item.status ? 'Completed' : 'Not Yet'"
