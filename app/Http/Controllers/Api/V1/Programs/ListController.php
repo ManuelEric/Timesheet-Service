@@ -13,7 +13,7 @@ class ListController extends Controller
     {
         /* incoming request */
         $search = $request->only(['program_name', 'keyword']);
-        $ref_success_programs = Ref_Program::onSearch($search)->newest()->paginate(10);
+        $ref_success_programs = Ref_Program::tutoring()->onSearch($search)->newest()->paginate(10);
         return response()->json($ref_success_programs);
     }
 

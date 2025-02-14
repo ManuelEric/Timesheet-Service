@@ -70,7 +70,6 @@ return new class extends Migration
                 table: 'temp_user_roles', indexName: 'timesheets_subject_id',
             )->onUpdate('restrict')->onDelete('restrict');
             $table->enum('void', ['true', 'false'])->default('false');
-            $table->double('individual_fee')->default('0.00');
             $table->timestamps();
         });
 
