@@ -35,7 +35,11 @@ class CheckEmailMentorTutorAction
         }
 
         /* initialize the data */
+<<<<<<< HEAD
+        $id = $response['id'];
+=======
         $uuid = $response['id'];
+>>>>>>> origin/staging
         $fullName = $this->concat($response['first_name'], $response['last_name']);
         $roles = $response['roles'];
         $emailExist = $response['email'] ? true : false;
@@ -43,14 +47,14 @@ class CheckEmailMentorTutorAction
 
         /* manipulate the response */
         $checkingResult = [
-            'uuid' => $uuid,
+            'uuid' => $id,
             'full_name' => $fullName,
             'email_exist' => $emailExist,
             'has_password' => $hasPassword,
         ];
 
         $rawInformation = [
-            'uuid' => $uuid,
+            'uuid' => $id,
             'full_name' => $fullName,
             'email' => $response['email'],
             'phone' => $response['phone'],
