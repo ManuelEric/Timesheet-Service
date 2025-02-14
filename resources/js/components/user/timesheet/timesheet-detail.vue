@@ -21,7 +21,7 @@ const isDialogVisible = ref([
 const selectedItem = ref([])
 // End Variable
 
-// Start Function
+// Start Functions
 const getData = async () => {
   loading.value = true
   try {

@@ -179,7 +179,6 @@ onMounted(() => {
             >
               #
             </th>
-            <!-- <th class="text-uppercase text-center">Invoice ID</th> -->
             <th class="text-uppercase text-center">Student/School Name</th>
             <th class="text-uppercase text-center">Program Name</th>
             <th class="text-uppercase text-center">Timesheet</th>
@@ -206,13 +205,6 @@ onMounted(() => {
                 v-else
               ></VIcon>
             </td>
-            <!-- <td nowrap>
-              <VIcon
-                icon="ri-receipt-line"
-                class="me-3"
-              ></VIcon>
-              {{ item.invoice_id }}
-            </td> -->
             <td
               class="text-left"
               nowrap

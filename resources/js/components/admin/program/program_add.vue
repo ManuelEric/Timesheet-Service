@@ -125,7 +125,7 @@ const submit = async () => {
   loading.value = true
 
   form.value.mentortutor_email = tutor_selected.value.email
-  // console.log(form.value)
+
   const { valid } = await formData.value.validate()
   if (valid) {
     try {
