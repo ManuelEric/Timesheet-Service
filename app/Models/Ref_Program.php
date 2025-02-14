@@ -51,7 +51,7 @@ class Ref_Program extends Model
      */
     public function scopeTutoring(Builder $query)
     {
-        $query->where('program_name', 'NOT LIKE', '%admission mentoring%');
+        $query->where('program_name', 'NOT LIKE', '%admissions mentoring%');
     }
 
     public function scopeWhereWetherB2C_B2B(Builder $query, $category, ?string $clientprog_id, ?string $schprog_id)
