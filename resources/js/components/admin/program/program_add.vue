@@ -91,6 +91,7 @@ const getSubject = async (item, uuid = null) => {
     form.value.subject_id = item[0].subjects[0].id
   } else {
     try {
+
       const res = await ApiService.get('api/v1/user/mentor-tutors/' + uuid + '/subjects')
       if (res) {
         subjects.value = res
@@ -103,10 +104,12 @@ const getSubject = async (item, uuid = null) => {
 
 const getIndividualFee = async (tutor_id, subject_name) => {
   try {
-    const res = await ApiService.get('api/v1/component/fee/' + tutor_id + '/' + subject_name)
+
+    const res = await ApiService.get('api/v1/component/fee/' + tutor_id + '/' + subject_name )
     if (res) {
       form.value.individual_fee = res.fee_individual
     }
+
   } catch (error) {
     console.error(error)
   }
@@ -115,7 +118,10 @@ const getIndividualFee = async (tutor_id, subject_name) => {
 const getCurriculum = async () => {
   try {
     const res = await ApiService.get('api/v1/curriculum/component/list')
-    if (res) curriculum_list.value = res
+    if (res) 
+      curriculum_list.value = res
+
+    console.log(res)
   } catch (error) {
     console.error(error)
   }
@@ -173,7 +179,7 @@ onMounted(() => {
 
 <template>
   <VCard
-    width="650"
+    width="600"
     prepend-icon="ri-send-plane-line"
     title="Assign to Mentor/Tutor"
   >
@@ -203,10 +209,7 @@ onMounted(() => {
               @update:modelValue="getSubject(tutor_selected.roles, tutor_selected.uuid)"
             ></VAutocomplete>
           </VCol>
-          <VCol
-            md="6"
-            col="12"
-          >
+          <VCol md="12">
             <VAutocomplete
               variant="solo"
               clearable
@@ -224,8 +227,7 @@ onMounted(() => {
             ></VAutocomplete>
           </VCol>
           <VCol
-            md="6"
-            col="12"
+            md="12"
             v-if="props.selected[0]?.require?.toLowerCase() == 'tutor'"
           >
             <!-- <VAutocomplete
@@ -252,10 +254,7 @@ onMounted(() => {
               @update:modelValue="getIndividualFee(tutor_selected.id, form.subject_name)"
             ></VAutocomplete>
           </VCol>
-          <VCol
-            md="5"
-            col="12"
-          >
+          <VCol md="8">
             <VAutocomplete
               variant="solo"
               clearable
@@ -275,24 +274,18 @@ onMounted(() => {
               @update:modelValue="checkPackage"
             ></VAutocomplete>
           </VCol>
-          <VCol
-            md="3"
-            col="7"
-          >
+          <VCol md="4">
             <VTextField
               type="number"
               variant="solo"
               clearable
-              :label="+form.duration / 60 ? '' + form.duration / 60 + ' Hours' : 'Minutes'"
+              :label="+form.duration / 60 ? 'Minutes (' + form.duration / 60 + ' Hours)' : 'Minutes'"
               :readonly="duration_readonly"
               v-model="form.duration"
               :rules="rules.required"
             />
           </VCol>
-          <VCol
-            md="4"
-            col="5"
-          >
+          <VCol md="12">
             <VTextField
               type="number"
               variant="solo"
@@ -302,10 +295,7 @@ onMounted(() => {
               :rules="rules.required"
             />
           </VCol>
-          <VCol
-            md="6"
-            col="12"
-          >
+          <VCol md="12">
             <VAutocomplete
               variant="solo"
               clearable
@@ -323,10 +313,7 @@ onMounted(() => {
               :rules="rules.required"
             ></VAutocomplete>
           </VCol>
-          <VCol
-            md="6"
-            col="12"
-          >
+          <VCol md="12">
             <VAutocomplete
               variant="solo"
               multiple
