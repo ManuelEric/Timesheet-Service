@@ -160,7 +160,7 @@ const submit = async () => {
     }
   }
 }
-// End Function
+// End Functions
 
 onMounted(() => {
   getTutor()
