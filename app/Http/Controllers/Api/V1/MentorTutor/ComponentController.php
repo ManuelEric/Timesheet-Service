@@ -33,7 +33,9 @@ class ComponentController extends Controller
             'Economics',
             'Computer Science',
             'Programming',
-            'Life Science'
+            'Life Science',
+            'English',
+            'Business Management'
         ];
         $subject_collections = collect($subjects)->sort()->values()->all();
         return response()->json($subject_collections);
