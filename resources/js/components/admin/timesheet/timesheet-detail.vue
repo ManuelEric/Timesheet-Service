@@ -195,7 +195,7 @@ onMounted(() => {
                 v-model="item.status"
                 :value="true"
                 :false-value="false"
-                v-tooltip:start="item.statusg ? 'Completed' : 'Not Yet'"
+                v-tooltip:start="item.status ? 'Completed' : 'Not Yet'"
                 @update:modelValue="updateStatus(item)"
               />
             </td>
