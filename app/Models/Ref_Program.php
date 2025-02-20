@@ -31,6 +31,7 @@ class Ref_Program extends Model
         'student_school',
         'student_grade',
         'program_name',
+        'free_trial',
         'require',
         'timesheet_id',
     ];
@@ -101,5 +102,15 @@ class Ref_Program extends Model
             orderByRaw('SUBSTRING_INDEX(SUBSTRING_INDEX(`invoice_id`, "/", 4), "/", -1) DESC')-> // for month
             orderByRaw('SUBSTRING_INDEX(`invoice_id`, "/", 1) DESC'); // for number 
 
+    }
+
+    public function scopeTrial(Builder $query): void
+    {
+        $query->where('free_trial', 1);
+    }
+
+    public function scopeNoTrial(Builder $query): void
+    {
+        $query->where('free_trial', 0);
     }
 }

@@ -128,7 +128,7 @@ class TimesheetDataService
             ];
         });
 
-        return $mappedTimesheets->sortByDesc('created_at')->values()->paginate(10);
+        return $mappedTimesheets->sortBy('clients')->values()->paginate(10);
     }
 
     public function detailTimesheet(Timesheet $timesheet)

@@ -182,6 +182,7 @@ onMounted(() => {
             <!-- <th class="text-uppercase text-center">Invoice ID</th> -->
             <th class="text-uppercase text-center">Student/School Name</th>
             <th class="text-uppercase text-center">Program Name</th>
+            <th class="text-uppercase text-center">Trial</th>
             <th class="text-uppercase text-center">Timesheet</th>
           </tr>
         </thead>
@@ -232,6 +233,26 @@ onMounted(() => {
                 class="me-3"
               ></VIcon>
               {{ item.program_name }}
+            </td>
+            <td
+              class="text-center"
+              nowrap
+            >
+              <VText v-if="item.free_trial">
+                <VIcon
+                  icon="ri-check-line"
+                  class="mx-1"
+                  color="success"
+                ></VIcon>
+              </VText>
+
+              <VText v-else>
+                <VIcon
+                  icon="ri-close-line"
+                  class="mx-1"
+                  color="error"
+                ></VIcon>
+              </VText>
             </td>
             <td class="text-center">
               <VText v-if="item.timesheet_id">
