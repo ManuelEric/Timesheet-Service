@@ -62,7 +62,7 @@ onMounted(() => {
   >
     <VerticalNavLink
       :item="{
-        title: 'Pre Cut-Off',
+        title: 'Finished Activity',
         icon: 'ri-calendar-todo-line',
         to: '/admin/cut-off/pre',
       }"
@@ -70,7 +70,7 @@ onMounted(() => {
 
     <VerticalNavLink
       :item="{
-        title: 'Completed',
+        title: 'Completed Payment',
         icon: 'ri-calendar-todo-line',
         to: '/admin/cut-off/completed',
       }"

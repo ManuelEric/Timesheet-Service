@@ -6,6 +6,7 @@ import moment from 'moment'
 
 const props = defineProps({ id: String })
 const emit = defineEmits(['close', 'reload'])
+const loading = ref(false)
 
 const formData = ref()
 const form = ref({
@@ -35,6 +36,7 @@ const resetForm = () => {
 const submit = async () => {
   const { valid } = await formData.value.validate()
   if (valid) {
+    loading.value = true
     try {
       const res = await ApiService.post('api/v1/timesheet/' + props.id + '/activity', form.value)
       // console.log(res)
@@ -59,6 +61,7 @@ const submit = async () => {
       // }
     } finally {
       resetForm()
+      loading.value = false
       emit('reload')
       emit('close')
     }
@@ -91,6 +94,8 @@ const submit = async () => {
               label="Activity Name"
               placeholder="Activity"
               variant="solo"
+              :loading="loading"
+              :disabled="loading"
             />
           </VCol>
           <VCol cols="12">
@@ -100,6 +105,8 @@ const submit = async () => {
               placeholder="Meeting Discussion"
               variant="solo"
               :rules="rules.required"
+              :loading="loading"
+              :disabled="loading"
             />
           </VCol>
           <VCol
@@ -113,6 +120,8 @@ const submit = async () => {
               prepend-icon=""
               variant="solo"
               :rules="rules.required"
+              :loading="loading"
+              :disabled="loading"
             />
           </VCol>
           <VCol
@@ -128,6 +137,8 @@ const submit = async () => {
               variant="solo"
               class="mb-3"
               @change="form.start_date = moment(form.date).format('YYYY-MM-DD') + ' ' + form.start_time + ':00'"
+              :loading="loading"
+              :disabled="loading"
             />
           </VCol>
           <VCol
@@ -141,6 +152,8 @@ const submit = async () => {
               placeholder="End Time"
               variant="solo"
               @change="form.end_date = moment(form.date).format('YYYY-MM-DD') + ' ' + form.end_time + ':00'"
+              :loading="loading"
+              :disabled="loading"
             />
           </VCol>
           <VCol
@@ -153,7 +166,8 @@ const submit = async () => {
               label="Meeting Link"
               placeholder="Meeting Link"
               variant="solo"
-              :rules="rules.url"
+              :loading="loading"
+              :disabled="loading"
             />
           </VCol>
         </VRow>
@@ -161,6 +175,8 @@ const submit = async () => {
           <VBtn
             type="button"
             color="error"
+            :loading="loading"
+            :disabled="loading"
             @click="emit('close')"
           >
             <VIcon
@@ -173,6 +189,8 @@ const submit = async () => {
           <VBtn
             type="submit"
             color="success"
+            :loading="loading"
+            :disabled="loading"
           >
             Save
             <VIcon

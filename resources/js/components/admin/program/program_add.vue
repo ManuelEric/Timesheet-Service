@@ -122,12 +122,11 @@ const getCurriculum = async () => {
 }
 
 const submit = async () => {
-  loading.value = true
-
   form.value.mentortutor_email = tutor_selected.value.email
 
   const { valid } = await formData.value.validate()
   if (valid) {
+    loading.value = true
     try {
       const res = await ApiService.post('api/v1/timesheet/create', form.value)
       if (res) {
