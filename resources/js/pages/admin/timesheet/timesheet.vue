@@ -126,7 +126,9 @@ onMounted(() => {
                 label="Package"
                 :items="package_list"
                 :item-props="
-                  item => ({ title: item.package != null ? item.type_of + ' - ' + item.package : item.type_of })
+                  item => ({
+                    title: item.package != null ? item.type_of + ' - ' + item.package : item.type_of,
+                  })
                 "
                 item-value="id"
                 placeholder="Select Package"
@@ -231,6 +233,7 @@ onMounted(() => {
                 icon="ri-bookmark-3-line"
                 class="me-3"
               ></VIcon>
+              {{ item.free_trial ? '[FREE TRIAL]' : '' }}
               {{ item.program_name }}
             </td>
             <td class="text-start">

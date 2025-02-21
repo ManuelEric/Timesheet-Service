@@ -78,7 +78,9 @@ const downloadTimesheet = async (id, name) => {
 
     if (res) {
       const url = window.URL.createObjectURL(
-        new Blob([res], { type: '"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"' }),
+        new Blob([res], {
+          type: '"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"',
+        }),
       )
 
       // Create a temporary <a> element to trigger the download
@@ -274,7 +276,10 @@ watch(() => {
               <tr>
                 <td width="30%">Program</td>
                 <td width="1%">:</td>
-                <td>{{ data.packageDetails?.program_name }}</td>
+                <td>
+                  {{ data.packageDetails?.free_trial ? '[FREE TRIAL]' : '' }}
+                  {{ data.packageDetails?.program_name }}
+                </td>
               </tr>
               <tr>
                 <td>Package</td>
@@ -287,12 +292,7 @@ watch(() => {
                 <td>Person in Charge</td>
                 <td width="1%">:</td>
                 <td>
-                  <ol
-                    class="ms-4"
-                    type="1"
-                  >
-                    <li>{{ data.packageDetails?.pic_name }}</li>
-                  </ol>
+                  {{ data.packageDetails?.pic_name }}
                 </td>
               </tr>
               <tr>
