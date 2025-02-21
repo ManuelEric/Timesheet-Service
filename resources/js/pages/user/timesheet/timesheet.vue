@@ -206,6 +206,7 @@ onMounted(() => {
                 icon="ri-bookmark-3-line"
                 class="me-3"
               ></VIcon>
+              {{ item.free_trial ? '[TRIAL]' : '' }}
               {{ item.program_name }}
             </td>
             <td class="text-start">
