@@ -91,7 +91,7 @@ class MainController extends Controller
         # before the data stored into timesheet
         # need to check if tutor has already subject on temp_user_roles
         # if tutor doesn't have subject, then create a new one
-        if (! $validatedSubject = TempUserRoles::where('temp_user_id', operator: $mentorTutorId)->where('tutor_subject', 'like', "%{$validatedSubjectName}%")->first() )
+        if (! $tempUserRoles = TempUserRoles::where('year', Carbon::now()->format('Y'))->where('temp_user_id', operator: $mentorTutorId)->where('tutor_subject', 'like', "%{$validatedSubjectName}%")->first() )
         {
             $tempUserRoles = TempUserRoles::create([
                 'temp_user_id' => $mentorTutorId,
@@ -103,6 +103,21 @@ class MainController extends Controller
                 'fee_individual' => $validatedFeeIndividual,
             ]);
         }
+        # when the tempUserRoles exists
+        # update the data
+        else
+        {
+            //! here's some notes that need to be checked later [IMPORTANT!]
+            # for now, to get tempUserRoles, we only check by year, temp_user_id, and subject name
+            # but there might be some issues when system using head and grade
+            # so if the system are using head and grade to get the subject, please update data below
+            # make sure to update not only the fee_individual but also the other parameters
+            # same goes with the data above, you should not hardcoded the head and grade
+            $tempUserRoles->fee_individual = $validatedFeeIndividual;
+            $tempUserRoles->save();
+        }
+
+
         $validatedSubject = $tempUserRoles->id;
         /************************* changes ***********************/
 

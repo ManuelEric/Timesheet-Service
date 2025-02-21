@@ -14,6 +14,10 @@ return new class extends Migration
         Schema::table('ref_programs', function (Blueprint $table) {
             $table->boolean('free_trial')->after('program_name')->default(false);
         });
+
+        Schema::table('temp_users', function (Blueprint $table) {
+            $table->boolean('has_npwp')->after('inhouse')->default(false); 
+        });
     }
 
     /**
@@ -21,8 +25,12 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('table', function (Blueprint $table) {
+        Schema::table('ref_programs', function (Blueprint $table) {
             $table->dropColumn('free_trial');
+        });
+
+        Schema::table('temp_users', function (Blueprint $table) {
+            $table->dropColumn('has_npwp');
         });
     }
 };

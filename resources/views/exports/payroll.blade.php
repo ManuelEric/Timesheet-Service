@@ -118,6 +118,24 @@
     </tr>
     <!-- Total hour end here -->
 
+    <!-- Total fee without tax start here -->
+    <tr>
+        <td colspan="6" valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Fee </td>
+        <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Rp {{ number_format($total_fee_without_tax, 2, ',', '.') }}</td>
+        <td style="border: 1px solid #000; word-wrap: break-word;"></td>
+    </tr>
+    <!-- Total fee without tax end here -->
+
+    
+
+    <!-- Tax add here -->
+    <tr>
+        <td colspan="6" valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Tax {{ $percentage_of_tax }}%</td>
+        <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Rp {{ number_format($total_tax, 2, ',', '.') }}</td>
+        <td style="border: 1px solid #000; word-wrap: break-word;"></td>
+    </tr>
+    <!-- Tax end here -->
+
     <!-- Total fee start here -->
     <tr>
         <td colspan="6" valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Total fee</td>
