@@ -41,6 +41,7 @@ class CreateActivityAction
         if ( $type == "tutoring" )
         {
             $fee_perHours = $isGroup ? $timesheet->subject->fee_group : $timesheet->subject->fee_individual;
+            $tax = $timesheet->handle_by->last()->has_npwp == 1 ? 2.5 : 3;
         }
 
         $endDate = array_key_exists('end_date', $validated) ? $validated['end_date'] : NULL;
@@ -49,7 +50,7 @@ class CreateActivityAction
         /* when the request comes from fee controller */
         if ( array_key_exists('additional_fee', $validated) ) 
         {
-            $fee_perHours = 0;
+            $fee_perHours = $tax = 0;
             $additionalFee = $validated['additional_fee'];
             $status = 1;
         } 
@@ -57,7 +58,7 @@ class CreateActivityAction
         /* when the request comes from bonus controller */
         if ( array_key_exists('bonus_fee', $validated) ) 
         {
-            $fee_perHours = 0;
+            $fee_perHours = $tax = 0;
             $bonusFee = $validated['bonus_fee'];
             $status = 1;
         } 
@@ -71,6 +72,7 @@ class CreateActivityAction
                 'description' => $validated['description'],
                 'start_date' => $validated['start_date'],
                 'end_date' => $endDate,
+                'tax' => $tax,
                 'fee_hours' => $fee_perHours,
                 'additional_fee' => $additionalFee,
                 'bonus_fee' => $bonusFee,

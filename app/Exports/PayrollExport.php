@@ -50,15 +50,22 @@ class PayrollExport implements FromView, WithTitle
 
         $fee = $this->activities->map(function ($item) {
             return [
-                'total_fee_per_activity' => ($item['time_spent'] / 60) * $item['fee_hours']
+                'total_fee_per_activity' => ($item['time_spent'] / 60) * $item['fee_hours'],
             ];
         });
 
-        $total_fee = $fee->sum('total_fee_per_activity') + $this->activities->sum('additional_fee') + $this->activities->sum('bonus_fee');
+        
+        $total_fee_without_tax = $fee->sum('total_fee_per_activity') + $this->activities->sum('additional_fee') + $this->activities->sum('bonus_fee');
+
+        # add tax here
+        $percentage_of_tax = $this->timesheet['packageDetails']['tutormentor_has_npwp'] ? 2.5 : 3;
+        $total_tax = ($percentage_of_tax / 100) * $total_fee_without_tax;
+
+        $total_fee = $total_fee_without_tax - $total_tax;
 
 
         # merge all variables that going to show in view 
-        $viewData = compact('isGroup', 'clients', 'activities', 'cutoff', 'total_hour', 'total_fee');
+        $viewData = compact('isGroup', 'clients', 'activities', 'cutoff', 'total_hour', 'total_fee_without_tax', 'percentage_of_tax', 'total_tax', 'total_fee');
 
         return view('exports.payroll', $this->timesheet + $viewData);
     }

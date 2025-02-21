@@ -162,6 +162,7 @@ class TimesheetDataService
         $tutorMentorUuid = $tutorMentor->uuid;
         $tutorMentorEmail = $tutorMentor->email;
         $tutorMentorName = $tutorMentor->full_name;
+        $tutorMentorHasNPWP = $tutorMentor->has_npwp;
         $inhouseUuid = $timesheet->inhouse_pic->uuid;
         $inhouseName = $timesheet->inhouse_pic->full_name;
         $last_updated = $timesheet->updated_at;
@@ -176,6 +177,7 @@ class TimesheetDataService
             'free_trial' => $freeTrial,
             'pic_name' => $adminName,
             'tutormentor_name' => $tutorMentorName,
+            'tutormentor_has_npwp' => $tutorMentorHasNPWP,
             'inhouse_name' => $inhouseName,
             'last_updated' => $last_updated,
             'duration_in_minutes' => $duration,

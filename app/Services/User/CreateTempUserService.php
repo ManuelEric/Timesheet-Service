@@ -29,6 +29,7 @@ class CreateTempUserService
         $email = $userRawInformation['email'];
         $phone = $userRawInformation['phone'];
         $password = $userRawInformation['password'];
+        $has_npwp = $userRawInformation['has_npwp'];
 
         /* check existing temp user */
         $tempUser = TempUser::where('email', $email)->first();
@@ -88,8 +89,10 @@ class CreateTempUserService
             $tempUserId = $tempUser->id;
 
 
+            # because managing timesheet now Kak Steven can also input the subject and fees
+            # guess, it doesn't used it anymore but I'll put it here just in case needed
             /* update or create the temp_user_role */
-            $this->storeOrUpdateRoles($tempUserId, $roleDetails);
+            // $this->storeOrUpdateRoles($tempUserId, $roleDetails);
         }
         
 
@@ -103,6 +106,7 @@ class CreateTempUserService
                 'email' => $email,
                 'phone' => $phone,
                 'password' => $password,
+                'has_npwp' => $has_npwp,
             ];
     
             DB::beginTransaction();

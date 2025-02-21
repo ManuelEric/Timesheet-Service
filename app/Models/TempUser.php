@@ -37,6 +37,7 @@ class TempUser extends Authenticatable implements CanResetPassword
         'password',
         'role',
         'inhouse',
+        'has_npwp',
         'last_activity',
     ];
 
