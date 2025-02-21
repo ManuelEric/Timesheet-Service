@@ -50,7 +50,7 @@ class PayrollExport implements FromView, WithTitle
 
         $fee = $this->activities->map(function ($item) {
             return [
-                'total_fee_per_activity' => ($item['time_spent'] / 60) * $item['fee_hours']
+                'total_fee_per_activity' => ($item['time_spent'] / 60) * $item['fee_hours'],
             ];
         });
 
