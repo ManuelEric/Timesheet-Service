@@ -277,7 +277,7 @@ watch(() => {
                 <td width="30%">Program</td>
                 <td width="1%">:</td>
                 <td>
-                  {{ data.packageDetails?.free_trial ? '[FREE TRIAL]' : '' }}
+                  {{ data.packageDetails?.free_trial ? '[TRIAL]' : '' }}
                   {{ data.packageDetails?.program_name }}
                 </td>
               </tr>

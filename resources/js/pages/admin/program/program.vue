@@ -232,7 +232,7 @@ onMounted(() => {
                 icon="ri-bookmark-line"
                 class="me-3"
               ></VIcon>
-              {{ item.free_trial ? '[FREE TRIAL]' : '' }}
+              {{ item.free_trial ? '[TRIAL]' : '' }}
               {{ item.program_name }}
             </td>
             <td
