@@ -56,6 +56,7 @@ class CheckEmailMentorTutorAction
             'phone' => $response['phone'],
             'password' => $response['password'],
             'roles' => collect($roles),
+            'has_npwp' => $response['has_npwp'],
         ];
 
         $result = [$checkingResult, $rawInformation];
