@@ -144,14 +144,7 @@ watch(() => {
               <tr>
                 <td>Person in Charge</td>
                 <td width="1%">:</td>
-                <td>
-                  <ol
-                    class="ms-4"
-                    type="1"
-                  >
-                    <li>{{ data.packageDetails?.pic_name }}</li>
-                  </ol>
-                </td>
+                <td>{{ data.packageDetails?.pic_name }}</td>
               </tr>
               <tr>
                 <td>Tutor/Mentor</td>
