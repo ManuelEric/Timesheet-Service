@@ -129,7 +129,10 @@ watch(() => {
               <tr>
                 <td width="20%">Program</td>
                 <td width="1%">:</td>
-                <td>{{ data.packageDetails?.program_name }}</td>
+                <td>
+                  {{ data.packageDetails?.free_trial ? '[TRIAL]' : '' }}
+                  {{ data.packageDetails?.program_name }}
+                </td>
               </tr>
               <tr>
                 <td>Package</td>
@@ -141,14 +144,7 @@ watch(() => {
               <tr>
                 <td>Person in Charge</td>
                 <td width="1%">:</td>
-                <td>
-                  <ol
-                    class="ms-4"
-                    type="1"
-                  >
-                    <li>{{ data.packageDetails?.pic_name }}</li>
-                  </ol>
-                </td>
+                <td>{{ data.packageDetails?.pic_name }}</td>
               </tr>
               <tr>
                 <td>Tutor/Mentor</td>

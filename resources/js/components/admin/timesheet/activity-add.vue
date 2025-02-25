@@ -44,21 +44,7 @@ const submit = async () => {
         showNotif('success', res.message, 'bottom-end')
       }
     } catch (error) {
-      // console.log(error.response.data.errors)
       showNotif('error', error.response.data.errors, 'bottom-end')
-      // if (error?.response?.data?.errors) {
-      //   const validationErrors = error.response.data.errors
-      //   let errorMessage = 'Validation errors:'
-      //   // Merge validation errors
-      //   for (const key in validationErrors) {
-      //     if (validationErrors.hasOwnProperty(key)) {
-      //       errorMessage += `\n${key}: ${validationErrors[key].join(', ')}`
-      //     }
-      //   }
-      //   showNotif('error', errorMessage, 'bottom-end')
-      // } else {
-      //   showNotif('error', error.response.data.message, 'bottom-end')
-      // }
     } finally {
       resetForm()
       loading.value = false
@@ -93,9 +79,9 @@ const submit = async () => {
               v-model="form.activity"
               label="Activity Name"
               placeholder="Activity"
-              variant="solo"
               :loading="loading"
               :disabled="loading"
+              variant="solo"
             />
           </VCol>
           <VCol cols="12">
@@ -104,9 +90,9 @@ const submit = async () => {
               label="Meeting Discussion"
               placeholder="Meeting Discussion"
               variant="solo"
-              :rules="rules.required"
               :loading="loading"
               :disabled="loading"
+              :rules="rules.required"
             />
           </VCol>
           <VCol
@@ -119,9 +105,9 @@ const submit = async () => {
               placeholder="Select Date"
               prepend-icon=""
               variant="solo"
-              :rules="rules.required"
               :loading="loading"
               :disabled="loading"
+              :rules="rules.required"
             />
           </VCol>
           <VCol
@@ -136,9 +122,9 @@ const submit = async () => {
               :rules="rules.required"
               variant="solo"
               class="mb-3"
-              @change="form.start_date = moment(form.date).format('YYYY-MM-DD') + ' ' + form.start_time + ':00'"
               :loading="loading"
               :disabled="loading"
+              @change="form.start_date = moment(form.date).format('YYYY-MM-DD') + ' ' + form.start_time + ':00'"
             />
           </VCol>
           <VCol
@@ -151,9 +137,9 @@ const submit = async () => {
               label="End Time"
               placeholder="End Time"
               variant="solo"
-              @change="form.end_date = moment(form.date).format('YYYY-MM-DD') + ' ' + form.end_time + ':00'"
               :loading="loading"
               :disabled="loading"
+              @change="form.end_date = moment(form.date).format('YYYY-MM-DD') + ' ' + form.end_time + ':00'"
             />
           </VCol>
           <VCol

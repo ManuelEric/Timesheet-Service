@@ -174,7 +174,7 @@ onMounted(() => {
   <VCard
     width="650"
     prepend-icon="ri-send-plane-line"
-    title="Assign to Mentor/Tutor"
+    title="Assign to Tutor"
   >
     <VCardText>
       <VForm
@@ -188,7 +188,7 @@ onMounted(() => {
               variant="solo"
               clearable
               v-model="tutor_selected"
-              label="Mentor/Tutor"
+              label="Tutor Name"
               :items="tutor_list"
               :item-props="
                 item => ({
@@ -227,18 +227,6 @@ onMounted(() => {
             col="12"
             v-if="props.selected[0]?.require?.toLowerCase() == 'tutor'"
           >
-            <!-- <VAutocomplete
-              variant="solo"
-              clearable
-              v-model="form.subject_id"
-              label="Subject Tutoring"
-              :items="subjects"
-              item-title="subject"
-              item-value="id"
-              :loading="loading"
-              :disabled="loading"
-              :rules="rules.required"
-            ></VAutocomplete> -->
             <VAutocomplete
               variant="solo"
               clearable

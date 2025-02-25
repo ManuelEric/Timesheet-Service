@@ -157,8 +157,17 @@ onMounted(() => {
             <th class="text-uppercase text-end">#</th>
           </tr>
         </thead>
-
-        <tbody>
+        <tbody v-if="data?.length == 0">
+          <tr>
+            <th
+              colspan="8"
+              class="text-center"
+            >
+              No Activity Found
+            </th>
+          </tr>
+        </tbody>
+        <tbody v-else>
           <tr
             v-for="(item, index) in data"
             :key="index"
@@ -204,6 +213,7 @@ onMounted(() => {
                 color="primary"
                 density="compact"
                 class="me-1"
+                v-if="item.meeting_link"
               >
                 <a
                   :href="item.meeting_link"

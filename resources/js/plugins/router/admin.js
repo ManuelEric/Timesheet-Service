@@ -16,7 +16,10 @@ export default [
         component: () => import('@/pages/admin/tutor/tutor.vue'),
       },
       {
-        path: '/admin/program',
+        path: '/admin/program/:name',
+        props: route => ({
+          name:route.params.name,
+        }),
         component: () => import('@/pages/admin/program/program.vue'),
       },
       {

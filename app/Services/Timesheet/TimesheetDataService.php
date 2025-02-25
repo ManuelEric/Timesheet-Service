@@ -128,7 +128,7 @@ class TimesheetDataService
             ];
         });
 
-        return $mappedTimesheets->sortByDesc('created_at')->values()->paginate(10);
+        return $mappedTimesheets->sortBy('clients')->values()->paginate(10);
     }
 
     public function detailTimesheet(Timesheet $timesheet)
@@ -139,7 +139,7 @@ class TimesheetDataService
         # because timesheets consists of multiple ref programs
         # we need to extract and define whether the client was b2c or b2b
 
-        [$clients, $programName] = $this->fetchRelatedProgram($relatedProgram);
+        [$clients, $programName, $freeTrial] = $this->fetchRelatedProgram($relatedProgram);
 
         /* fetch the package details */
         $package = $timesheet->package;
@@ -162,6 +162,7 @@ class TimesheetDataService
         $tutorMentorUuid = $tutorMentor->uuid;
         $tutorMentorEmail = $tutorMentor->email;
         $tutorMentorName = $tutorMentor->full_name;
+        $tutorMentorHasNPWP = $tutorMentor->has_npwp;
         $inhouseUuid = $timesheet->inhouse_pic->uuid;
         $inhouseName = $timesheet->inhouse_pic->full_name;
         $last_updated = $timesheet->updated_at;
@@ -173,8 +174,10 @@ class TimesheetDataService
             'package_category' => $packageCategory,
             'package_type' => $packageType,
             'package_name' => $packageName,
+            'free_trial' => $freeTrial,
             'pic_name' => $adminName,
             'tutormentor_name' => $tutorMentorName,
+            'tutormentor_has_npwp' => $tutorMentorHasNPWP,
             'inhouse_name' => $inhouseName,
             'last_updated' => $last_updated,
             'duration_in_minutes' => $duration,
@@ -253,8 +256,9 @@ class TimesheetDataService
 
         
         $programName = $relatedProgram->first()->program_name;
+        $freeTrial = $relatedProgram->first()->free_trial ? true : false;
 
-        return [$clients, $programName];
+        return [$clients, $programName, $freeTrial];
     }
 
     public function fetchTimesheetsByHandler(string $search) /* handle by who */

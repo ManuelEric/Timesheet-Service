@@ -33,6 +33,7 @@ class ActivityDataService
                 'description' => $data->description,
                 'start_date' => $data->start_date,
                 'end_date' => $data->end_date,
+                'tax' => $data->tax,
                 'fee_hours' => $data->fee_hours,
                 'additional_fee' => $data->additional_fee,
                 'bonus_fee' => $data->bonus_fee,

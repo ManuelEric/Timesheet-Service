@@ -1,5 +1,6 @@
 <script setup>
-import program from '@/components/admin/program/program_add.vue'
+import ProgramTutor from '@/components/admin/program/program_add.vue'
+import ProgramMentor from '@/components/admin/program/program_add_specialist.vue'
 import { showNotif } from '@/helper/notification'
 import ApiService from '@/services/ApiService'
 import debounce from 'lodash/debounce'
@@ -7,6 +8,8 @@ import debounce from 'lodash/debounce'
 // Start Variable
 const selected = ref([])
 const dialog = ref(false)
+
+const props = defineProps({ name: String })
 
 const currentPage = ref(1)
 const totalPage = ref()
@@ -34,6 +37,10 @@ const form = ref({
 const getData = async () => {
   // reset selected
   selected.value = []
+
+  // Check Category of Ref Program
+  const category = props.name
+  console.log(category)
 
   const page = '?page=' + currentPage.value
   const search = keyword.value ? '&keyword=' + keyword.value : ''
@@ -153,7 +160,15 @@ onMounted(() => {
         width="auto"
         persistent
       >
-        <program
+        <ProgramTutor
+          v-if="props.name == 'tutoring'"
+          :selected="selected"
+          @close="dialog = false"
+          @reload="getData"
+        />
+
+        <ProgramMentor
+          v-if="props.name == 'specialist'"
           :selected="selected"
           @close="dialog = false"
           @reload="getData"
@@ -181,6 +196,7 @@ onMounted(() => {
             </th>
             <th class="text-uppercase text-center">Student/School Name</th>
             <th class="text-uppercase text-center">Program Name</th>
+            <th class="text-uppercase text-center">Trial</th>
             <th class="text-uppercase text-center">Timesheet</th>
           </tr>
         </thead>
@@ -223,7 +239,28 @@ onMounted(() => {
                 icon="ri-bookmark-line"
                 class="me-3"
               ></VIcon>
+              {{ item.free_trial ? '[TRIAL]' : '' }}
               {{ item.program_name }}
+            </td>
+            <td
+              class="text-center"
+              nowrap
+            >
+              <VText v-if="item.free_trial">
+                <VIcon
+                  icon="ri-check-line"
+                  class="mx-1"
+                  color="success"
+                ></VIcon>
+              </VText>
+
+              <VText v-else>
+                <VIcon
+                  icon="ri-close-line"
+                  class="mx-1"
+                  color="error"
+                ></VIcon>
+              </VText>
             </td>
             <td class="text-center">
               <VText v-if="item.timesheet_id">

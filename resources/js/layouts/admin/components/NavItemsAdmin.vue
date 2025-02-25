@@ -36,14 +36,29 @@ onMounted(() => {
     }"
   />
 
-  <VerticalNavLink
+  <VerticalNavGroup
     :item="{
-      title: 'Programs',
+      title: 'Program',
       icon: 'ri-honour-line',
-      to: '/admin/program',
     }"
     v-if="role == 'admin' || role == 'super_admin'"
-  />
+  >
+    <VerticalNavLink
+      :item="{
+        title: 'Tutoring',
+        icon: 'ri-calendar-todo-line',
+        to: '/admin/program/tutoring',
+      }"
+    />
+
+    <VerticalNavLink
+      :item="{
+        title: 'Subject Specialist',
+        icon: 'ri-calendar-todo-line',
+        to: '/admin/program/specialist',
+      }"
+    />
+  </VerticalNavGroup>
 
   <VerticalNavLink
     :item="{
@@ -62,7 +77,7 @@ onMounted(() => {
   >
     <VerticalNavLink
       :item="{
-        title: 'Finished Activity',
+        title: 'Finished Activities',
         icon: 'ri-calendar-todo-line',
         to: '/admin/cut-off/pre',
       }"

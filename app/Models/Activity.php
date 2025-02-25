@@ -26,6 +26,7 @@ class Activity extends Model
         'description',
         'start_date',
         'end_date',
+        'tax',
         'fee_hours',
         'additional_fee',
         'bonus_fee',
