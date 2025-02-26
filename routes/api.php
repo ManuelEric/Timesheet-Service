@@ -26,7 +26,7 @@ use App\Http\Controllers\Api\V1\ChangePasswordController as V1ChangePasswordCont
 use App\Http\Controllers\Api\V1\DashboardBaseController as V1DashboardBaseController;
 use App\Http\Controllers\Api\V1\Curriculums\ListController as V1CurriculumListController;
 use App\Http\Controllers\Api\V1\Request\EngagementTypeController as V1EngagementTypeController;
-use App\Http\Controllers\Api\V1\RequestController as V1RequestController;
+use App\Http\Controllers\Api\V1\Request\MainController as V1RequestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 

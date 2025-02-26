@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::table('ref_programs', function (Blueprint $table) {
             $table->boolean('free_trial')->after('program_name')->default(false);
+            $table->unsignedBigInteger('engagement_type_id')->nullable()->after('timesheet_id');
+            $table->foreign('engagement_type_id')->references('id')->on('engagement_types')->onUpdate('cascade')->onDelete('cascade');
+            $table->text('notes')->nullable()->after('engagement_type_id')->comment('note from mentor');
         });
 
         Schema::table('temp_users', function (Blueprint $table) {
@@ -39,6 +42,10 @@ return new class extends Migration
 
         Schema::table('timesheet_activities', function (Blueprint $table) {
             $table->dropColumn('tax'); 
+        });
+
+        Schema::table('timesheets', function (Blueprint $table) {
+
         });
     }
 };

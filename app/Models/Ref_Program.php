@@ -34,6 +34,8 @@ class Ref_Program extends Model
         'free_trial',
         'require',
         'timesheet_id',
+        'engagement_type_id',
+        'notes'
     ];
 
     /**
@@ -53,6 +55,11 @@ class Ref_Program extends Model
     public function scopeTutoring(Builder $query)
     {
         $query->where('program_name', 'NOT LIKE', '%admissions mentoring%');
+    }
+
+    public function scopeMentoring(Builder $query)
+    {
+        $query->whereNotNull('engagement_type_id');
     }
 
     public function scopeWhereWetherB2C_B2B(Builder $query, $category, ?string $clientprog_id, ?string $schprog_id)
