@@ -38,7 +38,7 @@ class CreateTempUserService
         foreach ($userRawInformation['roles'] as $detail)
         {
             /* create model temp_user_roles only if the role are inside acceptable roles */
-            if ( in_array($detail['role_name'], ['Mentor', 'Tutor']) )
+            if ( in_array($detail['role_name'], ['Mentor', 'External Mentor', 'Tutor']) )
             {
                 $role_name = $detail['role_name'];
                 $subjects = $detail['subjects'];
@@ -84,6 +84,7 @@ class CreateTempUserService
             $tempUser->phone = $phone;
             /* update the password from CRMs */
             $tempUser->password = $password;
+            $tempUser->has_npwp = $has_npwp;
             $tempUser->save();           
 
             $tempUserId = $tempUser->id;

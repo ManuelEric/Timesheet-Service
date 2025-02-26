@@ -57,7 +57,7 @@ class GenerateTokenService
 
         /* generate token */
         $tempUser->authenticate();
-        $granted_access = ['timesheet-menu', 'program-menu']; #program-menu needed for summary on dashboard
+        $granted_access = ['timesheet-menu', 'program-menu', 'request-menu']; #program-menu needed for summary on dashboard
         $token = $tempUser->createToken('user-access', $granted_access)->plainTextToken;
 
         return [

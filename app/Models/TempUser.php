@@ -105,6 +105,10 @@ class TempUser extends Authenticatable implements CanResetPassword
      *
      * @var array<int, string>
      */
+    public function request()
+    {
+        return $this->hasMany(NewRequest::class, 'mentor_id', 'id');
+    }
 
     public function timesheets()
     {

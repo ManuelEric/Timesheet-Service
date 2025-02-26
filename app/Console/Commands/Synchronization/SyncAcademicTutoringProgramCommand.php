@@ -13,7 +13,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
-class SuccessProgramCommand extends Command
+class SyncAcademicTutoringProgramCommand extends Command
 {
     use ConcatenateName;
     use HttpCall;
@@ -22,14 +22,14 @@ class SuccessProgramCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'sync:success-program';
+    protected $signature = 'sync:academic-program';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Synchronize CRM application success program.';
+    protected $description = 'Synchronize CRM application academic tutoring program.';
 
     protected $responseService;
     protected $tokenService;
@@ -47,7 +47,7 @@ class SuccessProgramCommand extends Command
     public function handle()
     {
         /* call API to get all of the success and paid programs */
-        [$statusCode, $response] = $this->make_call('get', env('CRM_DOMAIN') . 'program/list');
+        [$statusCode, $response] = $this->make_call('get', env('CRM_DOMAIN') . 'program/academic/list');
         if (! $response) {
             $this->error('There are no data.');
             return COMMAND::FAILURE;

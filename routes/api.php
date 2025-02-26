@@ -25,6 +25,8 @@ use App\Http\Controllers\Api\V1\Payment\ExistingCutoffController as V1ExistingCu
 use App\Http\Controllers\Api\V1\ChangePasswordController as V1ChangePasswordController;
 use App\Http\Controllers\Api\V1\DashboardBaseController as V1DashboardBaseController;
 use App\Http\Controllers\Api\V1\Curriculums\ListController as V1CurriculumListController;
+use App\Http\Controllers\Api\V1\Request\EngagementTypeController as V1EngagementTypeController;
+use App\Http\Controllers\Api\V1\RequestController as V1RequestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -91,6 +93,16 @@ Route::prefix('user')->group(function () {
         Route::GET('mentor-tutors/{mentortutor_uuid}/subjects', [V1MentorTutorComponentController::class, 'comp_subjects']);
         /* List students mentored / tutored by Mentor / Tutor */
         Route::GET('mentor-tutors/{mentortutor_uuid}/students', [V1MentorTutorComponentController::class, 'comp_students']);
+    });
+});
+
+/* Request */
+Route::prefix('request')->group(function () {
+    Route::middleware(['auth:sanctum', 'abilities:request-menu'])->group(function () {
+        /* Store Request */
+        Route::POST('create', [V1RequestController::class, 'store']);
+        /* List of Requests */
+        Route::GET('/', [V1RequestController::class, 'index']);
     });
 });
 
@@ -220,6 +232,19 @@ Route::middleware(['auth:sanctum', 'abilities:program-menu'])->group(function ()
         Route::GET('fee/{tutor_id}/{subject_name}', [V1FeeController::class, 'component']);
     });
 });
+
+/* Engagement Type */
+Route::prefix('engagement-type')->group(function () {
+    Route::middleware(['auth:sanctum', 'abilities:request-menu'])->group(function () {
+        /**
+         * The Components
+         */
+        Route::prefix('component')->group(function () {
+            Route::GET('list', [V1EngagementTypeController::class, 'component']);
+        });
+    });
+});
+
 
 /* log everytime user visit any pages */
 Route::middleware('auth:sanctum')->get('visit/{page_name}/{detail?}', [LogController::class, 'index']);
