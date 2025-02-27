@@ -48,6 +48,11 @@ class Ref_Program extends Model
         return $this->belongsTo(Timesheet::class, 'timesheet_id', 'id');
     }
 
+    public function engagement_type()
+    {
+        return $this->belongsTo(EngagementType::class, 'engagement_type_id', 'id');
+    }
+
     /**
      * The scopes.
      * 
