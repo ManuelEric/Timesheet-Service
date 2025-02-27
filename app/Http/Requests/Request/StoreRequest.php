@@ -39,8 +39,8 @@ class StoreRequest extends FormRequest
             'invoice_id' => 'required|string',
             'student_uuid' => 'required|string',
             'student_name' => 'required|string',
-            'student_school' => 'required|string',
-            'student_grade' => 'required|integer',
+            'student_school' => 'nullable|string',
+            'student_grade' => 'nullable|integer',
             'program_name' => 'required|string',
             'engagement_type' => 'required|exists:engagement_types,id',
             'notes' => 'nullable'
