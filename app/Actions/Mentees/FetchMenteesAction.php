@@ -18,9 +18,11 @@ class FetchMenteesAction
         $this->tokenService = $tokenService;
     }
     
-    public function execute()
+    public function execute(string $mentor_uuid)
     {
-        [$statusCode, $response] = $this->make_call('get', env('CRM_DOMAIN') . 'program/admissions/list');
+        # k in get param means mentor_uuid
+        # use k to hide from anyone on browser
+        [$statusCode, $response] = $this->make_call('get', env('CRM_DOMAIN') . 'program/admissions/list?k=' . $mentor_uuid);
 
         if ( !$response ) {
             throw new HttpResponseException(

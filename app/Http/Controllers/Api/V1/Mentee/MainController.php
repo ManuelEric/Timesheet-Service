@@ -14,7 +14,8 @@ class MainController extends Controller
         FetchMenteesAction $fetchMenteesAction,
         )
     {
-        $mentees = $fetchMenteesAction->execute();
+        $mentor_uuid = auth('sanctum')->user()->uuid;
+        $mentees = $fetchMenteesAction->execute($mentor_uuid);
         return response()->json($mentees);
         
     }
