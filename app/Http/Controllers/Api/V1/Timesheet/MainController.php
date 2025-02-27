@@ -36,7 +36,11 @@ class MainController extends Controller
     {
         /* Incoming Request */
         $search = $request->only(['program_name', 'package_id', 'keyword']);
-        $results = $this->timesheetDataService->listTimesheet($search);
+
+        /* to determine whether timesheet tutor or timesheet mentor */
+        $is_subject_specialist = $request->is_subject_specialist;
+
+        $results = $this->timesheetDataService->listTimesheet($search, $is_subject_specialist);
         return response()->json($results);
     }
 

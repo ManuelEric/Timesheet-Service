@@ -27,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         /* pagination */
-        Collection::macro('paginate', function ($perPage = 15, $page = null, $options = []) {
+        Collection::macro('paginate', function ($perPage = 10, $page = null, $options = []) {
             $page = $page ?: (LengthAwarePaginator::resolveCurrentPage() ?: 1);
             $paginator = new LengthAwarePaginator(
                 items: $this->forPage($page, $perPage),
