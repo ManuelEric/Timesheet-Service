@@ -24,8 +24,11 @@ class TimesheetDataService
     {
         $timesheets = Timesheet::query()->with(
             [
+                'ref_program.engagement_type' => function ($query) {
+                    $query->select('id', 'name');
+                },
                 'ref_program' => function ($query) {
-                    $query->select('category', 'student_name', 'student_school', 'program_name', 'timesheet_id', 'require');
+                    $query->select('category', 'student_name', 'student_school', 'program_name', 'timesheet_id', 'require', 'engagement_type_id');
                 },
                 'transferred' => function ($query) {
                     $query->select('category', 'student_name', 'student_school', 'program_name', 'require');
@@ -65,9 +68,9 @@ class TimesheetDataService
             $refProgram = $data->ref_program;
             $transferredLog = $data->transferred;
 
-            # if timesheet has multiple ref programs
             if ( count($refProgram) > 0 )
             {
+                # if timesheet has multiple ref programs
                 if (count($refProgram) > 1) {
                     foreach ($refProgram as $ref) {
                         $category = $ref->category;
@@ -77,6 +80,7 @@ class TimesheetDataService
     
                         array_push($clients, $client);
                     }
+                # if timesheet has only one ref program
                 } else {
                     $category = $refProgram->first()->category;
                     $studentName = $refProgram->first()->student_name;
@@ -84,6 +88,7 @@ class TimesheetDataService
                     $clients = $category == "b2c" ? $studentName : $studentSchool;
                 }
                 $programName = $refProgram->first()->program_name;
+                $engagementType = $refProgram->first()->engagement_type ? $refProgram->first()->engagement_type->name : null;
                 $requirements = $refProgram->first()->require;
             }
 
@@ -106,6 +111,7 @@ class TimesheetDataService
                     $clients = $category == "b2c" ? $studentName : $studentSchool;
                 }
                 $programName = $transferredLog->first()->program_name;
+                $engagementType = $refProgram->first()->engagement_type ? $refProgram->first()->engagement_type->name : null;
                 $requirements = $transferredLog->first()->require;
             }
 
@@ -133,6 +139,7 @@ class TimesheetDataService
                 'group' => count($refProgram) > 1 ? true : false,
                 'clients' => $clients,
                 'void' => $void,
+                'engagement_type' => $engagementType,
                 'created_at' => $data->created_at,
             ];
         });
