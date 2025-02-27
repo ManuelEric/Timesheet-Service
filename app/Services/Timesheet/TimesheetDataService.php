@@ -47,7 +47,7 @@ class TimesheetDataService
                 },
             ]
         )->
-        when($is_subject_specialist === true, function ($query) {
+        when($is_subject_specialist, function ($query) {
             $query->mentoring();
         }, function ($query) {
             $query->tutoring();
