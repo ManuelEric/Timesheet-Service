@@ -125,7 +125,7 @@ Route::prefix('program')->group(function () {
 });
 
 /* Mentee */
-Route::middleware(['auth:sanctum', 'abilities:request-menu', 'throttle:120,1'])->group(function  () {
+Route::middleware(['auth:sanctum', 'abilities:request-menu', 'throttle:30,1'])->group(function  () {
 
     /**
      * The Components
