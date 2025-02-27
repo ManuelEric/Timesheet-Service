@@ -183,7 +183,9 @@ class TimesheetDataService
         $inhouseName = $timesheet->inhouse_pic->full_name;
         $last_updated = $timesheet->updated_at;
         $clientProfile = $clients;
-        $engagement_type = isset($refProgram->engagement_type) ? $refProgram->engagement_type->name : null;
+        $engagement_type = $refProgram->first()->engagement_type 
+            ? $refProgram->first()->engagement_type->name
+            : null;
         $packageDetails = [
             'program_name' => $programName,
             'void' => $timesheet->void,
