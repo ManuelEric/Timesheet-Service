@@ -22,8 +22,32 @@ class MainController extends Controller
     {
         /* incoming request */
         $search = $request->only(['program_name', 'keyword']);
-        $ref_success_programs = Ref_Program::mentoring()->onSearch($search)->orderBy('clientprog_id', 'desc')->paginate(10);
-        return response()->json($ref_success_programs);
+        $ref_admissions_programs = Ref_Program::with([
+                'engagement_type' => function ($query) {
+                    $query->select('id', 'name');
+                }
+            ])->mentoring()->onSearch($search)->orderBy('clientprog_id', 'desc')->get();
+        
+        $mapped_ref_admissions_programs = $ref_admissions_programs->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'category' => $item->category,
+                'clientprog_id' => $item->clientprog_id,
+                'schprog_id' => $item->schprog_id,
+                'invoice_id' => $item->invoice_id,
+                'student_uuid' => $item->student_uuid,
+                'student_name' => $item->student_name,
+                'student_school' => $item->student_school,
+                'student_grade' => $item->student_grade,
+                'program_name' => $item->program_name,
+                'free_trial' => $item->free_trial,
+                'require' => $item->require,
+                'timesheet_id' => $item->timesheet_id,
+                'engagement_type' => $item->engagement_type->name,
+                'notes' => $item->notes
+            ];
+        }); 
+        return response()->json($mapped_ref_admissions_programs->paginate());
     }
 
     public function store(

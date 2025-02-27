@@ -80,8 +80,8 @@ class MainController extends Controller
         $validatedDuration = $validated['duration'];
         $validatedNotes = $validated['notes'];
         // $validatedSubject = $validated['subject_id'];
-        $validatedSubjectName = $validated['subject_name'];
-        $validatedFeeIndividual = $validated['individual_fee'];
+        $validatedSubjectName = $validated['subject_name'] ?? null;
+        $validatedFeeIndividual = $validated['individual_fee'] ?? 0;
 
         $newPackageDetails = compact('validatedPackageId', 'validatedDuration');
 
