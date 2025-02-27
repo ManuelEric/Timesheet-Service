@@ -20,7 +20,7 @@ class TimesheetDataService
         $this->tokenService = $tokenService;
     }
 
-    public function listTimesheet(array $search = [])
+    public function listTimesheet(array $search = [], $is_subject_specialist = null)
     {
         $timesheets = Timesheet::query()->with(
             [
@@ -46,7 +46,16 @@ class TimesheetDataService
                     $query->select('uuid', 'full_name');
                 },
             ]
-        )->onSearch($search)->onSession()->newest()->select('timesheets.id', 'inhouse_id', 'package_id', 'duration', 'notes', 'void', 'created_at')->get();
+        )->
+        when($is_subject_specialist === true, function ($query) {
+            $query->mentoring();
+        }, function ($query) {
+            $query->tutoring();
+        })->
+        onSearch($search)->
+        onSession()->
+        newest()->
+        select('timesheets.id', 'inhouse_id', 'package_id', 'duration', 'notes', 'void', 'created_at')->get();
 
         $mappedTimesheets = $timesheets->map(function ($data) {
 
@@ -128,7 +137,7 @@ class TimesheetDataService
             ];
         });
 
-        return $mappedTimesheets->sortBy('clients')->values()->paginate(10);
+        return $mappedTimesheets->sortBy('clients')->values()->paginate();
     }
 
     public function detailTimesheet(Timesheet $timesheet)
@@ -167,6 +176,7 @@ class TimesheetDataService
         $inhouseName = $timesheet->inhouse_pic->full_name;
         $last_updated = $timesheet->updated_at;
         $clientProfile = $clients;
+        $engagement_type = isset($refProgram->engagement_type) ? $refProgram->engagement_type->name : null;
         $packageDetails = [
             'program_name' => $programName,
             'void' => $timesheet->void,
@@ -182,6 +192,7 @@ class TimesheetDataService
             'last_updated' => $last_updated,
             'duration_in_minutes' => $duration,
             'time_spent_in_minutes' => $timeSpent,
+            'engagement_type' => $engagement_type
         ];
 
 

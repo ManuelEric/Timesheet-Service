@@ -197,4 +197,18 @@ class Timesheet extends Model
     {
         $query->orderBy('created_at', 'DESC');
     }
+
+    public function scopeTutoring(Builder $query): void
+    {
+        $query->whereHas('ref_program', function ($query) {
+            $query->tutoring();
+        });
+    }
+
+    public function scopeMentoring(Builder $query): void
+    {
+        $query->whereHas('ref_program', function ($query) {
+            $query->mentoring();
+        });
+    }
 }
