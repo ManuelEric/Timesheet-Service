@@ -101,17 +101,6 @@ const getSubject = async (item, uuid = null) => {
   }
 }
 
-const getIndividualFee = async (tutor_id, subject_name) => {
-  try {
-    const res = await ApiService.get('api/v1/component/fee/' + tutor_id + '/' + subject_name)
-    if (res) {
-      form.value.individual_fee = res.fee_individual
-    }
-  } catch (error) {
-    console.error(error)
-  }
-}
-
 const getCurriculum = async () => {
   try {
     const res = await ApiService.get('api/v1/curriculum/component/list')
@@ -148,7 +137,6 @@ const submit = async () => {
         tutor_selected.value = []
       }
     } catch (error) {
-      console.log(error)
       if (error?.response?.data?.errors) {
         const validationErrors = error.response.data.errors
         showNotif('error', validationErrors, 'bottom-end')

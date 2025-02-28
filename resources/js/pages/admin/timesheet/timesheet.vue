@@ -11,6 +11,8 @@ import debounce from 'lodash/debounce'
 // Start Variable
 const avatars = [avatar1, avatar2, avatar3, avatar4, avatar5]
 
+const props = defineProps({ name: String })
+
 const selected = ref([])
 const currentPage = ref(1)
 const totalPage = ref()
@@ -31,9 +33,13 @@ const getData = async () => {
   const program = program_name.value ? '&program_name=' + encodeURIComponent(program_name.value) : ''
   const package_search = package_name.value ? '&package_id=' + package_name.value : ''
   const paginate = '&paginate=true'
+  const is_subject_specialist = props.name != 'tutoring' ? '&is_subject_specialist=true' : ''
+
   try {
     loading.value = true
-    const res = await ApiService.get('api/v1/timesheet/list' + page + search + program + package_search + paginate)
+    const res = await ApiService.get(
+      'api/v1/timesheet/list' + page + search + program + package_search + paginate + is_subject_specialist,
+    )
     // console.log(res)
     if (res) {
       currentPage.value = res.current_page
@@ -76,6 +82,10 @@ const searchData = debounce(async () => {
 }, 1000)
 // End Function
 
+watch(() => {
+  getData()
+})
+
 onMounted(() => {
   getData()
   getProgram()
@@ -95,6 +105,7 @@ onMounted(() => {
     <VCardText>
       <VRow class="my-1 justify-space-between">
         <VCol
+          v-if="props.name == 'tutoring'"
           cols="12"
           md="6"
         >
@@ -177,7 +188,9 @@ onMounted(() => {
               No
             </th>
             <th class="text-uppercase text-center">School/Student Name</th>
-            <th class="text-uppercase text-center">Program Name</th>
+            <th class="text-uppercase text-center">
+              {{ props.name == 'tutoring' ? 'Program Name' : 'Engagement Type' }}
+            </th>
             <th class="text-uppercase text-center">Package</th>
             <th class="text-uppercase text-center">Tutor/Mentor</th>
             <th class="text-uppercase text-center">PIC</th>
@@ -228,13 +241,20 @@ onMounted(() => {
                 {{ item.clients }}
               </VText>
             </td>
-            <td>
+            <td v-if="props.name == 'tutoring'">
               <VIcon
                 icon="ri-bookmark-3-line"
                 class="me-3"
               ></VIcon>
               {{ item.detail_package == 'Trial' ? '[TRIAL]' : '' }}
               {{ item.program_name }}
+            </td>
+            <td v-else>
+              <VIcon
+                icon="ri-bookmark-3-line"
+                class="me-3"
+              ></VIcon>
+              {{ item.engagement_type }}
             </td>
             <td class="text-start">
               <VIcon
@@ -273,7 +293,7 @@ onMounted(() => {
               {{ item.spent / 60 }} Hours
             </td>
             <td>
-              <router-link :to="'/admin/timesheet/' + item.id">
+              <router-link :to="'/admin/timesheet/' + props.name + '/' + item.id">
                 <VBtn :color="item.void == 'true' ? 'light' : 'secondary'">
                   <VIcon
                     icon="ri-timeline-view"

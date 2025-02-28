@@ -9,7 +9,7 @@ import moment from 'moment'
 import Swal from 'sweetalert2'
 
 // Start Variable
-const props = defineProps({ id: String })
+const props = defineProps({ id: String, name: String })
 const emit = defineEmits(['void'])
 const reloadData = inject('reloadData')
 const updateReload = inject('updateReload')
@@ -120,9 +120,16 @@ watch(() => {
 
 <template>
   <VCard class="mb-3">
-    <VCardTitle class="d-flex justify-between align-center">
+    <VSkeletonLoader
+      v-if="loading"
+      type="heading"
+    />
+    <VCardTitle
+      v-else
+      class="d-flex justify-between align-center"
+    >
       <div class="w-100">
-        <router-link to="/admin/timesheet">
+        <router-link :to="'/admin/timesheet/' + props.name">
           <VIcon
             icon="ri-arrow-left-line"
             color="secondary"
@@ -130,7 +137,7 @@ watch(() => {
             size="25"
           ></VIcon>
         </router-link>
-        Timesheet - {{ data.packageDetails?.package_type }}
+        Timesheet [{{ data?.packageDetails?.package_type + ' - ' + data?.packageDetails?.package_name }}]
       </div>
       <div>
         <VMenu
@@ -274,11 +281,14 @@ watch(() => {
           <VTable density="compact">
             <tbody>
               <tr>
-                <td width="30%">Program</td>
+                <td width="30%">{{ props.name == 'tutoring' ? 'Program Name' : 'Engagement Type' }}</td>
                 <td width="1%">:</td>
-                <td>
+                <td v-if="props.name == 'tutoring'">
                   {{ data.packageDetails?.free_trial ? '[TRIAL]' : '' }}
                   {{ data.packageDetails?.program_name }}
+                </td>
+                <td v-else>
+                  {{ data.packageDetails?.engagement_type }}
                 </td>
               </tr>
               <tr>

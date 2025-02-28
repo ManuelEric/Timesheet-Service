@@ -60,13 +60,29 @@ onMounted(() => {
     />
   </VerticalNavGroup>
 
-  <VerticalNavLink
+  <VerticalNavGroup
     :item="{
       title: 'Timesheet',
       icon: 'ri-calendar-todo-line',
-      to: '/admin/timesheet',
     }"
-  />
+    v-if="role == 'admin' || role == 'super_admin'"
+  >
+    <VerticalNavLink
+      :item="{
+        title: 'Tutoring',
+        icon: 'ri-calendar-todo-line',
+        to: '/admin/timesheet/tutoring',
+      }"
+    />
+
+    <VerticalNavLink
+      :item="{
+        title: 'Subject Specialist',
+        icon: 'ri-calendar-todo-line',
+        to: '/admin/timesheet/specialist',
+      }"
+    />
+  </VerticalNavGroup>
 
   <VerticalNavGroup
     :item="{

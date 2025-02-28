@@ -73,6 +73,11 @@ class Activity extends Model
         $query->where('status', 1)->where('cutoff_status', 'completed')->whereNotNull('cutoff_ref_id');
     }
 
+    public function scopeActivityNotRunningYet(Builder $query): void
+    {
+        $query->where('status', 0)->where('cutoff_status', 'not yet');;
+    }
+
     public function scopeCompleted(Builder $query): void
     {
         $query->where('status', 1);
@@ -83,15 +88,13 @@ class Activity extends Model
         $cutoff_start = $search['cutoff_start'] ?? false;
         $cutoff_end = $search['cutoff_end'] ?? false;
 
-        $query->
-            whereHas('timesheet', function ($sub) use ($search) {
-                $sub->onSearch($search);
-            })->
-            when( $cutoff_start && $cutoff_end, function ($sub) use ($cutoff_start, $cutoff_end) {
-                $sub->whereHas('cutoff_history', function ($_sub_) use ($cutoff_start, $cutoff_end) {
-                    $_sub_->inBetween($cutoff_start, $cutoff_end);
-                });
+        $query->whereHas('timesheet', function ($sub) use ($search) {
+            $sub->onSearch($search);
+        })->when($cutoff_start && $cutoff_end, function ($sub) use ($cutoff_start, $cutoff_end) {
+            $sub->whereHas('cutoff_history', function ($_sub_) use ($cutoff_start, $cutoff_end) {
+                $_sub_->inBetween($cutoff_start, $cutoff_end);
             });
+        });
     }
 
     public function scopeDayBeforeStart(Builder $query, int $day): void
@@ -108,17 +111,15 @@ class Activity extends Model
     {
         /* user auth information */
         $isAdmin = (bool) auth('sanctum')->user()->is_admin;
-        
-        $query->when( !$isAdmin, function ($_sub_) {
+
+        $query->when(!$isAdmin, function ($_sub_) {
 
             $tempUserUuid = auth('sanctum')->user()->uuid;
 
             $_sub_->whereHas('timesheet', function ($__sub__) use ($tempUserUuid) {
-                $__sub__->
-                    where('inhouse_id', $tempUserUuid)->
-                    orWhere(function ($__sub__) use ($tempUserUuid) {
-                        $__sub__->handleBy($tempUserUuid);
-                    });
+                $__sub__->where('inhouse_id', $tempUserUuid)->orWhere(function ($__sub__) use ($tempUserUuid) {
+                    $__sub__->handleBy($tempUserUuid);
+                });
             });
         });
     }

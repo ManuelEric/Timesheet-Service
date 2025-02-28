@@ -4,6 +4,7 @@ import { rules } from '@/helper/rules'
 import ApiService from '@/services/ApiService'
 import moment from 'moment'
 
+const loading = ref(false)
 const formData = ref()
 const prop = defineProps({ timesheet_id: Number, activity: String })
 const emit = defineEmits(['close', 'reload'])
@@ -26,7 +27,11 @@ const form = ref({
 const submit = async () => {
   const { valid } = await formData.value.validate()
   if (valid) {
+    loading.value = true
     try {
+      form.value.start_date = moment(form.value.date).format('YYYY-MM-DD') + ' ' + form.value.start_time + ':00'
+      form.value.end_date = moment(form.value.date).format('YYYY-MM-DD') + ' ' + form.value.end_time + ':00'
+
       const res = await ApiService.put(
         'api/v1/timesheet/' + prop.timesheet_id + '/activity/' + prop.activity.id,
         form.value,
@@ -55,6 +60,7 @@ const submit = async () => {
         }
       }
     } finally {
+      loading.value = false
       emit('close')
       setTimeout(() => {
         updateReload(true)
@@ -89,6 +95,8 @@ const submit = async () => {
               label="Activity Name"
               placeholder="Activity"
               variant="solo"
+              :disabled="loading"
+              :loading="loading"
             />
           </VCol>
           <VCol cols="12">
@@ -98,6 +106,8 @@ const submit = async () => {
               :rules="rules.required"
               placeholder="Meeting Discussion"
               variant="solo"
+              :disabled="loading"
+              :loading="loading"
             />
           </VCol>
           <VCol
@@ -110,6 +120,8 @@ const submit = async () => {
               placeholder="Select Date"
               prepend-icon=""
               variant="solo"
+              :disabled="loading"
+              :loading="loading"
               :rules="rules.required"
             />
           </VCol>
@@ -124,6 +136,8 @@ const submit = async () => {
               :rules="rules.required"
               placeholder="Start Time"
               variant="solo"
+              :disabled="loading"
+              :loading="loading"
               @change="
                 form.start_date = moment(prop?.activity.date).format('YYYY-MM-DD') + ' ' + form.start_time + ':00'
               "
@@ -139,6 +153,8 @@ const submit = async () => {
               label="End Time"
               placeholder="End Time"
               variant="solo"
+              :disabled="loading"
+              :loading="loading"
               @change="form.end_date = moment(prop?.activity.date).format('YYYY-MM-DD') + ' ' + form.end_time + ':00'"
             />
           </VCol>
@@ -152,7 +168,8 @@ const submit = async () => {
               label="Meeting Link"
               placeholder="Meeting Link"
               variant="solo"
-              :rules="rules.url"
+              :disabled="loading"
+              :loading="loading"
             />
           </VCol>
         </VRow>
@@ -160,6 +177,8 @@ const submit = async () => {
         <VCardActions class="mt-5">
           <VBtn
             color="error"
+            :disabled="loading"
+            :loading="loading"
             @click="emit('close')"
           >
             <VIcon
@@ -172,6 +191,8 @@ const submit = async () => {
           <VBtn
             color="success"
             type="submit"
+            :disabled="loading"
+            :loading="loading"
           >
             Save
             <VIcon
