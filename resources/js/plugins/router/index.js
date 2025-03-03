@@ -18,7 +18,7 @@ router.beforeEach((to, from, next) => {
 
   if (to.meta.middleware == "auth-user") {
     if (verify.isAuthenticated.value) {
-      if(user.role=='Tutor' || user.role=='Mentor') {
+      if(user.role=='Tutor' || user.role=='Mentor' || user.role=='External Mentor') {
         next();
       } else {
         showNotif('error','You have not permission!','bottom-end')

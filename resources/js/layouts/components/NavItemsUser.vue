@@ -8,8 +8,6 @@ const role = ref(null)
 onMounted(() => {
   const user = UserService.getUser()
   role.value = user.role
-
-  console.log(role.value)
 })
 </script>
 
@@ -32,7 +30,7 @@ onMounted(() => {
 
   <VerticalNavLink
     :item="{
-      title: 'Request',
+      title: 'Program',
       icon: 'ri-calendar-todo-line',
       to: '/user/request',
     }"

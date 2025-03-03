@@ -21,11 +21,11 @@ return new class extends Migration
         });
 
         Schema::table('temp_users', function (Blueprint $table) {
-            $table->boolean('has_npwp')->after('inhouse')->default(false); 
+            $table->boolean('has_npwp')->after('inhouse')->default(false);
         });
 
         Schema::table('timesheet_activities', function (Blueprint $table) {
-            $table->double('tax')->after('end_date'); 
+            $table->double('tax')->after('end_date');
         });
     }
 
@@ -43,11 +43,9 @@ return new class extends Migration
         });
 
         Schema::table('timesheet_activities', function (Blueprint $table) {
-            $table->dropColumn('tax'); 
+            $table->dropColumn('tax');
         });
 
-        Schema::table('timesheets', function (Blueprint $table) {
-
-        });
+        Schema::table('timesheets', function (Blueprint $table) {});
     }
 };

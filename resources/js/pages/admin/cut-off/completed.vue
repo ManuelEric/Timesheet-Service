@@ -186,6 +186,10 @@ const downloadPayroll = async () => {
   }
 }
 
+watch(() => {
+  getData()
+})
+
 onMounted(() => {
   getData()
   getPackage()

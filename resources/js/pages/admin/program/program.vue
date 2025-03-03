@@ -18,19 +18,6 @@ const data = ref([])
 const loading = ref(false)
 const program_list = ref([])
 const program_name = ref()
-
-const formData = ref()
-const form = ref({
-  ref_id: [],
-  mentortutor_email: null,
-  subject_id: null,
-  inhouse_id: null,
-  package_id: null,
-  duration: '',
-  notes: '',
-  pic_id: [],
-})
-
 // End Variable
 
 // Start Function
@@ -40,15 +27,19 @@ const getData = async () => {
 
   // Check Category of Ref Program
   const category = props.name
-  console.log(category)
 
   const page = '?page=' + currentPage.value
   const search = keyword.value ? '&keyword=' + keyword.value : ''
   const program = program_name.value ? '&program_name=' + encodeURIComponent(program_name.value) : ''
   const paginate = '&paginate=true'
+
+  const url =
+    category == 'tutoring'
+      ? 'api/v1/program/list' + page + search + program + paginate
+      : 'api/v1/request' + page + keyword
   try {
     loading.value = true
-    const res = await ApiService.get('api/v1/program/list' + page + search + program + paginate)
+    const res = await ApiService.get(url)
 
     if (res) {
       currentPage.value = res.current_page
@@ -81,6 +72,10 @@ const searchData = debounce(async () => {
 
 // End Function
 
+watch(() => {
+  getData()
+})
+
 onMounted(() => {
   getData()
   getProgram()
@@ -99,6 +94,7 @@ onMounted(() => {
     <VCardText>
       <VRow class="my-1">
         <VCol
+          v-if="props.name == 'tutoring'"
           cols="12"
           md="3"
         >
@@ -138,7 +134,7 @@ onMounted(() => {
 
         <VCol
           cols="12"
-          md="6"
+          :md="props.name == 'tutoring' ? 6 : 9"
           class="text-end"
         >
           <VBtn
@@ -149,6 +145,10 @@ onMounted(() => {
             :disabled="selected.length > 0 ? false : true"
             @click="dialog = true"
           >
+            <VIcon
+              icon="ri-add-line"
+              class="me-3"
+            ></VIcon>
             Assign {{ selected.length > 1 ? 'to Group' : '' }}
           </VBtn>
         </VCol>
@@ -194,9 +194,11 @@ onMounted(() => {
             >
               #
             </th>
-            <th class="text-uppercase text-center">Student/School Name</th>
-            <th class="text-uppercase text-center">Program Name</th>
-            <th class="text-uppercase text-center">Trial</th>
+            <th class="text-uppercase text-center">Student</th>
+            <th class="text-uppercase text-center">School Name</th>
+            <th class="text-uppercase text-center">
+              {{ props.name == 'tutoring' ? 'Program Name' : 'Engagement Type' }}
+            </th>
             <th class="text-uppercase text-center">Timesheet</th>
           </tr>
         </thead>
@@ -229,9 +231,16 @@ onMounted(() => {
                 icon="ri-user-line"
                 class="me-3"
               ></VIcon>
-              {{ item.student_name + ' - ' + item.student_school }}
+              {{ item.student_name }}
             </td>
             <td
+              class="text-left"
+              nowrap
+            >
+              {{ item.student_school }}
+            </td>
+            <td
+              v-if="props.name == 'tutoring'"
               class="text-left"
               nowrap
             >
@@ -243,24 +252,15 @@ onMounted(() => {
               {{ item.program_name }}
             </td>
             <td
-              class="text-center"
+              v-else
+              class="text-left"
               nowrap
             >
-              <VText v-if="item.free_trial">
-                <VIcon
-                  icon="ri-check-line"
-                  class="mx-1"
-                  color="success"
-                ></VIcon>
-              </VText>
-
-              <VText v-else>
-                <VIcon
-                  icon="ri-close-line"
-                  class="mx-1"
-                  color="error"
-                ></VIcon>
-              </VText>
+              <VIcon
+                icon="ri-bookmark-line"
+                class="me-3"
+              ></VIcon>
+              {{ item.engagement_type }}
             </td>
             <td class="text-center">
               <VText v-if="item.timesheet_id">
