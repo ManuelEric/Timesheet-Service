@@ -35,7 +35,9 @@ class Ref_Program extends Model
         'require',
         'timesheet_id',
         'engagement_type_id',
-        'notes'
+        'notes',
+        'cancellation_reason',
+        'cancelled_at',
     ];
 
     /**

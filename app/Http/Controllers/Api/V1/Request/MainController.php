@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api\V1\Request;
 
+use App\Actions\Request\CancelRequestAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Request\StoreRequest;
+use App\Http\Requests\Request\UpdateRequest;
 use App\Models\Ref_Program;
 use App\Services\Program\RefProgramServices;
 use App\Services\Timesheet\TimesheetDataService;
@@ -71,6 +73,20 @@ class MainController extends Controller
         return response()->json([
             'message' => 'Request has created successfully.',
             'data' => $new
+        ]);
+    }
+
+    public function update(
+        Ref_Program $ref_program, 
+        UpdateRequest $request,
+        CancelRequestAction $cancelRequestAction
+        )
+    {
+        $validated = $request->safe()->only(['cancellation_reason']);
+        $updated_request = $cancelRequestAction->execute($ref_program, $validated['cancellation_reason']);
+        return response()->json([
+            'message' => 'Request has updated successfully.',
+            'data' => $updated_request
         ]);
     }
 }

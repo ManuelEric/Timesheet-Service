@@ -104,6 +104,8 @@ Route::prefix('request')->group(function () {
         Route::POST('create', [V1RequestController::class, 'store']);
         /* List of Requests */
         Route::GET('/', [V1RequestController::class, 'index']);
+        /* Update Request */
+        Route::PATCH('{ref_program}/update', [V1RequestController::class, 'update']);
     });
 });
 

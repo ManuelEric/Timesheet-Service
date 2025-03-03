@@ -16,6 +16,8 @@ return new class extends Migration
             $table->unsignedBigInteger('engagement_type_id')->nullable()->after('timesheet_id');
             $table->foreign('engagement_type_id')->references('id')->on('engagement_types')->onUpdate('cascade')->onDelete('cascade');
             $table->text('notes')->nullable()->after('engagement_type_id')->comment('note from mentor');
+            $table->text('cancellation_reason')->nullable()->after('notes')->comment('note when request has cancelled');
+            $table->timestamp('cancelled_at')->after('updated_at')->nullable();
         });
 
         Schema::table('temp_users', function (Blueprint $table) {
