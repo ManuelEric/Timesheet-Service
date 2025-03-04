@@ -58,7 +58,7 @@ class PayrollExport implements FromView, WithTitle
         $total_fee_without_tax = $fee->sum('total_fee_per_activity') + $this->activities->sum('additional_fee') + $this->activities->sum('bonus_fee');
 
         # add tax here
-        $percentage_of_tax = $this->timesheet['packageDetails']['tutormentor_has_npwp'] ? 2.5 : 3;
+        $percentage_of_tax = $this->timesheet['packageDetails']['tutormentor_tax'];
         $total_tax = ($percentage_of_tax / 100) * $total_fee_without_tax;
 
         $total_fee = $total_fee_without_tax - $total_tax;
