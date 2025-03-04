@@ -47,6 +47,7 @@ class MainController extends Controller
                 'email' => $item->email,
                 'inhouse' => $item->inhouse,
                 'last_activity' => $item->last_activity,
+                'has_npwp' => $item->has_npwp,
                 'roles' => new Collection()
             ];
 
@@ -81,7 +82,7 @@ class MainController extends Controller
             {
                 $profile['roles']->push([
                     'name' => 'External Mentor',
-                    'subjects' => array_values($tutorDetail->all())
+                    'subjects' => array_values($externalMentorDetail->all())
                 ]);
             }
 

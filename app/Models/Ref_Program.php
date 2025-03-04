@@ -38,6 +38,7 @@ class Ref_Program extends Model
         'notes',
         'cancellation_reason',
         'cancelled_at',
+        'requested_by',
     ];
 
     /**
@@ -53,6 +54,11 @@ class Ref_Program extends Model
     public function engagement_type()
     {
         return $this->belongsTo(EngagementType::class, 'engagement_type_id', 'id');
+    }
+
+    public function temp_user()
+    {
+        return $this->belongsTo(TempUser::class, 'requested_by', 'id');
     }
 
     /**
@@ -126,5 +132,17 @@ class Ref_Program extends Model
     public function scopeNoTrial(Builder $query): void
     {
         $query->where('free_trial', 0);
+    }
+
+    public function scopeRequestedByMe(Builder $query): void
+    {
+        $query->whereRelation('temp_user', 'temp_users.id', auth('sanctum')->user()->id);
+    }
+
+    public function scopeOnCancel(Builder $query, $is_cancelled = false): void
+    {
+        $query->when($is_cancelled, function ($query) {
+            $query->whereNull('cancelled_at');
+        });
     }
 }

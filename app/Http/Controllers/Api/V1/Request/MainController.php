@@ -28,7 +28,12 @@ class MainController extends Controller
                 'engagement_type' => function ($query) {
                     $query->select('id', 'name');
                 }
-            ])->mentoring()->onSearch($search)->orderBy('clientprog_id', 'desc')->get();
+            ])->
+            mentoring()->
+            onSearch($search)->
+            requestedByMe()->
+            orderBy('clientprog_id', 'desc')->
+            get();
         
         $mapped_ref_admissions_programs = $ref_admissions_programs->map(function ($item) {
             return [
@@ -46,7 +51,8 @@ class MainController extends Controller
                 'require' => $item->require,
                 'timesheet_id' => $item->timesheet_id,
                 'engagement_type' => $item->engagement_type->name,
-                'notes' => $item->notes
+                'notes' => $item->notes,
+                'requested_by' => $item->requested_by
             ];
         }); 
         return response()->json($mapped_ref_admissions_programs->paginate());
