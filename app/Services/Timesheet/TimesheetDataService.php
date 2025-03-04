@@ -186,6 +186,7 @@ class TimesheetDataService
         $engagement_type = $refProgram->first()->engagement_type 
             ? $refProgram->first()->engagement_type->name
             : null;
+        $tax = $timesheet->subject->tax;
         $packageDetails = [
             'program_name' => $programName,
             'void' => $timesheet->void,
@@ -197,6 +198,7 @@ class TimesheetDataService
             'pic_name' => $adminName,
             'tutormentor_name' => $tutorMentorName,
             'tutormentor_has_npwp' => $tutorMentorHasNPWP,
+            'tutormentor_tax' => $tax,
             'inhouse_name' => $inhouseName,
             'last_updated' => $last_updated,
             'duration_in_minutes' => $duration,

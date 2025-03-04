@@ -93,7 +93,7 @@ class MainController extends Controller
 
         $mentorTutorId = $selectOrRegisterMentorTutorTimesheetAction->handle($validatedEmail);
 
-        $refProgram = Ref_Program::find($validatedRefPrograms);
+        $refProgram = Ref_Program::whereIn('id', $validatedRefPrograms)->first();
         
         if ( $refProgram && $refProgram->require === 'Tutor' )
         {
