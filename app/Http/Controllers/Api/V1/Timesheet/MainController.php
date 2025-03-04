@@ -102,7 +102,7 @@ class MainController extends Controller
             # need to check if tutor has already subject on temp_user_roles
             # if tutor doesn't have subject, then create a new one
             $tempUserRoles = TempUserRoles::firstOrCreate([
-                'year' => Carbon::format('Y'),
+                'year' => Carbon::now()->format('Y'),
                 'temp_user_id' => $mentorTutorId,
                 'tutor_subject' => $validatedSubjectName,
             ], [
