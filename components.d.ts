@@ -10,6 +10,7 @@ declare module 'vue' {
     ActivityAdd: typeof import('./resources/js/components/admin/timesheet/activity-add.vue')['default']
     ActivityEdit: typeof import('./resources/js/components/admin/timesheet/activity-edit.vue')['default']
     Additional_add: typeof import('./resources/js/components/admin/cut-off/additional_add.vue')['default']
+    CancelRequest: typeof import('./resources/js/components/user/request/cancel-request.vue')['default']
     CardStatisticsHorizontal: typeof import('./resources/js/@core/components/cards/CardStatisticsHorizontal.vue')['default']
     CardStatisticsVertical: typeof import('./resources/js/@core/components/cards/CardStatisticsVertical.vue')['default']
     CardStatisticsWithImages: typeof import('./resources/js/@core/components/cards/CardStatisticsWithImages.vue')['default']

@@ -1,7 +1,6 @@
 <script setup>
 import VQalendar from '@/components/Qalendar.vue'
 import ApiService from '@/services/ApiService'
-import UserService from '@/services/UserService'
 import moment from 'moment'
 
 const monthModel = ref(moment().format('YYYY-MM'))
@@ -28,7 +27,6 @@ const getSummarize = async month => {
 
 onMounted(() => {
   getSummarize(monthModel.value)
-  console.log(UserService.getUser())
 })
 </script>
 

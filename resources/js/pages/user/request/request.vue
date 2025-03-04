@@ -1,14 +1,17 @@
 <script setup>
+import CancelRequest from '@/components/user/request/cancel-request.vue'
 import NewRequest from '@/components/user/request/new-request.vue'
 import ApiService from '@/services/ApiService'
 import { onMounted } from 'vue'
 
 const loading = ref(false)
 const dialog = ref(false)
+const dialogCancel = ref(false)
 const currentPage = ref(1)
 const totalPage = ref()
 const keyword = ref()
 const data = ref([])
+const selected = ref([])
 
 const getData = async () => {
   loading.value = true
@@ -21,7 +24,7 @@ const getData = async () => {
 
     if (res) {
       data.value = res
-      totalPage.value = res.total
+      totalPage.value = res.last_page
     }
   } catch (error) {
     console.log(error)
@@ -33,6 +36,11 @@ const getData = async () => {
 const searchData = async () => {
   currentPage.value = 1
   await getData()
+}
+
+const selectedProgram = item => {
+  selected.value = item
+  dialogCancel.value = true
 }
 
 onMounted(() => {
@@ -86,6 +94,7 @@ onMounted(() => {
         </VCol>
       </VRow>
 
+      <!-- NEW REQUEST DIALOG  -->
       <VDialog
         v-model="dialog"
         width="auto"
@@ -96,6 +105,21 @@ onMounted(() => {
           @reload="getData"
         />
       </VDialog>
+      <!-- NEW REQUEST DIALOG -->
+
+      <!-- CANCEL DIALOG  -->
+      <VDialog
+        v-model="dialogCancel"
+        width="auto"
+        persistent
+      >
+        <CancelRequest
+          :data="selected"
+          @close="dialogCancel = false"
+          @reload="getData"
+        />
+      </VDialog>
+      <!-- CANCEL DIALOG -->
 
       <!-- Table  -->
       <!-- Loader  -->
@@ -119,7 +143,7 @@ onMounted(() => {
             <th class="text-uppercase text-center">Student</th>
             <th class="text-uppercase text-center">School Name</th>
             <th class="text-uppercase text-center">Program Name</th>
-            <th class="text-uppercase text-center">Notes</th>
+            <th class="text-uppercase text-center">#</th>
           </tr>
         </thead>
         <tbody v-if="data?.data?.length > 0">
@@ -131,7 +155,22 @@ onMounted(() => {
             <th>{{ item.student_name }}</th>
             <th>{{ item.student_school }}</th>
             <th>{{ item.engagement_type }}</th>
-            <th>{{ item.notes }}</th>
+            <th>
+              <VTooltip
+                activator="parent"
+                location="start"
+                >Cancel Request</VTooltip
+              >
+              <VChip
+                class="cursor-pointer"
+                @click.prevent="selectedProgram(item)"
+              >
+                <VIcon
+                  icon="ri-close-line"
+                  color="error"
+                />
+              </VChip>
+            </th>
           </tr>
         </tbody>
         <!-- If Nothing Data  -->

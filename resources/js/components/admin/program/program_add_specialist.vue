@@ -8,9 +8,7 @@ const emit = defineEmits(['close', 'reload'])
 
 const loading = ref(false)
 const tutor_selected = ref([])
-const curriculum_selected = ref([])
 const tutor_list = ref([])
-const curriculum_list = ref([])
 const subjects = ref([])
 const package_list = ref([])
 const pic_list = ref([])
@@ -31,9 +29,11 @@ const form = ref({
 })
 
 const getTutor = async (inhouse = false) => {
+  const role = require == 'mentor' ? 'External Mentor' : require
+
   const url = inhouse
     ? 'api/v1/user/mentor-tutors?inhouse=true&role=' + require
-    : 'api/v1/user/mentor-tutors?role=' + require
+    : 'api/v1/user/mentor-tutors?role=' + role
   try {
     const res = await ApiService.get(url)
     if (res) {
@@ -88,7 +88,8 @@ const getSubject = async (item, uuid = null) => {
   form.value.subject_id = null
 
   if (require == 'mentor') {
-    form.value.subject_id = item[0].subjects[0].id
+    form.value.subject_id = item[0]?.subjects[0]?.id
+    form.value.individual_fee = item[0]?.subjects[0]?.fee_individual
   } else {
     try {
       const res = await ApiService.get('api/v1/user/mentor-tutors/' + uuid + '/subjects')
@@ -98,15 +99,6 @@ const getSubject = async (item, uuid = null) => {
     } catch (error) {
       console.error(error)
     }
-  }
-}
-
-const getCurriculum = async () => {
-  try {
-    const res = await ApiService.get('api/v1/curriculum/component/list')
-    if (res) curriculum_list.value = res
-  } catch (error) {
-    console.error(error)
   }
 }
 
@@ -154,7 +146,6 @@ onMounted(() => {
   getTutor(true)
   getPackage()
   getPIC()
-  getCurriculum()
 })
 </script>
 
@@ -171,7 +162,10 @@ onMounted(() => {
         validate-on="input"
       >
         <VRow>
-          <VCol md="12">
+          <VCol
+            md="12"
+            cols="12"
+          >
             <VAutocomplete
               variant="solo"
               clearable
@@ -192,7 +186,7 @@ onMounted(() => {
           </VCol>
           <VCol
             md="5"
-            col="12"
+            cols="12"
           >
             <VAutocomplete
               variant="solo"
@@ -215,7 +209,7 @@ onMounted(() => {
           </VCol>
           <VCol
             md="3"
-            col="7"
+            cols="7"
           >
             <VTextField
               type="number"
@@ -229,7 +223,7 @@ onMounted(() => {
           </VCol>
           <VCol
             md="4"
-            col="5"
+            cols="5"
           >
             <VTextField
               type="number"
@@ -242,7 +236,7 @@ onMounted(() => {
           </VCol>
           <VCol
             md="6"
-            col="12"
+            cols="12"
           >
             <VAutocomplete
               variant="solo"
@@ -263,7 +257,7 @@ onMounted(() => {
           </VCol>
           <VCol
             md="6"
-            col="12"
+            cols="12"
           >
             <VAutocomplete
               variant="solo"

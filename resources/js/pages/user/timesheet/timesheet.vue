@@ -24,14 +24,16 @@ const package_name = ref()
 
 // Start Function
 const getData = async () => {
+  const role = UserService.getUser().role_detail[0].role.toLowerCase()
   const page = '?page=' + currentPage.value
   const search = keyword.value ? '&keyword=' + keyword.value : ''
   const package_search = package_name.value ? '&package_id=' + package_name.value : ''
   const paginate = '&paginate=true'
+  const is_subject = role == 'external mentor' ? '&is_subject_specialist=true' : ''
 
   try {
     loading.value = true
-    const res = await ApiService.get('api/v1/timesheet/list' + page + search + package_search + paginate)
+    const res = await ApiService.get('api/v1/timesheet/list' + page + search + package_search + is_subject + paginate)
     // console.log(res)
     if (res) {
       currentPage.value = res.current_page
@@ -48,10 +50,12 @@ const getData = async () => {
 
 const getPackage = async () => {
   // Check Role
-  const role =
-    UserService.getUser().role_detail.length == 1
-      ? '?category=' + UserService.getUser().role_detail[0].role.toLowerCase()
-      : ''
+  const temp_role =
+    UserService.getUser().role_detail[0].role.toLowerCase() == 'external mentor'
+      ? 'mentor'
+      : UserService.getUser().role_detail[0].role.toLowerCase()
+
+  const role = UserService.getUser().role_detail.length == 1 ? '?category=' + temp_role : ''
 
   try {
     const res = await ApiService.get('api/v1/package/component/list' + role)
