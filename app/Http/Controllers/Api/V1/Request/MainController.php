@@ -24,6 +24,11 @@ class MainController extends Controller
     {
         /* incoming request */
         $search = $request->only(['program_name', 'keyword']);
+        $additionalSearch = $request->only(['is_cancelled']);
+
+        /* manage the variables of additional search */
+        $isCancelled = $additionalSearch['is_cancelled'] ?? false;
+
         $ref_admissions_programs = Ref_Program::with([
                 'engagement_type' => function ($query) {
                     $query->select('id', 'name');
@@ -34,6 +39,7 @@ class MainController extends Controller
             when( !auth('sanctum')->user()->is_admin, function ($query) {
                 $query->requestedByMe();
             })->
+            onCancel($isCancelled)->
             orderBy('clientprog_id', 'desc')->
             get();
         
