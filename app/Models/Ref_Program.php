@@ -142,7 +142,7 @@ class Ref_Program extends Model
     public function scopeOnCancel(Builder $query, $is_cancelled = false): void
     {
         $query->when($is_cancelled, function ($query) {
-            $query->whereNull('cancelled_at');
+            $query->whereNotNull('cancelled_at');
         });
     }
 }
