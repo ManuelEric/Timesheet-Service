@@ -31,7 +31,9 @@ class MainController extends Controller
             ])->
             mentoring()->
             onSearch($search)->
-            requestedByMe()->
+            when( !auth('sanctum')->user()->is_admin, function ($query) {
+                $query->requestedByMe();
+            })->
             orderBy('clientprog_id', 'desc')->
             get();
         
