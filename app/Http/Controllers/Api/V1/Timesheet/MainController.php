@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Timesheet;
 
 use App\Http\Controllers\Controller;
+use App\Models\Ref_Program;
 use Illuminate\Http\Request;
 use App\Actions\Timesheet\IdentifierCheckingAction as IdentifyTimesheetIdAction;
 use App\Http\Requests\Timesheet\StoreRequest as TimesheetStoreRequest;
@@ -86,40 +87,55 @@ class MainController extends Controller
         // $validatedSubject = $validated['subject_id'];
         $validatedSubjectName = $validated['subject_name'] ?? null;
         $validatedFeeIndividual = $validated['individual_fee'] ?? 0;
+        $validatedTax = $validated['tax'] ?? 0;
 
         $newPackageDetails = compact('validatedPackageId', 'validatedDuration');
 
         $mentorTutorId = $selectOrRegisterMentorTutorTimesheetAction->handle($validatedEmail);
+
+        $refProgram = Ref_Program::find($validatedRefPrograms);
         
-        /************************* changes ***********************/
-        # before the data stored into timesheet
-        # need to check if tutor has already subject on temp_user_roles
-        # if tutor doesn't have subject, then create a new one
-        if (! $tempUserRoles = TempUserRoles::where('year', Carbon::now()->format('Y'))->where('temp_user_id', operator: $mentorTutorId)->where('tutor_subject', 'like', "%{$validatedSubjectName}%")->first() )
+        if ( $refProgram && $refProgram->require === 'Tutor' )
         {
-            $tempUserRoles = TempUserRoles::create([
+            /************************* changes ***********************/
+            # before the data stored into timesheet
+            # need to check if tutor has already subject on temp_user_roles
+            # if tutor doesn't have subject, then create a new one
+            $tempUserRoles = TempUserRoles::firstOrCreate([
+                'year' => Carbon::format('Y'),
                 'temp_user_id' => $mentorTutorId,
-                'role' => 'Tutor',
                 'tutor_subject' => $validatedSubjectName,
-                'year' => Carbon::now()->format('Y'),
-                'head' => 1, # hardcoded into 1
-                'grade' => '[9-12]', # hardcoded in order to cover all grades
+            ], [
+                'role' => 'Tutor',
+                'head' => 1,
+                'grade' => '[9-12]',
                 'fee_individual' => $validatedFeeIndividual,
+                'tax' => $validatedTax
+            ]);
+            
+        } elseif ($refProgram && $refProgram->require === 'Mentor') { # require mentor
+            $tempUserRoles = TempUserRoles::firstOrCreate([
+                'temp_user_id' => $mentorTutorId,
+                'role' => 'External Mentor'
+            ], [
+                'year' => Carbon::format('Y'),
+                'head' => 1,
+                'grade' => '[9-12]',
+                'fee_individual' => $validatedFeeIndividual,
+                'tax' => $validatedTax
             ]);
         }
-        # when the tempUserRoles exists
-        # update the data
-        else
-        {
-            //! here's some notes that need to be checked later [IMPORTANT!]
-            # for now, to get tempUserRoles, we only check by year, temp_user_id, and subject name
-            # but there might be some issues when system using head and grade
-            # so if the system are using head and grade to get the subject, please update data below
-            # make sure to update not only the fee_individual but also the other parameters
-            # same goes with the data above, you should not hardcoded the head and grade
-            $tempUserRoles->fee_individual = $validatedFeeIndividual;
-            $tempUserRoles->save();
-        }
+
+        
+        //! here's some notes that need to be checked later [IMPORTANT!]
+        # for now, to get tempUserRoles, we only check by year, temp_user_id, and subject name
+        # but there might be some issues when system using head and grade
+        # so if the system are using head and grade to get the subject, please update data below
+        # make sure to update not only the fee_individual but also the other parameters
+        # same goes with the data above, you should not hardcoded the head and grade
+        $tempUserRoles->fee_individual = $validatedFeeIndividual;
+        $tempUserRoles->tax = $validatedTax;
+        $tempUserRoles->save();
 
 
         $validatedSubject = $tempUserRoles->id;

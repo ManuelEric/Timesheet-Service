@@ -27,6 +27,7 @@ class TempUserRoles extends Model
         'grade',
         'fee_individual',
         'fee_group',
+        'tax',
     ];
 
     /**

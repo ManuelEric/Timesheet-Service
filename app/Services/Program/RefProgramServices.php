@@ -117,6 +117,7 @@ class RefProgramServices
             'require' => 'Mentor',
             'engagement_type_id' => $request['engagement_type'],
             'notes' => $request['notes'],
+            'requested_by' => auth('sanctum')->user()->id
         ];
 
         DB::beginTransaction();
