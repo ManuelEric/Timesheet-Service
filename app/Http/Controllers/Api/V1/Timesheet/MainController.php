@@ -74,6 +74,7 @@ class MainController extends Controller
             'subject_id', # used when subject fetched from the server
             'subject_name', # used when subject fetched from own db
             'individual_fee',
+            'tax',
         ]);
 
         /* defines the validated variables */
@@ -118,7 +119,7 @@ class MainController extends Controller
                 'temp_user_id' => $mentorTutorId,
                 'role' => 'External Mentor'
             ], [
-                'year' => Carbon::format('Y'),
+                'year' => Carbon::now()->format('Y'),
                 'head' => 1,
                 'grade' => '[9-12]',
                 'fee_individual' => $validatedFeeIndividual,
