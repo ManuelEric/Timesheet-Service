@@ -139,10 +139,12 @@ class Ref_Program extends Model
         $query->whereRelation('temp_user', 'temp_users.id', auth('sanctum')->user()->id);
     }
 
-    public function scopeOnCancel(Builder $query, $is_cancelled = false): void
+    public function scopeOnCancel(Builder $query, bool $is_cancelled): void
     {
-        $query->when($is_cancelled, function ($query) {
+        $query->when($is_cancelled === true, function ($query) {
             $query->whereNotNull('cancelled_at');
+        }, function ($query) {
+            $query->whereNull('cancelled_at');
         });
     }
 }
