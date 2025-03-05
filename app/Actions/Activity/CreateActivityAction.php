@@ -37,11 +37,11 @@ class CreateActivityAction
         $head = count($timesheet->ref_program);
         $isGroup = $head > 1 ? true : false;
         $fee_perHours = 0; # default
+        $tax = $timesheet->subject->tax;
 
         if ( $type == "tutoring" )
         {
             $fee_perHours = $isGroup ? $timesheet->subject->fee_group : $timesheet->subject->fee_individual;
-            $tax = $timesheet->handle_by->last()->has_npwp == 1 ? 2.5 : 3;
         }
 
         $endDate = array_key_exists('end_date', $validated) ? $validated['end_date'] : NULL;
