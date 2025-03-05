@@ -154,22 +154,40 @@ onMounted(() => {
             <th>{{ parseInt(i) + 1 }}</th>
             <th>{{ item.student_name }}</th>
             <th>{{ item.student_school }}</th>
-            <th>{{ item.engagement_type }}</th>
             <th>
-              <VTooltip
-                activator="parent"
-                location="start"
-                >Cancel Request</VTooltip
-              >
-              <VChip
-                class="cursor-pointer"
-                @click.prevent="selectedProgram(item)"
-              >
-                <VIcon
-                  icon="ri-close-line"
-                  color="error"
-                />
-              </VChip>
+              {{ item.engagement_type }}
+              {{ item.timesheet_id }}
+            </th>
+            <th>
+              <div v-if="!item.timesheet_id">
+                <VTooltip
+                  activator="parent"
+                  location="start"
+                  >Cancel Request</VTooltip
+                >
+                <VChip
+                  class="cursor-pointer"
+                  @click.prevent="selectedProgram(item)"
+                >
+                  <VIcon
+                    icon="ri-close-line"
+                    color="error"
+                  />
+                </VChip>
+              </div>
+              <div v-else>
+                <VTooltip
+                  activator="parent"
+                  location="start"
+                  >Already Generated Timesheet</VTooltip
+                >
+                <VChip color="success">
+                  <VIcon
+                    icon="ri-check-line"
+                    color="success"
+                  />
+                </VChip>
+              </div>
             </th>
           </tr>
         </tbody>

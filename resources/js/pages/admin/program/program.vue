@@ -36,7 +36,7 @@ const getData = async () => {
   const url =
     category == 'tutoring'
       ? 'api/v1/program/list' + page + search + program + paginate
-      : 'api/v1/request' + page + keyword
+      : 'api/v1/request' + page + keyword + '&is_cancelled=true'
   try {
     loading.value = true
     const res = await ApiService.get(url)
@@ -215,13 +215,24 @@ onMounted(() => {
                   id: item.id,
                   require: item.require,
                 }"
-                v-if="!item.timesheet_id"
+                v-if="!item.timesheet_id && !item.cancellation_reason"
               ></VCheckbox>
               <VIcon
                 icon="ri-check-line"
                 color="success"
-                v-else
+                v-else-if="item.timesheet_id && !item.cancellation_reason"
               ></VIcon>
+              <div v-else-if="item.cancellation_reason">
+                <VTooltip
+                  activator="parent"
+                  location="end"
+                  >Cancelled</VTooltip
+                >
+                <VIcon
+                  icon="ri-subtract-line"
+                  color="error"
+                ></VIcon>
+              </div>
             </td>
             <td
               class="text-left"

@@ -17,6 +17,7 @@ const pic_list = ref([])
 const inhouse_mentor = ref([])
 const duration_readonly = ref(false)
 const require = props.selected[0]?.require?.toLowerCase()
+const has_npwp = ref(null)
 
 const formData = ref()
 const form = ref({
@@ -25,6 +26,8 @@ const form = ref({
   subject_id: null,
   inhouse_id: null,
   package_id: null,
+  tax: null,
+  individual_fee: null,
   duration: '',
   notes: '',
   pic_id: [],
@@ -84,7 +87,11 @@ const getPIC = async () => {
   }
 }
 
-const getSubject = async (item, uuid = null) => {
+const getSubject = async (item, uuid = null, npwp = 0) => {
+  // check NPWP
+  has_npwp.value = npwp
+  form.value.tax = npwp == 1 ? 2.5 : 3
+
   form.value.subject_id = null
 
   if (require == 'mentor') {
@@ -143,6 +150,7 @@ const submit = async () => {
           duration: '',
           notes: '',
           pic_id: [],
+          tax: null,
           individual_fee: '',
         }
         tutor_selected.value = []
@@ -161,7 +169,7 @@ const submit = async () => {
 }
 // End Functions
 
-onMounted(() => {s
+onMounted(() => {
   getTutor()
   getTutor(true)
   getPackage()
@@ -199,8 +207,16 @@ onMounted(() => {s
               :rules="rules.required"
               :loading="loading"
               :disabled="loading"
-              @update:modelValue="getSubject(tutor_selected.roles, tutor_selected.uuid)"
+              @update:modelValue="getSubject(tutor_selected.roles, tutor_selected.uuid, tutor_selected.has_npwp)"
             ></VAutocomplete>
+            <v-alert
+              :color="has_npwp == 1 ? 'success' : 'error'"
+              icon="ri-error-warning-line"
+              class="py-2 mt-2"
+              v-if="has_npwp != null"
+            >
+              <small> Tutor {{ has_npwp == 1 ? 'already' : 'don`t' }} have NPWP </small>
+            </v-alert>
           </VCol>
           <VCol
             md="6"
@@ -240,7 +256,7 @@ onMounted(() => {s
             ></VAutocomplete>
           </VCol>
           <VCol
-            md="5"
+            md="8"
             col="12"
           >
             <VAutocomplete
@@ -263,7 +279,7 @@ onMounted(() => {s
             ></VAutocomplete>
           </VCol>
           <VCol
-            md="3"
+            md="4"
             col="7"
           >
             <VTextField
@@ -277,15 +293,28 @@ onMounted(() => {s
             />
           </VCol>
           <VCol
-            md="4"
+            md="7"
             col="5"
           >
             <VTextField
               type="number"
               variant="solo"
               clearable
-              label="Fee/hours"
+              label="Fee/hours (Gross)"
               v-model="form.individual_fee"
+              :rules="rules.required"
+            />
+          </VCol>
+          <VCol
+            md="5"
+            col="5"
+          >
+            <VTextField
+              type="number"
+              variant="solo"
+              clearable
+              label="Tax"
+              v-model="form.tax"
               :rules="rules.required"
             />
           </VCol>

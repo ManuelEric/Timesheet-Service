@@ -86,7 +86,7 @@ const downloadTimesheet = async (id, name) => {
       // Create a temporary <a> element to trigger the download
       const link = document.createElement('a')
       link.href = url
-      link.setAttribute('download', `timesheet_${name}.xlsx`)
+      link.setAttribute('download', `Timesheet_${name}.xlsx`)
 
       // Append the <a> element to the body and click it to trigger the download
       document.body.appendChild(link)

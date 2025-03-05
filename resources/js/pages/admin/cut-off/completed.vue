@@ -163,7 +163,7 @@ const downloadPayroll = async () => {
         // Create a temporary <a> element to trigger the download
         const link = document.createElement('a')
         link.href = url
-        link.setAttribute('download', `payroll_${start_date}_${end_date}.xlsx`)
+        link.setAttribute('download', `Payroll_${start_date}_${end_date}.xlsx`)
 
         // Append the <a> element to the body and click it to trigger the download
         document.body.appendChild(link)

@@ -3,16 +3,8 @@ import { showNotif } from '@/helper/notification'
 import ApiService from '@/services/ApiService'
 import UserService from '@/services/UserService'
 
-import avatar1 from '@images/avatars/avatar-1.png'
-import avatar2 from '@images/avatars/avatar-2.png'
-import avatar3 from '@images/avatars/avatar-3.png'
-import avatar4 from '@images/avatars/avatar-4.png'
-import avatar5 from '@images/avatars/avatar-5.png'
-
-// Start Variable
-const avatars = [avatar1, avatar2, avatar3, avatar4, avatar5]
-
 const currentPage = ref(1)
+const role = ref(UserService.getUser().role_detail[0].role.toLowerCase())
 const totalPage = ref()
 const keyword = ref()
 const data = ref([])
@@ -24,12 +16,11 @@ const package_name = ref()
 
 // Start Function
 const getData = async () => {
-  const role = UserService.getUser().role_detail[0].role.toLowerCase()
   const page = '?page=' + currentPage.value
   const search = keyword.value ? '&keyword=' + keyword.value : ''
   const package_search = package_name.value ? '&package_id=' + package_name.value : ''
   const paginate = '&paginate=true'
-  const is_subject = role == 'external mentor' ? '&is_subject_specialist=true' : ''
+  const is_subject = role.value == 'tutor' ? '' : '&is_subject_specialist=true'
 
   try {
     loading.value = true
@@ -153,10 +144,10 @@ onMounted(() => {
             >
               No
             </th>
-            <th class="text-uppercase text-center">School/Student Name</th>
+            <th class="text-uppercase text-center">Student Name</th>
             <th class="text-uppercase text-center">Program Name</th>
             <th class="text-uppercase text-center">Package</th>
-            <th class="text-uppercase text-center">Tutor/Mentor</th>
+            <th class="text-uppercase text-center">{{ role == 'tutor' ? 'Tutor' : 'Mentor' }}</th>
             <th class="text-uppercase text-center">PIC</th>
             <th class="text-uppercase text-center">Total Hours</th>
             <th class="text-uppercase text-center">Used</th>
@@ -221,10 +212,9 @@ onMounted(() => {
               {{ item.detail_package ? item.package_type + ' - ' + item.detail_package : item.package_type }}
             </td>
             <td class="text-left">
-              <VAvatar
-                size="25"
-                class="avatar-center me-3"
-                :image="avatars[index % 5]"
+              <VIcon
+                icon="ri-user-line"
+                class="mr-2"
               />
               {{ item.tutor_mentor }}
             </td>
