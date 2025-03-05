@@ -60,7 +60,8 @@ class MainController extends Controller
                 'timesheet_id' => $item->timesheet_id,
                 'engagement_type' => $item->engagement_type->name,
                 'notes' => $item->notes,
-                'requested_by' => $item->requested_by
+                'requested_by' => $item->requested_by,
+                'cancellation_reason' => $item->cancellation_reason,
             ];
         }); 
         return response()->json($mapped_ref_admissions_programs->paginate());
