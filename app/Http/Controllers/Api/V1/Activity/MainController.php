@@ -59,15 +59,12 @@ class MainController extends Controller
         $timesheetId,
         StoreActivityRequest $request, 
         CreateActivityAction $createActivityAction,
+        CheckEmailMentorTutorAction $checkEmailMentorTutorAction
         ): JsonResponse
     {
         $timesheet = $this->identifyTimesheetIdAction->execute($timesheetId);
 
         $validated = $request->safe()->only(['description', 'start_date', 'end_date', 'meeting_link', 'status']);
-
-        /* because now, the admin can manually input fee so the function below will be hide */
-        /* unhide the function if fees data fetch from CRM */
-        //$this->updateFee($timesheet);
 
         $createActivityAction->execute($timesheet, $validated);
 
@@ -75,17 +72,6 @@ class MainController extends Controller
             'message' => 'Activity has created successfully.'
         ]);
 
-    }
-
-    private function updateFee(
-        $timesheet,
-        CheckEmailMentorTutorAction $checkEmailMentorTutorAction
-        )
-    {
-        /* get the newest information about the latest tutor/mentor fee hours who signed to handle the timesheet */
-        $handleBy = $timesheet->handle_by->last();
-        $itsEmail = $handleBy->email;
-        $checkEmailMentorTutorAction->execute($itsEmail);
     }
 
     public function update(

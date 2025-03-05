@@ -43,6 +43,10 @@ class CreateActivityAction
         {
             $fee_perHours = $isGroup ? $timesheet->subject->fee_group : $timesheet->subject->fee_individual;
         }
+        elseif ( $type == "mentoring" )
+        {
+            $fee_perHours = $timesheet->subject->fee_individual;
+        }
 
         $endDate = array_key_exists('end_date', $validated) ? $validated['end_date'] : NULL;
         $additionalFee = $bonusFee = $status = 0;
