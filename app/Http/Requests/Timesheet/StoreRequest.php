@@ -91,6 +91,7 @@ class StoreRequest extends FormRequest
             ],
             'subject_name' => 'nullable',
             'individual_fee' => 'nullable',
+            'tax' => 'required'
         ];
     }
 
