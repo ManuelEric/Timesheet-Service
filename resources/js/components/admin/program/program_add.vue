@@ -31,6 +31,7 @@ const form = ref({
   duration: '',
   notes: '',
   pic_id: [],
+  curriculum_id: null,
 })
 
 const getTutor = async (inhouse = false) => {
@@ -108,9 +109,9 @@ const getSubject = async (item, uuid = null, npwp = 0) => {
   }
 }
 
-const getIndividualFee = async (tutor_id, subject_name) => {
+const getIndividualFee = async (tutor_id, subject_name, curriculum_id) => {
   try {
-    const res = await ApiService.get('api/v1/component/fee/' + tutor_id + '/' + subject_name)
+    const res = await ApiService.get('api/v1/component/fee/' + tutor_id + '/' + subject_name + '/' + curriculum_id)
     if (res) {
       form.value.individual_fee = res.fee_individual
     }
@@ -225,7 +226,7 @@ onMounted(() => {
             <VAutocomplete
               variant="solo"
               clearable
-              v-model="curriculum_selected"
+              v-model="form.curriculum_id"
               label="Curriculum"
               :items="curriculum_list"
               :item-props="
@@ -236,6 +237,7 @@ onMounted(() => {
               :rules="rules.required"
               :loading="loading"
               :disabled="loading"
+              item-value="id"
             ></VAutocomplete>
           </VCol>
           <VCol
@@ -252,7 +254,7 @@ onMounted(() => {
               :loading="loading"
               :disabled="loading"
               :rules="rules.required"
-              @update:modelValue="getIndividualFee(tutor_selected.id, form.subject_name)"
+              @update:modelValue="getIndividualFee(tutor_selected.id, form.subject_name, form.curriculum_id)"
             ></VAutocomplete>
           </VCol>
           <VCol

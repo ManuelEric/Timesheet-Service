@@ -11,12 +11,13 @@ use Illuminate\Support\Carbon;
 
 class FeeController extends Controller
 {
-    public function component($tutor_uuid, $subject_name)
+    public function component(string $tutor_uuid, string $subject_name, string $curriculum_id)
     {
         $details = TempUserRoles::query()->
             select(['fee_individual', 'fee_group'])->
             where('temp_user_id', $tutor_uuid)->
             where('tutor_subject', $subject_name)->
+            where('curriculum_id', $curriculum_id)->
             where('year', Carbon::now()->format('Y'))->
             where('head', 1)->
             first();

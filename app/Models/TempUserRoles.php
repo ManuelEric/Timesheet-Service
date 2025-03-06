@@ -21,6 +21,7 @@ class TempUserRoles extends Model
         'temp_user_id',
         'role',
         'tutor_subject',
+        'curriculum_id',
         'year',
         'head',
         'additional_fee',
@@ -43,6 +44,11 @@ class TempUserRoles extends Model
     public function timesheet()
     {
         return $this->hasMany(Timesheet::class, 'subject_id', 'id');
+    }
+
+    public function curriculum()
+    {
+        return $this->belongsTo(Curriculum::class, 'curriculum_id', 'id');
     }
 
     /**
