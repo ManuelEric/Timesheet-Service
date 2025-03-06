@@ -234,7 +234,7 @@ Route::middleware(['throttle:120,1'])->group(function () {
          * The Components
          */
         Route::prefix('component')->group(function () {
-            Route::GET('fee/{tutor_id}/{subject_name}', [V1FeeController::class, 'component']);
+            Route::GET('fee/{tutor_id}/{subject_name}/{curriculum_id}', [V1FeeController::class, 'component']);
         });
     });
 
