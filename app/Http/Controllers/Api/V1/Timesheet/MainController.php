@@ -75,6 +75,7 @@ class MainController extends Controller
             'subject_name', # used when subject fetched from own db
             'individual_fee',
             'tax',
+            'curriculum_id',
         ]);
 
         /* defines the validated variables */
@@ -89,6 +90,7 @@ class MainController extends Controller
         $validatedSubjectName = $validated['subject_name'] ?? null;
         $validatedFeeIndividual = $validated['individual_fee'] ?? 0;
         $validatedTax = $validated['tax'] ?? 0;
+        $validatedCurriculumId = $validated['curriculum_id'];
 
         $newPackageDetails = compact('validatedPackageId', 'validatedDuration');
 
@@ -106,6 +108,7 @@ class MainController extends Controller
                 'year' => Carbon::now()->format('Y'),
                 'temp_user_id' => $mentorTutorId,
                 'tutor_subject' => $validatedSubjectName,
+                'curriculum_id' => $validatedCurriculumId
             ], [
                 'role' => 'Tutor',
                 'head' => 1,
@@ -117,7 +120,7 @@ class MainController extends Controller
         } elseif ($refProgram && $refProgram->require === 'Mentor') { # require mentor
             $tempUserRoles = TempUserRoles::firstOrCreate([
                 'temp_user_id' => $mentorTutorId,
-                'role' => 'External Mentor'
+                'role' => 'External Mentor',
             ], [
                 'year' => Carbon::now()->format('Y'),
                 'head' => 1,
