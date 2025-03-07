@@ -70,8 +70,10 @@ const getPackage = async () => {
   }
 }
 
-const searchData = debounce(async () => {
+const searchData = debounce(async item => {
   currentPage.value = 1
+  keyword.value = item.target.value
+
   await getData()
 }, 1000)
 // End Function
@@ -157,7 +159,6 @@ onMounted(() => {
             variant="solo"
             hide-details
             single-line
-            v-model="keyword"
             @input="searchData"
           />
         </VCol>

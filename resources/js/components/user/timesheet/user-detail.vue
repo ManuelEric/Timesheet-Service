@@ -60,7 +60,8 @@ watch(() => {
             size="25"
           ></VIcon>
         </router-link>
-        Timesheet - {{ data.packageDetails?.package_type }}
+        {{ data.packageDetails?.tutormentor_name }} |
+        {{ data?.packageDetails?.package_type + ' - ' + data?.packageDetails?.package_name }}
       </div>
     </VCardTitle>
     <VCardText>
@@ -150,6 +151,13 @@ watch(() => {
                 <td>Tutor/Mentor</td>
                 <td width="1%">:</td>
                 <td>{{ data.packageDetails?.tutormentor_name }}</td>
+              </tr>
+              <tr>
+                <td>Notes</td>
+                <td width="1%">:</td>
+                <td>
+                  {{ data.editableColumns?.notes }}
+                </td>
               </tr>
               <tr>
                 <td>Update On</td>
