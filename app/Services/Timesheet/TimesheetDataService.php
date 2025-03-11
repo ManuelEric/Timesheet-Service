@@ -203,12 +203,13 @@ class TimesheetDataService
             'last_updated' => $last_updated,
             'duration_in_minutes' => $duration,
             'time_spent_in_minutes' => $timeSpent,
-            'engagement_type' => $engagement_type
+            'engagement_type' => $engagement_type,
         ];
 
 
         /* fetch the data to support editable columns */
         $subjectId = $timesheet->subject_id;
+        
         $editableColumns = [
             'pic_id' => $adminId,
             'tutormentor_id' => $tutorMentorUuid,
@@ -218,6 +219,7 @@ class TimesheetDataService
             'notes' => $notes,
             'subject_id' => $subjectId,
             'inhouse_id' => $inhouseUuid,
+            'curriculum_name' => $timesheet->subject->curriculum->name
         ];
 
         return compact('clientProfile', 'packageDetails', 'editableColumns');
