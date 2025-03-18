@@ -13,7 +13,7 @@ class TempUserSeeder extends Seeder
     public function run(): void
     {
         \App\Models\TempUser::withoutEvents(function () {
-            \App\Models\TempUser::factory(10)->create();
+            \App\Models\TempUser::factory(5)->create();
         });
     }
 }
