@@ -219,7 +219,7 @@ class TimesheetDataService
             'notes' => $notes,
             'subject_id' => $subjectId,
             'inhouse_id' => $inhouseUuid,
-            'curriculum_name' => $timesheet->subject->curriculum->name
+            'curriculum_name' => $timesheet->subject->curriculum ? $timesheet->subject->curriculum->name : null
         ];
 
         return compact('clientProfile', 'packageDetails', 'editableColumns');
