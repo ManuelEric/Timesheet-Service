@@ -60,26 +60,37 @@ class CreateTimesheetService
             );
         }
 
-
         /* insert timesheet into the success-program */
-        $ref_Programs = Ref_Program::doesntHave('timesheet')->whereIn('id', $ref_programId)->get();
+        // $ref_Programs = Ref_Program::doesntHave('timesheet')->whereIn('id', $ref_programId)->get();
+        $ref_Programs = Ref_Program::whereIn('id', $ref_programId)->get();
         
         /* check if there are ref_program that doesn't have timesheet */
-        if ( count($ref_Programs) === 0 )
-        {
-            throw new HttpResponseException(
-                response()->json([
-                    'errors' => 'Each of the selected program already has a timesheet.'
-                ], JsonResponse::HTTP_BAD_REQUEST)
-            );
-        }
+        //! for now, the condition below is hidden because SAT program would have 2 timesheet
+        // if ( count($ref_Programs) === 0 )
+        // {
+        //     throw new HttpResponseException(
+        //         response()->json([
+        //             'errors' => 'Each of the selected program already has a timesheet.'
+        //         ], JsonResponse::HTTP_BAD_REQUEST)
+        //     );
+        // }
                 
         try {
 
             foreach ($ref_Programs as $program)
             {
-                $program->timesheet_id = $createdTimesheet->id;
-                $program->save();
+                # check if program is SAT or no
+                # if it is not SAT then it is not allowed to insert multiple timesheet
+                $act_sat_programs = ['Private', 'Semi Private', 'Diagnostic Test', 'General', 'Math', 'Diagnostic Result Consultation', 'Extended Hours Online', 'Bootcamp'];
+                if ( $program->whereIn('program_name', $act_sat_programs) )
+                {
+                    $program->timesheets()->attach($createdTimesheet->id);
+                }
+                else
+                {
+                    $program->timesheet_id = $createdTimesheet->id;
+                    $program->save();
+                }
             }
             DB::commit();
 

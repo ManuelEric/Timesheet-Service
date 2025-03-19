@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Pivot\PivotTimesheet;
 use App\Observers\Ref_ProgramObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
@@ -49,6 +50,11 @@ class Ref_Program extends Model
     public function timesheet()
     {
         return $this->belongsTo(Timesheet::class, 'timesheet_id', 'id');
+    }
+
+    public function timesheets()
+    {
+        return $this->belongsToMany(Timesheet::class, 'pivot_timesheets', 'ref_id', 'timesheet_id')->using(PivotTimesheet::class)->withTimestamps();
     }
 
     public function engagement_type()
