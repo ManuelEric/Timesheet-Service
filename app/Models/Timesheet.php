@@ -77,6 +77,11 @@ class Timesheet extends Model
         return $this->hasMany(Ref_Program::class, 'timesheet_id', 'id');
     }
 
+    public function ref_programs()
+    {
+        return $this->belongsToMany(Ref_Program::class, 'pivot_timesheets', 'timesheet_id', 'ref_id');
+    }
+
     public function activities()
     {
         return $this->hasMany(Activity::class, 'timesheet_id', 'id');
