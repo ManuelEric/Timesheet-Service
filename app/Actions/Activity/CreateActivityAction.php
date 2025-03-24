@@ -70,9 +70,11 @@ class CreateActivityAction
         DB::beginTransaction();
         try {
 
+            $program_name = $timesheet->reference_program[0]->program_name;
+
             $activityDetails = [
                 'timesheet_id' => $timesheetId,
-                'activity' => $timesheet->ref_program[0]->program_name,
+                'activity' => $program_name,
                 'description' => $validated['description'],
                 'start_date' => $validated['start_date'],
                 'end_date' => $endDate,

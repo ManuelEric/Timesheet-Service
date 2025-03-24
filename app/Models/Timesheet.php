@@ -50,6 +50,22 @@ class Timesheet extends Model
         return $full_duration - $used_duration;
     }
 
+    protected function referenceProgram(): Attribute
+    {
+        
+        return new Attribute(
+            get: fn () => $this->getReferenceProgram()
+        );  
+    }
+
+    private function getReferenceProgram()
+    {
+        if ( count($this->ref_program) > 0 )
+            return $this->ref_program;
+        else
+            return $this->second_ref_program;
+    }
+
     
     /**
      * The relations.
