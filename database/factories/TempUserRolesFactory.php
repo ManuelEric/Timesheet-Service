@@ -16,13 +16,30 @@ class TempUserRolesFactory extends Factory
      */
     public function definition(): array
     {
-        $subjects = ['IB English', 'Mathematic', 'Biology', 'Science'];
+        /**
+         * Tutor Factory
+         */
+        // $subjects = ['IB English', 'Mathematic', 'Biology', 'Science'];
+        // return [
+        //     'temp_user_id' => \App\Models\TempUser::inRandomOrder()->first()->id,
+        //     'role' => 'Tutor',
+        //     'tutor_subject' => $subjects[array_rand($subjects, 1)],
+        //     'year' => Carbon::now()->format('Y'),
+        //     'head' => null,
+        //     'additional_fee' => 0,
+        //     'grade' => rand(10,12),
+        //     'fee_individual' => fake()->randomNumber(6),
+        //     'fee_group' => fake()->randomNumber(6),
+        //     'tax' => null,
+        //     'curriculum_id' => null,
+        // ];
+
+        /**
+         * External Mentor Factory
+         */
         return [
-            'temp_user_id' => \App\Models\TempUser::inRandomOrder()->first()->id,
-            'role' => 'Tutor',
-            'tutor_subject' => $subjects[array_rand($subjects, 1)],
-            'fee_hours' => fake()->randomNumber(6),
-            'fee_session' => 0
+            'temp_user_id' => \App\Models\TempUser::doesntHave('roles')->inRandomOrder()->first()->id,
+            'role' => 'External Mentor',
         ];
     }
 }
