@@ -99,6 +99,7 @@ const getSubject = async (item, uuid = null, npwp = 0) => {
     form.value.subject_id = item[0].subjects[0].id
   } else {
     try {
+
       const res = await ApiService.get('api/v1/user/mentor-tutors/' + uuid + '/subjects')
       if (res) {
         subjects.value = res
@@ -115,6 +116,7 @@ const getIndividualFee = async (tutor_id, subject_name, curriculum_id) => {
     if (res) {
       form.value.individual_fee = res.fee_individual
     }
+
   } catch (error) {
     console.error(error)
   }
@@ -123,7 +125,10 @@ const getIndividualFee = async (tutor_id, subject_name, curriculum_id) => {
 const getCurriculum = async () => {
   try {
     const res = await ApiService.get('api/v1/curriculum/component/list')
-    if (res) curriculum_list.value = res
+    if (res) 
+      curriculum_list.value = res
+
+    console.log(res)
   } catch (error) {
     console.error(error)
   }
@@ -181,7 +186,7 @@ onMounted(() => {
 
 <template>
   <VCard
-    width="650"
+    width="600"
     prepend-icon="ri-send-plane-line"
     title="Assign to Tutor"
   >
@@ -219,10 +224,7 @@ onMounted(() => {
               <small> Tutor {{ has_npwp == 1 ? 'already' : 'don`t' }} have NPWP </small>
             </v-alert>
           </VCol>
-          <VCol
-            md="6"
-            col="12"
-          >
+          <VCol md="12">
             <VAutocomplete
               variant="solo"
               clearable
@@ -241,8 +243,7 @@ onMounted(() => {
             ></VAutocomplete>
           </VCol>
           <VCol
-            md="6"
-            col="12"
+            md="12"
             v-if="props.selected[0]?.require?.toLowerCase() == 'tutor'"
           >
             <VAutocomplete
@@ -288,7 +289,7 @@ onMounted(() => {
               type="number"
               variant="solo"
               clearable
-              :label="+form.duration / 60 ? '' + form.duration / 60 + ' Hours' : 'Minutes'"
+              :label="+form.duration / 60 ? 'Minutes (' + form.duration / 60 + ' Hours)' : 'Minutes'"
               :readonly="duration_readonly"
               v-model="form.duration"
               :rules="rules.required"
@@ -341,10 +342,7 @@ onMounted(() => {
               :rules="rules.required"
             ></VAutocomplete>
           </VCol>
-          <VCol
-            md="6"
-            col="12"
-          >
+          <VCol md="12">
             <VAutocomplete
               variant="solo"
               multiple
