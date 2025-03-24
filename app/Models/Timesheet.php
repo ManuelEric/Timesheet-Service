@@ -77,9 +77,13 @@ class Timesheet extends Model
         return $this->hasMany(Ref_Program::class, 'timesheet_id', 'id');
     }
 
-    public function ref_programs()
+    /**
+     * second ref program only uses if program is SAT
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function second_ref_program()
     {
-        return $this->belongsToMany(Ref_Program::class, 'pivot_timesheets', 'timesheet_id', 'ref_id');
+        return $this->hasMany(Ref_Program::class, 'scnd_timesheet_id', 'id');
     }
 
     public function activities()
@@ -206,6 +210,8 @@ class Timesheet extends Model
     public function scopeTutoring(Builder $query): void
     {
         $query->whereHas('ref_program', function ($query) {
+            $query->tutoring();
+        })->orWhereHas('second_ref_program', function ($query) {
             $query->tutoring();
         });
     }
