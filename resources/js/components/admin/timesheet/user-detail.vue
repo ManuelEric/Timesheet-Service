@@ -52,7 +52,7 @@ const deleteTimesheet = async () => {
       data.value = res
       showNotif('success', res.message, 'bottom-end')
       isDialogVisible.value.delete = false
-      router.push('/admin/timesheet')
+      router.push('/admin/timesheet/tutoring')
     }
   } catch (error) {
     if (error.response?.status == 400) {
@@ -137,7 +137,8 @@ watch(() => {
             size="25"
           ></VIcon>
         </router-link>
-        Timesheet [{{ data?.packageDetails?.package_type + ' - ' + data?.packageDetails?.package_name }}]
+        {{ data.packageDetails?.tutormentor_name }} |
+        {{ data?.packageDetails?.package_type + ' - ' + data?.packageDetails?.package_name }}
       </div>
       <div>
         <VMenu
@@ -231,6 +232,7 @@ watch(() => {
             ></VIcon>
             Basic Profile
           </h4>
+
           <hr class="my-2" />
           <VTable density="compact">
             <tbody v-if="data.clientProfile?.length > 1">
@@ -295,7 +297,8 @@ watch(() => {
                 <td>Package</td>
                 <td width="1%">:</td>
                 <td>
-                  {{ data.packageDetails?.package_type + ' - ' + data.packageDetails?.package_name }}
+                  {{ data.packageDetails?.package_type }}
+                  {{ data.packageDetails?.package_name ? ' - ' + data.packageDetails?.package_name : '' }}
                 </td>
               </tr>
               <tr>
@@ -306,14 +309,21 @@ watch(() => {
                 </td>
               </tr>
               <tr>
-                <td>Tutor/Mentor</td>
+                <td>{{ props.name == 'tutoring' ? 'Tutor' : 'Mentor' }} Name</td>
                 <td width="1%">:</td>
                 <td>{{ data.packageDetails?.tutormentor_name }}</td>
               </tr>
               <tr>
-                <td>Inhouse Tutor/Mentor</td>
+                <td>Inhouse {{ props.name == 'tutoring' ? 'Tutor' : 'Mentor' }}</td>
                 <td width="1%">:</td>
                 <td>{{ data.packageDetails?.inhouse_name }}</td>
+              </tr>
+              <tr>
+                <td>Notes</td>
+                <td width="1%">:</td>
+                <td>
+                  {{ data.editableColumns?.notes }}
+                </td>
               </tr>
               <tr>
                 <td>Update On</td>

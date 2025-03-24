@@ -142,7 +142,7 @@ onMounted(() => {
             </th>
             <th class="text-uppercase text-center">Student</th>
             <th class="text-uppercase text-center">School Name</th>
-            <th class="text-uppercase text-center">Program Name</th>
+            <th class="text-uppercase text-center">Engagement Type</th>
             <th class="text-uppercase text-center">#</th>
           </tr>
         </thead>
