@@ -2,7 +2,9 @@
 import { showNotif } from '@/helper/notification'
 import ApiService from '@/services/ApiService'
 import UserService from '@/services/UserService'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const currentPage = ref(1)
 const role = ref(UserService.getUser().role_detail[0].role.toLowerCase())
 const totalPage = ref()
@@ -61,6 +63,10 @@ const getPackage = async () => {
 const searchData = async () => {
   currentPage.value = 1
   await getData()
+}
+
+const goToTimesheet = (id, require) => {
+  router.push('/user/timesheet/' + id + '/' + require.toLowerCase())
 }
 // End Function
 
@@ -135,6 +141,7 @@ onMounted(() => {
       <VTable
         class="text-no-wrap"
         v-else
+        hover
       >
         <thead>
           <tr>
@@ -159,6 +166,8 @@ onMounted(() => {
             v-for="(item, index) in data.data"
             :key="index"
             :class="item.void == 'true' ? 'bg-secondary' : ''"
+            class="cursor-pointer"
+            @click="goToTimesheet(item.id, item.require)"
           >
             <td>
               {{ parseInt(index) + 1 }}
