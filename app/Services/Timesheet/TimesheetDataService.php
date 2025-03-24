@@ -152,7 +152,7 @@ class TimesheetDataService
 
     public function detailTimesheet(Timesheet $timesheet)
     {
-        $refProgram = $timesheet->ref_program;
+        $refProgram = count(value: $timesheet->ref_program) > 0 ? $timesheet->ref_program : $timesheet->second_ref_program;
         $transferredLog = $timesheet->transferred;
         $relatedProgram = count($refProgram) > 0 ? $refProgram : $transferredLog;
         # because timesheets consists of multiple ref programs
