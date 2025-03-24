@@ -195,12 +195,12 @@ onMounted(() => {
             >
               #
             </th>
+            <th class="text-uppercase text-center">Timesheet</th>
             <th class="text-uppercase text-center">Student</th>
             <th class="text-uppercase text-center">School Name</th>
             <th class="text-uppercase text-center">
               {{ props.name == 'tutoring' ? 'Program Name' : 'Engagement Type' }}
             </th>
-            <th class="text-uppercase text-center">Timesheet</th>
           </tr>
         </thead>
         <tbody>
@@ -216,24 +216,36 @@ onMounted(() => {
                   id: item.id,
                   require: item.require,
                 }"
-                v-if="!item.timesheet_id && !item.cancellation_reason"
               ></VCheckbox>
-              <VIcon
-                icon="ri-check-line"
-                color="success"
-                v-else-if="item.timesheet_id && !item.cancellation_reason"
-              ></VIcon>
-              <div v-else-if="item.cancellation_reason">
-                <VTooltip
-                  activator="parent"
-                  location="end"
-                  >Cancelled</VTooltip
-                >
+            </td>
+            <td class="text-center">
+              <VText v-if="item.timesheet_id">
+                <router-link :to="'/admin/timesheet/tutoring/' + item.timesheet_id">
+                  <VIcon
+                    icon="ri-file-check-line"
+                    class="mx-1"
+                    color="success"
+                  ></VIcon>
+                  <v-tooltip
+                    activator="parent"
+                    location="top"
+                    >Already</v-tooltip
+                  >
+                </router-link>
+              </VText>
+
+              <VText v-else>
                 <VIcon
-                  icon="ri-subtract-line"
+                  icon="ri-file-close-line"
+                  class="mx-1"
                   color="error"
                 ></VIcon>
-              </div>
+                <v-tooltip
+                  activator="parent"
+                  location="top"
+                  >Not Yet</v-tooltip
+                >
+              </VText>
             </td>
             <td
               class="text-left"
@@ -273,33 +285,6 @@ onMounted(() => {
                 class="me-3"
               ></VIcon>
               {{ item.engagement_type }}
-            </td>
-            <td class="text-center">
-              <VText v-if="item.timesheet_id">
-                <VIcon
-                  icon="ri-file-check-line"
-                  class="mx-1"
-                  color="success"
-                ></VIcon>
-                <v-tooltip
-                  activator="parent"
-                  location="top"
-                  >Already</v-tooltip
-                >
-              </VText>
-
-              <VText v-else>
-                <VIcon
-                  icon="ri-file-close-line"
-                  class="mx-1"
-                  color="error"
-                ></VIcon>
-                <v-tooltip
-                  activator="parent"
-                  location="top"
-                  >Not Yet</v-tooltip
-                >
-              </VText>
             </td>
           </tr>
         </tbody>

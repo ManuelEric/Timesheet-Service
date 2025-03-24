@@ -297,7 +297,8 @@ watch(() => {
                 <td>Package</td>
                 <td width="1%">:</td>
                 <td>
-                  {{ data.packageDetails?.package_type + ' - ' + data.packageDetails?.package_name }}
+                  {{ data.packageDetails?.package_type }}
+                  {{ data.packageDetails?.package_name ? ' - ' + data.packageDetails?.package_name : '' }}
                 </td>
               </tr>
               <tr>
