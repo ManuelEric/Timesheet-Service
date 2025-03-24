@@ -35,6 +35,7 @@ class Ref_Program extends Model
         'free_trial',
         'require',
         'timesheet_id',
+        'scnd_timesheet_id',
         'engagement_type_id',
         'notes',
         'cancellation_reason',
@@ -52,9 +53,9 @@ class Ref_Program extends Model
         return $this->belongsTo(Timesheet::class, 'timesheet_id', 'id');
     }
 
-    public function timesheets()
+    public function second_timesheet()
     {
-        return $this->belongsToMany(Timesheet::class, 'pivot_timesheets', 'ref_id', 'timesheet_id')->using(PivotTimesheet::class)->withTimestamps();
+        return $this->belongsTo(Timesheet::class, 'scnd_timesheet_id', 'id');
     }
 
     public function engagement_type()

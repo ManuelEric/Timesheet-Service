@@ -30,6 +30,9 @@ class TimesheetDataService
                 'ref_program' => function ($query) {
                     $query->select('category', 'student_name', 'student_school', 'program_name', 'timesheet_id', 'require', 'engagement_type_id');
                 },
+                'second_ref_program' => function ($query) {
+                    $query->select('category', 'student_name', 'student_school', 'program_name', 'scnd_timesheet_id', 'require', 'engagement_type_id');
+                },
                 'transferred' => function ($query) {
                     $query->select('category', 'student_name', 'student_school', 'program_name', 'require');
                 },
@@ -65,7 +68,7 @@ class TimesheetDataService
             # because timesheets consists of multiple ref programs
             # we need to extract and define whether the client was b2c or b2b
             $clients = array();
-            $refProgram = $data->ref_program;
+            $refProgram = count($data->ref_program) > 0 ? $data->ref_program : $data->second_ref_program;
             $transferredLog = $data->transferred;
 
             if ( count($refProgram) > 0 )

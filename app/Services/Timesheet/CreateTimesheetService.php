@@ -65,7 +65,7 @@ class CreateTimesheetService
         $ref_Programs = Ref_Program::whereIn('id', $ref_programId)->get();
         
         /* check if there are ref_program that doesn't have timesheet */
-        //! for now, the condition below is hidden because SAT program would have 2 timesheet
+        //! for now, the condition below is hidden because SAT program could have 2 timesheet
         // if ( count($ref_Programs) === 0 )
         // {
         //     throw new HttpResponseException(
@@ -79,12 +79,21 @@ class CreateTimesheetService
 
             foreach ($ref_Programs as $program)
             {
-                # check if program is SAT or no
-                # if it is not SAT then it is not allowed to insert multiple timesheet
-                $act_sat_programs = ['Private', 'Semi Private', 'Diagnostic Test', 'General', 'Math', 'Diagnostic Result Consultation', 'Extended Hours Online', 'Bootcamp'];
-                if ( $program->whereIn('program_name', $act_sat_programs) )
+                /* validate if program already has 2 timesheet */
+                if ( $program->timesheet && $program->second_timesheet )
                 {
-                    $program->timesheets()->attach($createdTimesheet->id);
+                    throw new HttpResponseException(
+                        response()->json([
+                            'errors' => 'The selected program already has 2 timesheets. Please re-check / contact our administrator if the data is wrong'
+                        ], JsonResponse::HTTP_BAD_REQUEST)
+                    );
+                }
+
+                /* check if program already has a timesheet */
+                if ( $program->timesheet )
+                {
+                    $program->scnd_timesheet_id = $createdTimesheet->id;
+                    $program->save();
                 }
                 else
                 {
