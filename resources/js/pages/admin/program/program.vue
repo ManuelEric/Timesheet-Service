@@ -72,6 +72,10 @@ const searchData = debounce(async item => {
   await getData()
 }, 1000)
 
+const goToTimesheet = id => {
+  window.open('/admin/timesheet/' + props.name + '/' + id)
+}
+
 // End Function
 
 watch(() => {
@@ -210,30 +214,52 @@ onMounted(() => {
             :class="{ 'bg-secondary': selected.includes(item.id) }"
           >
             <td>
+              <VText v-if="item.cancellation_reason">
+                <VTooltip
+                  activator="parent"
+                  location="top"
+                >
+                  Cancel: {{ item.cancellation_reason }}
+                </VTooltip>
+                <VIcon
+                  icon="ri-subtract-line"
+                  color="error"
+                />
+              </VText>
+
               <VCheckbox
                 v-model="selected"
                 :value="{
                   id: item.id,
                   require: item.require,
                 }"
+                v-else-if="(!item.timesheet_id || !item.scnd_timesheet_id) && !item.cancellation_reason"
               ></VCheckbox>
+
+              <VIcon
+                icon="ri-check-line"
+                color="success"
+                v-else-if="item.timesheet_id && item.scnd_timesheet_id && !item.cancellation_reason"
+              ></VIcon>
             </td>
             <td class="text-center">
-              <VText v-if="item.timesheet_id">
-                <router-link :to="'/admin/timesheet/tutoring/' + item.timesheet_id">
-                  <VIcon
-                    icon="ri-file-check-line"
-                    class="mx-1"
-                    color="success"
-                  ></VIcon>
-                  <v-tooltip
-                    activator="parent"
-                    location="top"
-                    >Already</v-tooltip
-                  >
-                </router-link>
+              <!-- First Timesheet  -->
+              <VText
+                v-if="item.timesheet_id"
+                class="cursor-pointer"
+                @click="goToTimesheet(item.timesheet_id)"
+              >
+                <VIcon
+                  icon="ri-file-check-line"
+                  class="mx-1"
+                  color="success"
+                ></VIcon>
+                <v-tooltip
+                  activator="parent"
+                  location="top"
+                  >Already</v-tooltip
+                >
               </VText>
-
               <VText v-else>
                 <VIcon
                   icon="ri-file-close-line"
@@ -244,6 +270,24 @@ onMounted(() => {
                   activator="parent"
                   location="top"
                   >Not Yet</v-tooltip
+                >
+              </VText>
+
+              <!-- Second Timesheet  -->
+              <VText
+                v-if="item.scnd_timesheet_id"
+                class="cursor-pointer"
+                @click="goToTimesheet(item.scnd_timesheet_id)"
+              >
+                <VIcon
+                  icon="ri-file-check-line"
+                  class="mx-1"
+                  color="success"
+                ></VIcon>
+                <v-tooltip
+                  activator="parent"
+                  location="top"
+                  >Already</v-tooltip
                 >
               </VText>
             </td>

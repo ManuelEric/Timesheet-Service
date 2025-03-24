@@ -2,10 +2,12 @@
 import { showNotif } from '@/helper/notification'
 import ApiService from '@/services/ApiService'
 import debounce from 'lodash/debounce'
+import { useRouter } from 'vue-router'
 
 // Start Variable
 
 const props = defineProps({ name: String })
+const router = useRouter()
 
 const selected = ref([])
 const currentPage = ref(1)
@@ -76,6 +78,10 @@ const searchData = debounce(async item => {
 
   await getData()
 }, 1000)
+
+const goToTimesheet = id => {
+  router.push('/admin/timesheet/' + props.name + '/' + id)
+}
 // End Function
 
 watch(() => {
@@ -173,6 +179,7 @@ onMounted(() => {
       <VTable
         class="text-no-wrap"
         v-else
+        hover
       >
         <thead>
           <tr>
@@ -199,6 +206,8 @@ onMounted(() => {
             v-for="(item, index) in data.data"
             :key="index"
             :class="item.void == 'true' ? 'bg-secondary' : ''"
+            class="cursor-pointer"
+            @click="goToTimesheet(item.id)"
           >
             <td>
               {{ parseInt(index) + 1 }}

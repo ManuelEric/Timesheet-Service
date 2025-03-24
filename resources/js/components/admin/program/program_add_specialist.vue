@@ -193,10 +193,13 @@ onMounted(() => {
             ></VAutocomplete>
             <v-alert
               :color="has_npwp == 1 ? 'success' : 'error'"
-              icon="ri-error-warning-line"
               class="py-2 mt-2"
               v-if="has_npwp != null"
             >
+              <VIcon
+                icon="ri-error-warning-line"
+                class="mr-2"
+              />
               <small> Mentor {{ has_npwp == 1 ? 'already' : 'don`t' }} have NPWP </small>
             </v-alert>
           </VCol>

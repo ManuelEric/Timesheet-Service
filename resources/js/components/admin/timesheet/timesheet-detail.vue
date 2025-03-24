@@ -135,7 +135,7 @@ onMounted(() => {
     <VCardText>
       <VTable
         class="text-no-wrap"
-        height="400"
+        max-height="400"
         fixed-header
         v-if="!loading"
       >
