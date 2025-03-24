@@ -75,9 +75,7 @@ const updateStatus = async item => {
       showNotif('success', res.message, 'bottom-end')
     }
   } catch (error) {
-    if (error?.response?.data?.message) {
-      showNotif('error', error.response.data.message, 'bottom-end')
-    } else if (error?.response?.data?.errors) {
+    if (error?.response?.data?.errors) {
       const validationErrors = error.response.data.errors
       let errorMessage = 'Validation errors:'
 
