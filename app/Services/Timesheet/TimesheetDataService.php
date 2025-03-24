@@ -68,7 +68,7 @@ class TimesheetDataService
             # because timesheets consists of multiple ref programs
             # we need to extract and define whether the client was b2c or b2b
             $clients = array();
-            $refProgram = count($data->ref_program) > 0 ? $data->ref_program : $data->second_ref_program;
+            $refProgram = $data->reference_program;
             $transferredLog = $data->transferred;
 
             if ( count($refProgram) > 0 )
@@ -152,7 +152,7 @@ class TimesheetDataService
 
     public function detailTimesheet(Timesheet $timesheet)
     {
-        $refProgram = count(value: $timesheet->ref_program) > 0 ? $timesheet->ref_program : $timesheet->second_ref_program;
+        $refProgram = $timesheet->reference_program;
         $transferredLog = $timesheet->transferred;
         $relatedProgram = count($refProgram) > 0 ? $refProgram : $transferredLog;
         # because timesheets consists of multiple ref programs
