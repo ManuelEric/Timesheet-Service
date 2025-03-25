@@ -106,7 +106,11 @@ watch(() => {
               <tr>
                 <td>Grade</td>
                 <td width="1%">:</td>
-                <td>{{ data.clientProfile[0].client_grade }}</td>
+                <td>
+                  {{
+                    data.clientProfile[0].client_grade <= 12 ? data.clientProfile[0].client_grade : 'Not High School'
+                  }}
+                </td>
               </tr>
               <tr>
                 <td>Email</td>
