@@ -61,6 +61,7 @@ class GenerateTokenService
         $token = $tempUser->createToken('user-access', $granted_access)->plainTextToken;
 
         return [
+            'uuid' => $tempUser->uuid,
             'full_name' => $tempUser->full_name,
             'email' => $tempUser->email,
             'role' => $tempUser->roles->first()->role,
