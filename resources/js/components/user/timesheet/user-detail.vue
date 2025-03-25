@@ -89,7 +89,7 @@ watch(() => {
               <tr v-for="client in data.clientProfile">
                 <td>{{ client.client_name }}</td>
                 <td>{{ client.client_school }}</td>
-                <td>{{ client.client_grade }}</td>
+                <td>{{ client.client_grade <= 12 ? client.client_grade : 'Not High School' }}</td>
               </tr>
             </tbody>
             <tbody v-else-if="data.clientProfile?.length == 1">
