@@ -159,7 +159,7 @@ onMounted(() => {
 
 <template>
   <VCard
-    width="650"
+    max-width="650"
     prepend-icon="ri-send-plane-line"
     title="Assign to External Mentor"
   >
@@ -317,6 +317,7 @@ onMounted(() => {
 
         <VCardActions class="mt-5">
           <VBtn
+            variant="tonal"
             color="error"
             type="button"
             @click="emit('close')"
@@ -329,6 +330,7 @@ onMounted(() => {
           </VBtn>
           <VSpacer />
           <VBtn
+            variant="tonal"
             color="success"
             type="submit"
           >

@@ -8,7 +8,6 @@ const emit = defineEmits(['close', 'reload'])
 
 const loading = ref(false)
 const tutor_selected = ref([])
-const curriculum_selected = ref([])
 const tutor_list = ref([])
 const curriculum_list = ref([])
 const subjects = ref([])
@@ -99,7 +98,6 @@ const getSubject = async (item, uuid = null, npwp = 0) => {
     form.value.subject_id = item[0].subjects[0].id
   } else {
     try {
-
       const res = await ApiService.get('api/v1/user/mentor-tutors/' + uuid + '/subjects')
       if (res) {
         subjects.value = res
@@ -116,7 +114,6 @@ const getIndividualFee = async (tutor_id, subject_name, curriculum_id) => {
     if (res) {
       form.value.individual_fee = res.fee_individual
     }
-
   } catch (error) {
     console.error(error)
   }
@@ -125,8 +122,7 @@ const getIndividualFee = async (tutor_id, subject_name, curriculum_id) => {
 const getCurriculum = async () => {
   try {
     const res = await ApiService.get('api/v1/curriculum/component/list')
-    if (res) 
-      curriculum_list.value = res
+    if (res) curriculum_list.value = res
 
     console.log(res)
   } catch (error) {
@@ -186,7 +182,7 @@ onMounted(() => {
 
 <template>
   <VCard
-    width="600"
+    max-width="650"
     prepend-icon="ri-send-plane-line"
     title="Assign to Tutor"
   >
@@ -227,7 +223,10 @@ onMounted(() => {
               <small> Tutor {{ has_npwp == 1 ? 'already' : 'don`t' }} have NPWP </small>
             </v-alert>
           </VCol>
-          <VCol md="12">
+          <VCol
+            md="6"
+            cols="12"
+          >
             <VAutocomplete
               variant="solo"
               clearable
@@ -246,7 +245,8 @@ onMounted(() => {
             ></VAutocomplete>
           </VCol>
           <VCol
-            md="12"
+            md="6"
+            cols="12"
             v-if="props.selected[0]?.require?.toLowerCase() == 'tutor'"
           >
             <VAutocomplete
@@ -286,7 +286,7 @@ onMounted(() => {
           </VCol>
           <VCol
             md="4"
-            col="7"
+            cols="12"
           >
             <VTextField
               type="number"
@@ -300,7 +300,7 @@ onMounted(() => {
           </VCol>
           <VCol
             md="7"
-            col="5"
+            cols="12"
           >
             <VTextField
               type="number"
@@ -313,7 +313,7 @@ onMounted(() => {
           </VCol>
           <VCol
             md="5"
-            col="5"
+            cols="12"
           >
             <VTextField
               type="number"
@@ -345,7 +345,10 @@ onMounted(() => {
               :rules="rules.required"
             ></VAutocomplete>
           </VCol>
-          <VCol md="12">
+          <VCol
+            md="6"
+            cols="12"
+          >
             <VAutocomplete
               variant="solo"
               multiple
@@ -372,6 +375,7 @@ onMounted(() => {
 
         <VCardActions class="mt-5">
           <VBtn
+            variant="tonal"
             color="error"
             type="button"
             @click="emit('close')"
@@ -384,6 +388,7 @@ onMounted(() => {
           </VBtn>
           <VSpacer />
           <VBtn
+            variant="tonal"
             color="success"
             type="submit"
           >
