@@ -31,7 +31,7 @@ onMounted(() => {
   <VerticalNavLink
     :item="{
       title: 'Program',
-      icon: 'ri-calendar-todo-line',
+      icon: 'ri-sticky-note-add-line',
       to: '/user/request',
     }"
     v-if="role == 'Mentor'"

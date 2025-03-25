@@ -2,6 +2,7 @@
 import { showNotif } from '@/helper/notification'
 import { rules } from '@/helper/rules'
 import ApiService from '@/services/ApiService'
+import UserService from '@/services/UserService'
 import { onMounted } from 'vue'
 
 const emit = defineEmits(['close', 'reload'])
@@ -11,6 +12,7 @@ const formData = ref(null)
 const packageItems = ref([])
 const menteeItems = ref([])
 const selectedMentee = ref([])
+const user = UserService.getUser()
 
 const form = ref({
   clientprog_id: null,
@@ -88,7 +90,7 @@ onMounted(() => {
     <VCol cols="12">
       <VCard
         title="New Request"
-        width="500"
+        max-width="500"
         prepend-icon="ri-send-plane-line"
       >
         <VCardText>
