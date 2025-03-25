@@ -156,7 +156,6 @@ onMounted(() => {
             <th>{{ item.student_school }}</th>
             <th>
               {{ item.engagement_type }}
-              {{ item.timesheet_id }}
             </th>
             <th>
               <div v-if="!item.timesheet_id">
