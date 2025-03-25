@@ -21,9 +21,12 @@ class ComponentController extends Controller
         [$year, $month] = $summaryService->fetchMonthAndYear($requestedMonthYear);
         $activities = Activity::onSession()->whereMonth('start_date', $month)->whereYear('start_date', $year)->get();
         $mappedActivities = $activities->map(function ($item) {
+
+            $title = $item->timesheet->reference_program ? 'Meeting with ' . json_decode($item->timesheet->reference_program)[0]->student_name : null;
+
             return [
                 'id' => $item->id,
-                'title' => 'Meeting with ' . json_decode($item->timesheet->reference_program)[0]->student_name,
+                'title' => $title,
                 'with' => $item->timesheet->handle_by->first()->full_name,
                 'time' => [
                     'start' => Carbon::parse($item->start_date)->format('Y-m-d H:i'),
