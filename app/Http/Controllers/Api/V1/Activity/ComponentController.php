@@ -12,17 +12,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
 class ComponentController extends Controller
-{    
+{
     public function monthlyActivities(
         string $requestedMonthYear,
         SummaryService $summaryService,
-        ): JsonResponse
-    {
+    ): JsonResponse {
         [$year, $month] = $summaryService->fetchMonthAndYear($requestedMonthYear);
         $activities = Activity::onSession()->whereMonth('start_date', $month)->whereYear('start_date', $year)->get();
         $mappedActivities = $activities->map(function ($item) {
 
-            $title = $item->timesheet->reference_program ? 'Meeting with ' . json_decode($item->timesheet->reference_program)[0]->student_name : null;
+            $title = json_decode($item->timesheet->reference_program) ? 'Meeting with ' . json_decode($item->timesheet->reference_program)[0]->student_name : null;
 
             return [
                 'id' => $item->id,
@@ -43,8 +42,7 @@ class ComponentController extends Controller
     public function summaryMonthlyActivities(
         string $month,
         SummaryService $summaryService,
-        ): JsonResponse
-    {
+    ): JsonResponse {
         $activity = $summaryService->summaryMonthlyActivities($month);
         return response()->json($activity, JsonResponse::HTTP_OK);
     }
