@@ -106,7 +106,7 @@
 
     <!-- Total cut off date start here -->
     <tr>
-        <td colspan="8" valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word; background-color: yellow; font-weight: bold;">CUT OFF DATE: {{ strtoupper(date('M d, Y', strtotime($cutoff->created_at))) }}</td>
+        <td colspan="8" valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word; background-color: yellow; font-weight: bold;">CUT OFF DATE: {{ isset($cutoff) ? strtoupper(date('M d, Y', strtotime($cutoff->created_at))) : null }}</td>
     </tr>
     <!-- Total cut off date end here -->
 
