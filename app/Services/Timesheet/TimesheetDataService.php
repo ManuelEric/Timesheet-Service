@@ -345,7 +345,7 @@ class TimesheetDataService
         ];
         
         /* we're gonna find timesheets using cutoff `from` and `to` */
-        $timesheets = Timesheet::with('activities')->filterCutoff($search)->get();
+        $timesheets = Timesheet::with('activities', 'ref_program', 'second_ref_program')->filterCutoff($search)->get();
         return $timesheets;
     }
 }
