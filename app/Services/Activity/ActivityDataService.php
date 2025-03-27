@@ -17,7 +17,7 @@ class ActivityDataService
     {
         /* fetch activities based on requested timesheet */
         $activities = $timesheet->activities;
-        return $activities->map(function ($data) {
+        return $activities->sortBy('asc')->map(function ($data) {
 
             $start_date = Carbon::parse($data->start_date);
             $end_date = $data->end_date ? Carbon::parse($data->end_date) : false;
@@ -48,6 +48,7 @@ class ActivityDataService
                 'estimate' => $estimate,
                 'disabled_changes' => $is_disabled
             ];
+        
         });
     }
 }
