@@ -254,5 +254,4 @@ Route::middleware(['throttle:120,1'])->group(function () {
     /* log everytime user visit any pages */
     Route::middleware('auth:sanctum')->get('visit/{page_name}/{detail?}', [LogController::class, 'index']);
 
-
 });
