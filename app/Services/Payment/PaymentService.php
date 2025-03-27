@@ -86,7 +86,7 @@ class PaymentService
 
         foreach ( $timesheets as $timesheet )
         {
-            if (!$timesheet->reference_program)
+            if (!isset($timesheet->reference_program))
                 continue;
             $timesheet = $this->identifyTimesheetIdAction->execute($timesheet->id);
             $detailTimesheet = $this->timesheetDataService->detailTimesheet($timesheet);
