@@ -86,13 +86,24 @@ class PaymentService
 
         foreach ( $timesheets as $timesheet )
         {
+            if (!isset($timesheet->reference_program))
+                continue;
+
             $timesheet = $this->identifyTimesheetIdAction->execute($timesheet->id);
             $detailTimesheet = $this->timesheetDataService->detailTimesheet($timesheet);
+            // echo json_encode($detailTimesheet);
+            // echo '<br><br>';
+
             $activities = $this->activityDataService->listActivitiesByTimesheet($timesheet);
+            // echo json_encode($activities);
+            // echo '<br>';
+            // echo 'cutoff ref id terakhir ' . $activities[count($activities)-1]['cutoff_ref_id']. ' dari total activities '. count($activities);
+            // echo '<br><br><br><br><br><br>';continue;
 
             // regist into the exports
             $exports[] = new PayrollExport($detailTimesheet, $activities);
         }
+        // exit;
 
         return Excel::download(new PayrollExportMultipleSheets($exports), $this->filename);
     }

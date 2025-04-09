@@ -41,7 +41,7 @@ const checkLogin = async () => {
         UserService.saveUser(res)
         showNotif('success', 'You`ve successfully login.', 'bottom-end')
         setTimeout(() => {
-          router.go(0)
+          router.go('/admin/dashboard')
         }, 1500)
       }
       loading.value = false
@@ -62,6 +62,7 @@ const checkAuth = () => {
   const is_login = verifyAuth().isAuthenticated.value
 
   if (is_login) {
+    // router.go('/admin/dashboard')
     router.push('/admin/dashboard')
   }
 }

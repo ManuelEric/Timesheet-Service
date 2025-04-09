@@ -70,7 +70,7 @@ onMounted(() => {
     <VCardTitle>
       <div class="d-flex justify-between align-center">
         <div class="w-100">
-          <h4>Pre Cut-Off</h4>
+          <h4>Finished Activities</h4>
         </div>
       </div>
     </VCardTitle>

@@ -29,6 +29,7 @@ class CreateTempUserService
         $email = $userRawInformation['email'];
         $phone = $userRawInformation['phone'];
         $password = $userRawInformation['password'];
+        $has_npwp = $userRawInformation['has_npwp'];
 
         /* check existing temp user */
         $tempUser = TempUser::where('email', $email)->first();
@@ -37,7 +38,7 @@ class CreateTempUserService
         foreach ($userRawInformation['roles'] as $detail)
         {
             /* create model temp_user_roles only if the role are inside acceptable roles */
-            if ( in_array($detail['role_name'], ['Mentor', 'Tutor']) )
+            if ( in_array($detail['role_name'], ['Mentor', 'External Mentor', 'Tutor']) )
             {
                 $role_name = $detail['role_name'];
                 $subjects = $detail['subjects'];
@@ -83,13 +84,16 @@ class CreateTempUserService
             $tempUser->phone = $phone;
             /* update the password from CRMs */
             $tempUser->password = $password;
+            $tempUser->has_npwp = $has_npwp;
             $tempUser->save();           
 
             $tempUserId = $tempUser->id;
 
 
+            # because managing timesheet now Kak Steven can also input the subject and fees
+            # guess, it doesn't used it anymore but I'll put it here just in case needed
             /* update or create the temp_user_role */
-            $this->storeOrUpdateRoles($tempUserId, $roleDetails);
+            // $this->storeOrUpdateRoles($tempUserId, $roleDetails);
         }
         
 
@@ -103,6 +107,7 @@ class CreateTempUserService
                 'email' => $email,
                 'phone' => $phone,
                 'password' => $password,
+                'has_npwp' => $has_npwp,
             ];
     
             DB::beginTransaction();

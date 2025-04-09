@@ -2,12 +2,15 @@
 
 namespace App\Exports;
 
+use App\Http\Traits\ManipulateProgramName;
 use App\Models\Timesheet;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
+use Maatwebsite\Excel\Concerns\WithTitle;
 
-class TimesheetExport implements FromView
+class TimesheetExport implements FromView, WithTitle
 {
+    use ManipulateProgramName;
     protected $timesheet;
     protected $activities;
 
@@ -16,6 +19,19 @@ class TimesheetExport implements FromView
         $this->timesheet = $timesheet;
         $this->activities = $activities;
     }
+
+    /**
+     * @return string
+     */
+    public function title(): string
+    {
+        # if the program name is too long, it would be cut 
+        # example: Environmental Systems and Societies Pro Package 
+        # would be Environmental Systems and So
+        # because excel has maximum length for the worksheet name
+        return $this->fetchSubjectOnly($this->timesheet['packageDetails']['program_name']);
+    }   
+
     /**
      * @return \Illuminate\Contracts\View\View
      */

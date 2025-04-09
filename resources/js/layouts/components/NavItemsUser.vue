@@ -1,6 +1,14 @@
 <script setup>
 import VerticalNavSectionTitle from '@/@layouts/components/VerticalNavSectionTitle.vue'
+import UserService from '@/services/UserService'
 import VerticalNavLink from '@layouts/components/VerticalNavLink.vue'
+import { onMounted } from 'vue'
+
+const role = ref(null)
+onMounted(() => {
+  const user = UserService.getUser()
+  role.value = user.role
+})
 </script>
 
 <template>
@@ -18,6 +26,15 @@ import VerticalNavLink from '@layouts/components/VerticalNavLink.vue'
     :item="{
       heading: 'Apps & Pages',
     }"
+  />
+
+  <VerticalNavLink
+    :item="{
+      title: 'Program',
+      icon: 'ri-sticky-note-add-line',
+      to: '/user/request',
+    }"
+    v-if="role == 'Mentor'"
   />
 
   <VerticalNavLink

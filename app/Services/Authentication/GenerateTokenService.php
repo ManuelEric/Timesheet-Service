@@ -30,7 +30,13 @@ class GenerateTokenService
         /* call API to identify the user information */
         [$statusCode, $response] = $this->make_call('post', env('CRM_DOMAIN') . 'auth/token', $validated);
         if (!$response)
-            return response()->json($response, JsonResponse::HTTP_BAD_REQUEST);
+        {
+            throw new HttpResponseException(
+                response()->json([
+                    'errors' => 'Connection failed'
+                ], JsonResponse::HTTP_BAD_REQUEST)
+            );
+        }
 
 
         /* check if the user has already stored in timesheet app */
@@ -57,10 +63,11 @@ class GenerateTokenService
 
         /* generate token */
         $tempUser->authenticate();
-        $granted_access = ['timesheet-menu', 'program-menu']; #program-menu needed for summary on dashboard
+        $granted_access = ['timesheet-menu', 'program-menu', 'request-menu']; #program-menu needed for summary on dashboard
         $token = $tempUser->createToken('user-access', $granted_access)->plainTextToken;
 
         return [
+            'uuid' => $tempUser->uuid,
             'full_name' => $tempUser->full_name,
             'email' => $tempUser->email,
             'role' => $tempUser->roles->first()->role,

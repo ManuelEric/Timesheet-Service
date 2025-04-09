@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Timesheet;
 
 use App\Http\Controllers\Controller;
+use App\Models\Ref_Program;
 use Illuminate\Http\Request;
 use App\Actions\Timesheet\IdentifierCheckingAction as IdentifyTimesheetIdAction;
 use App\Http\Requests\Timesheet\StoreRequest as TimesheetStoreRequest;
@@ -12,11 +13,13 @@ use App\Actions\Timesheet\VoidTimesheetAction;
 use App\Exports\TimesheetExport;
 use App\Http\Traits\GenerateTimesheetFileName;
 use App\Models\TempUser;
+use App\Models\TempUserRoles;
 use App\Models\Timesheet;
 use App\Services\Activity\ActivityDataService;
 use App\Services\Timesheet\CreateTimesheetService;
 use App\Services\Timesheet\TimesheetDataService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -34,7 +37,11 @@ class MainController extends Controller
     {
         /* Incoming Request */
         $search = $request->only(['program_name', 'package_id', 'keyword']);
-        $results = $this->timesheetDataService->listTimesheet($search);
+
+        /* to determine whether timesheet tutor or timesheet mentor */
+        $is_subject_specialist = $request->is_subject_specialist;
+
+        $results = $this->timesheetDataService->listTimesheet($search, $is_subject_specialist);
         return response()->json($results);
     }
 
@@ -64,7 +71,11 @@ class MainController extends Controller
             'duration',
             'pic_id',
             'notes',
-            'subject_id',
+            'subject_id', # used when subject fetched from the server
+            'subject_name', # used when subject fetched from own db
+            'individual_fee',
+            'tax',
+            'curriculum_id',
         ]);
 
         /* defines the validated variables */
@@ -75,11 +86,65 @@ class MainController extends Controller
         $validatedPackageId = $validated['package_id'];
         $validatedDuration = $validated['duration'];
         $validatedNotes = $validated['notes'];
-        $validatedSubject = $validated['subject_id'];
+        // $validatedSubject = $validated['subject_id'];
+        $validatedSubjectName = $validated['subject_name'] ?? null;
+        $validatedFeeIndividual = $validated['individual_fee'] ?? 0;
+        $validatedTax = $validated['tax'] ?? 0;
+        $validatedCurriculumId = $validated['curriculum_id'] ?? null;
 
         $newPackageDetails = compact('validatedPackageId', 'validatedDuration');
 
         $mentorTutorId = $selectOrRegisterMentorTutorTimesheetAction->handle($validatedEmail);
+
+        $refProgram = Ref_Program::whereIn('id', $validatedRefPrograms)->first();
+        
+        if ( $refProgram && $refProgram->require === 'Tutor' )
+        {
+            /************************* changes ***********************/
+            # before the data stored into timesheet
+            # need to check if tutor has already subject on temp_user_roles
+            # if tutor doesn't have subject, then create a new one
+            $tempUserRoles = TempUserRoles::firstOrCreate([
+                'year' => Carbon::now()->format('Y'),
+                'temp_user_id' => $mentorTutorId,
+                'tutor_subject' => $validatedSubjectName,
+                'curriculum_id' => $validatedCurriculumId
+            ], [
+                'role' => 'Tutor',
+                'head' => 1,
+                'grade' => '[9-12]',
+                'fee_individual' => $validatedFeeIndividual,
+                'tax' => $validatedTax
+            ]);
+            
+        } elseif ($refProgram && $refProgram->require === 'Mentor') { # require mentor
+            $tempUserRoles = TempUserRoles::firstOrCreate([
+                'temp_user_id' => $mentorTutorId,
+                'role' => 'External Mentor',
+            ], [
+                'year' => Carbon::now()->format('Y'),
+                'head' => 1,
+                'grade' => '[9-12]',
+                'fee_individual' => $validatedFeeIndividual,
+                'tax' => $validatedTax
+            ]);
+        }
+
+        
+        //! here's some notes that need to be checked later [IMPORTANT!]
+        # for now, to get tempUserRoles, we only check by year, temp_user_id, and subject name
+        # but there might be some issues when system using head and grade
+        # so if the system are using head and grade to get the subject, please update data below
+        # make sure to update not only the fee_individual but also the other parameters
+        # same goes with the data above, you should not hardcoded the head and grade
+        $tempUserRoles->fee_individual = $validatedFeeIndividual;
+        $tempUserRoles->tax = $validatedTax;
+        $tempUserRoles->save();
+
+
+        $validatedSubject = $tempUserRoles->id;
+        /************************* changes ***********************/
+
         $createTimesheetService->storeTimesheet($validatedRefPrograms, $newPackageDetails, $validatedNotes, $validatedInhouse, $validatedPics, $mentorTutorId, $validatedSubject);
     
         return response()->json([

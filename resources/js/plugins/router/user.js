@@ -12,6 +12,10 @@ export default [
         component: () => import('@/pages/user/dashboard/dashboard.vue'),
       },
       {
+        path: '/user/request',
+        component: () => import('@/pages/user/request/request.vue'),
+      },
+      {
         path: '/user/timesheet',
         component: () => import('@/pages/user/timesheet/timesheet.vue'),
       },

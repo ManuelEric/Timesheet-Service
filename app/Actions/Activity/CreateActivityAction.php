@@ -37,10 +37,15 @@ class CreateActivityAction
         $head = count($timesheet->ref_program);
         $isGroup = $head > 1 ? true : false;
         $fee_perHours = 0; # default
+        $tax = $timesheet->subject->tax;
 
         if ( $type == "tutoring" )
         {
             $fee_perHours = $isGroup ? $timesheet->subject->fee_group : $timesheet->subject->fee_individual;
+        }
+        elseif ( $type == "mentoring" )
+        {
+            $fee_perHours = $timesheet->subject->fee_individual;
         }
 
         $endDate = array_key_exists('end_date', $validated) ? $validated['end_date'] : NULL;
@@ -49,7 +54,7 @@ class CreateActivityAction
         /* when the request comes from fee controller */
         if ( array_key_exists('additional_fee', $validated) ) 
         {
-            $fee_perHours = 0;
+            $fee_perHours = $tax = 0;
             $additionalFee = $validated['additional_fee'];
             $status = 1;
         } 
@@ -57,7 +62,7 @@ class CreateActivityAction
         /* when the request comes from bonus controller */
         if ( array_key_exists('bonus_fee', $validated) ) 
         {
-            $fee_perHours = 0;
+            $fee_perHours = $tax = 0;
             $bonusFee = $validated['bonus_fee'];
             $status = 1;
         } 
@@ -65,12 +70,15 @@ class CreateActivityAction
         DB::beginTransaction();
         try {
 
+            $program_name = $timesheet->reference_program[0]->program_name;
+
             $activityDetails = [
                 'timesheet_id' => $timesheetId,
-                'activity' => $timesheet->ref_program[0]->program_name,
+                'activity' => $program_name,
                 'description' => $validated['description'],
                 'start_date' => $validated['start_date'],
                 'end_date' => $endDate,
+                'tax' => $tax,
                 'fee_hours' => $fee_perHours,
                 'additional_fee' => $additionalFee,
                 'bonus_fee' => $bonusFee,

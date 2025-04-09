@@ -7,6 +7,7 @@ use App\Http\Requests\Authentication\AuthenticateAdminRequest;
 use App\Http\Requests\Authentication\AuthenticateNonAdminRequest;
 use App\Services\Authentication\GenerateTokenService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class LoginController extends Controller
 {

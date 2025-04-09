@@ -2,17 +2,11 @@
 import { showNotif } from '@/helper/notification'
 import ApiService from '@/services/ApiService'
 import UserService from '@/services/UserService'
+import { useRouter } from 'vue-router'
 
-import avatar1 from '@images/avatars/avatar-1.png'
-import avatar2 from '@images/avatars/avatar-2.png'
-import avatar3 from '@images/avatars/avatar-3.png'
-import avatar4 from '@images/avatars/avatar-4.png'
-import avatar5 from '@images/avatars/avatar-5.png'
-
-// Start Variable
-const avatars = [avatar1, avatar2, avatar3, avatar4, avatar5]
-
+const router = useRouter()
 const currentPage = ref(1)
+const role = ref(UserService.getUser().role_detail[0].role.toLowerCase())
 const totalPage = ref()
 const keyword = ref()
 const data = ref([])
@@ -28,10 +22,11 @@ const getData = async () => {
   const search = keyword.value ? '&keyword=' + keyword.value : ''
   const package_search = package_name.value ? '&package_id=' + package_name.value : ''
   const paginate = '&paginate=true'
+  const is_subject = role.value == 'tutor' ? '' : '&is_subject_specialist=true'
 
   try {
     loading.value = true
-    const res = await ApiService.get('api/v1/timesheet/list' + page + search + package_search + paginate)
+    const res = await ApiService.get('api/v1/timesheet/list' + page + search + package_search + is_subject + paginate)
     // console.log(res)
     if (res) {
       currentPage.value = res.current_page
@@ -48,10 +43,12 @@ const getData = async () => {
 
 const getPackage = async () => {
   // Check Role
-  const role =
-    UserService.getUser().role_detail.length == 1
-      ? '?category=' + UserService.getUser().role_detail[0].role.toLowerCase()
-      : ''
+  const temp_role =
+    UserService.getUser().role_detail[0].role.toLowerCase() == 'external mentor'
+      ? 'mentor'
+      : UserService.getUser().role_detail[0].role.toLowerCase()
+
+  const role = UserService.getUser().role_detail.length == 1 ? '?category=' + temp_role : ''
 
   try {
     const res = await ApiService.get('api/v1/package/component/list' + role)
@@ -66,6 +63,10 @@ const getPackage = async () => {
 const searchData = async () => {
   currentPage.value = 1
   await getData()
+}
+
+const goToTimesheet = (id, require) => {
+  router.push('/user/timesheet/' + id + '/' + require.toLowerCase())
 }
 // End Function
 
@@ -140,6 +141,7 @@ onMounted(() => {
       <VTable
         class="text-no-wrap"
         v-else
+        hover
       >
         <thead>
           <tr>
@@ -149,10 +151,10 @@ onMounted(() => {
             >
               No
             </th>
-            <th class="text-uppercase text-center">School/Student Name</th>
+            <th class="text-uppercase text-center">Student Name</th>
             <th class="text-uppercase text-center">Program Name</th>
             <th class="text-uppercase text-center">Package</th>
-            <th class="text-uppercase text-center">Tutor/Mentor</th>
+            <th class="text-uppercase text-center">{{ role == 'tutor' ? 'Tutor' : 'Mentor' }}</th>
             <th class="text-uppercase text-center">PIC</th>
             <th class="text-uppercase text-center">Total Hours</th>
             <th class="text-uppercase text-center">Used</th>
@@ -164,6 +166,8 @@ onMounted(() => {
             v-for="(item, index) in data.data"
             :key="index"
             :class="item.void == 'true' ? 'bg-secondary' : ''"
+            class="cursor-pointer"
+            @click="goToTimesheet(item.id, item.require)"
           >
             <td>
               {{ parseInt(index) + 1 }}
@@ -206,6 +210,7 @@ onMounted(() => {
                 icon="ri-bookmark-3-line"
                 class="me-3"
               ></VIcon>
+              {{ item.free_trial ? '[TRIAL]' : '' }}
               {{ item.program_name }}
             </td>
             <td class="text-start">
@@ -216,10 +221,9 @@ onMounted(() => {
               {{ item.detail_package ? item.package_type + ' - ' + item.detail_package : item.package_type }}
             </td>
             <td class="text-left">
-              <VAvatar
-                size="25"
-                class="avatar-center me-3"
-                :image="avatars[index % 5]"
+              <VIcon
+                icon="ri-user-line"
+                class="mr-2"
               />
               {{ item.tutor_mentor }}
             </td>

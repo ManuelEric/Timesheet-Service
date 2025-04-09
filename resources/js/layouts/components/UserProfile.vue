@@ -1,9 +1,9 @@
 <script setup>
-import avatar1 from '@images/avatars/avatar-1.png'
+import { showNotif } from '@/helper/notification'
 import { router } from '@/plugins/router'
 import JwtService from '@/services/JwtService'
 import UserService from '@/services/UserService'
-import { showNotif } from '@/helper/notification'
+import avatar1 from '@images/avatars/avatar-1.png'
 
 const user = UserService.getUser()
 
@@ -11,7 +11,7 @@ const logout = () => {
   JwtService.destroyToken()
   UserService.destroyUser()
   showNotif('success', 'You`ve successfully log-out', 'bottom-end')
-  router.push('/')
+  router.go('/')
 }
 </script>
 
@@ -61,7 +61,7 @@ const logout = () => {
             </template>
 
             <VListItemTitle class="font-weight-semibold"> {{ user?.full_name }} </VListItemTitle>
-            <VListItemSubtitle>Tutor/Mentor</VListItemSubtitle>
+            <VListItemSubtitle>{{ user?.role }}</VListItemSubtitle>
           </VListItem>
           <VDivider class="my-2" />
 

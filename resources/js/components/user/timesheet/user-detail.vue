@@ -60,7 +60,8 @@ watch(() => {
             size="25"
           ></VIcon>
         </router-link>
-        Timesheet - {{ data.packageDetails?.package_type }}
+        {{ data.packageDetails?.tutormentor_name }} |
+        {{ data?.packageDetails?.package_type + ' - ' + data?.packageDetails?.package_name }}
       </div>
     </VCardTitle>
     <VCardText>
@@ -88,7 +89,7 @@ watch(() => {
               <tr v-for="client in data.clientProfile">
                 <td>{{ client.client_name }}</td>
                 <td>{{ client.client_school }}</td>
-                <td>{{ client.client_grade }}</td>
+                <td>{{ client.client_grade <= 12 ? client.client_grade : 'Not High School' }}</td>
               </tr>
             </tbody>
             <tbody v-else-if="data.clientProfile?.length == 1">
@@ -105,7 +106,11 @@ watch(() => {
               <tr>
                 <td>Grade</td>
                 <td width="1%">:</td>
-                <td>{{ data.clientProfile[0].client_grade }}</td>
+                <td>
+                  {{
+                    data.clientProfile[0].client_grade <= 12 ? data.clientProfile[0].client_grade : 'Not High School'
+                  }}
+                </td>
               </tr>
               <tr>
                 <td>Email</td>
@@ -129,7 +134,10 @@ watch(() => {
               <tr>
                 <td width="20%">Program</td>
                 <td width="1%">:</td>
-                <td>{{ data.packageDetails?.program_name }}</td>
+                <td>
+                  {{ data.packageDetails?.free_trial ? '[TRIAL]' : '' }}
+                  {{ data.packageDetails?.program_name }}
+                </td>
               </tr>
               <tr>
                 <td>Package</td>
@@ -141,19 +149,19 @@ watch(() => {
               <tr>
                 <td>Person in Charge</td>
                 <td width="1%">:</td>
-                <td>
-                  <ol
-                    class="ms-4"
-                    type="1"
-                  >
-                    <li>{{ data.packageDetails?.pic_name }}</li>
-                  </ol>
-                </td>
+                <td>{{ data.packageDetails?.pic_name }}</td>
               </tr>
               <tr>
                 <td>Tutor/Mentor</td>
                 <td width="1%">:</td>
                 <td>{{ data.packageDetails?.tutormentor_name }}</td>
+              </tr>
+              <tr>
+                <td>Notes</td>
+                <td width="1%">:</td>
+                <td>
+                  {{ data.editableColumns?.notes }}
+                </td>
               </tr>
               <tr>
                 <td>Update On</td>

@@ -9,12 +9,14 @@ const emit = defineEmits(['close', 'reload'])
 const loading = ref(false)
 const tutor_selected = ref([])
 const tutor_list = ref([])
+const curriculum_list = ref([])
 const subjects = ref([])
 const package_list = ref([])
 const pic_list = ref([])
 const inhouse_mentor = ref([])
 const duration_readonly = ref(false)
 const require = props.selected[0]?.require?.toLowerCase()
+const has_npwp = ref(null)
 
 const formData = ref()
 const form = ref({
@@ -23,9 +25,12 @@ const form = ref({
   subject_id: null,
   inhouse_id: null,
   package_id: null,
+  tax: null,
+  individual_fee: null,
   duration: '',
   notes: '',
   pic_id: [],
+  curriculum_id: null,
 })
 
 const getTutor = async (inhouse = false) => {
@@ -82,7 +87,11 @@ const getPIC = async () => {
   }
 }
 
-const getSubject = async (item, uuid = null) => {
+const getSubject = async (item, uuid = null, npwp = 0) => {
+  // check NPWP
+  has_npwp.value = npwp
+  form.value.tax = npwp == 1 ? 2.5 : 3
+
   form.value.subject_id = null
 
   if (require == 'mentor') {
@@ -99,13 +108,34 @@ const getSubject = async (item, uuid = null) => {
   }
 }
 
-const submit = async () => {
-  loading.value = true
+const getIndividualFee = async (tutor_id, subject_name, curriculum_id) => {
+  try {
+    const res = await ApiService.get('api/v1/component/fee/' + tutor_id + '/' + subject_name + '/' + curriculum_id)
+    if (res) {
+      form.value.individual_fee = res.fee_individual
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
 
+const getCurriculum = async () => {
+  try {
+    const res = await ApiService.get('api/v1/curriculum/component/list')
+    if (res) curriculum_list.value = res
+
+    console.log(res)
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const submit = async () => {
   form.value.mentortutor_email = tutor_selected.value.email
-  // console.log(form.value)
+
   const { valid } = await formData.value.validate()
   if (valid) {
+    loading.value = true
     try {
       const res = await ApiService.post('api/v1/timesheet/create', form.value)
       if (res) {
@@ -115,12 +145,15 @@ const submit = async () => {
         form.value = {
           ref_id: [],
           mentortutor_email: null,
-          subject_id: null,
+          subject_id: null, // used when subject fetched from the server
+          subject_name: null, // used when subject fetched from own db
           inhouse_id: null,
           package_id: null,
           duration: '',
           notes: '',
           pic_id: [],
+          tax: null,
+          individual_fee: '',
         }
         tutor_selected.value = []
       }
@@ -136,21 +169,22 @@ const submit = async () => {
     }
   }
 }
-// End Function
+// End Functions
 
 onMounted(() => {
   getTutor()
   getTutor(true)
   getPackage()
   getPIC()
+  getCurriculum()
 })
 </script>
 
 <template>
   <VCard
-    width="600"
+    max-width="650"
     prepend-icon="ri-send-plane-line"
-    title="Assign to Mentor/Tutor"
+    title="Assign to Tutor"
   >
     <VCardText>
       <VForm
@@ -164,7 +198,7 @@ onMounted(() => {
               variant="solo"
               clearable
               v-model="tutor_selected"
-              label="Mentor/Tutor"
+              label="Tutor Name"
               :items="tutor_list"
               :item-props="
                 item => ({
@@ -175,27 +209,62 @@ onMounted(() => {
               :rules="rules.required"
               :loading="loading"
               :disabled="loading"
-              @update:modelValue="getSubject(tutor_selected.roles, tutor_selected.uuid)"
+              @update:modelValue="getSubject(tutor_selected.roles, tutor_selected.uuid, tutor_selected.has_npwp)"
+            ></VAutocomplete>
+            <v-alert
+              :color="has_npwp == 1 ? 'success' : 'error'"
+              class="py-1 mt-2"
+              v-if="has_npwp != null"
+            >
+              <VIcon
+                icon="ri-error-warning-line"
+                class="mr-2"
+              />
+              <small> Tutor {{ has_npwp == 1 ? 'already' : 'don`t' }} have NPWP </small>
+            </v-alert>
+          </VCol>
+          <VCol
+            md="6"
+            cols="12"
+          >
+            <VAutocomplete
+              variant="solo"
+              clearable
+              v-model="form.curriculum_id"
+              label="Curriculum"
+              :items="curriculum_list"
+              :item-props="
+                item => ({
+                  title: item.name,
+                })
+              "
+              :rules="rules.required"
+              :loading="loading"
+              :disabled="loading"
+              item-value="id"
             ></VAutocomplete>
           </VCol>
           <VCol
-            md="12"
+            md="6"
+            cols="12"
             v-if="props.selected[0]?.require?.toLowerCase() == 'tutor'"
           >
             <VAutocomplete
               variant="solo"
               clearable
-              v-model="form.subject_id"
+              v-model="form.subject_name"
               label="Subject Tutoring"
               :items="subjects"
-              item-title="subject"
-              item-value="id"
               :loading="loading"
               :disabled="loading"
               :rules="rules.required"
+              @update:modelValue="getIndividualFee(tutor_selected.id, form.subject_name, form.curriculum_id)"
             ></VAutocomplete>
           </VCol>
-          <VCol md="8">
+          <VCol
+            md="8"
+            col="12"
+          >
             <VAutocomplete
               variant="solo"
               clearable
@@ -215,7 +284,10 @@ onMounted(() => {
               @update:modelValue="checkPackage"
             ></VAutocomplete>
           </VCol>
-          <VCol md="4">
+          <VCol
+            md="4"
+            cols="12"
+          >
             <VTextField
               type="number"
               variant="solo"
@@ -226,7 +298,36 @@ onMounted(() => {
               :rules="rules.required"
             />
           </VCol>
-          <VCol md="12">
+          <VCol
+            md="7"
+            cols="12"
+          >
+            <VTextField
+              type="number"
+              variant="solo"
+              clearable
+              label="Fee/hours (Gross)"
+              v-model="form.individual_fee"
+              :rules="rules.required"
+            />
+          </VCol>
+          <VCol
+            md="5"
+            cols="12"
+          >
+            <VTextField
+              type="number"
+              variant="solo"
+              clearable
+              label="Tax"
+              v-model="form.tax"
+              :rules="rules.required"
+            />
+          </VCol>
+          <VCol
+            md="6"
+            col="12"
+          >
             <VAutocomplete
               variant="solo"
               clearable
@@ -244,7 +345,10 @@ onMounted(() => {
               :rules="rules.required"
             ></VAutocomplete>
           </VCol>
-          <VCol md="12">
+          <VCol
+            md="6"
+            cols="12"
+          >
             <VAutocomplete
               variant="solo"
               multiple
@@ -271,6 +375,7 @@ onMounted(() => {
 
         <VCardActions class="mt-5">
           <VBtn
+            variant="tonal"
             color="error"
             type="button"
             @click="emit('close')"
@@ -283,6 +388,7 @@ onMounted(() => {
           </VBtn>
           <VSpacer />
           <VBtn
+            variant="tonal"
             color="success"
             type="submit"
           >

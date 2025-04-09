@@ -2,6 +2,7 @@
 import DeleteDialog from '@/components/DeleteHandler.vue'
 import { showNotif } from '@/helper/notification'
 import ApiService from '@/services/ApiService'
+import UserService from '@/services/UserService'
 import debounce from 'lodash/debounce'
 import AddActivity from './activity-add.vue'
 
@@ -10,6 +11,7 @@ const props = defineProps({ id: String, require: String })
 const updateReload = inject('updateReload')
 const data = ref([])
 const loading = ref(false)
+const role = ref(UserService.getUser().role_detail[0].role.toLowerCase())
 
 const isDialogVisible = ref([
   {
@@ -21,7 +23,7 @@ const isDialogVisible = ref([
 const selectedItem = ref([])
 // End Variable
 
-// Start Function
+// Start Functions
 const getData = async () => {
   loading.value = true
   try {
@@ -115,7 +117,7 @@ onMounted(() => {
         <VBtn
           v-tooltip:start="'New Activity'"
           @click="toggleDialog('add')"
-          v-if="props.require == 'mentor'"
+          v-if="role == 'external mentor'"
         >
           <VIcon icon="ri-add-line" />
         </VBtn>
@@ -160,7 +162,12 @@ onMounted(() => {
             </th>
             <th class="text-uppercase text-center">Time Spent</th>
             <th class="text-uppercase text-center">Status</th>
-            <th class="text-uppercase text-end">#</th>
+            <th
+              class="text-uppercase text-end"
+              v-if="role != 'mentor'"
+            >
+              #
+            </th>
           </tr>
         </thead>
 
@@ -191,7 +198,7 @@ onMounted(() => {
                 class="form-control px-2 py-2 border rounded cursor-pointer"
                 v-model="item.end_time"
                 @change="updateTime(item)"
-                :disabled="item.start_time == '00:00' || item.cutoff_status == 'completed'"
+                :disabled="role == 'mentor' || item.start_time == '00:00' || item.cutoff_status == 'completed'"
                 v-tooltip:start="item.cutoff_status == 'completed' ? 'Already Cut-Off' : 'End Time'"
               />
             </td>
@@ -200,14 +207,16 @@ onMounted(() => {
               <VCheckbox
                 color="success"
                 v-model="item.status"
-                value="1"
-                :false-value="0"
-                :disabled="item.start_time == '00:00' || item.cutoff_status == 'completed'"
+                :value="true"
+                :disabled="role == 'mentor' || item.start_time == '00:00' || item.cutoff_status == 'completed'"
                 v-tooltip:start="item.status ? 'Completed' : 'Not Yet'"
                 @update:modelValue="updateStatus(item)"
               />
             </td>
-            <td class="text-end">
+            <td
+              class="text-end"
+              v-if="role != 'mentor'"
+            >
               <VBtn
                 color="primary"
                 density="compact"

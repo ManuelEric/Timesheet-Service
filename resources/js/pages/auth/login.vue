@@ -91,7 +91,7 @@ const checkLogin = async () => {
           UserService.saveUser(res)
           showNotif('success', 'You`ve successfully login.', 'bottom-end')
           setTimeout(() => {
-            router.go(0)
+            router.go('/user/dashboard')
           }, 1500)
         }
       } else {

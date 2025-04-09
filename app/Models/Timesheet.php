@@ -50,6 +50,22 @@ class Timesheet extends Model
         return $full_duration - $used_duration;
     }
 
+    protected function referenceProgram(): Attribute
+    {
+        
+        return new Attribute(
+            get: fn () => $this->getReferenceProgram()
+        );  
+    }
+
+    private function getReferenceProgram()
+    {
+        if ( count($this->ref_program) > 0 )
+            return $this->ref_program;
+        else
+            return $this->second_ref_program;
+    }
+
     
     /**
      * The relations.
@@ -75,6 +91,15 @@ class Timesheet extends Model
     public function ref_program()
     {
         return $this->hasMany(Ref_Program::class, 'timesheet_id', 'id');
+    }
+
+    /**
+     * second ref program only uses if program is SAT
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function second_ref_program()
+    {
+        return $this->hasMany(Ref_Program::class, 'scnd_timesheet_id', 'id');
     }
 
     public function activities()
@@ -196,5 +221,21 @@ class Timesheet extends Model
     public function scopeNewest(Builder $query): void
     {
         $query->orderBy('created_at', 'DESC');
+    }
+
+    public function scopeTutoring(Builder $query): void
+    {
+        $query->whereHas('ref_program', function ($query) {
+            $query->tutoring();
+        })->orWhereHas('second_ref_program', function ($query) {
+            $query->tutoring();
+        });
+    }
+
+    public function scopeMentoring(Builder $query): void
+    {
+        $query->whereHas('ref_program', function ($query) {
+            $query->mentoring();
+        });
     }
 }

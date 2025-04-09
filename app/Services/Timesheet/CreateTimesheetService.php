@@ -60,26 +60,46 @@ class CreateTimesheetService
             );
         }
 
-
         /* insert timesheet into the success-program */
-        $ref_Programs = Ref_Program::doesntHave('timesheet')->whereIn('id', $ref_programId)->get();
+        // $ref_Programs = Ref_Program::doesntHave('timesheet')->whereIn('id', $ref_programId)->get();
+        $ref_Programs = Ref_Program::whereIn('id', $ref_programId)->get();
         
         /* check if there are ref_program that doesn't have timesheet */
-        if ( count($ref_Programs) === 0 )
-        {
-            throw new HttpResponseException(
-                response()->json([
-                    'errors' => 'Each of the selected program already has a timesheet.'
-                ], JsonResponse::HTTP_BAD_REQUEST)
-            );
-        }
+        //! for now, the condition below is hidden because SAT program could have 2 timesheet
+        // if ( count($ref_Programs) === 0 )
+        // {
+        //     throw new HttpResponseException(
+        //         response()->json([
+        //             'errors' => 'Each of the selected program already has a timesheet.'
+        //         ], JsonResponse::HTTP_BAD_REQUEST)
+        //     );
+        // }
                 
         try {
 
             foreach ($ref_Programs as $program)
             {
-                $program->timesheet_id = $createdTimesheet->id;
-                $program->save();
+                /* validate if program already has 2 timesheet */
+                if ( $program->timesheet && $program->second_timesheet )
+                {
+                    throw new HttpResponseException(
+                        response()->json([
+                            'errors' => 'The selected program already has 2 timesheets. Please re-check / contact our administrator if the data is wrong'
+                        ], JsonResponse::HTTP_BAD_REQUEST)
+                    );
+                }
+
+                /* check if program already has a timesheet */
+                if ( $program->timesheet )
+                {
+                    $program->scnd_timesheet_id = $createdTimesheet->id;
+                    $program->save();
+                }
+                else
+                {
+                    $program->timesheet_id = $createdTimesheet->id;
+                    $program->save();
+                }
             }
             DB::commit();
 

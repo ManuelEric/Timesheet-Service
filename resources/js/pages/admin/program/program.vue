@@ -1,5 +1,6 @@
 <script setup>
-import program from '@/components/admin/program/program_add.vue'
+import ProgramTutor from '@/components/admin/program/program_add.vue'
+import ProgramMentor from '@/components/admin/program/program_add_specialist.vue'
 import { showNotif } from '@/helper/notification'
 import ApiService from '@/services/ApiService'
 import debounce from 'lodash/debounce'
@@ -8,6 +9,8 @@ import debounce from 'lodash/debounce'
 const selected = ref([])
 const dialog = ref(false)
 
+const props = defineProps({ name: String })
+
 const currentPage = ref(1)
 const totalPage = ref()
 const keyword = ref()
@@ -15,19 +18,6 @@ const data = ref([])
 const loading = ref(false)
 const program_list = ref([])
 const program_name = ref()
-
-const formData = ref()
-const form = ref({
-  ref_id: [],
-  mentortutor_email: null,
-  subject_id: null,
-  inhouse_id: null,
-  package_id: null,
-  duration: '',
-  notes: '',
-  pic_id: [],
-})
-
 // End Variable
 
 // Start Function
@@ -35,13 +25,21 @@ const getData = async () => {
   // reset selected
   selected.value = []
 
+  // Check Category of Ref Program
+  const category = props.name
+
   const page = '?page=' + currentPage.value
   const search = keyword.value ? '&keyword=' + keyword.value : ''
   const program = program_name.value ? '&program_name=' + encodeURIComponent(program_name.value) : ''
   const paginate = '&paginate=true'
+
+  const url =
+    category == 'tutoring'
+      ? 'api/v1/program/list' + page + search + program + paginate
+      : 'api/v1/request' + page + keyword + '&is_cancelled=true'
   try {
     loading.value = true
-    const res = await ApiService.get('api/v1/program/list' + page + search + program + paginate)
+    const res = await ApiService.get(url)
 
     if (res) {
       currentPage.value = res.current_page
@@ -67,12 +65,22 @@ const getProgram = async () => {
   }
 }
 
-const searchData = debounce(async () => {
+const searchData = debounce(async item => {
   currentPage.value = 1
+  keyword.value = item.target.value
+
   await getData()
 }, 1000)
 
+const goToTimesheet = id => {
+  window.open('/admin/timesheet/' + props.name + '/' + id)
+}
+
 // End Function
+
+watch(() => {
+  getData()
+})
 
 onMounted(() => {
   getData()
@@ -92,6 +100,7 @@ onMounted(() => {
     <VCardText>
       <VRow class="my-1">
         <VCol
+          v-if="props.name == 'tutoring'"
           cols="12"
           md="3"
         >
@@ -124,14 +133,13 @@ onMounted(() => {
             variant="solo"
             hide-details
             single-line
-            v-model="keyword"
             @input="searchData"
           />
         </VCol>
 
         <VCol
           cols="12"
-          md="6"
+          :md="props.name == 'tutoring' ? 6 : 9"
           class="text-end"
         >
           <VBtn
@@ -142,6 +150,10 @@ onMounted(() => {
             :disabled="selected.length > 0 ? false : true"
             @click="dialog = true"
           >
+            <VIcon
+              icon="ri-add-line"
+              class="me-3"
+            ></VIcon>
             Assign {{ selected.length > 1 ? 'to Group' : '' }}
           </VBtn>
         </VCol>
@@ -153,7 +165,15 @@ onMounted(() => {
         width="auto"
         persistent
       >
-        <program
+        <ProgramTutor
+          v-if="props.name == 'tutoring'"
+          :selected="selected"
+          @close="dialog = false"
+          @reload="getData"
+        />
+
+        <ProgramMentor
+          v-if="props.name == 'specialist'"
           :selected="selected"
           @close="dialog = false"
           @reload="getData"
@@ -179,10 +199,12 @@ onMounted(() => {
             >
               #
             </th>
-            <th class="text-uppercase text-center">Invoice ID</th>
-            <th class="text-uppercase text-center">Student/School Name</th>
-            <th class="text-uppercase text-center">Program Name</th>
             <th class="text-uppercase text-center">Timesheet</th>
+            <th class="text-uppercase text-center">Student</th>
+            <th class="text-uppercase text-center">School Name</th>
+            <th class="text-uppercase text-center">
+              {{ props.name == 'tutoring' ? 'Program Name' : 'Engagement Type' }}
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -192,49 +214,41 @@ onMounted(() => {
             :class="{ 'bg-secondary': selected.includes(item.id) }"
           >
             <td>
+              <VText v-if="item.cancellation_reason">
+                <VTooltip
+                  activator="parent"
+                  location="top"
+                >
+                  Cancel: {{ item.cancellation_reason }}
+                </VTooltip>
+                <VIcon
+                  icon="ri-subtract-line"
+                  color="error"
+                />
+              </VText>
+
               <VCheckbox
                 v-model="selected"
                 :value="{
                   id: item.id,
                   require: item.require,
                 }"
-                v-if="!item.timesheet_id"
+                v-else-if="(!item.timesheet_id || !item.scnd_timesheet_id) && !item.cancellation_reason"
               ></VCheckbox>
+
               <VIcon
                 icon="ri-check-line"
                 color="success"
-                v-else
+                v-else-if="item.timesheet_id && item.scnd_timesheet_id && !item.cancellation_reason"
               ></VIcon>
-            </td>
-            <td nowrap>
-              <VIcon
-                icon="ri-receipt-line"
-                class="me-3"
-              ></VIcon>
-              {{ item.invoice_id }}
-            </td>
-            <td
-              class="text-left"
-              nowrap
-            >
-              <VIcon
-                icon="ri-user-line"
-                class="me-3"
-              ></VIcon>
-              {{ item.student_name + ' - ' + item.student_school }}
-            </td>
-            <td
-              class="text-left"
-              nowrap
-            >
-              <VIcon
-                icon="ri-bookmark-line"
-                class="me-3"
-              ></VIcon>
-              {{ item.program_name }}
             </td>
             <td class="text-center">
-              <VText v-if="item.timesheet_id">
+              <!-- First Timesheet  -->
+              <VText
+                v-if="item.timesheet_id"
+                class="cursor-pointer"
+                @click="goToTimesheet(item.timesheet_id)"
+              >
                 <VIcon
                   icon="ri-file-check-line"
                   class="mx-1"
@@ -246,7 +260,6 @@ onMounted(() => {
                   >Already</v-tooltip
                 >
               </VText>
-
               <VText v-else>
                 <VIcon
                   icon="ri-file-close-line"
@@ -259,6 +272,63 @@ onMounted(() => {
                   >Not Yet</v-tooltip
                 >
               </VText>
+
+              <!-- Second Timesheet  -->
+              <VText
+                v-if="item.scnd_timesheet_id"
+                class="cursor-pointer"
+                @click="goToTimesheet(item.scnd_timesheet_id)"
+              >
+                <VIcon
+                  icon="ri-file-check-line"
+                  class="mx-1"
+                  color="success"
+                ></VIcon>
+                <v-tooltip
+                  activator="parent"
+                  location="top"
+                  >Already</v-tooltip
+                >
+              </VText>
+            </td>
+            <td
+              class="text-left"
+              nowrap
+            >
+              <VIcon
+                icon="ri-user-line"
+                class="me-3"
+              ></VIcon>
+              {{ item.student_name }}
+            </td>
+            <td
+              class="text-left"
+              nowrap
+            >
+              {{ item.student_school }}
+            </td>
+            <td
+              v-if="props.name == 'tutoring'"
+              class="text-left"
+              nowrap
+            >
+              <VIcon
+                icon="ri-bookmark-line"
+                class="me-3"
+              ></VIcon>
+              {{ item.free_trial ? '[TRIAL]' : '' }}
+              {{ item.program_name }}
+            </td>
+            <td
+              v-else
+              class="text-left"
+              nowrap
+            >
+              <VIcon
+                icon="ri-bookmark-line"
+                class="me-3"
+              ></VIcon>
+              {{ item.engagement_type }}
             </td>
           </tr>
         </tbody>

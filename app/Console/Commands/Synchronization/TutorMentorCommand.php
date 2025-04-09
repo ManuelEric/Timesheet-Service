@@ -10,6 +10,7 @@ use App\Services\User\CreateTempUserService;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Log;
 
 class TutorMentorCommand extends Command
 {
@@ -64,12 +65,14 @@ class TutorMentorCommand extends Command
     
             } catch (Exception $e) {
 
+                Log::debug($e->getMessage() . ' on '. $e->getLine() . ' file '. $e->getFile());
                 $this->newLine();
                 $this->error("Cannot stored user `{$name}` with email `{$email}`. Error: {$e->getMessage()}");
                 continue;
 
             } catch (HttpResponseException $e) {
 
+                Log::debug($e->getMessage() . ' on '. $e->getLine() . ' file '. $e->getFile());
                 $this->newLine();
                 $this->error("Cannot stored user `{$name}` with email `{$email}`. Error: {$e->getMessage()}");
                 continue;
