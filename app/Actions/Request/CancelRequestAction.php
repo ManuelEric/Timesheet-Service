@@ -23,7 +23,7 @@ class CancelRequestAction
     {
         DB::beginTransaction();
         try {
-            # not yet meaning unpaid
+            # not yet meant to be unpaid
             $ref_program->cancellation_reason = $cancellation_reason;
             $ref_program->cancelled_at = Carbon::now();
             $ref_program->save();

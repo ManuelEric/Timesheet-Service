@@ -41,6 +41,7 @@ class Ref_Program extends Model
         'cancellation_reason',
         'cancelled_at',
         'requested_by',
+        'mentoring_log_id',
     ];
 
     /**
