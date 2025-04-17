@@ -10,20 +10,27 @@ use Illuminate\Support\Facades\Log;
 
 trait HttpCall
 {
-    public function make_call(string $method, string $endpoint, array $params = []): array
+    public function make_call(string $method, string $endpoint, array $params = [], array $additional_headers = []): array
     {
+        $headers = [
+            'Header-ET' => $this->tokenService->get(),
+            'Accept' => 'application/json',
+        ];
+
+        if ( !empty($additional_headers) && count($additional_headers) > 0 ) {
+            $headers = array_merge($headers, $additional_headers);
+        }
+        
         try {
 
             $request = Http::
             withoutVerifying()->
-            withHeaders([
-                'Header-ET' => $this->tokenService->get(),
-            ])->
+            withHeaders($headers)->
             withOptions(['verify' => false])->
             timeout(30)->{$method}( $endpoint, $params );
     
             if ( $request->failed() ) {
-                Log::error('Failed to make a call to ' . $endpoint);
+                Log::error('Failed to make a call to ' . $endpoint, $request->json());
                 throw new HttpResponseException(
                     response()->json([
                         'errors' => $request->json()

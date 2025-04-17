@@ -28,15 +28,15 @@ class GenerateTokenService
     public function createNonAdminToken(array $validated): array
     {
         /* call API to identify the user information */
-        [$statusCode, $response] = $this->make_call('post', env('CRM_DOMAIN') . 'auth/token', $validated);
-        if (!$response)
-        {
-            throw new HttpResponseException(
-                response()->json([
-                    'errors' => 'Connection failed'
-                ], JsonResponse::HTTP_BAD_REQUEST)
-            );
-        }
+        // [$statusCode, $response] = $this->make_call('post', env('CRM_DOMAIN') . 'auth/token', $validated);
+        // if (!$response)
+        // {
+        //     throw new HttpResponseException(
+        //         response()->json([
+        //             'errors' => 'Connection failed'
+        //         ], JsonResponse::HTTP_BAD_REQUEST)
+        //     );
+        // }
 
 
         /* check if the user has already stored in timesheet app */
@@ -50,7 +50,6 @@ class GenerateTokenService
                 ], JsonResponse::HTTP_BAD_REQUEST)
             );
         }
-
 
         /* check user credentials */
         if (!Hash::check($validatedPassword, $tempUser->password)) { # need to be remember that "tempUser->password" need to be updated also if the one in crm was updated, for now no update function (need to be discussed)

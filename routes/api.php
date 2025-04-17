@@ -30,6 +30,7 @@ use App\Http\Controllers\Api\V1\Request\MainController as V1RequestController;
 use App\Http\Controllers\Api\V1\Mentee\MainController as V1MenteeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\V1\Programs\ExternalController as V1ProgramEXTERNALController;
 
 /*
 |--------------------------------------------------------------------------
@@ -253,5 +254,12 @@ Route::middleware(['throttle:120,1'])->group(function () {
 
     /* log everytime user visit any pages */
     Route::middleware('auth:sanctum')->get('visit/{page_name}/{detail?}', [LogController::class, 'index']);
+
+
+    /**
+     * used out of auth sanctum
+     * since this is going to be a private API
+    */
+    Route::get('program/{clientprog_id}/detail', [V1ProgramEXTERNALController::class, 'index']);
 
 });
