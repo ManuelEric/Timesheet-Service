@@ -53,6 +53,8 @@ Route::middleware(['throttle:120,1'])->group(function () {
 
     /* Authentication */
     Route::prefix('auth')->group(function () {
+        # login timesheet by uuid (Currently use for mentor)
+        Route::get('u/{uuid}', [V1LoginController::class, 'authenticateByUuid']);
 
         Route::POST('email/checking', [V1CheckEmailController::class, 'execute']);
         Route::POST('token', [V1LoginController::class, 'authenticateAdmin']);

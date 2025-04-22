@@ -5,6 +5,7 @@ namespace App\Services\Authentication;
 use App\Http\Traits\ConcatenateName;
 use App\Http\Traits\HttpCall;
 use App\Models\TempUser;
+use App\Models\TempUserRoles;
 use App\Models\User;
 use App\Services\Token\TokenService;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -110,4 +111,48 @@ class GenerateTokenService
             'granted_token' => $token
         ];
     }
+
+    public function createTokenByUuid(array $validated)
+    {
+
+        /* check if the user has already stored in timesheet app */
+        $validatedUuid = $validated['uuid'];
+        $tempUser = TempUser::where('uuid', $validatedUuid)->first();
+
+        if (!$tempUser) {
+            [$statusCode, $response] = $this->make_call('get', env('CRM_DOMAIN') . 'user/mentor/by/' . $validatedUuid);
+            if (!$response){
+                return response()->json($response, JsonResponse::HTTP_BAD_REQUEST);
+            }
+
+            $userDetails = [
+                'uuid' => $response['id'],
+                'full_name' => $response['first_name'] . ' ' . $response['last_name'],
+                'phone' => $response['phone'],
+                'email' => $response['email'],
+                'password' => $response['password'],
+                'inhouse' => 1,
+                'has_npwp' => $response['npwp'] != null ? 1 : 0,
+            ];
+
+            $tempUser = TempUser::create($userDetails);
+
+            TempUserRoles::create(['temp_user_id' => $tempUser->id, 'role' => 'Mentor', 'tax' => 0]);
+        }
+
+        /* generate token */
+        $tempUser->authenticate();
+        $granted_access = ['timesheet-menu', 'program-menu', 'request-menu']; #program-menu needed for summary on dashboard
+        $token = $tempUser->createToken('user-access', $granted_access)->plainTextToken;
+        
+        return [
+            'uuid' => $tempUser->uuid,
+            'full_name' => $tempUser->full_name,
+            'email' => $tempUser->email,
+            'role' => $tempUser->roles->first()->role,
+            'role_detail' => $tempUser->roles,
+            'granted_token' => $token
+        ];
+    }
+
 }
