@@ -43,6 +43,14 @@ export default [
         component: () => import('@/pages/auth/login.vue'),
       },
       {
+        path: '/user/login/:uuid',
+        name:'login-uuid',
+        component: () => import('@/pages/auth/login.vue'),
+        props: route => ({
+          uuid:route.params.uuid,
+        }),
+      },
+      {
         path: '/reset-password/:token?/:email?',
         component: () => import('@/pages/auth/login.vue'),
         props: route => ({
