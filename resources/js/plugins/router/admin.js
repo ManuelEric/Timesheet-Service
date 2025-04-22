@@ -16,16 +16,23 @@ export default [
         component: () => import('@/pages/admin/tutor/tutor.vue'),
       },
       {
-        path: '/admin/program',
+        path: '/admin/program/:name',
+        props: route => ({
+          name:route.params.name,
+        }),
         component: () => import('@/pages/admin/program/program.vue'),
       },
       {
-        path: '/admin/timesheet',
+        path: '/admin/timesheet/:name',
+        props: route => ({
+          name:route.params.name,
+        }),
         component: () => import('@/pages/admin/timesheet/timesheet.vue'),
       },
       {
-        path: '/admin/timesheet/:id',
+        path: '/admin/timesheet/:name/:id',
         props: route => ({
+          name:route.params.name,
           id:route.params.id,
         }),
         component: () => import('@/pages/admin/timesheet/timesheet-detail.vue'),

@@ -37,6 +37,7 @@ class TempUser extends Authenticatable implements CanResetPassword
         'password',
         'role',
         'inhouse',
+        'has_npwp',
         'last_activity',
     ];
 
@@ -104,6 +105,10 @@ class TempUser extends Authenticatable implements CanResetPassword
      *
      * @var array<int, string>
      */
+    public function request()
+    {
+        return $this->hasMany(NewRequest::class, 'mentor_id', 'id');
+    }
 
     public function timesheets()
     {
@@ -137,19 +142,19 @@ class TempUser extends Authenticatable implements CanResetPassword
     public function scopeOnSearch(Builder $query, array $search = []): void
     {
         $keyword = array_key_exists('keyword', $search) ? $search['keyword'] : false;
-        $role = array_key_exists('role', $search) ? $search['role'] : false;
+        $role = array_key_exists('role', $search) ? strtolower($search['role']) : false;
         $inhouse = array_key_exists('inhouse', $search) ? $search['inhouse'] === 'true' ? 1 : 0  : null;
-        
+
         $query->
-            when($keyword, function ($sub) use ($keyword) {
-                $sub->
-                    whereRaw("full_name LIKE '%{$keyword}%'")->
-                    orWhereRaw("email LIKE '%{$keyword}%'");
-            })->
             when($role, function ($sub) use ($role) {
                 $sub->whereHas('roles', function ($_sub_) use ($role) {
                     $_sub_->whereRaw("LOWER(role) = '{$role}'");
                 });
+            })->
+            when($keyword, function ($sub) use ($keyword) {
+                $sub->
+                    whereRaw("full_name LIKE '%{$keyword}%'")->
+                    orWhereRaw("email LIKE '%{$keyword}%'");
             })->
             # for boolean check, its a bit tricky
             # so the trick is to compared to null value here

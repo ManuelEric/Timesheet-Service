@@ -9,7 +9,7 @@ import moment from 'moment'
 import Swal from 'sweetalert2'
 
 // Start Variable
-const props = defineProps({ id: String })
+const props = defineProps({ id: String, name: String })
 const emit = defineEmits(['void'])
 const reloadData = inject('reloadData')
 const updateReload = inject('updateReload')
@@ -52,7 +52,7 @@ const deleteTimesheet = async () => {
       data.value = res
       showNotif('success', res.message, 'bottom-end')
       isDialogVisible.value.delete = false
-      router.push('/admin/timesheet')
+      router.push('/admin/timesheet/tutoring')
     }
   } catch (error) {
     if (error.response?.status == 400) {
@@ -78,13 +78,15 @@ const downloadTimesheet = async (id, name) => {
 
     if (res) {
       const url = window.URL.createObjectURL(
-        new Blob([res], { type: '"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"' }),
+        new Blob([res], {
+          type: '"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"',
+        }),
       )
 
       // Create a temporary <a> element to trigger the download
       const link = document.createElement('a')
       link.href = url
-      link.setAttribute('download', `timesheet_${name}.xlsx`)
+      link.setAttribute('download', `Timesheet_${name}.xlsx`)
 
       // Append the <a> element to the body and click it to trigger the download
       document.body.appendChild(link)
@@ -118,9 +120,16 @@ watch(() => {
 
 <template>
   <VCard class="mb-3">
-    <VCardTitle class="d-flex justify-between align-center">
+    <VSkeletonLoader
+      v-if="loading"
+      type="heading"
+    />
+    <VCardTitle
+      v-else
+      class="d-flex justify-between align-center"
+    >
       <div class="w-100">
-        <router-link to="/admin/timesheet">
+        <router-link :to="'/admin/timesheet/' + props.name">
           <VIcon
             icon="ri-arrow-left-line"
             color="secondary"
@@ -128,7 +137,8 @@ watch(() => {
             size="25"
           ></VIcon>
         </router-link>
-        Timesheet - {{ data.packageDetails?.package_type }}
+        {{ data.packageDetails?.tutormentor_name }} |
+        {{ data?.packageDetails?.package_type + ' - ' + data?.packageDetails?.package_name }}
       </div>
       <div>
         <VMenu
@@ -222,6 +232,7 @@ watch(() => {
             ></VIcon>
             Basic Profile
           </h4>
+
           <hr class="my-2" />
           <VTable density="compact">
             <tbody v-if="data.clientProfile?.length > 1">
@@ -272,38 +283,47 @@ watch(() => {
           <VTable density="compact">
             <tbody>
               <tr>
-                <td width="30%">Program</td>
+                <td width="30%">{{ props.name == 'tutoring' ? 'Program Name' : 'Engagement Type' }}</td>
                 <td width="1%">:</td>
-                <td>{{ data.packageDetails?.program_name }}</td>
+                <td v-if="props.name == 'tutoring'">
+                  {{ data.packageDetails?.free_trial ? '[TRIAL]' : '' }}
+                  {{ data.packageDetails?.program_name }}
+                </td>
+                <td v-else>
+                  {{ data.packageDetails?.engagement_type }}
+                </td>
               </tr>
               <tr>
                 <td>Package</td>
                 <td width="1%">:</td>
                 <td>
-                  {{ data.packageDetails?.package_type + ' - ' + data.packageDetails?.package_name }}
+                  {{ data.packageDetails?.package_type }}
+                  {{ data.packageDetails?.package_name ? ' - ' + data.packageDetails?.package_name : '' }}
                 </td>
               </tr>
               <tr>
                 <td>Person in Charge</td>
                 <td width="1%">:</td>
                 <td>
-                  <ol
-                    class="ms-4"
-                    type="1"
-                  >
-                    <li>{{ data.packageDetails?.pic_name }}</li>
-                  </ol>
+                  {{ data.packageDetails?.pic_name }}
                 </td>
               </tr>
               <tr>
-                <td>Tutor/Mentor</td>
+                <td>{{ props.name == 'tutoring' ? 'Tutor' : 'Mentor' }} Name</td>
                 <td width="1%">:</td>
                 <td>{{ data.packageDetails?.tutormentor_name }}</td>
               </tr>
               <tr>
-                <td>Inhouse Tutor/Mentor</td>
+                <td>Inhouse {{ props.name == 'tutoring' ? 'Tutor' : 'Mentor' }}</td>
                 <td width="1%">:</td>
                 <td>{{ data.packageDetails?.inhouse_name }}</td>
+              </tr>
+              <tr>
+                <td>Notes</td>
+                <td width="1%">:</td>
+                <td>
+                  {{ data.editableColumns?.notes }}
+                </td>
               </tr>
               <tr>
                 <td>Update On</td>

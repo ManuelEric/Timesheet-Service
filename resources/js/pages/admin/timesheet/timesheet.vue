@@ -1,15 +1,13 @@
 <script setup>
 import { showNotif } from '@/helper/notification'
 import ApiService from '@/services/ApiService'
-import avatar1 from '@images/avatars/avatar-1.png'
-import avatar2 from '@images/avatars/avatar-2.png'
-import avatar3 from '@images/avatars/avatar-3.png'
-import avatar4 from '@images/avatars/avatar-4.png'
-import avatar5 from '@images/avatars/avatar-5.png'
 import debounce from 'lodash/debounce'
+import { useRouter } from 'vue-router'
 
 // Start Variable
-const avatars = [avatar1, avatar2, avatar3, avatar4, avatar5]
+
+const props = defineProps({ name: String })
+const router = useRouter()
 
 const selected = ref([])
 const currentPage = ref(1)
@@ -31,9 +29,13 @@ const getData = async () => {
   const program = program_name.value ? '&program_name=' + encodeURIComponent(program_name.value) : ''
   const package_search = package_name.value ? '&package_id=' + package_name.value : ''
   const paginate = '&paginate=true'
+  const is_subject_specialist = props.name != 'tutoring' ? '&is_subject_specialist=true' : ''
+
   try {
     loading.value = true
-    const res = await ApiService.get('api/v1/timesheet/list' + page + search + program + package_search + paginate)
+    const res = await ApiService.get(
+      'api/v1/timesheet/list' + page + search + program + package_search + paginate + is_subject_specialist,
+    )
     // console.log(res)
     if (res) {
       currentPage.value = res.current_page
@@ -70,11 +72,21 @@ const getPackage = async () => {
   }
 }
 
-const searchData = debounce(async () => {
+const searchData = debounce(async item => {
   currentPage.value = 1
+  keyword.value = item.target.value
+
   await getData()
 }, 1000)
+
+const goToTimesheet = id => {
+  router.push('/admin/timesheet/' + props.name + '/' + id)
+}
 // End Function
+
+watch(() => {
+  getData()
+})
 
 onMounted(() => {
   getData()
@@ -95,6 +107,7 @@ onMounted(() => {
     <VCardText>
       <VRow class="my-1 justify-space-between">
         <VCol
+          v-if="props.name == 'tutoring'"
           cols="12"
           md="6"
         >
@@ -126,7 +139,9 @@ onMounted(() => {
                 label="Package"
                 :items="package_list"
                 :item-props="
-                  item => ({ title: item.package != null ? item.type_of + ' - ' + item.package : item.type_of })
+                  item => ({
+                    title: item.package != null ? item.type_of + ' - ' + item.package : item.type_of,
+                  })
                 "
                 item-value="id"
                 placeholder="Select Package"
@@ -150,7 +165,6 @@ onMounted(() => {
             variant="solo"
             hide-details
             single-line
-            v-model="keyword"
             @input="searchData"
           />
         </VCol>
@@ -165,6 +179,7 @@ onMounted(() => {
       <VTable
         class="text-no-wrap"
         v-else
+        hover
       >
         <thead>
           <tr>
@@ -175,7 +190,9 @@ onMounted(() => {
               No
             </th>
             <th class="text-uppercase text-center">School/Student Name</th>
-            <th class="text-uppercase text-center">Program Name</th>
+            <th class="text-uppercase text-center">
+              {{ props.name == 'tutoring' ? 'Program Name' : 'Engagement Type' }}
+            </th>
             <th class="text-uppercase text-center">Package</th>
             <th class="text-uppercase text-center">Tutor/Mentor</th>
             <th class="text-uppercase text-center">PIC</th>
@@ -189,6 +206,8 @@ onMounted(() => {
             v-for="(item, index) in data.data"
             :key="index"
             :class="item.void == 'true' ? 'bg-secondary' : ''"
+            class="cursor-pointer"
+            @click="goToTimesheet(item.id)"
           >
             <td>
               {{ parseInt(index) + 1 }}
@@ -226,12 +245,20 @@ onMounted(() => {
                 {{ item.clients }}
               </VText>
             </td>
-            <td>
+            <td v-if="props.name == 'tutoring'">
               <VIcon
                 icon="ri-bookmark-3-line"
                 class="me-3"
               ></VIcon>
+              {{ item.detail_package == 'Trial' ? '[TRIAL]' : '' }}
               {{ item.program_name }}
+            </td>
+            <td v-else>
+              <VIcon
+                icon="ri-bookmark-3-line"
+                class="me-3"
+              ></VIcon>
+              {{ item.engagement_type }}
             </td>
             <td class="text-start">
               <VIcon
@@ -241,10 +268,9 @@ onMounted(() => {
               {{ item.detail_package ? item.package_type + ' - ' + item.detail_package : item.package_type }}
             </td>
             <td class="text-left">
-              <VAvatar
-                size="25"
-                class="avatar-center me-3"
-                :image="avatars[index % 5]"
+              <VIcon
+                icon="ri-user-line"
+                class="me-3"
               />
               {{ item.tutor_mentor }}
             </td>
@@ -270,7 +296,7 @@ onMounted(() => {
               {{ item.spent / 60 }} Hours
             </td>
             <td>
-              <router-link :to="'/admin/timesheet/' + item.id">
+              <router-link :to="'/admin/timesheet/' + props.name + '/' + item.id">
                 <VBtn :color="item.void == 'true' ? 'light' : 'secondary'">
                   <VIcon
                     icon="ri-timeline-view"

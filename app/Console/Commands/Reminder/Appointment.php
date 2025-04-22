@@ -41,7 +41,7 @@ class Appointment extends Command
     public function handle()
     {
         /* retrieve all activities one day before they start */
-        $activities = Activity::unpaid()->dayBeforeStart(1)->hasNotBeenReminded()->get();
+        $activities = Activity::ActivityNotRunningYet()->dayBeforeStart(1)->hasNotBeenReminded()->get();
         $total_data = count($activities);
 
         /* progress bar */
@@ -51,9 +51,8 @@ class Appointment extends Command
         /* report variables */
         $total_mail_sent = 0;
 
-        foreach ( $activities as $activity )
-        {
-            
+        foreach ($activities as $activity) {
+
             [$tutormentor_email, $viewData] = $this->createVariablesUsingActivity($activity);
             $this->sendTheReminder($tutormentor_email, $viewData);
 
@@ -61,13 +60,13 @@ class Appointment extends Command
             $total_mail_sent++;
             $progress->advance();
         }
-        
+
         /* console report */
         $this->newLine();
         $this->info("{$total_mail_sent} Mail of reminder appointment has been stored into a job queue.");
 
         /* finish the progress */
-        if ( $total_data > 0 )
+        if ($total_data > 0)
             $progress->finish();
 
         return COMMAND::SUCCESS;

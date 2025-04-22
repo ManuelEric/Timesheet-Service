@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Pivot\PivotTimesheet;
 use App\Observers\Ref_ProgramObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
@@ -31,8 +32,16 @@ class Ref_Program extends Model
         'student_school',
         'student_grade',
         'program_name',
+        'free_trial',
         'require',
         'timesheet_id',
+        'scnd_timesheet_id',
+        'engagement_type_id',
+        'notes',
+        'cancellation_reason',
+        'cancelled_at',
+        'requested_by',
+        'mentoring_log_id',
     ];
 
     /**
@@ -45,6 +54,21 @@ class Ref_Program extends Model
         return $this->belongsTo(Timesheet::class, 'timesheet_id', 'id');
     }
 
+    public function second_timesheet()
+    {
+        return $this->belongsTo(Timesheet::class, 'scnd_timesheet_id', 'id');
+    }
+
+    public function engagement_type()
+    {
+        return $this->belongsTo(EngagementType::class, 'engagement_type_id', 'id');
+    }
+
+    public function temp_user()
+    {
+        return $this->belongsTo(TempUser::class, 'requested_by', 'id');
+    }
+
     /**
      * The scopes.
      * 
@@ -52,6 +76,11 @@ class Ref_Program extends Model
     public function scopeTutoring(Builder $query)
     {
         $query->where('program_name', 'NOT LIKE', '%admissions mentoring%');
+    }
+
+    public function scopeMentoring(Builder $query)
+    {
+        $query->whereNotNull('engagement_type_id');
     }
 
     public function scopeWhereWetherB2C_B2B(Builder $query, $category, ?string $clientprog_id, ?string $schprog_id)
@@ -101,5 +130,27 @@ class Ref_Program extends Model
             orderByRaw('SUBSTRING_INDEX(SUBSTRING_INDEX(`invoice_id`, "/", 4), "/", -1) DESC')-> // for month
             orderByRaw('SUBSTRING_INDEX(`invoice_id`, "/", 1) DESC'); // for number 
 
+    }
+
+    public function scopeTrial(Builder $query): void
+    {
+        $query->where('free_trial', 1);
+    }
+
+    public function scopeNoTrial(Builder $query): void
+    {
+        $query->where('free_trial', 0);
+    }
+
+    public function scopeRequestedByMe(Builder $query): void
+    {
+        $query->whereRelation('temp_user', 'temp_users.id', auth('sanctum')->user()->id);
+    }
+
+    public function scopeOnCancel(Builder $query, bool $is_cancelled): void
+    {
+        $query->when($is_cancelled === false, function ($query) {
+            $query->whereNull('cancelled_at');
+        });
     }
 }

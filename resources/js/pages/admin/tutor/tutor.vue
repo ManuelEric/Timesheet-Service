@@ -1,15 +1,9 @@
 <script setup>
 import { showNotif } from '@/helper/notification'
 import ApiService from '@/services/ApiService'
-import avatar1 from '@images/avatars/avatar-1.png'
-import avatar2 from '@images/avatars/avatar-2.png'
-import avatar3 from '@images/avatars/avatar-3.png'
-import avatar4 from '@images/avatars/avatar-4.png'
-import avatar5 from '@images/avatars/avatar-5.png'
 import debounce from 'lodash/debounce'
 
 // Start Variable
-const avatars = [avatar1, avatar2, avatar3, avatar4, avatar5]
 const currentPage = ref(1)
 const totalPage = ref()
 const keyword = ref()
@@ -135,11 +129,10 @@ onMounted(() => {
               {{ parseInt(index) + 1 }}
             </td>
             <td nowrap>
-              <VAvatar
-                size="25"
-                class="avatar-center me-3"
-                :image="avatars[index % 5]"
-              />
+              <VIcon
+                icon="ri-user-line"
+                class="me-3"
+              ></VIcon>
               {{ item.full_name }}
             </td>
             <td

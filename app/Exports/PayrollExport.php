@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use App\Models\Cutoff;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\WithTitle;
 
@@ -42,23 +43,32 @@ class PayrollExport implements FromView, WithTitle
         $activities = $this->activities;
 
         # because there is possibilites, activities in 1 month could have different cutoff history
-        # then we only take 1 cutoff history ID as reference for the whole month
-        $cutoff_ref_id = $this->activities[0]['cutoff_ref_id'];
+        //// # then we only take 1 cutoff history ID as reference for the whole month
+        # then we only take 1 latest cutoff history
+        $latest_index = count($this->activities)-1;
+        $cutoff_ref_id = $this->activities[$latest_index]['cutoff_ref_id'];
         $cutoff = Cutoff::find($cutoff_ref_id);
 
         $total_hour = $this->activities->sum('time_spent');
 
         $fee = $this->activities->map(function ($item) {
             return [
-                'total_fee_per_activity' => ($item['time_spent'] / 60) * $item['fee_hours']
+                'total_fee_per_activity' => ($item['time_spent'] / 60) * $item['fee_hours'],
             ];
         });
 
-        $total_fee = $fee->sum('total_fee_per_activity') + $this->activities->sum('additional_fee') + $this->activities->sum('bonus_fee');
+        
+        $total_fee_without_tax = $fee->sum('total_fee_per_activity') + $this->activities->sum('additional_fee') + $this->activities->sum('bonus_fee');
+
+        # add tax here
+        $percentage_of_tax = $this->timesheet['packageDetails']['tutormentor_tax'];
+        $total_tax = ($percentage_of_tax / 100) * $total_fee_without_tax;
+
+        $total_fee = $total_fee_without_tax - $total_tax;
 
 
         # merge all variables that going to show in view 
-        $viewData = compact('isGroup', 'clients', 'activities', 'cutoff', 'total_hour', 'total_fee');
+        $viewData = compact('isGroup', 'clients', 'activities', 'cutoff', 'total_hour', 'total_fee_without_tax', 'percentage_of_tax', 'total_tax', 'total_fee');
 
         return view('exports.payroll', $this->timesheet + $viewData);
     }

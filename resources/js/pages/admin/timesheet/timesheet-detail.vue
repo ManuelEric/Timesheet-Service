@@ -2,7 +2,7 @@
 import TimesheetDetail from '@/components/admin/timesheet/timesheet-detail.vue'
 import UserDetail from '@/components/admin/timesheet/user-detail.vue'
 import { router } from '@/plugins/router'
-const props = defineProps({ id: Number })
+const props = defineProps({ id: Number, name: String })
 const timesheet_id = props.id
 const reload = ref(false)
 const void_timesheet = ref(false)
@@ -41,7 +41,7 @@ const checkVoid = value => {
           <VBtn
             color="light"
             class="mt-4"
-            @click="router.push({ path: '/admin/timesheet' })"
+            @click="router.push({ path: '/admin/timesheet' + props.name })"
           >
             Back to List
           </VBtn>
@@ -51,6 +51,7 @@ const checkVoid = value => {
 
     <UserDetail
       :id="timesheet_id"
+      :name="props.name"
       @void="checkVoid"
     />
     <TimesheetDetail :id="timesheet_id" />

@@ -19,4 +19,12 @@ class Curriculum extends Model
     protected $fillable = [
         'name',
     ];
+
+    /**
+     * The relations.
+     */
+    public function subject()
+    {
+        return $this->hasMany(TempUserRoles::class, 'curriculum_id', 'id');
+    }
 }

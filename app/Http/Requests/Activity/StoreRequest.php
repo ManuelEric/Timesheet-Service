@@ -56,14 +56,14 @@ class StoreRequest extends FormRequest
                 new ExistStartDateActivities('POST', $timesheet_id),
             ],
             'end_date' => [
-                'nullable', 
-                'date', 
+                'nullable',
+                'date',
                 'date_format:Y-m-d H:i:s',
                 'after:start_date',
             ],
-            'meeting_link' => 'required|active_url',
+            'meeting_link' => 'nullable|active_url',
             'status' => [
-                'nullable', 
+                'nullable',
                 'integer',
                 new StatusActivity($input_endDate)
             ],

@@ -22,7 +22,7 @@ const isDialogVisible = ref([
 const selectedItem = ref([])
 // End Variable
 
-// Start Function
+// Start Functions
 const getData = async () => {
   loading.value = true
   try {
@@ -133,7 +133,7 @@ onMounted(() => {
     <VCardText>
       <VTable
         class="text-no-wrap"
-        height="400"
+        max-height="400"
         fixed-header
         v-if="!loading"
       >
@@ -155,8 +155,17 @@ onMounted(() => {
             <th class="text-uppercase text-end">#</th>
           </tr>
         </thead>
-
-        <tbody>
+        <tbody v-if="data?.length == 0">
+          <tr>
+            <th
+              colspan="8"
+              class="text-center"
+            >
+              No Activity Found
+            </th>
+          </tr>
+        </tbody>
+        <tbody v-else>
           <tr
             v-for="(item, index) in data"
             :key="index"
@@ -192,7 +201,8 @@ onMounted(() => {
                 color="success"
                 v-model="item.status"
                 :value="true"
-                v-tooltip:start="item.statusg ? 'Completed' : 'Not Yet'"
+                :false-value="false"
+                v-tooltip:start="item.status ? 'Completed' : 'Not Yet'"
                 @update:modelValue="updateStatus(item)"
               />
             </td>
@@ -201,6 +211,7 @@ onMounted(() => {
                 color="primary"
                 density="compact"
                 class="me-1"
+                v-if="item.meeting_link"
               >
                 <a
                   :href="item.meeting_link"

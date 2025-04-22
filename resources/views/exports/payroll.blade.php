@@ -106,7 +106,7 @@
 
     <!-- Total cut off date start here -->
     <tr>
-        <td colspan="8" valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word; background-color: yellow; font-weight: bold;">CUT OFF DATE: {{ strtoupper(date('M d, Y', strtotime($cutoff->created_at))) }}</td>
+        <td colspan="8" valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word; background-color: yellow; font-weight: bold;">CUT OFF DATE: {{ isset($cutoff) ? strtoupper(date('M d, Y', strtotime($cutoff->created_at))) : null }}</td>
     </tr>
     <!-- Total cut off date end here -->
 
@@ -117,6 +117,22 @@
         <td style="border: 1px solid #000; word-wrap: break-word;"></td>
     </tr>
     <!-- Total hour end here -->
+
+    <!-- Total fee without tax start here -->
+    <tr>
+        <td colspan="6" valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Fee </td>
+        <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Rp {{ number_format($total_fee_without_tax, 2, ',', '.') }}</td>
+        <td style="border: 1px solid #000; word-wrap: break-word;"></td>
+    </tr>
+    <!-- Total fee without tax end here -->
+
+    <!-- Tax add here -->
+    <tr>
+        <td colspan="6" valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Tax {{ $percentage_of_tax }}%</td>
+        <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Rp {{ number_format($total_tax, 2, ',', '.') }}</td>
+        <td style="border: 1px solid #000; word-wrap: break-word;"></td>
+    </tr>
+    <!-- Tax end here -->
 
     <!-- Total fee start here -->
     <tr>

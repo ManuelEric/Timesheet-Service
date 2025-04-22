@@ -13,32 +13,34 @@ class ComponentController extends Controller
 {
     public function comp_subjects()
     {
-# because there were changes to the creation of timesheet
+        # because there were changes to the creation of timesheet
         # like: subjects now fetched from its own database instead of CRM
         # so I'll put the change here
 
         # after changes
         $subjects = [
-            'Chemistry Tutor',
-            'Biology Tutor',
-            'SAT English Tutor',
-            'SAT Math & English Tutor',
-            'SAT Math Tutor',
-            'TOEFL Tutor',
-            'IELTS Tutor',
+            'Chemistry',
+            'Biology',
+            'SAT English',
+            'SAT Math & English',
+            'SAT Math',
+            'TOEFL',
+            'IELTS',
             'IB Writing',
-            'Mathematics Tutor',
-            'Environmental Sciences & Society (ESS) Tutor',
-            'Physics Tutor',
-            'Economics Tutor',
-            'Computer Science Tutor',
-            'Programming Tutor',
-'            Life Science Tutor'
+            'Mathematics',
+            'Environmental Sciences & Society (ESS)',
+            'Physics',
+            'Economics',
+            'Computer Science',
+            'Programming',
+            'Life Science',
+            'English',
+            'Business Management'
         ];
-        $subject_collections = collect($subjects);
+        $subject_collections = collect($subjects)->sort()->values()->all();
         return response()->json($subject_collections);
     }
-    
+
     public function former_comp_subjects($mentorTutorsUuid): JsonResponse
     {
         # before changes
@@ -61,8 +63,7 @@ class ComponentController extends Controller
     public function comp_students(
         $mentorTutorUuid,
         TimesheetDataService $timesheetDataService,
-        ): JsonResponse
-    {
+    ): JsonResponse {
         $responses = $timesheetDataService->fetchTimesheetsByHandler($mentorTutorUuid);
 
         return response()->json($responses);

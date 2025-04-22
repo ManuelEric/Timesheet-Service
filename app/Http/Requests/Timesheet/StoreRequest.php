@@ -89,8 +89,10 @@ class StoreRequest extends FormRequest
                 'nullable',
                 //new ExistSubjectPerTutormentor($this->input('mentortutor_email'))
             ],
-            'subject_name' => 'required',
-            'individual_fee' => 'required',
+            'subject_name' => 'nullable',
+            'individual_fee' => 'nullable',
+            'tax' => 'required',
+            'curriculum_id' => 'nullable|exists:curriculums,id'
         ];
     }
 

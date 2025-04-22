@@ -58,20 +58,14 @@ class MainController extends Controller
     public function store(
         $timesheetId,
         StoreActivityRequest $request, 
-        CheckEmailMentorTutorAction $checkEmailMentorTutorAction,
         CreateActivityAction $createActivityAction,
+        CheckEmailMentorTutorAction $checkEmailMentorTutorAction
         ): JsonResponse
     {
         $timesheet = $this->identifyTimesheetIdAction->execute($timesheetId);
 
         $validated = $request->safe()->only(['description', 'start_date', 'end_date', 'meeting_link', 'status']);
 
-
-        /* get the newest information about the latest tutor/mentor fee hours who signed to handle the timesheet */
-        $handleBy = $timesheet->handle_by->last();
-        $itsEmail = $handleBy->email;
-
-        $checkEmailMentorTutorAction->execute($itsEmail);
         $createActivityAction->execute($timesheet, $validated);
 
         return response()->json([

@@ -20,12 +20,18 @@ class TimesheetDataService
         $this->tokenService = $tokenService;
     }
 
-    public function listTimesheet(array $search = [])
+    public function listTimesheet(array $search = [], $is_subject_specialist = null)
     {
         $timesheets = Timesheet::query()->with(
             [
+                'ref_program.engagement_type' => function ($query) {
+                    $query->select('id', 'name');
+                },
                 'ref_program' => function ($query) {
-                    $query->select('category', 'student_name', 'student_school', 'program_name', 'timesheet_id', 'require');
+                    $query->select('category', 'student_name', 'student_school', 'program_name', 'timesheet_id', 'require', 'engagement_type_id');
+                },
+                'second_ref_program' => function ($query) {
+                    $query->select('category', 'student_name', 'student_school', 'program_name', 'scnd_timesheet_id', 'require', 'engagement_type_id');
                 },
                 'transferred' => function ($query) {
                     $query->select('category', 'student_name', 'student_school', 'program_name', 'require');
@@ -46,19 +52,28 @@ class TimesheetDataService
                     $query->select('uuid', 'full_name');
                 },
             ]
-        )->onSearch($search)->onSession()->newest()->select('timesheets.id', 'inhouse_id', 'package_id', 'duration', 'notes', 'void', 'created_at')->get();
+        )->
+        when($is_subject_specialist, function ($query) {
+            $query->mentoring();
+        }, function ($query) {
+            $query->tutoring();
+        })->
+        onSearch($search)->
+        onSession()->
+        newest()->
+        select('timesheets.id', 'inhouse_id', 'package_id', 'duration', 'notes', 'void', 'created_at')->get();
 
         $mappedTimesheets = $timesheets->map(function ($data) {
 
             # because timesheets consists of multiple ref programs
             # we need to extract and define whether the client was b2c or b2b
             $clients = array();
-            $refProgram = $data->ref_program;
+            $refProgram = $data->reference_program;
             $transferredLog = $data->transferred;
 
-            # if timesheet has multiple ref programs
             if ( count($refProgram) > 0 )
             {
+                # if timesheet has multiple ref programs
                 if (count($refProgram) > 1) {
                     foreach ($refProgram as $ref) {
                         $category = $ref->category;
@@ -68,6 +83,7 @@ class TimesheetDataService
     
                         array_push($clients, $client);
                     }
+                # if timesheet has only one ref program
                 } else {
                     $category = $refProgram->first()->category;
                     $studentName = $refProgram->first()->student_name;
@@ -75,6 +91,7 @@ class TimesheetDataService
                     $clients = $category == "b2c" ? $studentName : $studentSchool;
                 }
                 $programName = $refProgram->first()->program_name;
+                $engagementType = $refProgram->first()->engagement_type ? $refProgram->first()->engagement_type->name : null;
                 $requirements = $refProgram->first()->require;
             }
 
@@ -97,6 +114,7 @@ class TimesheetDataService
                     $clients = $category == "b2c" ? $studentName : $studentSchool;
                 }
                 $programName = $transferredLog->first()->program_name;
+                $engagementType = $refProgram->first()->engagement_type ? $refProgram->first()->engagement_type->name : null;
                 $requirements = $transferredLog->first()->require;
             }
 
@@ -124,22 +142,23 @@ class TimesheetDataService
                 'group' => count($refProgram) > 1 ? true : false,
                 'clients' => $clients,
                 'void' => $void,
+                'engagement_type' => $engagementType,
                 'created_at' => $data->created_at,
             ];
         });
 
-        return $mappedTimesheets->sortByDesc('created_at')->values()->paginate(10);
+        return $mappedTimesheets->sortBy('clients')->values()->paginate();
     }
 
     public function detailTimesheet(Timesheet $timesheet)
     {
-        $refProgram = $timesheet->ref_program;
+        $refProgram = $timesheet->reference_program;
         $transferredLog = $timesheet->transferred;
         $relatedProgram = count($refProgram) > 0 ? $refProgram : $transferredLog;
         # because timesheets consists of multiple ref programs
         # we need to extract and define whether the client was b2c or b2b
 
-        [$clients, $programName] = $this->fetchRelatedProgram($relatedProgram);
+        [$clients, $programName, $freeTrial] = $this->fetchRelatedProgram($relatedProgram);
 
         /* fetch the package details */
         $package = $timesheet->package;
@@ -162,10 +181,15 @@ class TimesheetDataService
         $tutorMentorUuid = $tutorMentor->uuid;
         $tutorMentorEmail = $tutorMentor->email;
         $tutorMentorName = $tutorMentor->full_name;
+        $tutorMentorHasNPWP = $tutorMentor->has_npwp;
         $inhouseUuid = $timesheet->inhouse_pic->uuid;
         $inhouseName = $timesheet->inhouse_pic->full_name;
         $last_updated = $timesheet->updated_at;
         $clientProfile = $clients;
+        $engagement_type = $refProgram->first()->engagement_type 
+            ? $refProgram->first()->engagement_type->name
+            : null;
+        $tax = $timesheet->subject->tax;
         $packageDetails = [
             'program_name' => $programName,
             'void' => $timesheet->void,
@@ -173,17 +197,22 @@ class TimesheetDataService
             'package_category' => $packageCategory,
             'package_type' => $packageType,
             'package_name' => $packageName,
+            'free_trial' => $freeTrial,
             'pic_name' => $adminName,
             'tutormentor_name' => $tutorMentorName,
+            'tutormentor_has_npwp' => $tutorMentorHasNPWP,
+            'tutormentor_tax' => $tax,
             'inhouse_name' => $inhouseName,
             'last_updated' => $last_updated,
             'duration_in_minutes' => $duration,
             'time_spent_in_minutes' => $timeSpent,
+            'engagement_type' => $engagement_type,
         ];
 
 
         /* fetch the data to support editable columns */
         $subjectId = $timesheet->subject_id;
+        
         $editableColumns = [
             'pic_id' => $adminId,
             'tutormentor_id' => $tutorMentorUuid,
@@ -193,6 +222,7 @@ class TimesheetDataService
             'notes' => $notes,
             'subject_id' => $subjectId,
             'inhouse_id' => $inhouseUuid,
+            'curriculum_name' => $timesheet->subject->curriculum ? $timesheet->subject->curriculum->name : null
         ];
 
         return compact('clientProfile', 'packageDetails', 'editableColumns');
@@ -244,7 +274,7 @@ class TimesheetDataService
                 array_push($clients, [
                     'category' => $category,
                     'client_name' => $studentName,
-                    'client_mail' => $crm_clientInfo['mail'],
+                    'client_mail' => $crm_clientInfo['mail'] ?? null,
                     'client_school' => $studentSchool,
                     'client_grade' => $crm_clientInfo['grade'],
                 ]);
@@ -253,8 +283,9 @@ class TimesheetDataService
 
         
         $programName = $relatedProgram->first()->program_name;
+        $freeTrial = $relatedProgram->first()->free_trial ? true : false;
 
-        return [$clients, $programName];
+        return [$clients, $programName, $freeTrial];
     }
 
     public function fetchTimesheetsByHandler(string $search) /* handle by who */
@@ -314,7 +345,7 @@ class TimesheetDataService
         ];
         
         /* we're gonna find timesheets using cutoff `from` and `to` */
-        $timesheets = Timesheet::with('activities')->filterCutoff($search)->get();
+        $timesheets = Timesheet::with('activities', 'ref_program', 'second_ref_program')->filterCutoff($search)->get();
         return $timesheets;
     }
 }

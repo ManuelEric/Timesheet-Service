@@ -12,6 +12,10 @@ export default [
         component: () => import('@/pages/user/dashboard/dashboard.vue'),
       },
       {
+        path: '/user/request',
+        component: () => import('@/pages/user/request/request.vue'),
+      },
+      {
         path: '/user/timesheet',
         component: () => import('@/pages/user/timesheet/timesheet.vue'),
       },
@@ -37,6 +41,14 @@ export default [
         path: '/user/login',
         name:'login-user',
         component: () => import('@/pages/auth/login.vue'),
+      },
+      {
+        path: '/user/login/:uuid',
+        name:'login-uuid',
+        component: () => import('@/pages/auth/login.vue'),
+        props: route => ({
+          uuid:route.params.uuid,
+        }),
       },
       {
         path: '/reset-password/:token?/:email?',

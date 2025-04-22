@@ -47,11 +47,19 @@ class MainController extends Controller
                 'email' => $item->email,
                 'inhouse' => $item->inhouse,
                 'last_activity' => $item->last_activity,
+                'has_npwp' => $item->has_npwp,
                 'roles' => new Collection()
             ];
 
+            # separate mentor & tutor
             [$mentorDetail, $tutorDetail] = $item->roles->partition(function ($value) {
-                return $value->role == 'Mentor';
+                $pattern = "/mentor/i";
+                return preg_match($pattern, $value->role);
+            });
+
+            # separate mentor & external mentor
+            [$mentorDetail, $externalMentorDetail] = $mentorDetail->partition(function ($value) {
+                return $value->role == "Mentor";
             });
         
             if ($mentorDetail->count() > 0)
@@ -68,7 +76,15 @@ class MainController extends Controller
                     'name' => 'Tutor', 
                     'subjects' => array_values($tutorDetail->all())
                 ]);
-            }            
+            }
+
+            if ($externalMentorDetail->count() > 0)
+            {
+                $profile['roles']->push([
+                    'name' => 'External Mentor',
+                    'subjects' => array_values($externalMentorDetail->all())
+                ]);
+            }
 
             return $profile;
         });

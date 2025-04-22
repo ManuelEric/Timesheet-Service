@@ -17,7 +17,7 @@ class ActivityDataService
     {
         /* fetch activities based on requested timesheet */
         $activities = $timesheet->activities;
-        return $activities->map(function ($data) {
+        return $activities->sortBy('asc')->map(function ($data) {
 
             $start_date = Carbon::parse($data->start_date);
             $end_date = $data->end_date ? Carbon::parse($data->end_date) : false;
@@ -33,6 +33,7 @@ class ActivityDataService
                 'description' => $data->description,
                 'start_date' => $data->start_date,
                 'end_date' => $data->end_date,
+                'tax' => $data->tax,
                 'fee_hours' => $data->fee_hours,
                 'additional_fee' => $data->additional_fee,
                 'bonus_fee' => $data->bonus_fee,
@@ -47,6 +48,7 @@ class ActivityDataService
                 'estimate' => $estimate,
                 'disabled_changes' => $is_disabled
             ];
+        
         });
     }
 }
