@@ -10,6 +10,7 @@ use Exception;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CreateTempUserService
 {
@@ -43,6 +44,7 @@ class CreateTempUserService
                 $role_name = $detail['role_name'];
                 $subjects = $detail['subjects'];
 
+                /* for mentor and external mentor */
                 if ( $subjects === null || count($subjects) == 0 ) {
                     $roleDetails[] = [
                         'role' => $role_name,
@@ -70,6 +72,7 @@ class CreateTempUserService
                         'grade' => $grade,
                         'fee_individual' => $fee_individual,
                         'fee_group' => $fee_group,
+                        'tax' => 0
                     ];
                 }
             }
@@ -93,7 +96,7 @@ class CreateTempUserService
             # because managing timesheet now Kak Steven can also input the subject and fees
             # guess, it doesn't used it anymore but I'll put it here just in case needed
             /* update or create the temp_user_role */
-            // $this->storeOrUpdateRoles($tempUserId, $roleDetails);
+            $this->storeOrUpdateRoles($tempUserId, $roleDetails);
         }
         
 
@@ -145,6 +148,7 @@ class CreateTempUserService
 
     public function storeOrUpdateRoles(string $tempUserId, array $roleDetails)
     {
+        Log::debug('Inserted Temp Roles', $roleDetails);
         foreach ($roleDetails as $detail) {
             $role = $detail['role'];
             $tutor_subject = $detail['subject'] ?? null;
@@ -154,6 +158,8 @@ class CreateTempUserService
             $grade = $detail['grade'] ?? null;
             $fee_individual = $detail['fee_individual'] ?? 0;
             $fee_group = $detail['fee_group'] ?? 0;
+            $tax = $detail['tax'] ?? 0;
+
 
             TempUserRoles::updateOrCreate(
                 ['temp_user_id' => $tempUserId, 'role' => $role, 'tutor_subject' => $tutor_subject],
@@ -164,6 +170,7 @@ class CreateTempUserService
                     'grade' => $grade,
                     'fee_individual' => $fee_individual,
                     'fee_group' => $fee_group,
+                    'tax' => $tax
                 ]
             );
         }
