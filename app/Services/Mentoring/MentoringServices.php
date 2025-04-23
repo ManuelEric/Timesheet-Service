@@ -31,14 +31,16 @@ class MentoringServices
         ], ['crm-authorization' => env('CRM_AUTHORIZATION_KEY')]);
     }
 
-    public function storeMentoringLog(int $ref_Program_id, string $mentee_id, int $phase_detail_id)
+    public function storeMentoringLog(int $ref_Program_id, string $mentee_id, int $phase_detail_id, array $options = [])
     {
         $endpoint = env('MENTORING_DOMAIN') . "mentoring-log";
 
         [$status_code, $result] = $this->make_call('post', $endpoint, [
             'student_id' => $mentee_id,
             'phase_detail_id' => $phase_detail_id,
-            'start_date' => Carbon::now()->format('Y-m-d H:i:s'),
+            'start_date' => $options['start_date'],
+            'end_date' => $options['end_date'],
+            'mentor_id' => auth('sanctum')->user()->uuid,
         ], ['mentoring-authorization' => env('MENTORING_AUTHORIZATION_KEY')]);
         
         # update column mentoring_log_id using ref_program_id

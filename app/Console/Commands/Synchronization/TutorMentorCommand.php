@@ -61,6 +61,7 @@ class TutorMentorCommand extends Command
                 $this->newLine();
 
                 $createTempUserService->execute($userRawInformation);
+                $this->info("User `{$name}` with email `{$email}` has been stored successfully." . json_encode($userRawInformation));
                 $progress->advance();
     
             } catch (Exception $e) {

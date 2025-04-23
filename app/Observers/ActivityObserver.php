@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\Activity;
+use App\Services\Mentoring\MentoringServices;
 use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -10,11 +11,13 @@ use Illuminate\Support\Facades\Log;
 class ActivityObserver implements ShouldHandleEventsAfterCommit
 {
     protected $userName;
+    protected $mentoring_services;
 
-    public function __construct()
+    public function __construct(MentoringServices $mentoring_services)
     {
         $user = auth('sanctum')->user();
         $this->userName = $user->full_name;
+        $this->mentoring_services = $mentoring_services;
     }
 
     /**
@@ -36,6 +39,16 @@ class ActivityObserver implements ShouldHandleEventsAfterCommit
                 Log::info('Activity of Timesheet ID: ' . $activity->timesheet_id . ' has been created.');
         }
             
+        /**
+         * check if the activity is from ref_program which has a engagement_type_id
+         */
+        if ( $ref_Program = $activity->timesheet->ref_program->whereNotNull('engagement_type_id')->whereNull('cancelled_at')->where('require', 'Mentor')->first() )
+        {
+            $mentee_id = $ref_Program->student_uuid;
+            $phase_detail_id = $ref_Program->engagement_type_id; //! the primary of engagement type should be the same as primary of phase_detail_id
+            $this->mentoring_services->storeMentoringLog($ref_Program->id, $mentee_id, $phase_detail_id, $activity->toArray());
+        }
+
     }
 
     /**
@@ -74,6 +87,7 @@ class ActivityObserver implements ShouldHandleEventsAfterCommit
         {
             $endTime = $activity->end_date != NULL ? Carbon::parse($activity->end_date)->format('d M Y H:i') : 'NULL';
             Log::info($this->userName . ' has just updated the end date to ' . $endTime . ' of activity no. ' . $activityId);
+            return;
         }
 
         /**
@@ -85,6 +99,7 @@ class ActivityObserver implements ShouldHandleEventsAfterCommit
                 Log::info($this->userName . ' has just completed the activity no. ' . $activityId);
             else
                 Log::info($this->userName . ' has just undone the completed activity no. ' . $activityId);
+            return;
         }
 
         Log::info($this->userName . ' has just update the activity.');
@@ -96,6 +111,14 @@ class ActivityObserver implements ShouldHandleEventsAfterCommit
      */
     public function deleted(Activity $activity): void
     {
+
+        /**
+         * check if the activity is from ref_program which has a engagement_type_id
+         */
+        if ( $ref_Program = $activity->timesheet->ref_program->whereNotNull('engagement_type_id')->whereNull('cancelled_at')->where('require', 'Mentor')->first() )
+            $this->mentoring_services->deleteMentoringLog($ref_Program->id);
+        
+
         $activityName = $activity->activity;
         Log::info($this->userName . ' just deleted the activity ' . $activityName);
     }
