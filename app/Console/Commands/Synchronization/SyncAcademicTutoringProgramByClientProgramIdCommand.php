@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands\Synchronization;
 
+use App\Http\Traits\HttpCall;
 use App\Services\Program\RefProgramServices;
 use App\Services\ResponseService;
 use App\Services\Token\TokenService;
@@ -10,6 +11,7 @@ use Illuminate\Console\Command;
 
 class SyncAcademicTutoringProgramByClientProgramIdCommand extends Command
 {
+    use HttpCall;
     /**
      * The name and signature of the console command.
      *
