@@ -62,6 +62,7 @@ class TimesheetDataService
         onSession()->
         newest()->
         select('timesheets.id', 'inhouse_id', 'package_id', 'duration', 'notes', 'void', 'created_at')->get();
+        
 
         $mappedTimesheets = $timesheets->map(function ($data) {
 
