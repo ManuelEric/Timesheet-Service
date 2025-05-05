@@ -1,4 +1,3 @@
-import { router } from '@/plugins/router'
 import axios from 'axios'
 import JwtService from './JwtService'
 
@@ -34,12 +33,12 @@ apiClient.interceptors.response.use(
     return response
   },
   error => {
-    if (error?.response?.status === 401) {
-      // Hapus token dari tempat penyimpanan Anda
-      console.log('Token expired or invalid. Please log in again.');
-      JwtService.destroyToken();
-      router.go(0)
-    }
+    // if (error?.response?.status === 401) {
+    //   // Hapus token dari tempat penyimpanan Anda
+    //   console.log('Token expired or invalid. Please log in again.');
+    //   JwtService.destroyToken();
+    //   router.go(0)
+    // }
 
     return Promise.reject(error)
   },

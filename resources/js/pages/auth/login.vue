@@ -148,10 +148,10 @@ const checkAuthUUID = async () => {
       // save token
       JwtService.saveToken(res.granted_token)
       UserService.saveUser(res)
-      router.go()
       setTimeout(() => {
         router.push('/user/request').then(() => {
           showNotif('success', 'You`ve successfully login.', 'bottom-end')
+          router.go()
         })
       }, 1500)
     }
