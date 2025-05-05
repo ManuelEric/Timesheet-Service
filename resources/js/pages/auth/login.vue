@@ -148,10 +148,12 @@ const checkAuthUUID = async () => {
       // save token
       JwtService.saveToken(res.granted_token)
       UserService.saveUser(res)
-      router.push('/user/request').then(() => {
-        router.go()
-        showNotif('success', 'You`ve successfully login.', 'bottom-end')
-      })
+      setTimeout(() => {
+        router.push('/user/request').then(() => {
+          router.go()
+          showNotif('success', 'You`ve successfully login.', 'bottom-end')
+        })
+      }, 1500)
     }
   } catch (error) {
     form.value.password = ''
