@@ -1,4 +1,5 @@
 <script setup>
+import ProgramAddTutoring from '@/components/admin/program/program_add_tutoring.vue'
 import { showNotif } from '@/helper/notification'
 import ApiService from '@/services/ApiService'
 import debounce from 'lodash/debounce'
@@ -10,6 +11,7 @@ const props = defineProps({ name: String })
 const router = useRouter()
 
 const selected = ref([])
+const dialog = ref(false)
 const currentPage = ref(1)
 const totalPage = ref()
 const keyword = ref()
@@ -80,7 +82,8 @@ const searchData = debounce(async item => {
 }, 1000)
 
 const goToTimesheet = id => {
-  router.push('/admin/timesheet/' + props.name + '/' + id)
+  const routeData = router.resolve('/admin/timesheet/' + props.name + '/' + id)
+  window.open(routeData.href, '_blank')
 }
 // End Function
 
@@ -96,6 +99,16 @@ onMounted(() => {
 </script>
 
 <template>
+  <VDialog
+    v-model="dialog"
+    width="auto"
+    persistent
+  >
+    <ProgramAddTutoring
+      @close="dialog = false"
+      @reload="getData"
+    />
+  </VDialog>
   <VCard>
     <VCardTitle>
       <div class="d-flex justify-between align-center">
@@ -117,13 +130,13 @@ onMounted(() => {
               md="6"
             >
               <VAutocomplete
+                density="compact"
                 clearable
                 v-model="program_name"
                 label="Program Name"
                 :items="program_list"
                 item-title="program_name"
                 placeholder="Select Program Name"
-                variant="solo"
                 :loading="loading"
                 :disabled="loading"
                 @update:modelValue="getData"
@@ -134,6 +147,7 @@ onMounted(() => {
               md="6"
             >
               <VAutocomplete
+                density="compact"
                 clearable="true"
                 v-model="package_name"
                 label="Package"
@@ -145,7 +159,6 @@ onMounted(() => {
                 "
                 item-value="id"
                 placeholder="Select Package"
-                variant="solo"
                 :loading="loading"
                 :disabled="loading"
                 @update:modelValue="getData"
@@ -157,16 +170,31 @@ onMounted(() => {
           cols="12"
           md="3"
         >
-          <VTextField
-            :loading="loading"
-            :disabled="loading"
-            append-inner-icon="ri-search-line"
-            label="Search"
-            variant="solo"
-            hide-details
-            single-line
-            @input="searchData"
-          />
+          <div class="d-flex gap-2">
+            <VTextField
+              density="compact"
+              :loading="loading"
+              :disabled="loading"
+              append-inner-icon="ri-search-line"
+              label="Search"
+              hide-details
+              single-line
+              @input="searchData"
+            />
+
+            <div class="">
+              <v-tooltip
+                activator="parent"
+                location="start"
+                >Add New Timesheet</v-tooltip
+              >
+              <v-btn
+                icon="ri-add-line"
+                @click="dialog = true"
+              >
+              </v-btn>
+            </div>
+          </div>
         </VCol>
       </VRow>
 

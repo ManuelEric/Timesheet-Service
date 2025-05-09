@@ -114,7 +114,6 @@ onMounted(() => {
         <VRow>
           <VCol md="12">
             <VAutocomplete
-              variant="solo"
               clearable
               v-model="tutor_selected"
               label="Mentor/Tutor"
@@ -136,7 +135,6 @@ onMounted(() => {
             v-if="prop.require?.toLowerCase() == 'tutor'"
           >
             <VAutocomplete
-              variant="solo"
               clearable
               v-model="form.subject_id"
               label="Subject Tutoring"

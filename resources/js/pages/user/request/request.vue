@@ -67,7 +67,6 @@ onMounted(() => {
             label="Search"
             density="compact"
             v-model="keyword"
-            variant="solo"
             single-line
             :loading="loading"
             :disabled="loading"
@@ -75,21 +74,22 @@ onMounted(() => {
           />
         </VCol>
         <VCol
-          md="2"
+          md="1"
           cols="12"
+          class="text-end"
         >
+          <v-tooltip
+            activator="parent"
+            location="start"
+            >New Request</v-tooltip
+          >
           <VBtn
             density="compact"
             color="info"
-            block
+            icon="ri-add-line"
             border
             @click="dialog = true"
           >
-            New Request
-            <VIcon
-              icon="ri-add-line"
-              class="ms-3"
-            />
           </VBtn>
         </VCol>
       </VRow>

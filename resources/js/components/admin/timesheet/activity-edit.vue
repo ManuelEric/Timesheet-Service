@@ -91,21 +91,21 @@ const submit = async () => {
             class="d-none"
           >
             <VTextField
+              density="compact"
               v-model="form.activity"
               label="Activity Name"
               placeholder="Activity"
-              variant="solo"
               :disabled="loading"
               :loading="loading"
             />
           </VCol>
           <VCol cols="12">
             <VTextarea
+              density="compact"
               v-model="form.description"
               label="Meeting Discussion"
               :rules="rules.required"
               placeholder="Meeting Discussion"
-              variant="solo"
               :disabled="loading"
               :loading="loading"
             />
@@ -115,11 +115,11 @@ const submit = async () => {
             cols="12"
           >
             <VDateInput
+              density="compact"
               v-model="form.date"
               label="Date"
               placeholder="Select Date"
               prepend-icon=""
-              variant="solo"
               :disabled="loading"
               :loading="loading"
               :rules="rules.required"
@@ -130,12 +130,12 @@ const submit = async () => {
             cols="6"
           >
             <VTextField
+              density="compact"
               type="time"
               v-model="form.start_time"
               label="Start Time"
               :rules="rules.required"
               placeholder="Start Time"
-              variant="solo"
               :disabled="loading"
               :loading="loading"
               @change="
@@ -148,11 +148,11 @@ const submit = async () => {
             cols="6"
           >
             <VTextField
+              density="compact"
               type="time"
               v-model="form.end_time"
               label="End Time"
               placeholder="End Time"
-              variant="solo"
               :disabled="loading"
               :loading="loading"
               @change="form.end_date = moment(prop?.activity.date).format('YYYY-MM-DD') + ' ' + form.end_time + ':00'"
@@ -163,11 +163,11 @@ const submit = async () => {
             cols="12"
           >
             <VTextField
+              density="compact"
               type="text"
               v-model="form.meeting_link"
               label="Meeting Link"
               placeholder="Meeting Link"
-              variant="solo"
               :disabled="loading"
               :loading="loading"
             />
@@ -176,6 +176,7 @@ const submit = async () => {
 
         <VCardActions class="mt-5">
           <VBtn
+            variant="tonal"
             color="error"
             :disabled="loading"
             :loading="loading"
@@ -189,6 +190,7 @@ const submit = async () => {
           </VBtn>
           <VSpacer />
           <VBtn
+            variant="tonal"
             color="success"
             type="submit"
             :disabled="loading"

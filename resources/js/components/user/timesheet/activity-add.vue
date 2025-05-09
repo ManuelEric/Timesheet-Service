@@ -80,7 +80,6 @@ const submit = async () => {
               placeholder="Activity"
               :loading="loading"
               :disabled="loading"
-              variant="solo"
             />
           </VCol>
           <VCol cols="12">
@@ -88,7 +87,6 @@ const submit = async () => {
               v-model="form.description"
               label="Meeting Discussion"
               placeholder="Meeting Discussion"
-              variant="solo"
               :loading="loading"
               :disabled="loading"
               :rules="rules.required"
@@ -103,7 +101,6 @@ const submit = async () => {
               label="Date"
               placeholder="Select Date"
               prepend-icon=""
-              variant="solo"
               :loading="loading"
               :disabled="loading"
               :rules="rules.required"
@@ -119,7 +116,6 @@ const submit = async () => {
               label="Start Time"
               placeholder="Start Time"
               :rules="rules.required"
-              variant="solo"
               class="mb-3"
               :loading="loading"
               :disabled="loading"
@@ -135,7 +131,6 @@ const submit = async () => {
               v-model="form.end_time"
               label="End Time"
               placeholder="End Time"
-              variant="solo"
               :loading="loading"
               :disabled="loading"
               @change="form.end_date = moment(form.date).format('YYYY-MM-DD') + ' ' + form.end_time + ':00'"
@@ -150,7 +145,6 @@ const submit = async () => {
               v-model="form.meeting_link"
               label="Meeting Link"
               placeholder="Meeting Link"
-              variant="solo"
               :loading="loading"
               :disabled="loading"
             />

@@ -72,7 +72,6 @@ onMounted(() => {
               :items="timesheet_list"
               :item-title="item => item.package_type + ' - ' + item.package_name + ' | ' + item.clients"
               item-value="id"
-              variant="solo"
               :rules="rules.required"
               :loading="loading"
               :disabled="loading"
@@ -84,7 +83,6 @@ onMounted(() => {
               prepend-icon=""
               label="Date"
               placeholder="Date"
-              variant="solo"
               :rules="rules.required"
             />
             <VTextField
@@ -92,7 +90,6 @@ onMounted(() => {
               type="number"
               label="Additional Fee"
               placeholder="Additional Fee"
-              variant="solo"
               :rules="rules.required"
             />
           </VCol>

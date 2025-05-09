@@ -102,7 +102,6 @@ onMounted(() => {
             <VRow>
               <VCol cols="12">
                 <VAutocomplete
-                  variant="solo"
                   clearable
                   v-model="selectedMentee"
                   label="Mentee Name"
@@ -121,7 +120,6 @@ onMounted(() => {
               </VCol>
               <VCol cols="12">
                 <VAutocomplete
-                  variant="solo"
                   clearable
                   v-model="form.engagement_type"
                   :items="packageItems"
@@ -141,13 +139,16 @@ onMounted(() => {
                 <VTextarea
                   label="Notes"
                   v-model="form.notes"
-                  variant="solo"
+                  placeholder="Please provide a short brief:
+What help does your mentee need?
+Which subject or topic should the specialist support with?"
                 ></VTextarea>
               </VCol>
             </VRow>
 
-            <VCardActions class="mt-5">
+            <VCardActions class="mt-5 px-0">
               <VBtn
+                variant="tonal"
                 color="error"
                 type="button"
                 @click="emit('close')"
@@ -160,6 +161,7 @@ onMounted(() => {
               </VBtn>
               <VSpacer />
               <VBtn
+                variant="tonal"
                 color="success"
                 type="submit"
               >

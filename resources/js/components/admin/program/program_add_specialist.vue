@@ -175,7 +175,7 @@ onMounted(() => {
             cols="12"
           >
             <VAutocomplete
-              variant="solo"
+              density="compact"
               clearable
               v-model="tutor_selected"
               label="Mentor Name"
@@ -208,7 +208,7 @@ onMounted(() => {
             cols="12"
           >
             <VAutocomplete
-              variant="solo"
+              density="compact"
               clearable
               label="Package"
               v-model="form.package_id"
@@ -231,8 +231,8 @@ onMounted(() => {
             cols="7"
           >
             <VTextField
+              density="compact"
               type="number"
-              variant="solo"
               clearable
               :label="+form.duration / 60 ? '' + form.duration / 60 + ' Hours' : 'Minutes'"
               :readonly="duration_readonly"
@@ -245,8 +245,8 @@ onMounted(() => {
             cols="5"
           >
             <VTextField
+              density="compact"
               type="number"
-              variant="solo"
               clearable
               label="Fee/hours (Gross)"
               v-model="form.individual_fee"
@@ -258,8 +258,8 @@ onMounted(() => {
             cols="5"
           >
             <VTextField
+              density="compact"
               type="number"
-              variant="solo"
               clearable
               label="Tax"
               v-model="form.tax"
@@ -271,7 +271,7 @@ onMounted(() => {
             cols="12"
           >
             <VAutocomplete
-              variant="solo"
+              density="compact"
               clearable
               v-model="form.inhouse_id"
               label="Inhouse Mentor"
@@ -292,7 +292,7 @@ onMounted(() => {
             cols="12"
           >
             <VAutocomplete
-              variant="solo"
+              density="compact"
               multiple
               clearable
               chips
@@ -310,12 +310,11 @@ onMounted(() => {
             <VTextarea
               label="Notes"
               v-model="form.notes"
-              variant="solo"
             ></VTextarea>
           </VCol>
         </VRow>
 
-        <VCardActions class="mt-5">
+        <VCardActions class="mt-5 px-0">
           <VBtn
             variant="tonal"
             color="error"

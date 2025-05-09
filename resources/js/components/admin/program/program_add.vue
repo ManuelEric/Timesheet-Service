@@ -156,6 +156,7 @@ const submit = async () => {
           individual_fee: '',
         }
         tutor_selected.value = []
+        console.log(res)
       }
     } catch (error) {
       console.log(error)
@@ -195,7 +196,6 @@ onMounted(() => {
         <VRow>
           <VCol md="12">
             <VAutocomplete
-              variant="solo"
               clearable
               v-model="tutor_selected"
               label="Tutor Name"
@@ -209,6 +209,7 @@ onMounted(() => {
               :rules="rules.required"
               :loading="loading"
               :disabled="loading"
+              density="compact"
               @update:modelValue="getSubject(tutor_selected.roles, tutor_selected.uuid, tutor_selected.has_npwp)"
             ></VAutocomplete>
             <v-alert
@@ -228,7 +229,6 @@ onMounted(() => {
             cols="12"
           >
             <VAutocomplete
-              variant="solo"
               clearable
               v-model="form.curriculum_id"
               label="Curriculum"
@@ -241,6 +241,7 @@ onMounted(() => {
               :rules="rules.required"
               :loading="loading"
               :disabled="loading"
+              density="compact"
               item-value="id"
             ></VAutocomplete>
           </VCol>
@@ -250,7 +251,6 @@ onMounted(() => {
             v-if="props.selected[0]?.require?.toLowerCase() == 'tutor'"
           >
             <VAutocomplete
-              variant="solo"
               clearable
               v-model="form.subject_name"
               label="Subject Tutoring"
@@ -258,6 +258,7 @@ onMounted(() => {
               :loading="loading"
               :disabled="loading"
               :rules="rules.required"
+              density="compact"
               @update:modelValue="getIndividualFee(tutor_selected.id, form.subject_name, form.curriculum_id)"
             ></VAutocomplete>
           </VCol>
@@ -266,11 +267,11 @@ onMounted(() => {
             col="12"
           >
             <VAutocomplete
-              variant="solo"
               clearable
               label="Package"
               v-model="form.package_id"
               :items="package_list"
+              density="compact"
               :item-props="
                 item => ({
                   title: item.package != null ? item.type_of + ' - ' + item.package : item.type_of,
@@ -290,11 +291,11 @@ onMounted(() => {
           >
             <VTextField
               type="number"
-              variant="solo"
               clearable
               :label="+form.duration / 60 ? 'Minutes (' + form.duration / 60 + ' Hours)' : 'Minutes'"
               :readonly="duration_readonly"
               v-model="form.duration"
+              density="compact"
               :rules="rules.required"
             />
           </VCol>
@@ -304,10 +305,10 @@ onMounted(() => {
           >
             <VTextField
               type="number"
-              variant="solo"
               clearable
               label="Fee/hours (Gross)"
               v-model="form.individual_fee"
+              density="compact"
               :rules="rules.required"
             />
           </VCol>
@@ -317,11 +318,11 @@ onMounted(() => {
           >
             <VTextField
               type="number"
-              variant="solo"
               clearable
               label="Tax"
               v-model="form.tax"
               :rules="rules.required"
+              density="compact"
             />
           </VCol>
           <VCol
@@ -329,11 +330,11 @@ onMounted(() => {
             col="12"
           >
             <VAutocomplete
-              variant="solo"
               clearable
               v-model="form.inhouse_id"
               label="Inhouse Mentor/Tutor"
               :items="inhouse_mentor"
+              density="compact"
               :item-props="
                 item => ({
                   title: item.full_name,
@@ -350,7 +351,6 @@ onMounted(() => {
             cols="12"
           >
             <VAutocomplete
-              variant="solo"
               multiple
               clearable
               chips
@@ -360,6 +360,7 @@ onMounted(() => {
               item-title="full_name"
               item-value="id"
               :loading="loading"
+              density="compact"
               :disabled="loading"
               :rules="rules.required"
             ></VAutocomplete>
@@ -368,12 +369,12 @@ onMounted(() => {
             <VTextarea
               label="Notes"
               v-model="form.notes"
-              variant="solo"
+              density="compact"
             ></VTextarea>
           </VCol>
         </VRow>
 
-        <VCardActions class="mt-5">
+        <VCardActions class="mt-5 px-0">
           <VBtn
             variant="tonal"
             color="error"

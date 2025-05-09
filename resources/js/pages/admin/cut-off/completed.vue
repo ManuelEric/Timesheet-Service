@@ -213,7 +213,6 @@ onMounted(() => {
             v-model="keyword"
             placeholder="Search"
             prepend-inner-icon="ri-search-line"
-            variant="solo"
             @click:clear="searchData"
             @input="searchData"
           />
@@ -229,7 +228,6 @@ onMounted(() => {
             item-value="id"
             v-model="package_id"
             placeholder="Select Timesheet Package"
-            variant="solo"
             @update:modelValue="getData"
           />
         </VCol>
@@ -249,7 +247,6 @@ onMounted(() => {
             item-value="id"
             v-model="tutor_id"
             placeholder="Select Tutor/Mentor Name"
-            variant="solo"
             @update:modelValue="getData"
           />
         </VCol>
@@ -260,7 +257,6 @@ onMounted(() => {
             prepend-icon=""
             multiple="range"
             color="primary"
-            variant="solo"
             :clearable="true"
             @update:modelValue="getData"
           ></VDateInput>
@@ -288,7 +284,6 @@ onMounted(() => {
             <VCol cols="12">
               <VDateInput
                 label="Start - End Date"
-                variant="solo"
                 prepend-icon=""
                 multiple="range"
                 v-model="formDownload.cut_off_date"
@@ -304,7 +299,6 @@ onMounted(() => {
               <v-autocomplete
                 :loading="loading"
                 label="Timesheet - Package"
-                variant="solo"
                 :items="timesheet"
                 :item-props="
                   item => ({

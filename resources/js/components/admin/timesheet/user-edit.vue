@@ -153,7 +153,7 @@ onMounted(() => {
         <VRow>
           <VCol md="8">
             <VAutocomplete
-              variant="solo"
+              density="compact"
               clearable
               label="Package"
               v-model="form.package_id"
@@ -171,7 +171,6 @@ onMounted(() => {
           <VCol md="4">
             <VTextField
               type="number"
-              variant="solo"
               clearable
               :label="+form.duration / 60 ? 'Minutes (' + form.duration / 60 + ' Hours)' : 'Minutes'"
               :readonly="duration_readonly"
@@ -181,7 +180,7 @@ onMounted(() => {
           </VCol>
           <VCol md="12">
             <VAutocomplete
-              variant="solo"
+              density="compact"
               clearable
               v-model="form.inhouse_id"
               label="Inhouse Mentor/Tutor"
@@ -199,7 +198,7 @@ onMounted(() => {
           </VCol>
           <VCol md="12">
             <VAutocomplete
-              variant="solo"
+              density="compact"
               multiple
               clearable
               chips
@@ -215,16 +214,17 @@ onMounted(() => {
           </VCol>
           <VCol md="12">
             <VTextarea
+              density="compact"
               label="Notes"
               v-model="form.notes"
-              variant="solo"
             ></VTextarea>
           </VCol>
         </VRow>
 
-        <VDivider class="my-3" />
+        <VDivider class="my-3 px-0" />
         <VCardActions>
           <VBtn
+            variant="tonal"
             color="error"
             type="button"
             @click="emit('close')"
@@ -237,6 +237,7 @@ onMounted(() => {
           </VBtn>
           <VSpacer />
           <VBtn
+            variant="tonal"
             color="success"
             type="submit"
           >

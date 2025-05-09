@@ -106,7 +106,6 @@ onMounted(() => {
                 "
                 item-value="id"
                 placeholder="Select Package"
-                variant="solo"
                 :loading="loading"
                 :disabled="loading"
                 @update:modelValue="getData"
@@ -123,7 +122,6 @@ onMounted(() => {
             :disabled="loading"
             append-inner-icon="ri-search-line"
             label="Search"
-            variant="solo"
             hide-details
             single-line
             v-model="keyword"

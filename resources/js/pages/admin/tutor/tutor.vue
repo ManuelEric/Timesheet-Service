@@ -87,7 +87,6 @@ onMounted(() => {
             append-inner-icon="ri-search-line"
             density="compact"
             label="Search"
-            variant="solo"
             hide-details
             single-line
             @input="searchData"

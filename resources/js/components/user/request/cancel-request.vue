@@ -53,7 +53,6 @@ const submit = async () => {
                 <VTextarea
                   label="Reason"
                   v-model="form.cancellation_reason"
-                  variant="solo"
                   :rules="rules.required"
                 ></VTextarea>
               </VCol>

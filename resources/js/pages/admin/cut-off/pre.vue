@@ -91,7 +91,6 @@ onMounted(() => {
             v-model="package_id"
             placeholder="Select Timesheet Package"
             density="compact"
-            variant="solo"
             @update:modelValue="getData"
           />
         </VCol>
@@ -105,7 +104,6 @@ onMounted(() => {
             prepend-inner-icon="ri-search-line"
             density="compact"
             label="Search"
-            variant="solo"
             hide-details
             single-line
             v-model="keyword"

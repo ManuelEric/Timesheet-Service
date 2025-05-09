@@ -64,7 +64,6 @@ const submit = async () => {
             <VDateInput
               v-model="cut_off_date"
               label="Start - End Date"
-              variant="solo"
               :rules="rules.required"
               multiple="range"
               @update:modelValue="handleDate"

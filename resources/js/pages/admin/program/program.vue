@@ -23,7 +23,7 @@ const program_name = ref()
 // Start Function
 const getData = async () => {
   // reset selected
-  selected.value = []
+  // selected.value = []
 
   // Check Category of Ref Program
   const category = props.name
@@ -112,7 +112,6 @@ onMounted(() => {
             item-title="program_name"
             placeholder="Select Program Name"
             density="compact"
-            variant="solo"
             hide-details
             single-line
             :loading="loading"
@@ -130,7 +129,6 @@ onMounted(() => {
             append-inner-icon="ri-search-line"
             density="compact"
             label="Search"
-            variant="solo"
             hide-details
             single-line
             @input="searchData"
@@ -168,7 +166,7 @@ onMounted(() => {
         <ProgramTutor
           v-if="props.name == 'tutoring'"
           :selected="selected"
-          @close="dialog = false"
+          @close=";(dialog = false), (selected = [])"
           @reload="getData"
         />
 

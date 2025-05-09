@@ -52,7 +52,6 @@ const submit = async () => {
           <VCol cols="12">
             <VDateInput
               v-model="cut_off_date"
-              variant="solo"
               label="Start - End Date"
               :rules="rules.required"
               multiple="range"
