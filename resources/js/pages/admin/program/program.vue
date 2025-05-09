@@ -75,7 +75,6 @@ const searchData = debounce(async item => {
 const goToTimesheet = id => {
   window.open('/admin/timesheet/' + props.name + '/' + id)
 }
-
 // End Function
 
 watch(() => {
@@ -187,12 +186,18 @@ onMounted(() => {
       >
         Selected:
         <small
-          class="bg-info px-3 rounded-xl ms-1"
-          style="font-size: 10px"
+          class="bg-info px-3 rounded-xl ms-1 d-flex"
+          style="font-size: 10px; align-items: center"
           v-for="item in selected"
           :key="item"
         >
           {{ item.mentee }}
+          <v-icon
+            icon="ri-close-line"
+            color="error"
+            class="ms-2 cursor-pointer"
+            @click="selected = selected.filter(data => data !== item)"
+          />
         </small>
       </div>
       <vSkeletonLoader
