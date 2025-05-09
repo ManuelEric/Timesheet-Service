@@ -182,7 +182,7 @@ onMounted(() => {
               @input="searchData"
             />
 
-            <div class="">
+            <div v-if="props.name == 'tutoring'">
               <v-tooltip
                 activator="parent"
                 location="start"
