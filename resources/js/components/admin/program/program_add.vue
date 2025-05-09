@@ -123,8 +123,6 @@ const getCurriculum = async () => {
   try {
     const res = await ApiService.get('api/v1/curriculum/component/list')
     if (res) curriculum_list.value = res
-
-    console.log(res)
   } catch (error) {
     console.error(error)
   }
@@ -156,7 +154,6 @@ const submit = async () => {
           individual_fee: '',
         }
         tutor_selected.value = []
-        console.log(res)
       }
     } catch (error) {
       console.log(error)

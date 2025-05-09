@@ -41,7 +41,6 @@ const getProgram = async () => {
 
     if (res) {
       program_list.value = res
-      console.log(res)
     }
     loading.value = false
   } catch (error) {
@@ -172,7 +171,6 @@ const submit = async () => {
           individual_fee: '',
         }
         tutor_selected.value = []
-        console.log(res)
       }
     } catch (error) {
       console.log(error)
@@ -220,7 +218,8 @@ onMounted(() => {
               :item-props="
                 item => ({
                   title: item.student_name,
-                  subtitle: item.program_name + (item.timesheet_id || item.scnd_timesheet_id ? ' ✅' : ''),
+                  subtitle:
+                    item.program_name + (item.timesheet_id ? ' ✅' : '') + (item.scnd_timesheet_id ? ' ✅' : ''),
                 })
               "
               item-value="id"
