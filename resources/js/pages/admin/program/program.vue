@@ -180,6 +180,21 @@ onMounted(() => {
       <!-- End Assign Modal  -->
 
       <!-- Loader  -->
+      <div
+        class="d-flex bg-secondary py-1 px-2 rounded-lg"
+        style="align-items: center"
+        v-if="selected.length > 0"
+      >
+        Selected:
+        <small
+          class="bg-info px-3 rounded-xl ms-1"
+          style="font-size: 10px"
+          v-for="item in selected"
+          :key="item"
+        >
+          {{ item.mentee }}
+        </small>
+      </div>
       <vSkeletonLoader
         class="mx-auto border"
         type="table-thead, table-row@10"
@@ -230,6 +245,7 @@ onMounted(() => {
                 :value="{
                   id: item.id,
                   require: item.require,
+                  mentee: item.student_name,
                 }"
                 v-else-if="(!item.timesheet_id || !item.scnd_timesheet_id) && !item.cancellation_reason"
               ></VCheckbox>

@@ -139,7 +139,7 @@ const submit = async () => {
       if (res) {
         showNotif('success', res.message, 'bottom-end')
         emit('reload')
-        selected.value = []
+
         form.value = {
           ref_id: [],
           mentortutor_email: null,
