@@ -114,10 +114,10 @@ onMounted(() => {
         <div class="w-100">
           <h4>Activity</h4>
         </div>
+        <!-- for external mentor & tutor  -->
         <VBtn
           v-tooltip:start="'New Activity'"
           @click="toggleDialog('add')"
-          v-if="role == 'external mentor'"
         >
           <VIcon icon="ri-add-line" />
         </VBtn>

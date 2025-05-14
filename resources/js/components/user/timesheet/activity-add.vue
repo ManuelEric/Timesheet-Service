@@ -80,6 +80,7 @@ const submit = async () => {
               placeholder="Activity"
               :loading="loading"
               :disabled="loading"
+              density="compact"
             />
           </VCol>
           <VCol cols="12">
@@ -90,6 +91,7 @@ const submit = async () => {
               :loading="loading"
               :disabled="loading"
               :rules="rules.required"
+              density="compact"
             />
           </VCol>
           <VCol
@@ -104,6 +106,8 @@ const submit = async () => {
               :loading="loading"
               :disabled="loading"
               :rules="rules.required"
+              variant="outlined"
+              density="compact"
             />
           </VCol>
           <VCol
@@ -119,6 +123,7 @@ const submit = async () => {
               class="mb-3"
               :loading="loading"
               :disabled="loading"
+              density="compact"
               @change="form.start_date = moment(form.date).format('YYYY-MM-DD') + ' ' + form.start_time + ':00'"
             />
           </VCol>
@@ -133,6 +138,7 @@ const submit = async () => {
               placeholder="End Time"
               :loading="loading"
               :disabled="loading"
+              density="compact"
               @change="form.end_date = moment(form.date).format('YYYY-MM-DD') + ' ' + form.end_time + ':00'"
             />
           </VCol>
@@ -145,8 +151,10 @@ const submit = async () => {
               v-model="form.meeting_link"
               label="Meeting Link"
               placeholder="Meeting Link"
+              density="compact"
               :loading="loading"
               :disabled="loading"
+              :rules="rules.url"
             />
           </VCol>
         </VRow>
