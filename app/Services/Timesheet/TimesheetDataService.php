@@ -170,7 +170,7 @@ class TimesheetDataService
         $detailPackage = $timesheet->detail_package;
         $duration = $timesheet->duration;
         $timeSpent = $timesheet->activities()->sum('time_spent');
-        $notes = $timesheet->notes;
+        $notes = $timesheet->ref_program->last()->notes ?? $timesheet->second_ref_program->last()->notes ?? null;
         $void = $timesheet->void;
 
 
@@ -277,7 +277,7 @@ class TimesheetDataService
                     'client_name' => $studentName,
                     'client_mail' => $crm_clientInfo['mail'] ?? null,
                     'client_school' => $studentSchool,
-                    'client_grade' => $crm_clientInfo['grade'],
+                    'client_grade' => $crm_clientInfo['grade'] ?? null,
                 ]);
             }
         }

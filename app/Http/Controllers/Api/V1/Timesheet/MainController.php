@@ -117,7 +117,9 @@ class MainController extends Controller
                 'tax' => $validatedTax
             ]);
             
-        } elseif ($refProgram && $refProgram->require === 'Mentor') { # require mentor
+        } 
+        elseif ($refProgram && $refProgram->require === 'Mentor') # require mentor
+        { 
             $tempUserRoles = TempUserRoles::firstOrCreate([
                 'temp_user_id' => $mentorTutorId,
                 'role' => 'External Mentor',
@@ -145,10 +147,13 @@ class MainController extends Controller
         $validatedSubject = $tempUserRoles->id;
         /************************* changes ***********************/
 
-        $createTimesheetService->storeTimesheet($validatedRefPrograms, $newPackageDetails, $validatedNotes, $validatedInhouse, $validatedPics, $mentorTutorId, $validatedSubject);
+        $createdTimesheet = $createTimesheetService->storeTimesheet($validatedRefPrograms, $newPackageDetails, $validatedNotes, $validatedInhouse, $validatedPics, $mentorTutorId, $validatedSubject);
     
         return response()->json([
-            'message' => "Timesheet has been created successfully."
+            'message' => "Timesheet has been created successfully.",
+            'data' => [
+                'timesheet_id' => $createdTimesheet->id,
+            ]
         ]);
     }
 

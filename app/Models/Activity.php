@@ -123,4 +123,15 @@ class Activity extends Model
             });
         });
     }
+
+    public function scopeFilterCutoff(Builder $query, array $search): void
+    {
+        $cutoff_start = $search['cutoff_start'] ?? false;
+        $cutoff_end = $search['cutoff_end'] ?? false;
+        $query->when($cutoff_start, function ($query) use ($cutoff_start) {
+            $query->where('start_date', '>=', $cutoff_start);
+        })->when($cutoff_end, function ($query) use ($cutoff_end) {
+            $query->where('end_date', '<=', $cutoff_end);
+        });
+    }
 }
