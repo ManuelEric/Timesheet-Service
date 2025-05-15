@@ -170,7 +170,10 @@ class TimesheetDataService
         $detailPackage = $timesheet->detail_package;
         $duration = $timesheet->duration;
         $timeSpent = $timesheet->activities()->sum('time_spent');
-        $notes = $timesheet->ref_program->last()->notes ?? $timesheet->second_ref_program->last()->notes ?? null;
+
+
+        // $notes = $timesheet->ref_program->last()->notes ?? $timesheet->second_ref_program->last()->notes ?? null;
+        $notes = $timesheet->notes;
         $void = $timesheet->void;
 
 
