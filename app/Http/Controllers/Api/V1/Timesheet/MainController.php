@@ -153,6 +153,7 @@ class MainController extends Controller
             'message' => "Timesheet has been created successfully.",
             'data' => [
                 'timesheet_id' => $createdTimesheet->id,
+                'student_name' => $createdTimesheet->list_of_student_name, // could be more than 1 student 
             ]
         ]);
     }

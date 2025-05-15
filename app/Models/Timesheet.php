@@ -66,6 +66,21 @@ class Timesheet extends Model
             return $this->second_ref_program;
     }
 
+    protected function listOfStudentName(): Attribute
+    {
+        return new Attribute(
+            get: fn () => $this->getListOfStudentName()
+        );
+    }
+
+    private function getListOfStudentName()
+    {
+        $student_name = [];
+        foreach ($this->reference_program as $program) {
+            $student_name[] = $program->student_name;
+        }
+        return implode(', ', $student_name);
+    }
     
     /**
      * The relations.

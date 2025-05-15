@@ -44,6 +44,7 @@ class TimesheetObserver
 
         /* detach related timesheet from ref_programs */
         Ref_Program::where('timesheet_id', $timesheetId)->update(['timesheet_id' => NULL]);
+        Ref_Program::where('scnd_timesheet_id', $timesheetId)->update(['scnd_timesheet_id' => NULL]);
 
         /* delete the timesheet handling records by mentor/tutor */ 
         HandleBy::where('timesheet_id', $timesheetId)->delete();
