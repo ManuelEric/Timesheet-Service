@@ -8,6 +8,7 @@ import debounce from 'lodash/debounce'
 // Start Variable
 const selected = ref([])
 const dialog = ref(false)
+const dialogNotes = ref(false)
 
 const props = defineProps({ name: String })
 
@@ -18,6 +19,7 @@ const data = ref([])
 const loading = ref(false)
 const program_list = ref([])
 const program_name = ref()
+const notes = ref()
 // End Variable
 
 // Start Function
@@ -88,6 +90,19 @@ onMounted(() => {
 </script>
 
 <template>
+  <v-dialog
+    v-model="dialogNotes"
+    width="400"
+  >
+    <v-card
+      title="Notes"
+      prepend-icon="ri-chat-3-line"
+    >
+      <v-card-text>
+        <div v-html="notes"></div>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
   <VCard>
     <VCardTitle>
       <div class="d-flex justify-between align-center">
@@ -319,6 +334,23 @@ onMounted(() => {
                 class="me-3"
               ></VIcon>
               {{ item.student_name }}
+
+              <div
+                class="d-inline ms-2 cursor-pointer"
+                v-if="props.name == 'specialist' && item.notes"
+                @click=";(dialogNotes = true), (notes = item.notes)"
+              >
+                <v-tooltip
+                  activator="parent"
+                  location="start"
+                >
+                  Notes
+                </v-tooltip>
+                <v-icon
+                  icon="ri-chat-3-line"
+                  color="info"
+                ></v-icon>
+              </div>
             </td>
             <td
               class="text-left"

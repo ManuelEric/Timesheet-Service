@@ -1,5 +1,6 @@
 import axios from 'axios'
 import JwtService from './JwtService'
+import UserService from './UserService'
 
 
 const token = JwtService.getToken()
@@ -33,12 +34,13 @@ apiClient.interceptors.response.use(
     return response
   },
   error => {
-    // if (error?.response?.status === 401) {
-    //   // Hapus token dari tempat penyimpanan Anda
-    //   console.log('Token expired or invalid. Please log in again.');
-    //   JwtService.destroyToken();
-    //   router.go(0)
-    // }
+    if (error?.response?.status === 401) {
+      // Hapus token dari tempat penyimpanan Anda
+      UserService.destroyUser();
+      JwtService.destroyToken();
+      // console.log('Token expired or invalid. Please log in again.');
+      router.go(0)
+    }
 
     return Promise.reject(error)
   },

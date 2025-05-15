@@ -51,6 +51,7 @@ const selectedActivity = (type, item) => {
 }
 
 const deleteActivity = async () => {
+  loading.value = true
   try {
     const res = await ApiService.delete('api/v1/timesheet/' + props.id + '/activity/' + selectedItem.value.id)
     if (res) {
@@ -62,6 +63,7 @@ const deleteActivity = async () => {
       showNotif('error', error.response?.data?.errors, 'bottom-end')
     }
   } finally {
+    loading.value = false
     getData()
     updateReload(true)
   }
@@ -279,6 +281,7 @@ onMounted(() => {
     >
       <DeleteDialog
         title="activity"
+        :loading="loading"
         @close="toggleDialog('delete')"
         @delete="deleteActivity"
       />

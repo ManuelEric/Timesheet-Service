@@ -135,6 +135,8 @@ const submit = async () => {
           individual_fee: '',
         }
         tutor_selected.value = []
+
+        window.open('/admin/timesheet/tutoring/' + res.data?.timesheet_id, '_blank')
       }
     } catch (error) {
       if (error?.response?.data?.errors) {

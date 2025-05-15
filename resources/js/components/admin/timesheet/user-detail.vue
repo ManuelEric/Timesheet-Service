@@ -46,6 +46,7 @@ const getData = async id => {
 }
 
 const deleteTimesheet = async () => {
+  loading.value = true
   try {
     const res = await ApiService.delete('api/v1/timesheet/' + props.id + '/delete')
     if (res) {
@@ -58,6 +59,8 @@ const deleteTimesheet = async () => {
     if (error.response?.status == 400) {
       showNotif('error', error.response?.data?.errors, 'bottom-end')
     }
+  } finally {
+    loading.value = false
   }
 }
 
@@ -475,6 +478,7 @@ watch(() => {
     >
       <DeleteDialog
         title="timesheet"
+        :loading="loading"
         @delete="deleteTimesheet"
         @close="toggleDialog('delete')"
       />

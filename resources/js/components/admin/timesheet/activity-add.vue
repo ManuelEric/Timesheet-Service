@@ -104,6 +104,7 @@ const submit = async () => {
               v-model="form.date"
               label="Date"
               placeholder="Select Date"
+              variant="outlined"
               prepend-icon=""
               :loading="loading"
               :disabled="loading"
@@ -123,7 +124,7 @@ const submit = async () => {
               :rules="rules.required"
               class="mb-3"
               :loading="loading"
-              :disabled="loading"
+              :disabled="!form.date || loading"
               @change="form.start_date = moment(form.date).format('YYYY-MM-DD') + ' ' + form.start_time + ':00'"
             />
           </VCol>
@@ -138,7 +139,7 @@ const submit = async () => {
               label="End Time"
               placeholder="End Time"
               :loading="loading"
-              :disabled="loading"
+              :disabled="!form.date || loading"
               @change="form.end_date = moment(form.date).format('YYYY-MM-DD') + ' ' + form.end_time + ':00'"
             />
           </VCol>
