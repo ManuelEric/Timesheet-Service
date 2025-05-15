@@ -12,11 +12,13 @@ class PayrollExport implements FromView, WithTitle
 {
     protected $timesheet;
     protected $activities;
+    protected $cutoff;
 
-    public function __construct($timesheet, $activities)
+    public function __construct($timesheet, $activities, $cutoff)
     {
         $this->timesheet = $timesheet;
         $this->activities = $activities;
+        $this->cutoff = $cutoff;
     }
 
     /**
@@ -41,13 +43,7 @@ class PayrollExport implements FromView, WithTitle
 
         # store the activities data into activities variable, so that viewData can allow to be inside compact()
         $activities = $this->activities;
-
-        # because there is possibilites, activities in 1 month could have different cutoff history
-        //// # then we only take 1 cutoff history ID as reference for the whole month
-        # then we only take 1 latest cutoff history
-        $latest_index = count($this->activities)-1;
-        $cutoff_ref_id = $this->activities[$latest_index]['cutoff_ref_id'];
-        $cutoff = Cutoff::find($cutoff_ref_id);
+        $cutoff = $this->cutoff;
 
         $total_hour = $this->activities->sum('time_spent');
 
