@@ -324,22 +324,23 @@ onMounted(() => {
               {{ item.spent / 60 }} Hours
             </td>
             <td>
-              <router-link :to="'/admin/timesheet/' + props.name + '/' + item.id">
-                <VBtn :color="item.void == 'true' ? 'light' : 'secondary'">
-                  <VIcon
-                    icon="ri-timeline-view"
-                    class="cursor-pointer"
-                  />
+              <VBtn
+                :color="item.void == 'true' ? 'light' : 'secondary'"
+                @click="goToTimesheet(item.id)"
+              >
+                <VIcon
+                  icon="ri-timeline-view"
+                  class="cursor-pointer"
+                />
 
-                  <VTooltip
-                    activator="parent"
-                    location="top"
-                    transition="scroll-y-transition"
-                  >
-                    View Detail
-                  </VTooltip>
-                </VBtn>
-              </router-link>
+                <VTooltip
+                  activator="parent"
+                  location="top"
+                  transition="scroll-y-transition"
+                >
+                  View Detail
+                </VTooltip>
+              </VBtn>
             </td>
           </tr>
         </tbody>
