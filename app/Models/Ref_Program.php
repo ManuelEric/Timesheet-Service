@@ -97,6 +97,7 @@ class Ref_Program extends Model
     {
         $program_name = $search['program_name'] ?? false;
         $keyword = $search['keyword'] ?? false;
+        $has_timesheet = isset($search['has_timesheet']) ? $search['has_timesheet'] == "true" ? true : false : null;
 
         $query->
             when( $program_name, function ($_sub_) use ($program_name) {
@@ -109,6 +110,13 @@ class Ref_Program extends Model
                             where('student_name', 'like', '%'.$keyword.'%')->
                             orWhere('student_school', 'like', '%'.$keyword.'%');
                     });
+            })->
+            when( $has_timesheet !== null, function ($query) use ($has_timesheet) {
+                $query->when($has_timesheet == "true", function ($query) {
+                    $query->has('timesheet')->orHas('second_timesheet');
+                }, function ($query) {
+                    $query->doesntHave('timesheet')->doesntHave('second_timesheet');
+                });
             });
     }
 
