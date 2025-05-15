@@ -51,14 +51,14 @@ class PaymentService
 
 
             $detailTimesheet = $this->timesheetDataService->detailTimesheet($timesheet);
-            $activities = $this->activityDataService->listActivitiesByTimesheetAndCutoff($timesheet, $validatedCutoffStart, $validatedCutoffEnd);
+            $activities = $this->activityDataService->listActivitiesByTimesheet($timesheet);
             unset($detailTimesheet['editableColumns']);
 
             $cutoff = Cutoff::inBetween($validatedCutoffStart, $validatedCutoffEnd)->first();
             $cutoffId = $cutoff->id;
             $activities = $activities->where('cutoff_ref_id', $cutoffId);
             
-            return Excel::download(new PayrollExport($detailTimesheet, $activities), $this->filename);
+            return Excel::download(new PayrollExport($detailTimesheet, $activities, $cutoff), $this->filename);
 
         }
 
@@ -91,17 +91,19 @@ class PaymentService
 
             $timesheet = $this->identifyTimesheetIdAction->execute($timesheet->id);
             $detailTimesheet = $this->timesheetDataService->detailTimesheet($timesheet);
-            // echo json_encode($detailTimesheet);
-            // echo '<br><br>';
+            $activities = $this->activityDataService->listActivitiesByTimesheet($timesheet);
 
-            $activities = $this->activityDataService->listActivitiesByTimesheetAndCutoff($timesheet, $validatedCutoffStart, $validatedCutoffEnd);
+            $cutoff = Cutoff::inBetween($validatedCutoffStart, $validatedCutoffEnd)->first();
+            $cutoffId = $cutoff->id;
+            $activities = $activities->where('cutoff_ref_id', $cutoffId);
+            
             // echo json_encode($activities);
             // echo '<br>';
             // echo 'cutoff ref id terakhir ' . $activities[count($activities)-1]['cutoff_ref_id']. ' dari total activities '. count($activities);
             // echo '<br><br><br><br><br><br>';continue;
 
             // regist into the exports
-            $exports[] = new PayrollExport($detailTimesheet, $activities);
+            $exports[] = new PayrollExport($detailTimesheet, $activities, $cutoff);
         }
         // exit;
 
