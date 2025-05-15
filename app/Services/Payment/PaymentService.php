@@ -51,7 +51,7 @@ class PaymentService
 
 
             $detailTimesheet = $this->timesheetDataService->detailTimesheet($timesheet);
-            $activities = $this->activityDataService->listActivitiesByTimesheet($timesheet);
+            $activities = $this->activityDataService->listActivitiesByTimesheetAndCutoff($timesheet, $validatedCutoffStart, $validatedCutoffEnd);
             unset($detailTimesheet['editableColumns']);
 
             $cutoff = Cutoff::inBetween($validatedCutoffStart, $validatedCutoffEnd)->first();
