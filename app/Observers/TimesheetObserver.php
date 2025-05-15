@@ -43,12 +43,30 @@ class TimesheetObserver
         $timesheetId = $timesheet->id;
 
         /* detach related timesheet from ref_programs */
-        Ref_Program::where('timesheet_id', $timesheetId)->update(['timesheet_id' => NULL]);
-        Ref_Program::where('scnd_timesheet_id', $timesheetId)->update(['scnd_timesheet_id' => NULL]);
+        /* first case: if deleted timesheet is the first timesheet */
+        if ( Ref_Program::where('timesheet_id', $timesheetId)->exists() )
+        {
+            $ref_Program = Ref_Program::where('timesheet_id', $timesheetId)->first();
+            if ( $ref_Program->scnd_timesheet_id != NULL )
+            {
+                $ref_Program->timesheet_id = $ref_Program->scnd_timesheet_id;
+                $ref_Program->scnd_timesheet_id = NULL;
+            }
+            else
+            {
+                $ref_Program->timesheet_id = NULL;
+            }   
+            $ref_Program->save();
+        }
+        /* second case: if deleted timesheet is the second timesheet */
+        if ( Ref_Program::where('scnd_timesheet_id', $timesheetId)->exists() )
+            Ref_Program::where('scnd_timesheet_id', $timesheetId)->update(['scnd_timesheet_id' => NULL]);
+        
 
         /* delete the timesheet handling records by mentor/tutor */ 
         HandleBy::where('timesheet_id', $timesheetId)->delete();
 
+        
         /* delete the timesheet pic-ing records by admin */ 
         Pic::where('timesheet_id', $timesheetId)->delete();
 
