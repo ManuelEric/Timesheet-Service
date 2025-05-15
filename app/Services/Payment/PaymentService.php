@@ -94,7 +94,7 @@ class PaymentService
             // echo json_encode($detailTimesheet);
             // echo '<br><br>';
 
-            $activities = $this->activityDataService->listActivitiesByTimesheet($timesheet);
+            $activities = $this->activityDataService->listActivitiesByTimesheetAndCutoff($timesheet, $validatedCutoffStart, $validatedCutoffEnd);
             // echo json_encode($activities);
             // echo '<br>';
             // echo 'cutoff ref id terakhir ' . $activities[count($activities)-1]['cutoff_ref_id']. ' dari total activities '. count($activities);

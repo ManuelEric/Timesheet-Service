@@ -31,7 +31,15 @@ class MentoringServices
         ], ['crm-authorization' => env('CRM_AUTHORIZATION_KEY')]);
     }
 
-    public function storeMentoringLog(int $ref_Program_id, string $mentee_id, int $phase_detail_id, array $options = [])
+    public function storeMentoringLog(
+        int $ref_Program_id, 
+        string $mentee_id, 
+        int $phase_detail_id, 
+        string $mentor_id, 
+        string $activity_description,
+        string $meeting_link,
+        array $options = []
+    )
     {
         $endpoint = env('MENTORING_DOMAIN') . "mentoring-log";
 
@@ -40,21 +48,22 @@ class MentoringServices
             'phase_detail_id' => $phase_detail_id,
             'start_date' => $options['start_date'],
             'end_date' => $options['end_date'],
-            'mentor_id' => auth('sanctum')->user()->uuid,
+            'mentor_id' => $mentor_id,
+            'meeting_notes' => $activity_description,
+            'meeting_link' => $meeting_link,
         ], ['mentoring-authorization' => env('MENTORING_AUTHORIZATION_KEY')]);
         
         # update column mentoring_log_id using ref_program_id
         # in order to help determine which ref_program should be deleted if mentor cancel/delete the request
         Ref_Program::find($ref_Program_id)->update([
-            'mentoring_log_id' => $result['data']['id'],
+            'mentoring_log_id' => $result['data']['created_mentoring_log']['id'],
         ]);
     }
 
     public function deleteMentoringLog(int $ref_Program_id)
     {
         $ref_Program = Ref_Program::find($ref_Program_id);
-        $endpoint = env('MENTORING_DOMAIN') . "mentoring-log/{$ref_Program->mentoring_log_id}";
-        Log::debug($endpoint);
+        $endpoint = env('MENTORING_DOMAIN') . 'mentoring-log/' . $ref_Program->mentoring_log_id;
 
         [$status_code, $result] = $this->make_call('delete', $endpoint, [], ['mentoring-authorization' => env('MENTORING_AUTHORIZATION_KEY')]);
 

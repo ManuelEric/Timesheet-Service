@@ -82,6 +82,7 @@ class CreateTempUserService
         /* if the user has existed on timesheet db */
         if ( $tempUser ) {
             /* update the personal information from CRMs, in order to the data in timesheet db stay updated */
+            $tempUser->uuid = $uuid;
             $tempUser->full_name = $full_name;
             $tempUser->email = $email;
             $tempUser->phone = $phone;

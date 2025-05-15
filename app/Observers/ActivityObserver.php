@@ -46,7 +46,10 @@ class ActivityObserver implements ShouldHandleEventsAfterCommit
         {
             $mentee_id = $ref_Program->student_uuid;
             $phase_detail_id = $ref_Program->engagement_type_id; //! the primary of engagement type should be the same as primary of phase_detail_id
-            $this->mentoring_services->storeMentoringLog($ref_Program->id, $mentee_id, $phase_detail_id, $activity->toArray());
+            $mentor_id = $activity->timesheet->subject->temp_user->uuid;
+            $activity_description = $activity->description;
+            $meeting_link = $activity->meeting_link;
+            $this->mentoring_services->storeMentoringLog($ref_Program->id, $mentee_id, $phase_detail_id, $mentor_id, $activity_description, $meeting_link, $activity->toArray());
         }
 
     }
