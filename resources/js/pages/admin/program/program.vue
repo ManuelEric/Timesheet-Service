@@ -238,6 +238,12 @@ onMounted(() => {
             <th class="text-uppercase text-center">
               {{ props.name == 'tutoring' ? 'Program Name' : 'Engagement Type' }}
             </th>
+            <th
+              class="text-uppercase text-center"
+              v-if="props.name == 'tutoring'"
+            >
+              Tutor Name
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -380,6 +386,9 @@ onMounted(() => {
                 class="me-3"
               ></VIcon>
               {{ item.engagement_type }}
+            </td>
+            <td v-if="props.name == 'tutoring'">
+              {{ item.tutor_name }}
             </td>
           </tr>
         </tbody>
