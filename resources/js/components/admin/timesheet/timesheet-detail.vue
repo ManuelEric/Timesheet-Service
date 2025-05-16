@@ -148,7 +148,7 @@ onMounted(() => {
               No
             </th>
             <!-- <th class="text-uppercase text-center">Activity</th> -->
-            <th class="text-uppercase text-center">Meeting Discussion</th>
+            <th class="text-uppercase text-start">Meeting Discussion</th>
             <th class="text-uppercase text-center">Date</th>
             <th class="text-uppercase text-center">Start Time</th>
             <th class="text-uppercase text-center">End Time</th>
@@ -179,7 +179,11 @@ onMounted(() => {
               {{ item.activity }}
             </td>
             <td class="text-start">
-              {{ item.description }}
+              <div
+                class="py-2"
+                style="width: 250px; text-wrap: wrap"
+                v-html="item.description"
+              ></div>
             </td>
             <td>
               {{ $moment(item.start_date).format('dddd') }},

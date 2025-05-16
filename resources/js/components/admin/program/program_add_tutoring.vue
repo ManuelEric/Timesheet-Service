@@ -242,6 +242,7 @@ onMounted(() => {
                   title: item.student_name,
                   subtitle:
                     item.program_name + (item.timesheet_id ? ' ✅' : '') + (item.scnd_timesheet_id ? ' ✅' : ''),
+                  disabled: item.timesheet_id && item.scnd_timesheet_id,
                 })
               "
               item-value="id"
