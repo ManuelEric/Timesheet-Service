@@ -387,7 +387,10 @@ onMounted(() => {
               ></VIcon>
               {{ item.engagement_type }}
             </td>
-            <td v-if="props.name == 'tutoring'">
+            <td
+              v-if="props.name == 'tutoring'"
+              nowrap
+            >
               {{ item.tutor_name }}
             </td>
           </tr>
