@@ -4,6 +4,7 @@ import ProgramMentor from '@/components/admin/program/program_add_specialist.vue
 import { showNotif } from '@/helper/notification'
 import ApiService from '@/services/ApiService'
 import debounce from 'lodash/debounce'
+import { onUpdated } from 'vue'
 
 // Start Variable
 const selected = ref([])
@@ -81,6 +82,10 @@ const goToTimesheet = id => {
 
 watch(() => {
   getData()
+})
+
+onUpdated(() => {
+  selected.value = []
 })
 
 onMounted(() => {
