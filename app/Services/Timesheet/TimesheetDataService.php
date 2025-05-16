@@ -231,8 +231,8 @@ class TimesheetDataService
             'subject_id' => $subjectId,
             'inhouse_id' => $inhouseUuid,
             'curriculum_name' => $timesheet->subject->curriculum ? $timesheet->subject->curriculum->name : null,
-            'timesheet_tax' => $timesheetTax,
-            'timesheet_fee_hours' => $timesheetFeeHours,
+            'tax' => $timesheetTax, // timesheet tax
+            'individual_fee' => $timesheetFeeHours, // timesheet fee hours
         ];
 
         return compact('clientProfile', 'packageDetails', 'editableColumns');
