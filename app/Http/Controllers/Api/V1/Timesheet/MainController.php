@@ -176,6 +176,9 @@ class MainController extends Controller
             'pic_id',
             'notes',
             'subject_id',
+            /* added */
+            'individual_fee',
+            'tax',
         ]); 
 
         /* defines the validated variables */
@@ -186,11 +189,13 @@ class MainController extends Controller
         $validatedDuration = $validated['duration'];
         $validatedNotes = $validated['notes'];
         $validatedSubject = $validated['subject_id'];
+        $validatedIndividualFee = $validated['individual_fee'];
+        $validatedTax = $validated['tax'];
 
         $newPackageDetails = compact('validatedPackageId', 'validatedDuration');
 
         $mentorTutorId = TempUser::where('email', $validatedEmail)->first()->id;
-        $updateTimesheetAction->execute($timesheet, $newPackageDetails, $validatedNotes, $validatedInhouse, $validatedPics, $mentorTutorId, $validatedSubject);
+        $updateTimesheetAction->execute($timesheet, $newPackageDetails, $validatedNotes, $validatedInhouse, $validatedPics, $mentorTutorId, $validatedSubject, $validatedIndividualFee, $validatedTax);
 
         return response()->json([
             'message' => 'Timesheet has been updated successfully.'
