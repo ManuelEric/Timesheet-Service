@@ -154,6 +154,15 @@ class TimesheetDataService
     public function detailTimesheet(Timesheet $timesheet)
     {
         $refProgram = $timesheet->reference_program;
+        if ( count($refProgram) == 0 )
+        {
+            throw new HttpResponseException(
+                response()->json([
+                    'message' => 'Timesheet is invalid. No reference program found.'
+                ], JsonResponse::HTTP_NOT_FOUND)
+            );
+        }
+
         $transferredLog = $timesheet->transferred;
         $relatedProgram = count($refProgram) > 0 ? $refProgram : $transferredLog;
         # because timesheets consists of multiple ref programs
@@ -218,8 +227,8 @@ class TimesheetDataService
 
         /* fetch the data to support editable columns */
         $subjectId = $timesheet->subject_id;
-        $timesheetTax = $timesheet->activities()->first()->tax;
-        $timesheetFeeHours = $timesheet->activities()->first()->fee_hours;
+        $timesheetTax = $timesheet->activities()->first()?->tax ?? null;
+        $timesheetFeeHours = $timesheet->activities()->first()?->fee_hours ?? null;
         
         $editableColumns = [
             'pic_id' => $adminId,
