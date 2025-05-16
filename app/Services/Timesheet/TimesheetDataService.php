@@ -194,6 +194,7 @@ class TimesheetDataService
             ? $refProgram->first()->engagement_type->name
             : null;
         $tax = $timesheet->subject->tax;
+        $feeHours = $timesheet->subject->fee_individual;
         $packageDetails = [
             'program_name' => $programName,
             'void' => $timesheet->void,
@@ -206,6 +207,7 @@ class TimesheetDataService
             'tutormentor_name' => $tutorMentorName,
             'tutormentor_has_npwp' => $tutorMentorHasNPWP,
             'tutormentor_tax' => $tax,
+            'tutormentor_fee_hours' => $feeHours,
             'inhouse_name' => $inhouseName,
             'last_updated' => $last_updated,
             'duration_in_minutes' => $duration,
@@ -216,6 +218,8 @@ class TimesheetDataService
 
         /* fetch the data to support editable columns */
         $subjectId = $timesheet->subject_id;
+        $timesheetTax = $timesheet->activities()->first()->tax;
+        $timesheetFeeHours = $timesheet->activities()->first()->fee_hours;
         
         $editableColumns = [
             'pic_id' => $adminId,
@@ -226,7 +230,9 @@ class TimesheetDataService
             'notes' => $notes,
             'subject_id' => $subjectId,
             'inhouse_id' => $inhouseUuid,
-            'curriculum_name' => $timesheet->subject->curriculum ? $timesheet->subject->curriculum->name : null
+            'curriculum_name' => $timesheet->subject->curriculum ? $timesheet->subject->curriculum->name : null,
+            'timesheet_tax' => $timesheetTax,
+            'timesheet_fee_hours' => $timesheetFeeHours,
         ];
 
         return compact('clientProfile', 'packageDetails', 'editableColumns');

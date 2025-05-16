@@ -25,7 +25,9 @@ class UpdateTimesheetAction
         string $inhouseId, 
         array $picIds, 
         string $mentortutorId, 
-        ?int $subjectId = NULL
+        ?int $subjectId = NULL,
+        $feeHours,
+        $tax,
         )
     {
         /* define submitted package variables */
@@ -47,6 +49,12 @@ class UpdateTimesheetAction
             $existingTimesheet->update($timesheetNewDetails);
             $existingTimesheet->handle_by()->attach($mentortutorId, ['active' => true]);
             $existingTimesheet->admin()->sync($picIds);
+
+            /* update the tax and fees from activities */
+            $existingTimesheet->activities()->update([
+                'tax' => $tax,
+                'fee_hours' => $feeHours,
+            ]);
 
             DB::commit();
 
