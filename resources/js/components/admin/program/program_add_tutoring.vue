@@ -17,6 +17,7 @@ const inhouse_mentor = ref([])
 const duration_readonly = ref(false)
 const require = ref('tutor')
 const has_npwp = ref(null)
+const fee_nett = ref(null)
 
 const formData = ref()
 const form = ref({
@@ -107,7 +108,7 @@ const getPIC = async () => {
 const getSubject = async (item, uuid = null, npwp = 0) => {
   // check NPWP
   has_npwp.value = npwp
-  form.value.tax = npwp == 1 ? 2.5 : 3
+  form.value.tax = npwp == 1 ? 2.5 : 2.5
 
   form.value.subject_id = null
 
@@ -126,13 +127,20 @@ const getSubject = async (item, uuid = null, npwp = 0) => {
 }
 
 const getIndividualFee = async (tutor_id, subject_name, curriculum_id) => {
-  try {
-    const res = await ApiService.get('api/v1/component/fee/' + tutor_id + '/' + subject_name + '/' + curriculum_id)
-    if (res) {
-      form.value.individual_fee = res.fee_individual
+  if (subject_name) {
+    try {
+      const res = await ApiService.get('api/v1/component/fee/' + tutor_id + '/' + subject_name + '/' + curriculum_id)
+      if (res) {
+        form.value.individual_fee = res.fee_individual
+        if (res.fee_individual) {
+          checkNettFee()
+        } else {
+          fee_nett.value = null
+        }
+      }
+    } catch (error) {
+      console.error(error)
     }
-  } catch (error) {
-    console.error(error)
   }
 }
 
@@ -156,7 +164,6 @@ const submit = async () => {
       if (res) {
         showNotif('success', res.message, 'bottom-end')
         emit('reload')
-        selected.value = []
         form.value = {
           ref_id: [],
           mentortutor_email: null,
@@ -186,6 +193,16 @@ const submit = async () => {
     }
   }
 }
+
+const checkNettFee = () => {
+  const nett = form.value.individual_fee * (1 - form.value.tax / 100)
+  fee_nett.value = Math.ceil(nett)
+}
+
+const checkGrossFee = () => {
+  const gross = fee_nett.value / (1 - form.value.tax / 100)
+  form.value.individual_fee = Math.ceil(gross)
+}
 // End Functions
 
 onMounted(() => {
@@ -211,7 +228,10 @@ onMounted(() => {
         validate-on="input"
       >
         <VRow>
-          <VCol md="12">
+          <VCol
+            md="12"
+            cols="12"
+          >
             <VAutocomplete
               clearable
               v-model="form.ref_id"
@@ -232,7 +252,10 @@ onMounted(() => {
               multiple
             ></VAutocomplete>
           </VCol>
-          <VCol md="12">
+          <VCol
+            md="12"
+            cols="12"
+          >
             <VAutocomplete
               clearable
               v-model="tutor_selected"
@@ -264,7 +287,7 @@ onMounted(() => {
           </VCol>
           <VCol
             md="6"
-            cols="12"
+            cols="6"
           >
             <VAutocomplete
               clearable
@@ -281,11 +304,12 @@ onMounted(() => {
               :disabled="loading"
               density="compact"
               item-value="id"
+              @update:modelValue="getIndividualFee(tutor_selected.id, form.subject_name, form.curriculum_id)"
             ></VAutocomplete>
           </VCol>
           <VCol
             md="6"
-            cols="12"
+            cols="6"
           >
             <VAutocomplete
               clearable
@@ -301,7 +325,7 @@ onMounted(() => {
           </VCol>
           <VCol
             md="8"
-            col="12"
+            cols="8"
           >
             <VAutocomplete
               clearable
@@ -324,7 +348,7 @@ onMounted(() => {
           </VCol>
           <VCol
             md="4"
-            cols="12"
+            cols="4"
           >
             <VTextField
               type="number"
@@ -337,21 +361,22 @@ onMounted(() => {
             />
           </VCol>
           <VCol
-            md="7"
-            cols="12"
+            md="4"
+            cols="7"
           >
             <VTextField
               type="number"
               clearable
-              label="Fee/hours (Gross)"
-              v-model="form.individual_fee"
+              label="Fee/hours (Nett)"
+              v-model="fee_nett"
               density="compact"
               :rules="rules.required"
+              @update:model-value="checkGrossFee"
             />
           </VCol>
           <VCol
-            md="5"
-            cols="12"
+            md="4"
+            cols="5"
           >
             <VTextField
               type="number"
@@ -360,11 +385,33 @@ onMounted(() => {
               v-model="form.tax"
               :rules="rules.required"
               density="compact"
+              @update:model-value="checkGrossFee"
+            />
+          </VCol>
+          <VCol
+            md="4"
+            cols="12"
+          >
+            <v-tooltip
+              activator="parent"
+              location="top"
+            >
+              Fee Gross is automatically calculated based on the entered Net Fee and Tax Rate.
+            </v-tooltip>
+            <VTextField
+              type="number"
+              clearable
+              label="Fee/hours (Gross)"
+              v-model="form.individual_fee"
+              density="compact"
+              readonly
+              :rules="rules.required"
+              @update:model-value="checkNettFee"
             />
           </VCol>
           <VCol
             md="6"
-            col="12"
+            cols="6"
           >
             <VAutocomplete
               clearable
@@ -385,7 +432,7 @@ onMounted(() => {
           </VCol>
           <VCol
             md="6"
-            cols="12"
+            cols="6"
           >
             <VAutocomplete
               multiple

@@ -181,14 +181,14 @@ onMounted(() => {
           v-if="props.name == 'tutoring'"
           :selected="selected"
           @close=";(dialog = false), (selected = [])"
-          @reload="getData"
+          @reload=";(selected = []), getData()"
         />
 
         <ProgramMentor
           v-if="props.name == 'specialist'"
           :selected="selected"
           @close="dialog = false"
-          @reload="getData"
+          @reload=";(selected = []), getData()"
         />
       </VDialog>
       <!-- End Assign Modal  -->

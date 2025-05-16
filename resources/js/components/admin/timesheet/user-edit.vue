@@ -13,6 +13,7 @@ const inhouse_mentor = ref([])
 const duration_readonly = ref(false)
 const loading = ref(true)
 const loading_select = ref(true)
+const fee_nett = ref(null)
 
 const formData = ref()
 const form = ref({
@@ -23,6 +24,8 @@ const form = ref({
   duration: prop.item?.duration,
   notes: prop.item?.notes,
   pic_id: prop.item?.pic_id,
+  tax: prop.item?.tax,
+  individual_fee: Math.ceil(prop.item?.individual_fee),
 })
 
 const getTutor = async (inhouse = false) => {
@@ -124,10 +127,25 @@ const submit = async () => {
   }
 }
 
+const checkNettFee = () => {
+  if (form.value.individual_fee) {
+    const nett = form.value.individual_fee * (1 - form.value.tax / 100)
+    fee_nett.value = Math.ceil(nett)
+  } else {
+    fee_nett.value = null
+  }
+}
+
+const checkGrossFee = () => {
+  const gross = fee_nett.value / (1 - form.value.tax / 100)
+  form.value.individual_fee = Math.ceil(gross)
+}
+
 onMounted(() => {
   getTutor(true)
   getPackage()
   getPIC()
+  checkNettFee()
 
   setTimeout(() => {
     loading.value = false
@@ -151,7 +169,10 @@ onMounted(() => {
         validate-on="input"
       >
         <VRow>
-          <VCol md="8">
+          <VCol
+            md="8"
+            cols="8"
+          >
             <VAutocomplete
               density="compact"
               clearable
@@ -168,7 +189,10 @@ onMounted(() => {
               :disabled="loading_select"
             ></VAutocomplete>
           </VCol>
-          <VCol md="4">
+          <VCol
+            md="4"
+            cols="4"
+          >
             <VTextField
               type="number"
               clearable
@@ -178,7 +202,10 @@ onMounted(() => {
               :rules="rules.required"
             />
           </VCol>
-          <VCol md="12">
+          <VCol
+            md="12"
+            cols="12"
+          >
             <VAutocomplete
               density="compact"
               clearable
@@ -196,7 +223,62 @@ onMounted(() => {
               :disabled="loading_select"
             ></VAutocomplete>
           </VCol>
-          <VCol md="12">
+          <VCol
+            md="4"
+            cols="7"
+            v-if="prop.item?.individual_fee"
+          >
+            <VTextField
+              type="number"
+              clearable
+              label="Fee/hours (Nett)"
+              v-model="fee_nett"
+              density="compact"
+              :rules="rules.required"
+              @update:model-value="checkGrossFee"
+            />
+          </VCol>
+          <VCol
+            md="4"
+            cols="5"
+            v-if="prop.item?.individual_fee"
+          >
+            <VTextField
+              type="number"
+              clearable
+              label="Tax"
+              v-model="form.tax"
+              :rules="rules.required"
+              density="compact"
+              @update:model-value="checkGrossFee"
+            />
+          </VCol>
+          <VCol
+            md="4"
+            cols="12"
+            v-if="prop.item?.individual_fee"
+          >
+            <v-tooltip
+              activator="parent"
+              location="top"
+            >
+              Fee Gross is automatically calculated based on the entered Net Fee and Tax Rate.
+            </v-tooltip>
+            <VTextField
+              type="number"
+              clearable
+              label="Fee/hours (Gross)"
+              v-model="form.individual_fee"
+              density="compact"
+              readonly
+              :rules="rules.required"
+              @update:model-value="checkNettFee"
+            />
+          </VCol>
+          <VCol
+            md="12"
+            cols="12"
+          >
             <VAutocomplete
               density="compact"
               multiple
@@ -212,7 +294,10 @@ onMounted(() => {
               :disabled="loading_select"
             ></VAutocomplete>
           </VCol>
-          <VCol md="12">
+          <VCol
+            md="12"
+            cols="12"
+          >
             <VTextarea
               density="compact"
               label="Notes"
