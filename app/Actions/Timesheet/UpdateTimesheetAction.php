@@ -51,15 +51,15 @@ class UpdateTimesheetAction
             $existingTimesheet->admin()->sync($picIds);
 
             /* update the tax and fees from activities */
-            //! sementara ini code dibawah akan di comment sampai tutor berhasil update seluruh data tutor
-            // $existingTimesheet->activities()->whereNull('cutoff_ref_id')->update([
-            //     'tax' => $tax,
-            //     'fee_hours' => $feeHours,
-            // ]);
-            $existingTimesheet->activities()->update([
+            // // ! sementara ini code dibawah akan di comment sampai tutor berhasil update seluruh data tutor
+            $existingTimesheet->activities()->whereNull('cutoff_ref_id')->update([
                 'tax' => $tax,
                 'fee_hours' => $feeHours,
             ]);
+            // $existingTimesheet->activities()->update([
+            //     'tax' => $tax,
+            //     'fee_hours' => $feeHours,
+            // ]);
 
             /* also update the tax and fees from temp_user_roles */
             $existingTimesheet->subject()->update([
