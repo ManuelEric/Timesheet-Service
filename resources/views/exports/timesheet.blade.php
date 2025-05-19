@@ -3,15 +3,15 @@
     <tr>
         <td height="100" valign="middle" align="center" colspan="8" style="font-size:20px; font-weight: bold;">
             @if ($isGroup)
-                        Group Timesheet - {{ $packageDetails['program_name'] }}
-                        @php
-                            $colspanBasicProfile = 4;
-                        @endphp
+                Group Timesheet - {{ $packageDetails['program_name'] }}
+                @php
+                    $colspanBasicProfile = 4;
+                @endphp
             @else
-                        Timesheet of {{ ucwords($clients['client_name']) }}
-                        @php
-                            $colspanBasicProfile = 3;
-                        @endphp
+                Timesheet of {{ ucwords($clients['client_name']) }}
+                @php
+                    $colspanBasicProfile = 3;
+                @endphp
             @endif
         </td>
     </tr>
@@ -180,21 +180,30 @@
     <tr height="35">
         <td valign="middle" align="center" style="border: 1px solid #000; font-weight: bold;" width="15">No</td>
         <td valign="middle" align="center" style="border: 1px solid #000; font-weight: bold;" width="15">Date</td>
-        <td valign="middle" align="center" style="border: 1px solid #000; font-weight: bold;" width="15">Start (WIB)</td>
+        <td valign="middle" align="center" style="border: 1px solid #000; font-weight: bold;" width="15">Start (WIB)
+        </td>
         <td valign="middle" align="center" style="border: 1px solid #000; font-weight: bold;" width="15">End (WIB)</td>
-        <td valign="middle" align="center" style="border: 1px solid #000; font-weight: bold;" width="15">Timespent<br>(minutes)</td>
-        <td valign="middle" align="center" style="border: 1px solid #000; font-weight: bold;" width="70">Meeting Discussion</td>
+        <td valign="middle" align="center" style="border: 1px solid #000; font-weight: bold;" width="15">
+            Timespent<br>(minutes)</td>
+        <td valign="middle" align="center" style="border: 1px solid #000; font-weight: bold;" width="70">Meeting
+            Discussion</td>
         <td valign="middle" align="center" style="border: 1px solid #000; font-weight: bold" width="15">Paid</td>
     </tr>
     @foreach ($activities as $activity)
         <tr>
             <td valign="middle" align="center" style="border: 1px solid #000;">{{ $loop->iteration }}</td>
-            <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ $activity['date'] }}</td>
-            <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ $activity['start_time'] }}</td>
-            <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ $activity['end_time'] }}</td>
-            <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ $activity['estimate'] }}</td>
-            <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ $activity['description'] }}</td>
-            <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">{{ $activity['cutoff_status'] == 'completed' ? 'paid' : '-' }}</td>
+            <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">
+                {{ $activity['date'] }}</td>
+            <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">
+                {{ $activity['start_time'] }}</td>
+            <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">
+                {{ $activity['end_time'] }}</td>
+            <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">
+                {{ $activity['estimate'] }}</td>
+            <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">
+                {{ $activity['description'] }}</td>
+            <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">
+                {{ $activity['cutoff_status'] == 'completed' ? 'paid' : '-' }}</td>
         </tr>
     @endforeach
     <!-- Activities end here -->

@@ -264,3 +264,55 @@ Route::middleware(['throttle:120,1'])->group(function () {
     Route::get('program/{clientprog_id}/detail', [V1ProgramEXTERNALController::class, 'index']);
 
 });
+
+Route::get('test', function () {
+    $search = [
+        'cutoff_start' => '2025-04-25',
+        'cutoff_end' => '2025-05-27',
+    ];
+
+    $timesheets = \App\Models\Timesheet::with([
+            'activities', 
+            'ref_program', 
+            'second_ref_program',
+            'subject.temp_user' => function ($query) {
+                $query->select('id', 'full_name');
+            },
+        ])->
+        filterCutoff($search)->
+        orderBy(
+            \App\Models\TempUser::from('temp_users as tu')->select('tu.full_name')->
+            leftJoin('temp_user_roles as tur', 'tur.temp_user_id', '=', 'tu.id')->
+            whereColumn('tur.id', 'timesheets.subject_id'), 'asc'
+            // \Illuminate\Support\Facades\DB::raw('
+            // SELECT full_name FROM temp_users tu
+            // LEFT JOIN temp_user_roles tur ON tur.temp_user_id = tu.id
+            // WHERE tur.id = timesheets.subject_id
+            // '), 'asc'
+        )->
+        get();
+    return $timesheets;
+
+    // $ts = \App\Models\TempUser::with([
+    //     'activeTimesheets' => function ($query) use ($search) {
+    //         $query->filterCutoff($search);
+    //     },
+    //     'activeTimesheets.activities' => function ($query) use ($search) {
+    //         $query->filterCutoff($search);
+    //     },
+    //     'activeTimesheets.ref_program',
+    // ])->whereHas('timesheets', function ($query) use ($search) {
+    //     $query->filterCutoff($search);
+    // })->orderBy('full_name', 'asc')->get();
+
+    // $timesheets = [];
+    // $pluck = array_values($ts->pluck('activeTimesheets')->toArray());
+    
+    // foreach ($pluck as $each) {
+    //     foreach ($each as $item) {
+    //         array_push($timesheets, $item);
+    //     }
+    // }
+
+    // return collect($timesheets);
+});

@@ -25,7 +25,7 @@ class CutoffMonth implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $requestMonth = Carbon::parse($this->start_date)->format('F Y');
+        $requestMonth = Carbon::parse($this->end_date)->format('F Y');
         if ( !Cutoff::where('month', $requestMonth)->inBetween($this->start_date, $this->end_date)->exists() )
             $fail("The cutoff for the month you selected has not been created yet.");
     }

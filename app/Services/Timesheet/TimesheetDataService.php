@@ -364,7 +364,24 @@ class TimesheetDataService
         ];
         
         /* we're gonna find timesheets using cutoff `from` and `to` */
-        $timesheets = Timesheet::with('activities', 'ref_program', 'second_ref_program')->filterCutoff($search)->get();
+        // $timesheets = Timesheet::with('activities', 'ref_program', 'second_ref_program')->filterCutoff($search)->get();
+        $timesheets = Timesheet::with([
+            'activities', 
+            'ref_program', 
+            'second_ref_program',
+            'subject.temp_user' => function ($query) {
+                $query->select('id', 'full_name');
+            },
+        ])->
+        filterCutoff($search)->
+        orderBy(
+            \App\Models\TempUser::from('temp_users as tu')->select('tu.full_name')->
+            leftJoin('temp_user_roles as tur', 'tur.temp_user_id', '=', 'tu.id')->
+            whereColumn('tur.id', 'timesheets.subject_id'), 'asc'
+        )->
+        get();
         return $timesheets;
+
+
     }
 }
