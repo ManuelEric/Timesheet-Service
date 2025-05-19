@@ -94,19 +94,26 @@
         <tr>
             <td valign="middle" align="center" style="border: 1px solid #000;">{{ $loop->iteration }}</td>
             <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">
-                {{ date('l', strtotime($activity['start_date'])) }}</td>
+                {{ date('l', strtotime($activity['start_date'])) }}
+            </td>
             <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">
-                {{ date('Y-m-d', strtotime($activity['start_date'])) }}</td>
+                {{ date('Y-m-d', strtotime($activity['start_date'])) }}
+            </td>
             <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">
-                {{ $packageDetails['package_name'] }}</td>
+                {{ $packageDetails['package_name'] }}
+            </td>
             <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">
-                {{ $activity['start_time'] }}</td>
+                {{ $activity['start_time'] }}
+            </td>
             <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">
-                {{ $activity['end_time'] }}</td>
+                {{ $activity['end_time'] }}
+            </td>
             <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">
-                {{ minutesToTimeFormat($activity['estimate']) }}</td>
+                {{ minutesToTimeFormat($activity['estimate']) }}
+            </td>
             <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">
-                {{ $activity['status'] == 1 ? "done" : "-" }}</td>
+                {{ $activity['status'] == 1 ? "done" : "-" }}
+            </td>
         </tr>
     @endforeach
     <!-- Activities end here -->
@@ -124,7 +131,8 @@
         <td colspan="6" valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Total hour
         </td>
         <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">
-            {{ minutesToTimeFormat($total_hour) }}</td>
+            {{ minutesToTimeFormat($total_hour) }}
+        </td>
         <td style="border: 1px solid #000; word-wrap: break-word;"></td>
     </tr>
     <!-- Total hour end here -->
@@ -133,7 +141,8 @@
     <tr>
         <td colspan="6" valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Fee </td>
         <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Rp
-            {{ number_format($total_fee_without_tax, 2, ',', '.') }}</td>
+            {{ number_format($total_fee_without_tax, 2, ',', '.') }}
+        </td>
         <td style="border: 1px solid #000; word-wrap: break-word;"></td>
     </tr>
     <!-- Total fee without tax end here -->
@@ -141,9 +150,11 @@
     <!-- Tax add here -->
     <tr>
         <td colspan="6" valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Tax
-            {{ $percentage_of_tax }}%</td>
+            {{ $percentage_of_tax }}%
+        </td>
         <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Rp
-            {{ number_format($total_tax, 2, ',', '.') }}</td>
+            {{ number_format(round($total_tax), 2, ',', '.') }}
+        </td>
         <td style="border: 1px solid #000; word-wrap: break-word;"></td>
     </tr>
     <!-- Tax end here -->
@@ -153,7 +164,8 @@
         <td colspan="6" valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Total fee
         </td>
         <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Rp
-            {{ number_format($total_fee, 2, ',', '.') }}</td>
+            {{ number_format(round($total_fee), 2, ',', '.') }}
+        </td>
         <td style="border: 1px solid #000; word-wrap: break-word;"></td>
     </tr>
     <!-- Total fee end here -->
