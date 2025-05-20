@@ -153,7 +153,7 @@
             {{ $percentage_of_tax }}%
         </td>
         <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Rp
-            {{ number_format(round($total_tax), 0, ',', '.') }}
+            {{ number_format($total_tax, 0, ',', '.') }}
         </td>
         <td style="border: 1px solid #000; word-wrap: break-word;"></td>
     </tr>
@@ -164,7 +164,7 @@
         <td colspan="6" valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Total fee
         </td>
         <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Rp
-            {{ number_format(round($total_fee), 0, ',', '.') }}
+            {{ number_format($total_fee, 0, ',', '.') }}
         </td>
         <td style="border: 1px solid #000; word-wrap: break-word;"></td>
     </tr>
