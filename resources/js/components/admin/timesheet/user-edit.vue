@@ -25,7 +25,7 @@ const form = ref({
   notes: prop.item?.notes,
   pic_id: prop.item?.pic_id,
   tax: prop.item?.tax,
-  individual_fee: Math.ceil(prop.item?.individual_fee),
+  individual_fee: Math.trunc(prop.item?.individual_fee),
 })
 
 const getTutor = async (inhouse = false) => {
@@ -130,7 +130,7 @@ const submit = async () => {
 const checkNettFee = () => {
   if (form.value.individual_fee) {
     const nett = form.value.individual_fee * (1 - form.value.tax / 100)
-    fee_nett.value = Math.ceil(nett)
+    fee_nett.value = Math.trunc(nett)
   } else {
     fee_nett.value = null
   }
@@ -138,7 +138,7 @@ const checkNettFee = () => {
 
 const checkGrossFee = () => {
   const gross = fee_nett.value / (1 - form.value.tax / 100)
-  form.value.individual_fee = Math.ceil(gross)
+  form.value.individual_fee = Math.trunc(gross)
 }
 
 onMounted(() => {
