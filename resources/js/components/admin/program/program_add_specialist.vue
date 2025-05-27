@@ -156,14 +156,16 @@ const submit = async () => {
   }
 }
 
+// Check Nett
 const checkNettFee = () => {
   const nett = form.value.individual_fee * (1 - form.value.tax / 100)
-  fee_nett.value = Math.ceil(nett)
+  fee_nett.value = Math.trunc(nett)
 }
 
+// Check Gross
 const checkGrossFee = () => {
   const gross = fee_nett.value / (1 - form.value.tax / 100)
-  form.value.individual_fee = Math.ceil(gross)
+  form.value.individual_fee = Math.trunc(gross)
 }
 // End Functions
 

@@ -4,6 +4,7 @@ import ProgramMentor from '@/components/admin/program/program_add_specialist.vue
 import { showNotif } from '@/helper/notification'
 import ApiService from '@/services/ApiService'
 import debounce from 'lodash/debounce'
+import { onUpdated } from 'vue'
 
 // Start Variable
 const selected = ref([])
@@ -81,6 +82,10 @@ const goToTimesheet = id => {
 
 watch(() => {
   getData()
+})
+
+onUpdated(() => {
+  selected.value = []
 })
 
 onMounted(() => {
@@ -238,6 +243,12 @@ onMounted(() => {
             <th class="text-uppercase text-center">
               {{ props.name == 'tutoring' ? 'Program Name' : 'Engagement Type' }}
             </th>
+            <th
+              class="text-uppercase text-center"
+              v-if="props.name == 'tutoring'"
+            >
+              Tutor Name
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -380,6 +391,12 @@ onMounted(() => {
                 class="me-3"
               ></VIcon>
               {{ item.engagement_type }}
+            </td>
+            <td
+              v-if="props.name == 'tutoring'"
+              nowrap
+            >
+              {{ item.tutor_name }}
             </td>
           </tr>
         </tbody>
