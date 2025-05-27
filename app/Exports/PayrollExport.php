@@ -53,7 +53,6 @@ class PayrollExport implements FromView, WithTitle
             ];
         });
 
-        
         $total_fee_without_tax = $fee->sum('total_fee_per_activity') + $this->activities->sum('additional_fee') + $this->activities->sum('bonus_fee');
 
         # add tax here
@@ -75,7 +74,19 @@ class PayrollExport implements FromView, WithTitle
 
 
         # merge all variables that going to show in view 
-        $viewData = compact('isGroup', 'clients', 'activities', 'cutoff', 'total_hour', 'total_fee_without_tax', 'percentage_of_tax', 'total_tax', 'total_fee', 'bonus_fee', 'bonus_tax');
+        $viewData = compact(
+            'isGroup', 
+            'clients', 
+            'activities', 
+            'cutoff', 
+            'total_hour', 
+            'total_fee_without_tax', 
+            'percentage_of_tax', 
+            'total_tax', 
+            'total_fee', 
+            'bonus_fee', 
+            'bonus_tax'
+        );
 
         return view('exports.payroll', $this->timesheet + $viewData);
     }

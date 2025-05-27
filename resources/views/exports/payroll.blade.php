@@ -64,6 +64,13 @@
             <td></td>
         </tr>
         <tr>
+            <td>Program</td>
+            <td align="center">:</td>
+            <td>{{ $packageDetails['program_name'] }}</td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
             <td></td>
         </tr>
         <tr>
@@ -88,6 +95,7 @@
         <td valign="middle" align="center" style="border: 1px solid #000; font-weight: bold;" width="15">Start Time</td>
         <td valign="middle" align="center" style="border: 1px solid #000; font-weight: bold;" width="15">End Time</td>
         <td valign="middle" align="center" style="border: 1px solid #000; font-weight: bold;" width="15">Duration</td>
+        <td valign="middle" align="center" style="border: 1px solid #000; font-weight: bold;" width="15">Fee</td>
         <td valign="middle" align="center" style="border: 1px solid #000; font-weight: bold;" width="15">Done?</td>
     </tr>
     @foreach ($activities as $activity)
@@ -110,6 +118,9 @@
             </td>
             <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">
                 {{ minutesToTimeFormat($activity['estimate']) }}
+            </td>
+            <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Rp
+                {{ number_format($activity['fee_hours'], 0, ',', '.') }}
             </td>
             <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">
                 {{ $activity['status'] == 1 ? "done" : "-" }}
