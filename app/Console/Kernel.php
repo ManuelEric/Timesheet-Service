@@ -21,9 +21,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('auth:clear-resets')->everyFifteenMinutes();
 
         /* synchronize academic program from CRMs */
-        $schedule->command('sync:academic-program')->dailyAt('06:00')->withoutOverlapping();
-        $schedule->command('sync:tutor-mentor')->everyThreeHours()->withoutOverlapping(); # adjust the throttling frequency at the CRM routes
-        $schedule->command('sync:free-trial-program')->everyFifteenMinutes()->withoutOverlapping();
+        $schedule->command('sync:academic-program')->everyFifteenMinutes()->withoutOverlapping();
+        $schedule->command('sync:tutor-mentor')->everyFifteenMinutes()->withoutOverlapping(); # adjust the throttling frequency at the CRM routes
+        // $schedule->command('sync:free-trial-program')->everyFifteenMinutes()->withoutOverlapping();
     }
 
     /**

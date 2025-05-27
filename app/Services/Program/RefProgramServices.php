@@ -34,6 +34,8 @@ class RefProgramServices
             $student_school = $crm_success_program['client']['school_name'];
             $program_name = $crm_success_program['program_name'];
             $require = $crm_success_program['require'];
+            $package = $crm_success_program['package'];
+            $curriculum = $crm_success_program['curriculum'];
 
             if ($category == 'b2c') {
                 /* define b2c variables */
@@ -67,6 +69,8 @@ class RefProgramServices
                 'student_grade' => $student_grade,
                 'program_name' => $program_name,
                 'require' => $require,
+                'package' => $package,
+                'curriculum' => $curriculum,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ];

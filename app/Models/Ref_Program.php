@@ -6,9 +6,11 @@ use App\Models\Pivot\PivotTimesheet;
 use App\Observers\Ref_ProgramObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 #[ObservedBy([Ref_ProgramObserver::class])]
 class Ref_Program extends Model
@@ -34,6 +36,8 @@ class Ref_Program extends Model
         'program_name',
         'free_trial',
         'require',
+        'package',
+        'curriculum',
         'timesheet_id',
         'scnd_timesheet_id',
         'engagement_type_id',
@@ -43,6 +47,33 @@ class Ref_Program extends Model
         'requested_by',
         'mentoring_log_id',
     ];
+
+    /**
+     * The mutators
+     */
+    protected function programName(): Attribute
+    {
+        return Attribute::make(
+            get:  [$this, 'formattedProgramName'], // Reference the method
+        );
+    }
+
+    protected function formattedProgramName(string $value): string
+    {
+        $formatted = "";
+        if ($this->package != null)
+            $formatted .= $this->package;
+
+        if ($this->curriculum != null) 
+            $formatted .= " - " . $this->curriculum;
+
+        // check if the $formatted contains -
+        // why - ? because the formatted will be filled with package and curriculum so it supposed to have a - symbol
+        if (Str::contains($formatted, '-'))
+            $formatted = '['. $formatted . ']';
+        
+        return $value . ' ' . $formatted;
+    }
 
     /**
      * The relations.
