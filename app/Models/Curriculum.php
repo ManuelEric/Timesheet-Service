@@ -21,6 +21,14 @@ class Curriculum extends Model
     ];
 
     /**
+     * The scopes.
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('active', 1);
+    }
+
+    /**
      * The relations.
      */
     public function subject()
