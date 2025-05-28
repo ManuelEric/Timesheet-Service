@@ -39,6 +39,8 @@ class ListController extends Controller
             'second_timesheet.subject.temp_user' => function ($query) {
                 $query->select('id', 'full_name');
             },
+            'curriculums',
+            'packages'
 
         ])->tutoring()->onSearch($search)->onCancel($isCancelled)->newest()->get();
 

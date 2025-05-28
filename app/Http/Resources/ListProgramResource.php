@@ -38,8 +38,8 @@ class ListProgramResource extends JsonResource
             "updated_at" => $this->updated_at,
             "cancelled_at" => $this->cancelled_at,
             "tutor_name" => $this->getTutorsName(),
-            "package" => $this->package,
-            "curriculum" => $this->curriculum,
+            "package" => $this->packages?->id ?? null,
+            "curriculum" => $this->curriculums?->id ?? null,
         ];
     }
 

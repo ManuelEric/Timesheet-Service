@@ -18,6 +18,8 @@ class Curriculum extends Model
      */
     protected $fillable = [
         'name',
+        'alias',
+        'active',
     ];
 
     /**
@@ -34,5 +36,10 @@ class Curriculum extends Model
     public function subject()
     {
         return $this->hasMany(TempUserRoles::class, 'curriculum_id', 'id');
+    }
+
+    public function ref_programs()
+    {
+        return $this->hasMany(Ref_Program::class, 'curriculum', 'alias');
     }
 }

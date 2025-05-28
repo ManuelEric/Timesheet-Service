@@ -100,6 +100,16 @@ class Ref_Program extends Model
         return $this->belongsTo(TempUser::class, 'requested_by', 'id');
     }
 
+    public function curriculums()
+    {
+        return $this->belongsTo(Curriculum::class, 'curriculum', 'alias');
+    }
+
+    public function packages()
+    {
+        return $this->belongsTo(Package::class, 'package', 'package')->where('active', 1);
+    }
+
     /**
      * The scopes.
      * 
