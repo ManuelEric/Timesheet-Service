@@ -18,6 +18,7 @@ const duration_readonly = ref(false)
 const require = props.selected[0]?.require?.toLowerCase()
 const has_npwp = ref(null)
 const fee_nett = ref(null)
+const students_name = ref(props.selected.map(item => item.mentee))
 
 const formData = ref()
 const form = ref({
@@ -25,13 +26,13 @@ const form = ref({
   mentortutor_email: null,
   subject_id: null,
   inhouse_id: null,
-  package_id: null,
+  package_id: props.selected[0]?.package ?? null,
   tax: null,
   individual_fee: null,
   duration: '',
   notes: '',
   pic_id: [],
-  curriculum_id: null,
+  curriculum_id: props.selected[0]?.curriculum ?? null,
 })
 
 const getTutor = async (inhouse = false) => {
@@ -204,9 +205,19 @@ onMounted(() => {
   <VCard
     max-width="650"
     prepend-icon="ri-send-plane-line"
-    title="Assign to Tutor"
+    :title="props.selected[0]?.program_name"
   >
     <VCardText>
+      <div class="mb-4 d-flex gap-1">
+        <p class="text-sm">{{ props.selected?.length > 1 ? 'Students' : 'Student' }}:</p>
+        <p
+          v-for="i in students_name"
+          :key="i"
+          class="text-sm bg-info px-2 rounded"
+        >
+          {{ i }}
+        </p>
+      </div>
       <VForm
         @submit.prevent="submit"
         ref="formData"
@@ -234,7 +245,7 @@ onMounted(() => {
               density="compact"
               @update:modelValue="getSubject(tutor_selected.roles, tutor_selected.uuid, tutor_selected.has_npwp)"
             ></VAutocomplete>
-            <v-alert
+            <!-- <v-alert
               :color="has_npwp == 1 ? 'success' : 'error'"
               class="py-1 mt-2"
               v-if="has_npwp != null"
@@ -244,7 +255,7 @@ onMounted(() => {
                 class="mr-2"
               />
               <small> Tutor {{ has_npwp == 1 ? 'already' : 'don`t' }} have NPWP </small>
-            </v-alert>
+            </v-alert> -->
           </VCol>
           <VCol
             md="6"
@@ -262,7 +273,7 @@ onMounted(() => {
               "
               :rules="rules.required"
               :loading="loading"
-              :disabled="loading"
+              :disabled="loading || props.selected[0]?.curriculum"
               density="compact"
               item-value="id"
               @update:modelValue="getIndividualFee(tutor_selected.id, form.subject_name, form.curriculum_id)"
@@ -304,7 +315,7 @@ onMounted(() => {
               item-value="id"
               :rules="rules.required"
               :loading="loading"
-              :disabled="loading"
+              :disabled="loading || props.selected[0]?.package"
               @update:modelValue="checkPackage"
             ></VAutocomplete>
           </VCol>
@@ -315,7 +326,7 @@ onMounted(() => {
             <VTextField
               type="number"
               clearable
-              :label="+form.duration / 60 ? 'Minutes (' + form.duration / 60 + ' Hours)' : 'Minutes'"
+              :label="form.duration / 60 ? 'Minutes (' + (form.duration / 60).toFixed(1) + ' Hours)' : 'Minutes'"
               :readonly="duration_readonly"
               v-model="form.duration"
               density="compact"

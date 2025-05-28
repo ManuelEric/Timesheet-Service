@@ -18,6 +18,7 @@ const duration_readonly = ref(false)
 const require = ref('tutor')
 const has_npwp = ref(null)
 const fee_nett = ref(null)
+const selected = ref([])
 
 const formData = ref()
 const form = ref({
@@ -176,6 +177,7 @@ const submit = async () => {
           pic_id: [],
           tax: null,
           individual_fee: '',
+          curriculum_id: null,
         }
         tutor_selected.value = []
 
@@ -191,6 +193,15 @@ const submit = async () => {
       emit('close')
       loading.value = false
     }
+  }
+}
+
+const checkProgram = () => {
+  form.value = {
+    ref_id: selected.value.map(item => item.id),
+    curriculum_id: selected.value[0].curriculum ?? null,
+    package_id: selected.value[0].package ?? null,
+    program_name: selected.value[0].program_name ?? null,
   }
 }
 
@@ -221,7 +232,7 @@ onMounted(() => {
   <VCard
     max-width="650"
     prepend-icon="ri-send-plane-line"
-    title="Assign to Tutor"
+    :title="selected[0]?.program_name ?? 'Assign to Tutor'"
   >
     <VCardText>
       <VForm
@@ -236,7 +247,7 @@ onMounted(() => {
           >
             <VAutocomplete
               clearable
-              v-model="form.ref_id"
+              v-model="selected"
               label="Mentee Name"
               :items="program_list"
               :item-props="
@@ -245,12 +256,20 @@ onMounted(() => {
                   subtitle:
                     item.program_name + (item.timesheet_id ? ' ✅' : '') + (item.scnd_timesheet_id ? ' ✅' : ''),
                   disabled: item.timesheet_id && item.scnd_timesheet_id,
+                  value: {
+                    id: item.id,
+                    require: item.require,
+                    mentee: item.student_name,
+                    package: item.package,
+                    curriculum: item.curriculum,
+                    program_name: item.program_name,
+                  },
                 })
               "
-              item-value="id"
               :rules="rules.required"
               :loading="loading"
               :disabled="loading"
+              @update:model-value="checkProgram"
               density="compact"
               multiple
             ></VAutocomplete>
@@ -276,7 +295,7 @@ onMounted(() => {
               density="compact"
               @update:modelValue="getSubject(tutor_selected.roles, tutor_selected.uuid, tutor_selected.has_npwp)"
             ></VAutocomplete>
-            <v-alert
+            <!-- <v-alert
               :color="has_npwp == 1 ? 'success' : 'error'"
               class="py-1 mt-2"
               v-if="has_npwp != null"
@@ -286,7 +305,7 @@ onMounted(() => {
                 class="mr-2"
               />
               <small> Tutor {{ has_npwp == 1 ? 'already' : 'don`t' }} have NPWP </small>
-            </v-alert>
+            </v-alert> -->
           </VCol>
           <VCol
             md="6"
@@ -304,7 +323,7 @@ onMounted(() => {
               "
               :rules="rules.required"
               :loading="loading"
-              :disabled="loading"
+              :disabled="loading || selected[0]?.curriculum"
               density="compact"
               item-value="id"
               @update:modelValue="getIndividualFee(tutor_selected.id, form.subject_name, form.curriculum_id)"
@@ -345,7 +364,7 @@ onMounted(() => {
               item-value="id"
               :rules="rules.required"
               :loading="loading"
-              :disabled="loading"
+              :disabled="loading || selected[0]?.package"
               @update:modelValue="checkPackage"
             ></VAutocomplete>
           </VCol>

@@ -277,6 +277,9 @@ onMounted(() => {
                   id: item.id,
                   require: item.require,
                   mentee: item.student_name,
+                  package: item.package,
+                  curriculum: item.curriculum,
+                  program_name: item.program_name,
                 }"
                 v-else-if="(!item.timesheet_id || !item.scnd_timesheet_id) && !item.cancellation_reason"
               ></VCheckbox>
