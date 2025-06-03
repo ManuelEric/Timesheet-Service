@@ -3,24 +3,26 @@ import { showNotif } from '@/helper/notification'
 import { rules } from '@/helper/rules'
 import ApiService from '@/services/ApiService'
 
-const props = defineProps({ selected: Object })
 const emit = defineEmits(['close', 'reload'])
 
 const loading = ref(false)
 const tutor_selected = ref([])
 const tutor_list = ref([])
+const program_list = ref([])
 const subjects = ref([])
 const package_list = ref([])
 const pic_list = ref([])
 const inhouse_mentor = ref([])
 const duration_readonly = ref(false)
-const require = props.selected[0]?.require?.toLowerCase()
+const require = 'mentor'
 const has_npwp = ref(null)
 const fee_nett = ref(null)
+const selected = ref([])
+const packageItems = ref([])
 
 const formData = ref()
 const form = ref({
-  ref_id: props.selected.map(item => item.id),
+  ref_id: [],
   mentortutor_email: null,
   subject_id: null,
   inhouse_id: null,
@@ -31,6 +33,23 @@ const form = ref({
   notes: '',
   pic_id: [],
 })
+
+const getProgram = async () => {
+  const url = 'api/v1/program/list'
+  try {
+    loading.value = true
+    const res = await ApiService.get(url)
+
+    if (res) {
+      program_list.value = res
+    }
+    loading.value = false
+  } catch (error) {
+    showNotif('error', error.response?.data?.message, 'bottom-end')
+    console.error(error)
+    loading.value = false
+  }
+}
 
 const getTutor = async (inhouse = false) => {
   const role = require == 'mentor' ? 'External Mentor' : require
@@ -116,6 +135,18 @@ const getSubject = async (item, uuid = null, npwp = 0) => {
   }
 }
 
+const getEngagement = async () => {
+  try {
+    const res = await ApiService.get('api/v1/engagement-type/component/list')
+
+    if (res) {
+      packageItems.value = res
+    }
+  } catch (error) {
+    console.log(error)
+  }
+}
+
 const submit = async () => {
   form.value.mentortutor_email = tutor_selected.value.email
 
@@ -170,6 +201,8 @@ const checkGrossFee = () => {
 // End Functions
 
 onMounted(() => {
+  getProgram()
+  getEngagement()
   getTutor()
   getTutor(true)
   getPackage()
@@ -184,12 +217,75 @@ onMounted(() => {
     title="Assign to Subject Specialist"
   >
     <VCardText>
+      <div
+        class="mb-4 d-flex gap-1"
+        v-if="selected?.length > 0"
+      >
+        <p class="text-sm">{{ selected?.length > 1 ? 'Students' : 'Student' }}:</p>
+        <p
+          v-for="i in selected"
+          :key="i"
+          class="text-sm bg-info px-2 rounded"
+        >
+          {{ i.mentee }}
+        </p>
+      </div>
       <VForm
         @submit.prevent="submit"
         ref="formData"
         validate-on="input"
       >
         <VRow>
+          <VCol
+            md="12"
+            cols="12"
+          >
+            <VAutocomplete
+              clearable
+              v-model="selected"
+              label="Mentee Name"
+              :items="program_list"
+              :item-props="
+                item => ({
+                  title: item.student_name,
+                  subtitle:
+                    item.program_name + (item.timesheet_id ? ' ✅' : '') + (item.scnd_timesheet_id ? ' ✅' : ''),
+                  disabled: item.timesheet_id && item.scnd_timesheet_id,
+                  value: {
+                    id: item.id,
+                    require: item.require,
+                    mentee: item.student_name,
+                    package: item.package,
+                    curriculum: item.curriculum,
+                    program_name: item.program_name,
+                  },
+                })
+              "
+              :rules="rules.required"
+              :loading="loading"
+              :disabled="loading"
+              @update:model-value="checkProgram"
+              density="compact"
+              multiple
+            ></VAutocomplete>
+          </VCol>
+          <VCol cols="12">
+            <VAutocomplete
+              clearable
+              v-model="form.engagement_type"
+              :items="packageItems"
+              :item-props="
+                item => ({
+                  title: item.name,
+                })
+              "
+              item-value="id"
+              label="Engagement Type"
+              :rules="rules.required"
+              :loading="loading"
+              :disabled="loading"
+            ></VAutocomplete>
+          </VCol>
           <VCol
             md="12"
             cols="12"
