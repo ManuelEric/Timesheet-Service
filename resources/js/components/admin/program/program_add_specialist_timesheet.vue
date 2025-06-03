@@ -3,42 +3,60 @@ import { showNotif } from '@/helper/notification'
 import { rules } from '@/helper/rules'
 import ApiService from '@/services/ApiService'
 
-const props = defineProps({ selected: Object })
 const emit = defineEmits(['close', 'reload'])
 
 const loading = ref(false)
 const tutor_selected = ref([])
 const tutor_list = ref([])
-const curriculum_list = ref([])
+const program_list = ref([])
 const subjects = ref([])
 const package_list = ref([])
 const pic_list = ref([])
 const inhouse_mentor = ref([])
 const duration_readonly = ref(false)
-const require = props.selected[0]?.require?.toLowerCase()
+const require = 'mentor'
 const has_npwp = ref(null)
 const fee_nett = ref(null)
-const students_name = ref(props.selected.map(item => item.mentee))
+const selected = ref([])
+const packageItems = ref([])
 
 const formData = ref()
 const form = ref({
-  ref_id: props.selected.map(item => item.id),
+  ref_id: [],
   mentortutor_email: null,
   subject_id: null,
   inhouse_id: null,
-  package_id: props.selected[0]?.package ?? null,
+  package_id: null,
+  duration: '',
   tax: null,
   individual_fee: null,
-  duration: '',
   notes: '',
   pic_id: [],
-  curriculum_id: props.selected[0]?.curriculum ?? null,
 })
 
+const getProgram = async () => {
+  const url = 'api/v1/program/list'
+  try {
+    loading.value = true
+    const res = await ApiService.get(url)
+
+    if (res) {
+      program_list.value = res
+    }
+    loading.value = false
+  } catch (error) {
+    showNotif('error', error.response?.data?.message, 'bottom-end')
+    console.error(error)
+    loading.value = false
+  }
+}
+
 const getTutor = async (inhouse = false) => {
+  const role = require == 'mentor' ? 'External Mentor' : require
+
   const url = inhouse
     ? 'api/v1/user/mentor-tutors?inhouse=true&role=' + require
-    : 'api/v1/user/mentor-tutors?role=' + require
+    : 'api/v1/user/mentor-tutors?role=' + role
   try {
     const res = await ApiService.get(url)
     if (res) {
@@ -90,14 +108,21 @@ const getPIC = async () => {
 }
 
 const getSubject = async (item, uuid = null, npwp = 0) => {
+  form.value.subject_id = null
+
   // check NPWP
   has_npwp.value = npwp
   form.value.tax = npwp == 1 ? 2.5 : 2.5
 
-  form.value.subject_id = null
-
   if (require == 'mentor') {
-    form.value.subject_id = item[0].subjects[0].id
+    form.value.subject_id = item[0]?.subjects[0]?.id
+    form.value.individual_fee = item[0]?.subjects[0]?.fee_individual
+
+    if (form.value.individual_fee) {
+      checkNettFee()
+    } else {
+      fee_nett.value = null
+    }
   } else {
     try {
       const res = await ApiService.get('api/v1/user/mentor-tutors/' + uuid + '/subjects')
@@ -110,30 +135,15 @@ const getSubject = async (item, uuid = null, npwp = 0) => {
   }
 }
 
-const getIndividualFee = async (tutor_id, subject_name, curriculum_id) => {
-  if (subject_name) {
-    try {
-      const res = await ApiService.get('api/v1/component/fee/' + tutor_id + '/' + subject_name + '/' + curriculum_id)
-      if (res) {
-        form.value.individual_fee = res.fee_individual
-        if (res.fee_individual) {
-          checkNettFee()
-        } else {
-          fee_nett.value = null
-        }
-      }
-    } catch (error) {
-      console.error(error)
-    }
-  }
-}
-
-const getCurriculum = async () => {
+const getEngagement = async () => {
   try {
-    const res = await ApiService.get('api/v1/curriculum/component/list')
-    if (res) curriculum_list.value = res
+    const res = await ApiService.get('api/v1/engagement-type/component/list')
+
+    if (res) {
+      packageItems.value = res
+    }
   } catch (error) {
-    console.error(error)
+    console.log(error)
   }
 }
 
@@ -148,7 +158,6 @@ const submit = async () => {
       if (res) {
         showNotif('success', res.message, 'bottom-end')
         emit('reload')
-
         form.value = {
           ref_id: [],
           mentortutor_email: null,
@@ -164,10 +173,9 @@ const submit = async () => {
         }
         tutor_selected.value = []
 
-        window.open('/admin/timesheet/tutoring/' + res.data?.timesheet_id, '_blank')
+        window.open('/admin/timesheet/specialist/' + res.data?.timesheet_id, '_blank')
       }
     } catch (error) {
-      console.log(error)
       if (error?.response?.data?.errors) {
         const validationErrors = error.response.data.errors
         showNotif('error', validationErrors, 'bottom-end')
@@ -193,11 +201,12 @@ const checkGrossFee = () => {
 // End Functions
 
 onMounted(() => {
+  getProgram()
+  getEngagement()
   getTutor()
   getTutor(true)
   getPackage()
   getPIC()
-  getCurriculum()
 })
 </script>
 
@@ -205,17 +214,20 @@ onMounted(() => {
   <VCard
     max-width="650"
     prepend-icon="ri-send-plane-line"
-    :title="props.selected[0]?.program_name"
+    title="Assign to Subject Specialist"
   >
     <VCardText>
-      <div class="mb-4 d-flex gap-1">
-        <p class="text-sm">{{ props.selected?.length > 1 ? 'Students' : 'Student' }}:</p>
+      <div
+        class="mb-4 d-flex gap-1"
+        v-if="selected?.length > 0"
+      >
+        <p class="text-sm">{{ selected?.length > 1 ? 'Students' : 'Student' }}:</p>
         <p
-          v-for="i in students_name"
+          v-for="i in selected"
           :key="i"
           class="text-sm bg-info px-2 rounded"
         >
-          {{ i }}
+          {{ i.mentee }}
         </p>
       </div>
       <VForm
@@ -230,8 +242,59 @@ onMounted(() => {
           >
             <VAutocomplete
               clearable
+              v-model="selected"
+              label="Mentee Name"
+              :items="program_list"
+              :item-props="
+                item => ({
+                  title: item.student_name,
+                  subtitle:
+                    item.program_name + (item.timesheet_id ? ' ✅' : '') + (item.scnd_timesheet_id ? ' ✅' : ''),
+                  disabled: item.timesheet_id && item.scnd_timesheet_id,
+                  value: {
+                    id: item.id,
+                    require: item.require,
+                    mentee: item.student_name,
+                    package: item.package,
+                    curriculum: item.curriculum,
+                    program_name: item.program_name,
+                  },
+                })
+              "
+              :rules="rules.required"
+              :loading="loading"
+              :disabled="loading"
+              @update:model-value="checkProgram"
+              density="compact"
+              multiple
+            ></VAutocomplete>
+          </VCol>
+          <VCol cols="12">
+            <VAutocomplete
+              clearable
+              v-model="form.engagement_type"
+              :items="packageItems"
+              :item-props="
+                item => ({
+                  title: item.name,
+                })
+              "
+              item-value="id"
+              label="Engagement Type"
+              :rules="rules.required"
+              :loading="loading"
+              :disabled="loading"
+            ></VAutocomplete>
+          </VCol>
+          <VCol
+            md="12"
+            cols="12"
+          >
+            <VAutocomplete
+              density="compact"
+              clearable
               v-model="tutor_selected"
-              label="Tutor Name"
+              label="Subject Specialist Name"
               :items="tutor_list"
               :item-props="
                 item => ({
@@ -242,70 +305,30 @@ onMounted(() => {
               :rules="rules.required"
               :loading="loading"
               :disabled="loading"
-              density="compact"
               @update:modelValue="getSubject(tutor_selected.roles, tutor_selected.uuid, tutor_selected.has_npwp)"
             ></VAutocomplete>
-            <!-- <v-alert
+            <v-alert
               :color="has_npwp == 1 ? 'success' : 'error'"
-              class="py-1 mt-2"
+              class="py-2 mt-2"
               v-if="has_npwp != null"
             >
               <VIcon
                 icon="ri-error-warning-line"
                 class="mr-2"
               />
-              <small> Tutor {{ has_npwp == 1 ? 'already' : 'don`t' }} have NPWP </small>
-            </v-alert> -->
-          </VCol>
-          <VCol
-            md="6"
-            cols="6"
-          >
-            <VAutocomplete
-              clearable
-              v-model="form.curriculum_id"
-              label="Curriculum"
-              :items="curriculum_list"
-              :item-props="
-                item => ({
-                  title: item.name,
-                })
-              "
-              :rules="rules.required"
-              :loading="loading"
-              :disabled="loading || props.selected[0]?.curriculum"
-              density="compact"
-              item-value="id"
-              @update:modelValue="getIndividualFee(tutor_selected.id, form.subject_name, form.curriculum_id)"
-            ></VAutocomplete>
-          </VCol>
-          <VCol
-            md="6"
-            cols="6"
-            v-if="props.selected[0]?.require?.toLowerCase() == 'tutor'"
-          >
-            <VAutocomplete
-              clearable
-              v-model="form.subject_name"
-              label="Subject Tutoring"
-              :items="subjects"
-              :loading="loading"
-              :disabled="loading"
-              :rules="rules.required"
-              density="compact"
-              @update:modelValue="getIndividualFee(tutor_selected.id, form.subject_name, form.curriculum_id)"
-            ></VAutocomplete>
+              <small> Mentor {{ has_npwp == 1 ? 'already' : 'don`t' }} have NPWP </small>
+            </v-alert>
           </VCol>
           <VCol
             md="8"
             cols="8"
           >
             <VAutocomplete
+              density="compact"
               clearable
               label="Package"
               v-model="form.package_id"
               :items="package_list"
-              density="compact"
               :item-props="
                 item => ({
                   title: item.package != null ? item.type_of + ' - ' + item.package : item.type_of,
@@ -315,7 +338,7 @@ onMounted(() => {
               item-value="id"
               :rules="rules.required"
               :loading="loading"
-              :disabled="loading || props.selected[0]?.package"
+              :disabled="loading"
               @update:modelValue="checkPackage"
             ></VAutocomplete>
           </VCol>
@@ -324,12 +347,12 @@ onMounted(() => {
             cols="4"
           >
             <VTextField
+              density="compact"
               type="number"
               clearable
-              :label="form.duration / 60 ? 'Minutes (' + (form.duration / 60).toFixed(1) + ' Hours)' : 'Minutes'"
+              :label="+form.duration / 60 ? '' + form.duration / 60 + ' Hours' : 'Minutes'"
               :readonly="duration_readonly"
               v-model="form.duration"
-              density="compact"
               :rules="rules.required"
             />
           </VCol>
@@ -384,14 +407,14 @@ onMounted(() => {
           </VCol>
           <VCol
             md="6"
-            cols="6"
+            cols="12"
           >
             <VAutocomplete
+              density="compact"
               clearable
               v-model="form.inhouse_id"
-              label="Inhouse Mentor/Tutor"
+              label="Inhouse Mentor"
               :items="inhouse_mentor"
-              density="compact"
               :item-props="
                 item => ({
                   title: item.full_name,
@@ -405,9 +428,10 @@ onMounted(() => {
           </VCol>
           <VCol
             md="6"
-            cols="6"
+            cols="12"
           >
             <VAutocomplete
+              density="compact"
               multiple
               clearable
               chips
@@ -417,7 +441,6 @@ onMounted(() => {
               item-title="full_name"
               item-value="id"
               :loading="loading"
-              density="compact"
               :disabled="loading"
               :rules="rules.required"
             ></VAutocomplete>
@@ -426,7 +449,6 @@ onMounted(() => {
             <VTextarea
               label="Notes"
               v-model="form.notes"
-              density="compact"
             ></VTextarea>
           </VCol>
         </VRow>

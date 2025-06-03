@@ -181,7 +181,7 @@ onMounted(() => {
   <VCard
     max-width="650"
     prepend-icon="ri-send-plane-line"
-    title="Assign to External Mentor"
+    title="Assign to Subject Specialist"
   >
     <VCardText>
       <VForm
@@ -198,7 +198,7 @@ onMounted(() => {
               density="compact"
               clearable
               v-model="tutor_selected"
-              label="Mentor Name"
+              label="Subject Specialist Name"
               :items="tutor_list"
               :item-props="
                 item => ({
