@@ -119,8 +119,8 @@
             <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">
                 {{ minutesToTimeFormat($activity['estimate']) }}
             </td>
-            <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Rp
-                {{ number_format($activity['fee_hours'], 0, ',', '.') }}
+            <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">
+                {{ formatToRupiah($activity['fee_hours']) }}
             </td>
             <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">
                 {{ $activity['status'] == 1 ? "done" : "-" }}
@@ -151,8 +151,8 @@
     <!-- Total fee without tax start here -->
     <tr>
         <td colspan="6" valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Fee </td>
-        <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Rp
-            {{ number_format($total_fee_without_tax, 0, ',', '.') }}
+        <td valign="middle" align="right" style="border: 1px solid #000; word-wrap: break-word;">
+            {{ formatToRupiah($total_fee_without_tax) }}
         </td>
         <td style="border: 1px solid #000; word-wrap: break-word;"></td>
     </tr>
@@ -163,8 +163,8 @@
         <td colspan="6" valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Tax
             {{ $percentage_of_tax }}%
         </td>
-        <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Rp
-            {{ number_format($total_tax, 0, ',', '.') }}
+        <td valign="middle" align="right" style="border: 1px solid #000; word-wrap: break-word;">
+            {{ formatToRupiah($total_tax) }}
         </td>
         <td style="border: 1px solid #000; word-wrap: break-word;"></td>
     </tr>
@@ -174,11 +174,21 @@
     <tr>
         <td colspan="6" valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Total fee
         </td>
-        <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Rp
-            {{ number_format($total_fee, 0, ',', '.') }}
+        <td valign="middle" align="right" style="border: 1px solid #000; word-wrap: break-word;">
+            {{ formatToRupiah($total_fee) }}
         </td>
         <td style="border: 1px solid #000; word-wrap: break-word;"></td>
     </tr>
     <!-- Total fee end here -->
+
+    <!-- Rounder start here -->
+    <tr>
+        <td colspan="6" valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Pembulatan
+        </td>
+        <td valign="middle" align="right" style="border: 1px solid #000; word-wrap: break-word;">
+            {{ formatToRupiah(roundCustom($total_fee)) }}
+        </td>
+    </tr>
+    <!-- Rounder end here -->
 
 </table>

@@ -235,6 +235,19 @@ onMounted(() => {
     :title="selected[0]?.program_name ?? 'Assign to Tutor'"
   >
     <VCardText>
+      <div
+        class="mb-4 d-flex gap-1"
+        v-if="selected?.length > 0"
+      >
+        <p class="text-sm">{{ selected?.length > 1 ? 'Students' : 'Student' }}:</p>
+        <p
+          v-for="i in selected"
+          :key="i"
+          class="text-sm bg-info px-2 rounded"
+        >
+          {{ i.mentee }}
+        </p>
+      </div>
       <VForm
         @submit.prevent="submit"
         ref="formData"

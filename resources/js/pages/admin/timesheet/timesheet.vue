@@ -1,4 +1,5 @@
 <script setup>
+import ProgramAddSpecialist from '@/components/admin/program/program_add_specialist_timesheet.vue'
 import ProgramAddTutoring from '@/components/admin/program/program_add_tutoring.vue'
 import { showNotif } from '@/helper/notification'
 import ApiService from '@/services/ApiService'
@@ -105,6 +106,13 @@ onMounted(() => {
     persistent
   >
     <ProgramAddTutoring
+      v-if="props.name == 'tutoring'"
+      @close="dialog = false"
+      @reload="getData"
+    />
+
+    <ProgramAddSpecialist
+      v-else
       @close="dialog = false"
       @reload="getData"
     />
@@ -168,7 +176,7 @@ onMounted(() => {
         </VCol>
         <VCol
           cols="12"
-          md="3"
+          :md="props.name == 'tutoring' ? 3 : 12"
         >
           <div class="d-flex gap-2">
             <VTextField
@@ -182,7 +190,10 @@ onMounted(() => {
               @input="searchData"
             />
 
-            <div v-if="props.name == 'tutoring'">
+            <div
+              class="text-end"
+              :class="props.name == 'tutoring' ? '' : 'w-md-75'"
+            >
               <v-tooltip
                 activator="parent"
                 location="start"
