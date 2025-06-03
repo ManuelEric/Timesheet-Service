@@ -86,7 +86,7 @@ class MainController extends Controller
         $validatedPackageId = $validated['package_id'];
         $validatedDuration = $validated['duration'];
         $validatedNotes = $validated['notes'];
-        // $validatedSubject = $validated['subject_id'];
+        $validatedSubject = $validated['subject_id'];
         $validatedSubjectName = $validated['subject_name'] ?? null;
         $validatedFeeIndividual = $validated['individual_fee'] ?? 0;
         $validatedTax = $validated['tax'] ?? 0;

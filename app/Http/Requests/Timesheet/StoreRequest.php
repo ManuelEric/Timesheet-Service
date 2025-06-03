@@ -3,11 +3,6 @@
 namespace App\Http\Requests\Timesheet;
 
 use App\Models\TempUser;
-use App\Rules\CompatiblePackage;
-use App\Rules\CompatibleProgram;
-use App\Rules\ExistSubjectPerTutormentor;
-use App\Rules\MatchingProgramName;
-use App\Rules\SameGrade;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -40,21 +35,18 @@ class StoreRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+    public function rules()
     {
         switch ( $this->method() )
         {
             case "POST":
                 return $this->store();
-                break;
 
             case "PUT":
                 return $this->update();
-                break;
 
             case "PATCH":
                 return $this->patch();
-                break;
         }
     }
 
