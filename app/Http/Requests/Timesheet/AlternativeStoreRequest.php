@@ -64,6 +64,10 @@ class AlternativeStoreRequest extends FormRequest
             'pic_id' => 'array',
             'pic_id.*' => 'required|exists:users,id',
             'notes' => 'nullable',
+            'subject_id' => [
+                'nullable',
+                //new ExistSubjectPerTutormentor($this->input('mentortutor_email'))
+            ],
             'individual_fee' => 'nullable',
             'tax' => 'required',
         ];

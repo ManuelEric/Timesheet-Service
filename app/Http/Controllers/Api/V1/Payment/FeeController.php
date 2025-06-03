@@ -11,15 +11,31 @@ use Illuminate\Support\Carbon;
 
 class FeeController extends Controller
 {
-    public function component(string $tutor_uuid, string $subject_name, string $curriculum_id)
+    public function component(string $tutor_uuid, ?string $subject_name = null, ?string $curriculum_id = null)
     {
+        /**
+         * because subject name and curriculum id is allow to be null
+         * 
+         * why subject name and curriculum allow to be null?
+         * because mentor doesn't have neither subject nor curriculum
+         * and this function can be called to check not only tutor, but mentor also
+         */
+        $subject_name = gettype($subject_name) == "string" ? null : $subject_name;
+        $curriculum_id = gettype($curriculum_id) == "string" ? null : $curriculum_id;
+
         $details = TempUserRoles::query()->
             select(['fee_individual', 'fee_group'])->
             where('temp_user_id', $tutor_uuid)->
-            where('tutor_subject', $subject_name)->
-            where('curriculum_id', $curriculum_id)->
+            when($subject_name, function ($query) use ($subject_name) {
+                $query->where('tutor_subject', $subject_name);
+            })->
+            when($curriculum_id, function ($query) use ($curriculum_id) {
+                $query->where('curriculum_id', $curriculum_id);
+            })->
             where('year', Carbon::now()->format('Y'))->
-            where('head', 1)->
+            where(function ($query) {
+                $query->where('head', 1)->orWhereNull('head');
+            })->            
             first();
         return response()->json($details);
     }

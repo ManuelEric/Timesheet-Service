@@ -139,7 +139,7 @@ Route::middleware(['throttle:120,1'])->group(function () {
             /* Store Timesheet */
             Route::POST('create', [V1TimesheetController::class, 'store'])->name('timesheet.tutor.store');
             /* Store Timesheet from subject specialist */
-            Route::POST('create/request/timesheet', [V1TimesheetAlternativeController::class, 'store'])->name('timesheet.mentor.store');
+            Route::POST('create/skip-request', [V1TimesheetAlternativeController::class, 'store'])->name('timesheet.mentor.store');
             /* Detail Timesheet */
             Route::GET('{timesheet}/detail', [V1TimesheetController::class, 'show']);
             /* Update Timesheet */

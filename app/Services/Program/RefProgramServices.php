@@ -109,6 +109,12 @@ class RefProgramServices
 
     public function createOne(array $request)
     {
+        /**
+         * determine logged in user
+         * only store the requested_by if user is mentor
+         */
+        $requested_by = auth('sanctum')->user()->is_admin ? null : auth('sanctum')->user()->id;
+
         $ref = [
             'category' => 'b2c',
             'clientprog_id' => $request['clientprog_id'],
@@ -121,7 +127,7 @@ class RefProgramServices
             'require' => 'Mentor',
             'engagement_type_id' => $request['engagement_type'],
             'notes' => $request['notes'],
-            'requested_by' => auth('sanctum')->user()->id
+            'requested_by' => $requested_by
         ];
 
         DB::beginTransaction();
