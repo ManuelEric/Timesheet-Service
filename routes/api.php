@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\Authentication\ResetPasswordController as V1Rese
 use App\Http\Controllers\Api\V1\Authentication\CreatePasswordController as V1CreatePasswordController;
 use App\Http\Controllers\Api\V1\MentorTutor\MainController as V1MentorTutorController;
 use App\Http\Controllers\Api\V1\MentorTutor\ComponentController as V1MentorTutorComponentController;
+use App\Http\Controllers\Api\V1\MentorTutor\FeeController as V1MentorTutorFeeController;
 use App\Http\Controllers\Api\V1\Programs\ListController as V1ProgramsListController;
 use App\Http\Controllers\Api\V1\Programs\ComponentController as V1ProgramsComponentController;
 use App\Http\Controllers\Api\V1\Timesheet\MainController as V1TimesheetController;
@@ -31,6 +32,8 @@ use App\Http\Controllers\Api\V1\Request\MainController as V1RequestController;
 use App\Http\Controllers\Api\V1\Mentee\MainController as V1MenteeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Programs\ExternalController as V1ProgramEXTERNALController;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -77,7 +80,12 @@ Route::middleware(['throttle:120,1'])->group(function () {
             /* List Mentor & Tutors */
             Route::GET('mentor-tutors', [V1MentorTutorController::class, 'index']);
             Route::PUT('mentor-tutors/{mentortutor_uuid}', [V1MentorTutorController::class, 'update']);
-            
+
+            /* List Fee of Mentor & Tutors */
+            Route::PATCH('mentor-tutors/{tempUser:uuid}/subjects/{roles}', [V1MentorTutorFeeController::class, 'patch'])->scopeBindings()->missing(function (Request $request) {
+                return response()->json(['error' => '404'], JsonResponse::HTTP_NOT_FOUND);
+            });
+
             /**
              * The Components.
              */
