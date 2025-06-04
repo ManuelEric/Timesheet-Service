@@ -104,6 +104,8 @@ class RefProgramServices
 
         }
 
+        // get the inserted ref program
+        $refs = Ref_Program::whereIn('clientprog_id', array_column($refs, 'clientprog_id'))->get()->toArray();
         return $refs;
     }
 

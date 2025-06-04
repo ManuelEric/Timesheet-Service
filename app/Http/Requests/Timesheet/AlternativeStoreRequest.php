@@ -30,6 +30,26 @@ class AlternativeStoreRequest extends FormRequest
     }
 
     /**
+     * Set the data before validation
+     */
+    public function prepareForValidation()
+    {
+        // Get the 'ref_details' array from the request
+        $refDetails = $this->input('ref_details', []); // Use [] as default if not present
+
+        // Use Laravel collection to map over each detail and add/modify the category
+        $modifiedRefDetails = collect($refDetails)->map(function ($detail) {
+            $detail['category'] = 'b2c';
+            return $detail;
+        })->all(); // Convert back to array if needed, or keep as collection
+
+        // Merge the modified ref_details back into the request
+        $this->merge([
+            'ref_details' => $modifiedRefDetails,
+        ]);
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
@@ -37,15 +57,22 @@ class AlternativeStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
+
             /* validation from mentor request */
-            'clientprog_id' => 'nullable',
-            'invoice_id' => 'required|string',
-            'student_uuid' => 'required|string',
-            'student_name' => 'required|string',
-            'student_school' => 'nullable|string',
-            'student_grade' => 'nullable|integer',
-            'program_name' => 'required|string',
-            'engagement_type' => 'required|exists:engagement_types,id',
+            'ref_details' => 'required|array',
+            'ref_details.*' => 'required',
+            'ref_details.*.clientprog_id' => 'required',
+            'ref_details.*.invoice_id' => 'nullable',
+            'ref_details.*.student_uuid' => 'required|string',
+            'ref_details.*.student_first_name' => 'required|string',
+            'ref_details.*.student_last_name' => 'nullable|string',
+            'ref_details.*.student_school' => 'nullable|string',
+            'ref_details.*.student_grade' => 'nullable|integer',
+            'ref_details.*.program_name' => 'required|string',
+            'ref_details.*.require' => 'required|string',
+            'ref_details.*.package' => 'required|string',
+            'ref_details.*.curriculum' => 'nullable|string',
+            'ref_details.*.engagement_type' => 'required|exists:engagement_types,id',
 
             /* modified validation from timesheet request */
             'mentortutor_email' => 'required|email|exists:temp_users,email',
