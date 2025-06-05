@@ -153,6 +153,7 @@ onMounted(() => {
             <th class="text-uppercase text-center">Start Time</th>
             <th class="text-uppercase text-center">End Time</th>
             <th class="text-uppercase text-center">Time Spent</th>
+            <th class="text-uppercase text-left">Fee Hours</th>
             <th class="text-uppercase text-center">Status</th>
             <th class="text-uppercase text-end">#</th>
           </tr>
@@ -202,6 +203,7 @@ onMounted(() => {
               />
               {{ item.estimate }} Minutes
             </td>
+            <td class="text-left">Rp. {{ new Intl.NumberFormat('id-ID').format(item.fee_hours) }}</td>
             <td>
               <VCheckbox
                 color="success"
