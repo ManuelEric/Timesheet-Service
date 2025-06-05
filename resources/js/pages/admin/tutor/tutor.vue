@@ -64,6 +64,21 @@ const updateInhouse = async (uuid, value, email) => {
     showNotif('error', error.response?.data?.errors, 'bottom-end')
   }
 }
+
+const updateFee = debounce(async (uuid, subject) => {
+  try {
+    const res = await ApiService.patch('api/v1/user/mentor-tutors/' + uuid + '/subjects/' + subject.id, {
+      fee_individual: subject.fee_individual ?? 0,
+    })
+
+    if (res) {
+      showNotif('success', res.message, 'bottom-end')
+    }
+  } catch (error) {
+    console.error(error)
+    showNotif('error', 'Please fill in the field individual fee', 'bottom-end')
+  }
+}, 1000)
 // End Function
 
 onMounted(() => {
@@ -218,15 +233,15 @@ onMounted(() => {
                               Subject Tutoring
                             </th>
                             <th nowrap>Grade</th>
-                            <th nowrap>Head</th>
-                            <th nowrap>Fee Individual</th>
-                            <th nowrap>Fee Group</th>
-                            <th
+                            <th nowrap>Year</th>
+                            <th nowrap>Fee Individual - Gross</th>
+                            <!-- <th nowrap>Fee Group</th> -->
+                            <!-- <th
                               nowrap
                               class="text-end"
                             >
                               Additional Fee
-                            </th>
+                            </th> -->
                           </tr>
                         </thead>
                         <tbody>
@@ -241,15 +256,25 @@ onMounted(() => {
                             >
                               <td nowrap>{{ subject.tutor_subject }}</td>
                               <td nowrap>{{ subject.grade }}</td>
-                              <td nowrap>{{ subject.head }}</td>
-                              <td nowrap>Rp. {{ new Intl.NumberFormat('id-ID').format(subject.fee_individual) }}</td>
-                              <td nowrap>Rp. {{ new Intl.NumberFormat('id-ID').format(subject.fee_group) }}</td>
+                              <td nowrap>{{ subject.year }}</td>
+                              <td nowrap>
+                                <VTextField
+                                  prefix="Rp. "
+                                  v-model="subject.fee_individual"
+                                  density="compact"
+                                  type="number"
+                                  label="Fee Gross"
+                                  class="my-3"
+                                  @update:model-value="updateFee(item.uuid, subject)"
+                                />
+                              </td>
+                              <!-- <td nowrap>Rp. {{ new Intl.NumberFormat('id-ID').format(subject.fee_group) }}</td>
                               <td
                                 class="text-end"
                                 nowrap
                               >
                                 Rp. {{ new Intl.NumberFormat('id-ID').format(subject.additional_fee) }}
-                              </td>
+                              </td> -->
                             </tr>
                           </template>
                         </tbody>

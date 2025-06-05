@@ -23,7 +23,6 @@ declare module 'vue' {
     Program_add: typeof import('./resources/js/components/admin/program/program_add.vue')['default']
     Program_add_specialist: typeof import('./resources/js/components/admin/program/program_add_specialist.vue')['default']
     Program_add_specialist_timesheet: typeof import('./resources/js/components/admin/program/program_add_specialist_timesheet.vue')['default']
-    Program_add_specilasit: typeof import('./resources/js/components/admin/program/program_add_specilasit.vue')['default']
     Program_add_tutoring: typeof import('./resources/js/components/admin/program/program_add_tutoring.vue')['default']
     Qalendar: typeof import('./resources/js/components/Qalendar.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

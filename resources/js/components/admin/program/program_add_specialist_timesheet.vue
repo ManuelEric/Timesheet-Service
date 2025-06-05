@@ -2,6 +2,7 @@
 import { showNotif } from '@/helper/notification'
 import { rules } from '@/helper/rules'
 import ApiService from '@/services/ApiService'
+import ApiServiceCRM from '@/services/ApiServiceCRM'
 
 const emit = defineEmits(['close', 'reload'])
 
@@ -17,12 +18,11 @@ const duration_readonly = ref(false)
 const require = 'mentor'
 const has_npwp = ref(null)
 const fee_nett = ref(null)
-const selected = ref([])
 const packageItems = ref([])
 
 const formData = ref()
 const form = ref({
-  ref_id: [],
+  ref_details: [],
   mentortutor_email: null,
   subject_id: null,
   inhouse_id: null,
@@ -33,6 +33,19 @@ const form = ref({
   notes: '',
   pic_id: [],
 })
+
+const getStudent = async () => {
+  const url = 'get/active/mentees/global'
+  try {
+    const res = await ApiServiceCRM.get(url)
+
+    if (res) {
+      program_list.value = res
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
 
 const getProgram = async () => {
   const url = 'api/v1/program/list'
@@ -154,12 +167,12 @@ const submit = async () => {
   if (valid) {
     loading.value = true
     try {
-      const res = await ApiService.post('api/v1/timesheet/create', form.value)
+      const res = await ApiService.post('api/v1/timesheet/create/skip-request', form.value)
       if (res) {
         showNotif('success', res.message, 'bottom-end')
         emit('reload')
         form.value = {
-          ref_id: [],
+          ref_details: [],
           mentortutor_email: null,
           subject_id: null, // used when subject fetched from the server
           subject_name: null, // used when subject fetched from own db
@@ -201,7 +214,8 @@ const checkGrossFee = () => {
 // End Functions
 
 onMounted(() => {
-  getProgram()
+  // getProgram()
+  getStudent()
   getEngagement()
   getTutor()
   getTutor(true)
@@ -219,15 +233,15 @@ onMounted(() => {
     <VCardText>
       <div
         class="mb-4 d-flex gap-1"
-        v-if="selected?.length > 0"
+        v-if="form.ref_details?.length > 0"
       >
-        <p class="text-sm">{{ selected?.length > 1 ? 'Students' : 'Student' }}:</p>
+        <p class="text-sm">{{ form.ref_details?.length > 1 ? 'Students' : 'Student' }}:</p>
         <p
-          v-for="i in selected"
+          v-for="i in form.ref_details"
           :key="i"
           class="text-sm bg-info px-2 rounded"
         >
-          {{ i.mentee }}
+          {{ i.student_first_name + ' ' + i.student_last_name }}
         </p>
       </div>
       <VForm
@@ -236,39 +250,6 @@ onMounted(() => {
         validate-on="input"
       >
         <VRow>
-          <VCol
-            md="12"
-            cols="12"
-          >
-            <VAutocomplete
-              clearable
-              v-model="selected"
-              label="Mentee Name"
-              :items="program_list"
-              :item-props="
-                item => ({
-                  title: item.student_name,
-                  subtitle:
-                    item.program_name + (item.timesheet_id ? ' ✅' : '') + (item.scnd_timesheet_id ? ' ✅' : ''),
-                  disabled: item.timesheet_id && item.scnd_timesheet_id,
-                  value: {
-                    id: item.id,
-                    require: item.require,
-                    mentee: item.student_name,
-                    package: item.package,
-                    curriculum: item.curriculum,
-                    program_name: item.program_name,
-                  },
-                })
-              "
-              :rules="rules.required"
-              :loading="loading"
-              :disabled="loading"
-              @update:model-value="checkProgram"
-              density="compact"
-              multiple
-            ></VAutocomplete>
-          </VCol>
           <VCol cols="12">
             <VAutocomplete
               clearable
@@ -284,6 +265,42 @@ onMounted(() => {
               :rules="rules.required"
               :loading="loading"
               :disabled="loading"
+            ></VAutocomplete>
+          </VCol>
+          <VCol
+            md="12"
+            cols="12"
+          >
+            <VAutocomplete
+              clearable
+              v-model="form.ref_details"
+              label="Mentee Name"
+              :items="program_list"
+              :item-props="
+                item => ({
+                  title: item.first_name + ' ' + item.last_name,
+                  subtitle: item.sch_name,
+                  value: {
+                    clientprog_id: item.clientprog_id,
+                    invoice_id: item.invoice_id,
+                    student_uuid: item.id,
+                    student_first_name: item.first_name,
+                    student_last_name: item.last_name,
+                    student_school: item.sch_name,
+                    student_grade: item.grade,
+                    program_name: item.program_name,
+                    require: item.require,
+                    package: item.package,
+                    curriculum: item.curriculum,
+                    engagement_type: form.engagement_type,
+                  },
+                })
+              "
+              :rules="rules.required"
+              :loading="loading"
+              :disabled="loading"
+              density="compact"
+              multiple
             ></VAutocomplete>
           </VCol>
           <VCol
@@ -307,7 +324,7 @@ onMounted(() => {
               :disabled="loading"
               @update:modelValue="getSubject(tutor_selected.roles, tutor_selected.uuid, tutor_selected.has_npwp)"
             ></VAutocomplete>
-            <v-alert
+            <!-- <v-alert
               :color="has_npwp == 1 ? 'success' : 'error'"
               class="py-2 mt-2"
               v-if="has_npwp != null"
@@ -317,7 +334,7 @@ onMounted(() => {
                 class="mr-2"
               />
               <small> Mentor {{ has_npwp == 1 ? 'already' : 'don`t' }} have NPWP </small>
-            </v-alert>
+            </v-alert> -->
           </VCol>
           <VCol
             md="8"

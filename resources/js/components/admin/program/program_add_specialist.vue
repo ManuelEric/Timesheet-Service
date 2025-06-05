@@ -211,7 +211,7 @@ onMounted(() => {
               :disabled="loading"
               @update:modelValue="getSubject(tutor_selected.roles, tutor_selected.uuid, tutor_selected.has_npwp)"
             ></VAutocomplete>
-            <v-alert
+            <!-- <v-alert
               :color="has_npwp == 1 ? 'success' : 'error'"
               class="py-2 mt-2"
               v-if="has_npwp != null"
@@ -221,7 +221,7 @@ onMounted(() => {
                 class="mr-2"
               />
               <small> Mentor {{ has_npwp == 1 ? 'already' : 'don`t' }} have NPWP </small>
-            </v-alert>
+            </v-alert> -->
           </VCol>
           <VCol
             md="8"
