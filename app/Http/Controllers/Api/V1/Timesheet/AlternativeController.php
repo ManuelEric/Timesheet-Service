@@ -52,6 +52,7 @@ class AlternativeController extends Controller
                     'require' => $item['require'],
                     'package' => $item['package'],
                     'curriculum' => $item['curriculum'],
+                    'engagement_type' => $item['engagement_type'],
                     'client' => [
                         'uuid' => $item['student_uuid'],
                         'first_name' => $item['student_first_name'],
