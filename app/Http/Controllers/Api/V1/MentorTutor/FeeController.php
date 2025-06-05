@@ -22,14 +22,18 @@ class FeeController extends Controller
         ): JsonResponse
     {
         $request->validate([
-            'fee_individual' => 'required',
+            'fee_individual' => 'required', // user will input nett fee
         ]);
 
         $validated = $request->only(['fee_individual']);
         
         DB::beginTransaction();
         try {
-            $roles->fee_individual = $validated['fee_individual'];
+            $nett_fee = $validated['fee_individual'];
+            $tax = ($validated['fee_individual'] * 2.5) / 100;
+            $gross_fee = $nett_fee + $tax;
+            $roles->fee_individual = $gross_fee; 
+
             $roles->save();
             DB::commit();
         } catch (Exception $err) {
