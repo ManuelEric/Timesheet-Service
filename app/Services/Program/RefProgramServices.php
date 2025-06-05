@@ -36,6 +36,7 @@ class RefProgramServices
             $require = $crm_success_program['require'];
             $package = $crm_success_program['package'];
             $curriculum = $crm_success_program['curriculum'];
+            $engagement_type = $crm_success_program['engagement_type'] ?? null;
 
             if ($category == 'b2c') {
                 /* define b2c variables */
@@ -73,6 +74,7 @@ class RefProgramServices
                 'curriculum' => $curriculum,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
+                'engagement_type_id' => $engagement_type, // for subject specialist: in order to be able to read in list request
             ];
         }
 
