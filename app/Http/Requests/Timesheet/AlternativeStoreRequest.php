@@ -70,7 +70,7 @@ class AlternativeStoreRequest extends FormRequest
             'ref_details.*.student_grade' => 'nullable|integer',
             'ref_details.*.program_name' => 'required|string',
             'ref_details.*.require' => 'required|string',
-            'ref_details.*.package' => 'required|string',
+            'ref_details.*.package' => 'nullable|string',
             'ref_details.*.curriculum' => 'nullable|string',
             'ref_details.*.engagement_type' => 'required|exists:engagement_types,id',
 
