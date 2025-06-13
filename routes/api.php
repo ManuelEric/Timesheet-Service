@@ -45,6 +45,7 @@ use Illuminate\Http\Request;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+
 Route::middleware(['throttle:120,1'])->group(function () {
 
     Route::prefix('timesheet')->group(function () {
@@ -58,7 +59,7 @@ Route::middleware(['throttle:120,1'])->group(function () {
     Route::prefix('auth')->group(function () {
         # login timesheet by uuid (Currently use for mentor)
         Route::GET('u/{uuid}', [V1LoginController::class, 'authenticateByUuidNonAdmin']);
-        Route::POST('token/email', [V1LoginController::class, 'authenticateAdminByEmail']);
+        Route::GET('token/{email}', [V1LoginController::class, 'authenticateAdminByEmail']);
 
         Route::POST('email/checking', [V1CheckEmailController::class, 'execute']);
         Route::POST('token', [V1LoginController::class, 'authenticateAdmin']);
