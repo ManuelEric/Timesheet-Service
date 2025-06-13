@@ -155,4 +155,36 @@ class GenerateTokenService
         ];
     }
 
+    public function createAdminTokenByEmail(array $validated)
+    {
+        $validatedEmail = $validated['email'];
+
+        if (! $user = User::where('email', $validatedEmail)->first()) {
+            throw new HttpResponseException(
+                response()->json([
+                    'errors' => 'The provided credentials are incorrect.'
+                ], JsonResponse::HTTP_BAD_REQUEST)
+            );
+        }
+
+        /* generate token */
+        $user->authenticate();
+        switch ($user->role) {
+            case 'finance':
+                $granted_access = ['program-menu', 'timesheet-menu', 'payment-menu']; # all access granted for finance
+                break;
+
+            default:
+                $granted_access = ['*']; # all access granted for admin
+                break;
+        }
+        $token = $user->createToken('admin-access', $granted_access, Carbon::now()->addHours(8))->plainTextToken;
+
+        return [
+            'full_name' => $user->full_name,
+            'email' => $user->email,
+            'role' => $user->role,
+            'granted_token' => $token
+        ];
+    }
 }

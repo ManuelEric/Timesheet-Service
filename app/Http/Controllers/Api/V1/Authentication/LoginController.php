@@ -41,13 +41,24 @@ class LoginController extends Controller
         return response()->json($authenticate, JsonResponse::HTTP_OK);
     }
 
-    public function authenticateByUuid(
+    public function authenticateByUuidNonAdmin(
         AuthenticateByUuidRequest $request,
         ): JsonResponse
     {
         $validated = $request->safe()->only(['uuid']);
         
         $authenticate = $this->generateTokenService->createTokenByUuid($validated);
+
+        return response()->json($authenticate, JsonResponse::HTTP_OK);
+    }
+
+    public function authenticateAdminByEmail(
+        AuthenticateByUuidRequest $request,
+        ): JsonResponse
+    {
+        $validated = $request->safe()->only(['email']);
+        
+        $authenticate = $this->generateTokenService->createAdminTokenByEmail($validated);
 
         return response()->json($authenticate, JsonResponse::HTTP_OK);
     }
