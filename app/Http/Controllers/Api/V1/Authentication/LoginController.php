@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Authentication;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Authentication\AuthenticateAdminByEmailRequest;
 use App\Http\Requests\Authentication\AuthenticateAdminRequest;
 use App\Http\Requests\Authentication\AuthenticateNonAdminRequest;
 use App\Http\Requests\Authentication\AuthenticateByUuidRequest;
@@ -41,13 +42,24 @@ class LoginController extends Controller
         return response()->json($authenticate, JsonResponse::HTTP_OK);
     }
 
-    public function authenticateByUuid(
+    public function authenticateByUuidNonAdmin(
         AuthenticateByUuidRequest $request,
         ): JsonResponse
     {
         $validated = $request->safe()->only(['uuid']);
         
         $authenticate = $this->generateTokenService->createTokenByUuid($validated);
+
+        return response()->json($authenticate, JsonResponse::HTTP_OK);
+    }
+
+    public function authenticateAdminByEmail(
+        AuthenticateAdminByEmailRequest $request,
+        ): JsonResponse
+    {
+        $validated = $request->safe()->only(['email']);
+        
+        $authenticate = $this->generateTokenService->createAdminTokenByEmail($validated);
 
         return response()->json($authenticate, JsonResponse::HTTP_OK);
     }
