@@ -18,6 +18,7 @@ const authThemeMask = computed(() => {
 })
 
 // Start Variable
+const props = defineProps({ email: String, token: String })
 const formData = ref()
 const form = ref({
   email: '',
@@ -66,11 +67,38 @@ const checkAuth = () => {
     router.push('/admin/dashboard')
   }
 }
+
+const checkMentoringLogin = async () => {
+  loading.value = true
+  const url = 'api/v1/auth/token/' + props?.email + '?signature=' + props.token
+  try {
+    const res = await ApiService.get(url)
+    if (res) {
+      console.log(res)
+
+      // save token
+      JwtService.saveToken(res.granted_token)
+      UserService.saveUser(res)
+      showNotif('success', 'You`ve successfully login.', 'bottom-end')
+      setTimeout(() => {
+        router.go('/admin/dashboard')
+      }, 1500)
+    }
+  } catch (error) {
+    console.log(error)
+  } finally {
+    loading.value = false
+  }
+}
 // End Function
 
 onMounted(() => {
   // JwtService.destroyToken()
   checkAuth()
+
+  if ((props.email || props.token) && !JwtService.getToken()) {
+    checkMentoringLogin()
+  }
 })
 </script>
 
