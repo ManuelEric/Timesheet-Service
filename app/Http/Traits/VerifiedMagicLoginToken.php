@@ -18,7 +18,16 @@ trait VerifiedMagicLoginToken
         try {
 
             $query = DB::connection('mysql_crmv2')->table('magic_login_token')->where('identifier', $identifier)->where('used', 0);
-            $magic_login = $query->first();
+            if (!$magic_login = $query->first())
+            {
+                throw new HttpResponseException(
+                    response()->json([
+                        'message' => "Invalid token.",
+                    ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY)
+                );
+            }
+
+
             if ( Hash::check($magic_login->issued_token, $magic_login_token) )
             {
                 throw new HttpResponseException(
