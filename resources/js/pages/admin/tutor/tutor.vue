@@ -197,7 +197,7 @@ onMounted(() => {
               class="text-center"
               nowrap
             >
-              <VDialog max-width="600">
+              <VDialog max-width="700">
                 <template v-slot:activator="{ props: activatorProps }">
                   <VIcon
                     icon="ri-folder-info-line"
@@ -232,6 +232,7 @@ onMounted(() => {
                             >
                               Subject Tutoring
                             </th>
+                            <th nowrap>Curriculum</th>
                             <th nowrap>Grade</th>
                             <th nowrap>Year</th>
                             <th nowrap>Fee Individual - Gross</th>
@@ -255,6 +256,7 @@ onMounted(() => {
                               :key="subject"
                             >
                               <td nowrap>{{ subject.tutor_subject }}</td>
+                              <td nowrap>{{ subject.curriculum_alias }}</td>
                               <td nowrap>{{ subject.grade }}</td>
                               <td nowrap>{{ subject.year }}</td>
                               <td nowrap>
