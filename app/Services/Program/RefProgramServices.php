@@ -69,6 +69,7 @@ class RefProgramServices
                 'student_school' => $student_school,
                 'student_grade' => $student_grade,
                 'program_name' => $program_name,
+                'free_trial' => $package == "Free Trial" ? 1 : 0, 
                 'require' => $require,
                 'package' => $package,
                 'curriculum' => $curriculum,
