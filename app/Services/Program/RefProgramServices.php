@@ -62,6 +62,7 @@ class RefProgramServices
                     'free_trial' => $package == "Free Trial" ? 1 : 0,
                     'package' => $package,
                     'curriculum' => $curriculum,
+                    'require' => $require,
                 ]); # just update the student grade
                 continue; # don't put existing clientprog_id / schprog_id into refs[]
             }
