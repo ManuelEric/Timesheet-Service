@@ -18,7 +18,7 @@ class ComponentController extends Controller
         ): JsonResponse
     {
         $search = $request->only(['cutoff_start', 'cutoff_end', 'terms']);
-        $timesheets = Timesheet::has('ref_program')->filterCutoff($search)->when($search['terms'], function ($query) use ($search) {
+        $timesheets = Timesheet::has('ref_program')->filterCutoff($search)->when(isset($search['terms']), function ($query) use ($search) {
             $query->whereRelation('subject.temp_user', 'full_name', 'like', '%'.$search['terms'].'%')->orderBy('created_at', 'desc');
         })->get();
         $mappedComponents = $timesheets->map(function ($data) use ($timesheetDataService)
