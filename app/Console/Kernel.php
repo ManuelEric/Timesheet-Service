@@ -23,7 +23,7 @@ class Kernel extends ConsoleKernel
         /* synchronize academic program from CRMs */
         $schedule->command('sync:academic-program')->everyFifteenMinutes()->withoutOverlapping();
         $schedule->command('sync:tutor-mentor')->everyFifteenMinutes()->withoutOverlapping(); # adjust the throttling frequency at the CRM routes
-        // $schedule->command('sync:free-trial-program')->everyFifteenMinutes()->withoutOverlapping();
+        $schedule->command('sync:free-trial-program')->everyFifteenMinutes()->withoutOverlapping();
     }
 
     /**

@@ -133,7 +133,7 @@ Route::middleware(['throttle:120,1'])->group(function () {
     });
 
     /* Mentee */
-    Route::middleware(['auth:sanctum', 'abilities:request-menu', 'throttle:30,1'])->group(function  () {
+    Route::middleware(['auth:sanctum', 'abilities:request-menu', 'throttle:2500,1'])->group(function  () {
 
         /**
          * The Components

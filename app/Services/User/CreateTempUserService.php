@@ -45,6 +45,7 @@ class CreateTempUserService
                 $subjects = $detail['subjects'];
 
                 /* for mentor and external mentor */
+                // since mentor and external mentor won't have subject
                 if ( $subjects === null || count($subjects) == 0 ) {
                     $roleDetails[] = [
                         'role' => $role_name,
@@ -149,7 +150,6 @@ class CreateTempUserService
 
     public function storeOrUpdateRoles(string $tempUserId, array $roleDetails)
     {
-        Log::debug('Inserted Temp Roles', $roleDetails);
         foreach ($roleDetails as $detail) {
             $role = $detail['role'];
             $tutor_subject = $detail['subject'] ?? null;

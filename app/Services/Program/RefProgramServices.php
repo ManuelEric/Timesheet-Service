@@ -55,7 +55,15 @@ class RefProgramServices
             /* check existence of success program on timesheet app */
             if ( Ref_Program::whereWetherB2C_B2B($category, $clientprog_id, $schprog_id)->noTrial()->exists() )
             {
-                Ref_Program::where('clientprog_id', $clientprog_id)->update(['student_grade' => $student_grade]); # just update the student grade
+                Ref_Program::where('clientprog_id', $clientprog_id)->update([
+                    'student_grade' => $student_grade,
+                    //? need to update package, curriculum, program_name, 
+                    'program_name' => $program_name,
+                    'free_trial' => $package == "Free Trial" ? 1 : 0,
+                    'package' => $package,
+                    'curriculum' => $curriculum,
+                    'require' => $require,
+                ]); # just update the student grade
                 continue; # don't put existing clientprog_id / schprog_id into refs[]
             }
 
@@ -69,6 +77,7 @@ class RefProgramServices
                 'student_school' => $student_school,
                 'student_grade' => $student_grade,
                 'program_name' => $program_name,
+                'free_trial' => $package == "Free Trial" ? 1 : 0, 
                 'require' => $require,
                 'package' => $package,
                 'curriculum' => $curriculum,

@@ -17,8 +17,10 @@ class ComponentController extends Controller
         TimesheetDataService $timesheetDataService,
         ): JsonResponse
     {
-        $search = $request->only(['cutoff_start', 'cutoff_end']);
-        $timesheets = Timesheet::has('ref_program')->filterCutoff($search)->get();
+        $search = $request->only(['cutoff_start', 'cutoff_end', 'terms']);
+        $timesheets = Timesheet::has('ref_program')->filterCutoff($search)->when($search['terms'], function ($query) use ($search) {
+            $query->whereRelation('subject.temp_user', 'full_name', 'like', '%'.$search['terms'].'%')->orderBy('created_at', 'desc');
+        })->get();
         $mappedComponents = $timesheets->map(function ($data) use ($timesheetDataService)
         {
             /* initialize variables */
@@ -39,6 +41,7 @@ class ComponentController extends Controller
                 'program_name' => $programName,
                 'package_type' => $packageType,
                 'package_name' => $packageName,
+                'timesheet_created_at' => $data->created_at,
             ];
         }); 
 
