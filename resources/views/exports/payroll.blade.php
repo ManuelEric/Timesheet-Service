@@ -183,7 +183,7 @@
 
     <!-- Rounder start here -->
     <tr>
-        <td colspan="6" valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Pembulatan
+        <td colspan="6" valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">Rounding
         </td>
         <td valign="middle" align="right" style="border: 1px solid #000; word-wrap: break-word;">
             {{ formatToRupiah(roundCustom($total_fee)) }}
