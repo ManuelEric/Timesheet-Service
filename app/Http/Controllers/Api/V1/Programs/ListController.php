@@ -14,7 +14,7 @@ class ListController extends Controller
     public function index(Request $request): JsonResponse
     {
         /* incoming request */
-        $search = $request->only(['program_name', 'keyword', 'has_timesheet']);
+        $search = $request->only(['program_name', 'keyword', 'has_timesheet', 'require']);
         $additionalSearch = $request->only(['paginate', 'is_cancelled']);
 
         /* manage the variables of additional search */

@@ -46,7 +46,7 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware(['throttle:120,1'])->group(function () {
+Route::middleware(['throttle:2500,1'])->group(function () {
 
     Route::prefix('timesheet')->group(function () {
         Route::GET('{timesheet}/export', [V1TimesheetController::class, 'export']);
@@ -95,6 +95,9 @@ Route::middleware(['throttle:120,1'])->group(function () {
             /* List PICs */
             Route::prefix('component')->middleware(['abilities:program-menu'])->group(function () {
                 Route::GET('list', [V1UserListController::class, 'component']);
+
+                /* retrieve fee mentor */
+                Route::GET('mentor/{tempUser:uuid}', [V1MentorTutorComponentController::class, 'comp_fee_mentor']);
             });
             /* List subject by Mentor / Tutor */
             Route::GET('mentor-tutors/{mentortutor_uuid}/subjects', [V1MentorTutorComponentController::class, 'comp_subjects']);
