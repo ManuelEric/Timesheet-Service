@@ -61,7 +61,7 @@ class CreateTempUserService
                     /* when role_name is external mentor then add the details from user_stream */
                     case "External Mentor":
 
-                        if ( !isset($subjects) && count($subjects) == 0 )
+                        if ( !isset($subjects) )
                         {
                             $roleDetails[] = [
                                 'role' => 'External Mentor'
@@ -89,7 +89,7 @@ class CreateTempUserService
                         break;
                     /* when role_name is tutor then add the details from user_subject */
                     case "Tutor":
-                        if ( !isset($subjects) && count($subjects) == 0)
+                        if ( !isset($subjects) )
                         {
                             $roleDetails[] = [
                                 'role' => 'Tutor',
