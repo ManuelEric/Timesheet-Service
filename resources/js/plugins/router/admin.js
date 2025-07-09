@@ -1,4 +1,13 @@
 export default [
+  // LOGIN FROM MENTORING 
+  { 
+    path: '/mentoring/login/:email',
+    props: route => ({
+      email:route.params.email,
+      token:route.query.token,
+    }),
+    component: () => import('@/pages/auth/login-admin.vue'),
+  },
   { path: '/admin', redirect: '/admin/login' },
   {
     path: '/admin',

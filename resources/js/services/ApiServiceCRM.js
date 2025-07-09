@@ -1,25 +1,16 @@
 import axios from 'axios'
-import JwtService from './JwtService'
-
-
-const token = JwtService.getToken()
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL, // Ganti dengan URL API yang sesuai
+  baseURL: import.meta.env.VITE_CRM_DOMAIN, // Ganti dengan URL API yang sesuai
   headers: {
     'Content-Type': 'application/json',
-
     // Jika diperlukan, Anda bisa menambahkan header lain di sini
   },
 })
 
 // Interceptor untuk menangani setiap melakukan permintaan
 apiClient.interceptors.request.use(
-  config => {
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
-    
+  config => {  
     return config
   },
   error => {
@@ -34,9 +25,6 @@ apiClient.interceptors.response.use(
   },
   error => {
     if (error?.response?.status === 401) {
-      // Hapus token dari tempat penyimpanan Anda
-      UserService.destroyUser();
-      JwtService.destroyToken();
       // console.log('Token expired or invalid. Please log in again.');
       router.go(0)
     }

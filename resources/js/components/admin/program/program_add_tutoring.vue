@@ -6,7 +6,7 @@ import ApiService from '@/services/ApiService'
 const emit = defineEmits(['close', 'reload'])
 
 const loading = ref(false)
-const tutor_selected = ref([])
+const tutor_selected = ref(null)
 const program_list = ref([])
 const tutor_list = ref([])
 const curriculum_list = ref([])
@@ -179,7 +179,7 @@ const submit = async () => {
           individual_fee: '',
           curriculum_id: null,
         }
-        tutor_selected.value = []
+        tutor_selected.value = null
 
         window.open('/admin/timesheet/tutoring/' + res.data?.timesheet_id, '_blank')
       }
@@ -287,10 +287,7 @@ onMounted(() => {
               multiple
             ></VAutocomplete>
           </VCol>
-          <VCol
-            md="12"
-            cols="12"
-          >
+          <VCol :cols="tutor_selected ? 11 : 12">
             <VAutocomplete
               clearable
               v-model="tutor_selected"
@@ -319,6 +316,85 @@ onMounted(() => {
               />
               <small> Tutor {{ has_npwp == 1 ? 'already' : 'don`t' }} have NPWP </small>
             </v-alert> -->
+          </VCol>
+          <VCol
+            cols="1"
+            v-if="tutor_selected"
+          >
+            <VDialog max-width="600">
+              <template v-slot:activator="{ props: activatorProps }">
+                <VTooltip
+                  activator="parent"
+                  location="end"
+                  >Fee Detail</VTooltip
+                >
+                <VIcon
+                  icon="ri-folder-info-line"
+                  class="cursor-pointer mt-3"
+                  v-bind="activatorProps"
+                />
+              </template>
+
+              <template v-slot:default="{ isActive }">
+                <VCard>
+                  <VCardText class="py-5">
+                    <div class="d-flex justify-between align-center mb-3">
+                      <h4 class="w-100">Detail</h4>
+
+                      <VBtn
+                        size="x-small"
+                        color="secondary"
+                        icon="ri-close-line"
+                        @click="isActive.value = false"
+                      ></VBtn>
+                    </div>
+                    <!-- Start Tutor  -->
+                    <VTable
+                      density="compact"
+                      v-if="tutor_selected?.roles.findIndex(role => role.name === 'Tutor') >= 0"
+                    >
+                      <thead>
+                        <tr>
+                          <th
+                            class="text-left"
+                            nowrap
+                          >
+                            Subject Tutoring
+                          </th>
+                          <th nowrap>Grade</th>
+                          <th nowrap>Year</th>
+                          <th nowrap>Fee Individual - Gross</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <template
+                          v-for="(sub_item, index) in tutor_selected.roles"
+                          :key="index"
+                        >
+                          <tr
+                            v-if="sub_item.name == 'Tutor'"
+                            v-for="subject in sub_item.subjects"
+                            :key="subject"
+                          >
+                            <td nowrap>{{ subject.tutor_subject }}</td>
+                            <td nowrap>{{ subject.grade }}</td>
+                            <td nowrap>{{ subject.year }}</td>
+                            <td nowrap>Rp. {{ new Intl.NumberFormat('id-ID').format(subject.fee_individual) }}</td>
+                          </tr>
+                        </template>
+                      </tbody>
+                    </VTable>
+                    <VCardText
+                      v-else
+                      class="text-center"
+                    >
+                      There is no tutoring subject
+                    </VCardText>
+                    <!-- End Tutor  -->
+                  </VCardText>
+                </VCard>
+              </template>
+            </VDialog>
           </VCol>
           <VCol
             md="6"

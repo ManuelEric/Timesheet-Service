@@ -318,7 +318,10 @@ watch(() => {
               <tr>
                 <td>{{ props.name == 'tutoring' ? 'Tutor' : 'Mentor' }} Name</td>
                 <td width="1%">:</td>
-                <td>{{ data.packageDetails?.tutormentor_name }}</td>
+                <td>
+                  {{ data.packageDetails?.tutormentor_name }} ( Rp.
+                  {{ new Intl.NumberFormat('id-ID').format(data.packageDetails?.tutormentor_fee_hours) }} )
+                </td>
               </tr>
               <tr>
                 <td>Inhouse {{ props.name == 'tutoring' ? 'Tutor' : 'Mentor' }}</td>

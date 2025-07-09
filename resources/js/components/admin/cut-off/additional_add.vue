@@ -14,12 +14,28 @@ const form = ref({
   date: null,
 })
 const timesheet_list = ref([])
+const tutor_list = ref([])
 const loading = ref(false)
+const tutor_name = ref(null)
+
+const getTutorName = async () => {
+  loading.value = true
+  try {
+    const res = await ApiService.get('api/v1/user/mentor-tutors?role=tutor')
+    if (res) {
+      tutor_list.value = res
+    }
+  } catch (error) {
+    console.error(error)
+  } finally {
+    loading.value = false
+  }
+}
 
 const getTimesheet = async () => {
   loading.value = true
   try {
-    const res = await ApiService.get('api/v1/timesheet/component/list')
+    const res = await ApiService.get('api/v1/timesheet/component/list?terms=' + tutor_name.value)
     if (res) {
       timesheet_list.value = res
     }
@@ -52,7 +68,7 @@ const submit = async () => {
 }
 
 onMounted(() => {
-  getTimesheet()
+  getTutorName()
 })
 </script>
 
@@ -66,15 +82,41 @@ onMounted(() => {
         <VRow>
           <VCol cols="12">
             <VAutocomplete
+              v-model="tutor_name"
+              label="Tutor Name"
+              placeholder="Timesheet - Package"
+              :items="tutor_list"
+              :item-props="
+                item => ({
+                  title: item.full_name,
+                  subtitle: item.email,
+                })
+              "
+              item-value="full_name"
+              :rules="rules.required"
+              :loading="loading"
+              :disabled="loading"
+              @update:model-value="getTimesheet"
+              density="compact"
+            ></VAutocomplete>
+          </VCol>
+          <VCol cols="12">
+            <VAutocomplete
               v-model="form.timesheet_id"
               label="Timesheet - Package"
               placeholder="Timesheet - Package"
               :items="timesheet_list"
-              :item-title="item => item.package_type + ' - ' + item.package_name + ' | ' + item.clients"
+              :item-props="
+                item => ({
+                  title: item.clients + ' (' + item.package_type + ' - ' + item.package_name + ')',
+                  subtitle: moment(item.timesheet_created_at).format('LL'),
+                })
+              "
               item-value="id"
               :rules="rules.required"
               :loading="loading"
               :disabled="loading"
+              density="compact"
             ></VAutocomplete>
           </VCol>
           <VCol cols="12">
@@ -84,6 +126,8 @@ onMounted(() => {
               label="Date"
               placeholder="Date"
               :rules="rules.required"
+              variant="outlined"
+              density="compact"
             />
             <VTextField
               v-model="form.fee"
@@ -91,6 +135,7 @@ onMounted(() => {
               label="Additional Fee"
               placeholder="Additional Fee"
               :rules="rules.required"
+              density="compact"
             />
           </VCol>
         </VRow>
