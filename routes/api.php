@@ -95,9 +95,6 @@ Route::middleware(['throttle:2500,1'])->group(function () {
             /* List PICs */
             Route::prefix('component')->middleware(['abilities:program-menu'])->group(function () {
                 Route::GET('list', [V1UserListController::class, 'component']);
-
-                /* retrieve fee mentor */
-                Route::GET('mentor/{tempUser:uuid}', [V1MentorTutorComponentController::class, 'comp_fee_mentor']);
             });
             /* List subject by Mentor / Tutor */
             Route::GET('mentor-tutors/{mentortutor_uuid}/subjects', [V1MentorTutorComponentController::class, 'comp_subjects']);
@@ -252,7 +249,8 @@ Route::middleware(['throttle:2500,1'])->group(function () {
          * The Components
          */
         Route::prefix('component')->group(function () {
-            Route::GET('fee/{tutor_id}/{subject_name}/{curriculum_id}', [V1FeeController::class, 'component']);
+            Route::GET('fee/tutor/{tutor_id}/{subject_name}/{curriculum_id}', [V1FeeController::class, 'component_tutor']);
+            Route::GET('fee/ext-mentor/{extmentor_id}/{stream}/{engagement_type_id}/{package_id}', [V1FeeController::class, 'component_extmentor']);
         });
     });
 

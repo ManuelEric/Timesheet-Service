@@ -11,7 +11,7 @@ use Illuminate\Support\Carbon;
 
 class FeeController extends Controller
 {
-    public function component(string $tutor_uuid, ?string $subject_name = null, ?string $curriculum_id = null)
+    public function component_tutor(string $tutor_id, ?string $subject_name = null, ?string $curriculum_id = null)
     {
         /**
          * because subject name and curriculum id is allow to be null
@@ -25,21 +25,37 @@ class FeeController extends Controller
 
         $details = TempUserRoles::query()->
             select(['start_date', 'end_date', 'grade', 'fee_individual', 'fee_group'])->
-            where('temp_user_id', $tutor_uuid)->
+            where('temp_user_id', $tutor_id)->
             when($subject_name, function ($query) use ($subject_name) {
                 $query->where('tutor_subject', $subject_name);
             })->
             when($curriculum_id, function ($query) use ($curriculum_id) {
                 $query->where('curriculum_id', $curriculum_id);
             })->
-            where('year', Carbon::now()->format('Y'))->
-            where(function ($query) {
-                $query->where('head', 1)->orWhereNull('head');
-            })->
-            where('start_date', '<', Carbon::now())->
-            where('end_date', '>', Carbon::now())->
+            whereRaw('now() BETWEEN start_date AND end_date')->
             active()->
             first();
+        return response()->json($details);
+    }
+
+    public function component_extmentor(string $mentor_id, string $stream, string $engagement_type_id, string $package_id)
+    {
+        $details = TempUserRoles::query()->
+            select(['start_date', 'end_date', 'grade', 'fee_individual', 'fee_group'])->
+            where('temp_user_id', $mentor_id)->
+            when( $stream, function ($query) use ($stream) {
+                $query->where('ext_mentor_stream', $stream);
+            })->
+            when($engagement_type_id, function ($query) use ($engagement_type_id) {
+                $query->where('engagement_type_id', $engagement_type_id);
+            })->
+            when($package_id, function ($query) use ($package_id) {
+                $query->where('package_id', $package_id);
+            })->
+            whereRaw('now() BETWEEN start_date AND end_date')->
+            active()->
+            first();
+
         return response()->json($details);
     }
 

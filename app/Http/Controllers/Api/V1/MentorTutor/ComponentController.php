@@ -72,24 +72,4 @@ class ComponentController extends Controller
 
         return response()->json($responses);
     }
-
-    public function comp_fee_mentor(Request $request, TempUser $tempUser)
-    {
-        $search = $request->only(['ref_program_id', 'engagement_type', 'package']);
-        $ref_program = Ref_Program::find($search['ref_program_id']);
-        //! perlu dapet nama streamsnya agar bisa get fee sesuai stream
-
-        $package = Package::where('type_of', $search['package'])->first();
-
-        $mentor_fee = TempUserRoles::where('temp_user_id', $tempUser->id)->
-            where('ext_mentor_engagement_type', $search['engagement_type'])->
-            when( $package, function ($query) use ($package) {
-                $query->where('ext_mentor_package', $package->type_of);
-            })->active()->first();
-
-        return response()->json([
-            'message' => 'Fee Mentor has found.',
-            'data' => $mentor_fee
-        ]);
-    }
 }
