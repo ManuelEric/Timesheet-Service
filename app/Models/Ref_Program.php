@@ -139,6 +139,7 @@ class Ref_Program extends Model
         $program_name = $search['program_name'] ?? false;
         $keyword = $search['keyword'] ?? false;
         $has_timesheet = isset($search['has_timesheet']) ? $search['has_timesheet'] == "true" ? true : false : null;
+        $require = $search['require'] ?? 'all';
 
         $query->
             when( $program_name, function ($_sub_) use ($program_name) {
@@ -158,6 +159,9 @@ class Ref_Program extends Model
                 }, function ($query) {
                     $query->doesntHave('timesheet')->doesntHave('second_timesheet');
                 });
+            })->
+            when( $require != 'all', function ($query) use ($require) {
+                $query->where('require', ucfirst($require));
             });
     }
 
