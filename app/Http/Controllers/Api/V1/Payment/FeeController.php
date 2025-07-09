@@ -11,7 +11,7 @@ use Illuminate\Support\Carbon;
 
 class FeeController extends Controller
 {
-    public function component_tutor(string $tutor_id, ?string $subject_name = null, ?string $curriculum_id = null)
+    public function component_tutor(string $tutor_id, ?string $subject_name = null, ?string $curriculum_id = null, ?string $grade = null)
     {
         /**
          * because subject name and curriculum id is allow to be null
@@ -22,6 +22,7 @@ class FeeController extends Controller
          */
         $subject_name = gettype($subject_name) == "string" && $subject_name == "null" ? null : $subject_name;
         $curriculum_id = gettype($curriculum_id) == "string" && $subject_name == "null" ? null : $curriculum_id;
+        $grade = gettype($grade) == "string" && $grade == "null" ? null : $grade;
 
         $details = TempUserRoles::query()->
             select(['start_date', 'end_date', 'grade', 'fee_individual', 'fee_group'])->
@@ -31,6 +32,9 @@ class FeeController extends Controller
             })->
             when($curriculum_id, function ($query) use ($curriculum_id) {
                 $query->where('curriculum_id', $curriculum_id);
+            })->
+            when($grade, function ($query) use ($grade) {
+                $query->whereRaw('? BETWEEN CAST(SUBSTRING_INDEX(REPLACE(REPLACE(grade, "[", ""), "]", ""), "-", 1) AS UNSIGNED) AND CAST(SUBSTRING_INDEX(REPLACE(REPLACE(grade, "[", ""), "]", ""), "-", -1) AS UNSIGNED)', [$grade]);
             })->
             whereRaw('now() BETWEEN start_date AND end_date')->
             active()->

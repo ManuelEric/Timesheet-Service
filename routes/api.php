@@ -249,7 +249,7 @@ Route::middleware(['throttle:2500,1'])->group(function () {
          * The Components
          */
         Route::prefix('component')->group(function () {
-            Route::GET('fee/tutor/{tutor_id}/{subject_name}/{curriculum_id}', [V1FeeController::class, 'component_tutor']);
+            Route::GET('fee/tutor/{tutor_id}/{subject_name}/{curriculum_id}/{grade}', [V1FeeController::class, 'component_tutor']);
             Route::GET('fee/ext-mentor/{extmentor_id}/{stream}/{engagement_type_id}/{package_id}', [V1FeeController::class, 'component_extmentor']);
         });
     });
