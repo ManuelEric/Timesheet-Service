@@ -20,11 +20,11 @@ class FeeController extends Controller
          * because mentor doesn't have neither subject nor curriculum
          * and this function can be called to check not only tutor, but mentor also
          */
-        $subject_name = gettype($subject_name) == "string" ? null : $subject_name;
-        $curriculum_id = gettype($curriculum_id) == "string" ? null : $curriculum_id;
+        $subject_name = gettype($subject_name) == "string" && $subject_name == "null" ? null : $subject_name;
+        $curriculum_id = gettype($curriculum_id) == "string" && $subject_name == "null" ? null : $curriculum_id;
 
         $details = TempUserRoles::query()->
-            select(['fee_individual', 'fee_group'])->
+            select(['start_date', 'end_date', 'grade', 'fee_individual', 'fee_group'])->
             where('temp_user_id', $tutor_uuid)->
             when($subject_name, function ($query) use ($subject_name) {
                 $query->where('tutor_subject', $subject_name);
@@ -35,7 +35,10 @@ class FeeController extends Controller
             where('year', Carbon::now()->format('Y'))->
             where(function ($query) {
                 $query->where('head', 1)->orWhereNull('head');
-            })->            
+            })->
+            where('start_date', '<', Carbon::now())->
+            where('end_date', '>', Carbon::now())->
+            active()->
             first();
         return response()->json($details);
     }
