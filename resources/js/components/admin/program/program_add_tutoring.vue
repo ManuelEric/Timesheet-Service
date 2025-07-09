@@ -36,7 +36,7 @@ const form = ref({
 })
 
 const getProgram = async () => {
-  const url = 'api/v1/program/list'
+  const url = 'api/v1/program/list?require=tutor'
   try {
     loading.value = true
     const res = await ApiService.get(url)
@@ -128,16 +128,27 @@ const getSubject = async (item, uuid = null, npwp = 0) => {
 }
 
 const getIndividualFee = async (tutor_id, subject_name, curriculum_id) => {
+  const grade = selected.value[0]?.grade
+
   if (subject_name) {
     try {
-      const res = await ApiService.get('api/v1/component/fee/' + tutor_id + '/' + subject_name + '/' + curriculum_id)
-      if (res) {
-        form.value.individual_fee = res.fee_individual
-        if (res.fee_individual) {
+      const res = await ApiService.get(
+        'api/v1/component/fee/tutor/' + tutor_id + '/' + subject_name + '/' + curriculum_id + '/' + grade,
+      )
+      if (res.length > 0) {
+        // if student more than one, use fee group
+        form.value.individual_fee = selected.value.length > 1 ? res.fee_group : res.fee_individual
+        if (form.value.individual_fee) {
           checkNettFee()
         } else {
           fee_nett.value = null
         }
+      } else {
+        showNotif(
+          'error',
+          "We're sorry, but we couldn't find a tutor fee for the selected curriculum and subject. This may be outside the scope of our current agreement. Please reach out to our HR team for assistance or to explore available options",
+          'bottom-end',
+        )
       }
     } catch (error) {
       console.error(error)
@@ -276,6 +287,7 @@ onMounted(() => {
                     package: item.package,
                     curriculum: item.curriculum,
                     program_name: item.program_name,
+                    grade: item.student_grade,
                   },
                 })
               "
@@ -339,7 +351,7 @@ onMounted(() => {
                 <VCard>
                   <VCardText class="py-5">
                     <div class="d-flex justify-between align-center mb-3">
-                      <h4 class="w-100">Detail</h4>
+                      <h4 class="w-100">Detail of Active Agreement</h4>
 
                       <VBtn
                         size="x-small"
@@ -359,10 +371,10 @@ onMounted(() => {
                             class="text-left"
                             nowrap
                           >
-                            Subject Tutoring
+                            Curriculum
                           </th>
+                          <th nowrap>Subject Tutoring</th>
                           <th nowrap>Grade</th>
-                          <th nowrap>Year</th>
                           <th nowrap>Fee Individual - Gross</th>
                         </tr>
                       </thead>
@@ -376,9 +388,9 @@ onMounted(() => {
                             v-for="subject in sub_item.subjects"
                             :key="subject"
                           >
-                            <td nowrap>{{ subject.tutor_subject }}</td>
-                            <td nowrap>{{ subject.grade }}</td>
-                            <td nowrap>{{ subject.year }}</td>
+                            <td nowrap>{{ subject.curriculum ?? '-' }}</td>
+                            <td nowrap>{{ subject.tutor_subject ?? '-' }}</td>
+                            <td nowrap>{{ subject.grade ?? '-' }}</td>
                             <td nowrap>Rp. {{ new Intl.NumberFormat('id-ID').format(subject.fee_individual) }}</td>
                           </tr>
                         </template>

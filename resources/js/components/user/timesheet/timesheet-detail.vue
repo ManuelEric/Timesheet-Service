@@ -90,12 +90,13 @@ const updateTime = debounce(async item => {
 
 const updateStatus = async item => {
   try {
-    const res = await ApiService.put('api/v1/timesheet/' + props.id + '/activity/' + item.id, item)
+    const res = await ApiService.patch('api/v1/timesheet/' + props.id + '/activity/' + item.id, item)
 
     if (res) {
       showNotif('success', res.message, 'bottom-end')
     }
   } catch (error) {
+    if (error?.response?.data?.message) showNotif('error', error.response.data.message, 'bottom-end')
     console.error(error)
   } finally {
     getData()

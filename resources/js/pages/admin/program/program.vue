@@ -15,7 +15,7 @@ const props = defineProps({ name: String })
 
 const currentPage = ref(1)
 const totalPage = ref()
-const keyword = ref()
+const keyword = ref(null)
 const data = ref([])
 const loading = ref(false)
 const program_list = ref([])
@@ -39,7 +39,7 @@ const getData = async () => {
   const url =
     category == 'tutoring'
       ? 'api/v1/program/list' + page + search + program + paginate
-      : 'api/v1/request' + page + keyword + '&is_cancelled=true'
+      : 'api/v1/request' + page + search + '&is_cancelled=true'
   try {
     loading.value = true
     const res = await ApiService.get(url)
@@ -280,6 +280,7 @@ onMounted(() => {
                   package: item.package,
                   curriculum: item.curriculum,
                   program_name: item.program_name,
+                  grade: item.student_grade,
                 }"
                 v-else-if="(!item.timesheet_id || !item.scnd_timesheet_id) && !item.cancellation_reason"
               ></VCheckbox>

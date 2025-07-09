@@ -10,13 +10,13 @@ const loading = ref(false)
 const tutor_selected = ref([])
 const tutor_list = ref([])
 const program_list = ref([])
-const subjects = ref([])
+const stream_list = ref([])
+const stream_selected = ref(null)
 const package_list = ref([])
 const pic_list = ref([])
 const inhouse_mentor = ref([])
 const duration_readonly = ref(false)
 const require = 'mentor'
-const has_npwp = ref(null)
 const fee_nett = ref(null)
 const packageItems = ref([])
 
@@ -28,7 +28,7 @@ const form = ref({
   inhouse_id: null,
   package_id: null,
   duration: '',
-  tax: null,
+  tax: 2.5,
   individual_fee: null,
   notes: '',
   pic_id: [],
@@ -47,14 +47,14 @@ const getStudent = async () => {
   }
 }
 
-const getProgram = async () => {
-  const url = 'api/v1/program/list'
+const getStream = async () => {
+  const url = 'external-mentor/streams'
   try {
     loading.value = true
-    const res = await ApiService.get(url)
+    const res = await ApiServiceCRM.get(url)
 
     if (res) {
-      program_list.value = res
+      stream_list.value = res
     }
     loading.value = false
   } catch (error) {
@@ -95,6 +95,33 @@ const getPackage = async () => {
   }
 }
 
+const getIndividualFee = async (mentor_id, stream, engagement_type, packages) => {
+  try {
+    const res = await ApiService.get(
+      'api/v1/component/fee/ext-mentor/' + mentor_id + '/' + stream + '/' + engagement_type + '/' + packages,
+    )
+    if (res.length > 0) {
+      // if student more than one, use fee group
+      form.value.individual_fee = form.value.ref_details.length > 1 ? res.fee_group : res.fee_individual
+      if (form.value.individual_fee) {
+        checkNettFee()
+      } else {
+        fee_nett.value = null
+      }
+    } else {
+      showNotif(
+        'error',
+        "We're sorry, but we couldn't find a tutor fee for the selected curriculum and subject. This may be outside the scope of our current agreement. Please reach out to our HR team for assistance or to explore available options",
+        'bottom-end',
+      )
+    }
+  } catch (error) {
+    console.error(error)
+  }
+
+  checkPackage()
+}
+
 const checkPackage = () => {
   const package_id = form.value.package_id
   const index = package_list.value.findIndex(item => item.id === package_id)
@@ -117,34 +144,6 @@ const getPIC = async () => {
     }
   } catch (error) {
     console.error(error)
-  }
-}
-
-const getSubject = async (item, uuid = null, npwp = 0) => {
-  form.value.subject_id = null
-
-  // check NPWP
-  has_npwp.value = npwp
-  form.value.tax = npwp == 1 ? 2.5 : 2.5
-
-  if (require == 'mentor') {
-    form.value.subject_id = item[0]?.subjects[0]?.id
-    form.value.individual_fee = item[0]?.subjects[0]?.fee_individual
-
-    if (form.value.individual_fee) {
-      checkNettFee()
-    } else {
-      fee_nett.value = null
-    }
-  } else {
-    try {
-      const res = await ApiService.get('api/v1/user/mentor-tutors/' + uuid + '/subjects')
-      if (res) {
-        subjects.value = res
-      }
-    } catch (error) {
-      console.error(error)
-    }
   }
 }
 
@@ -214,7 +213,7 @@ const checkGrossFee = () => {
 // End Functions
 
 onMounted(() => {
-  // getProgram()
+  getStream()
   getStudent()
   getEngagement()
   getTutor()
@@ -304,7 +303,7 @@ onMounted(() => {
             ></VAutocomplete>
           </VCol>
           <VCol
-            md="12"
+            md="6"
             cols="12"
           >
             <VAutocomplete
@@ -322,19 +321,23 @@ onMounted(() => {
               :rules="rules.required"
               :loading="loading"
               :disabled="loading"
-              @update:modelValue="getSubject(tutor_selected.roles, tutor_selected.uuid, tutor_selected.has_npwp)"
             ></VAutocomplete>
-            <!-- <v-alert
-              :color="has_npwp == 1 ? 'success' : 'error'"
-              class="py-2 mt-2"
-              v-if="has_npwp != null"
-            >
-              <VIcon
-                icon="ri-error-warning-line"
-                class="mr-2"
-              />
-              <small> Mentor {{ has_npwp == 1 ? 'already' : 'don`t' }} have NPWP </small>
-            </v-alert> -->
+          </VCol>
+          <VCol
+            md="6"
+            cols="12"
+          >
+            <VAutocomplete
+              density="compact"
+              clearable
+              label="Stream"
+              v-model="stream_selected"
+              :items="stream_list"
+              item-title="stream_name"
+              item-value="stream_name"
+              :loading="loading"
+              :disabled="loading"
+            ></VAutocomplete>
           </VCol>
           <VCol
             md="8"
@@ -356,7 +359,9 @@ onMounted(() => {
               :rules="rules.required"
               :loading="loading"
               :disabled="loading"
-              @update:modelValue="checkPackage"
+              @update:modelValue="
+                getIndividualFee(tutor_selected.uuid, stream_selected, form.engagement_type, form.package_id)
+              "
             ></VAutocomplete>
           </VCol>
           <VCol

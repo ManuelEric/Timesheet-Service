@@ -77,6 +77,8 @@ const updateStatus = async item => {
       showNotif('success', res.message, 'bottom-end')
     }
   } catch (error) {
+    if (error?.response?.data?.message) showNotif('error', error.response.data.message, 'bottom-end')
+
     if (error?.response?.data?.errors) {
       const validationErrors = error.response.data.errors
       let errorMessage = 'Validation errors:'
@@ -225,6 +227,7 @@ onMounted(() => {
                   :href="item.meeting_link"
                   target="_blank"
                   class="bg-primary"
+                  :disabled="item.cutoff_status == 'completed'"
                 >
                   <VIcon icon="ri ri-link" />
                   Join
@@ -235,6 +238,7 @@ onMounted(() => {
                 density="compact"
                 class="me-1"
                 v-tooltip:start="'Edit Activity'"
+                :disabled="item.cutoff_status == 'completed'"
                 @click="selectedActivity('edit', item)"
               >
                 <VIcon
@@ -247,6 +251,7 @@ onMounted(() => {
                 color="error"
                 density="compact"
                 v-tooltip:start="'Delete Activity'"
+                :disabled="item.cutoff_status == 'completed'"
                 @click="selectedActivity('delete', item)"
               >
                 <VIcon
