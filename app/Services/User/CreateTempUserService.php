@@ -61,40 +61,58 @@ class CreateTempUserService
                     /* when role_name is external mentor then add the details from user_stream */
                     case "External Mentor":
 
-                        foreach ($subjects as $subject) {
+                        if ( count($subjects) == 0 )
+                        {
                             $roleDetails[] = [
-                                'role' => $role_name,
-                                'stream' => $subject['stream'],
-                                'engagement_type' => $subject['engagement_type_id'],
-                                'package' => $subject['package'],
-                                'start_date' => $subject['start_date'],
-                                'end_date' => $subject['end_date'],
-                                'year' => $subject['year'],
-                                'fee_individual' => $subject['fee_individual'] ?? 0,
-                                'head' => $subject['head'],
-                                'grade' => $subject['grade'],
-                                'additional_fee' => $subject['additional_fee'] ?? 0,
-                                'tax' => 2.5
+                                'role' => 'External Mentor'
                             ];
+                        }
+                        else
+                        {
+                            foreach ($subjects as $subject) {
+                                $roleDetails[] = [
+                                    'role' => $role_name,
+                                    'stream' => $subject['stream'],
+                                    'engagement_type' => $subject['engagement_type_id'],
+                                    'package' => $subject['package'],
+                                    'start_date' => $subject['start_date'],
+                                    'end_date' => $subject['end_date'],
+                                    'year' => $subject['year'],
+                                    'fee_individual' => $subject['fee_individual'] ?? 0,
+                                    'head' => $subject['head'],
+                                    'grade' => $subject['grade'],
+                                    'additional_fee' => $subject['additional_fee'] ?? 0,
+                                    'tax' => 2.5
+                                ];
+                            }
                         }
                         break;
                     /* when role_name is tutor then add the details from user_subject */
                     case "Tutor":
-                        foreach ( $subjects as $subject  ) {            
+                        if (count($subjects) == 0)
+                        {
                             $roleDetails[] = [
-                                'role' => $role_name,
-                                'subject' => $subject['subject'],
-                                'curriculum_id' => Curriculum::where('alias', $subject['curriculum'])->first()->id ?? null,
-                                'start_date' => $subject['start_date'],
-                                'end_date' => $subject['end_date'],
-                                'year' => $subject['year'], # an indicator that allow this user to be a tutor for only student with choosen year
-                                'head' => $subject['head'],
-                                'additional_fee' => $subject['additional_fee'] ?? 0,
-                                'grade' => $subject['grade'],
-                                'fee_individual' => $subject['fee_individual'] ?? 0,
-                                'fee_group' => $subject['fee_group'] ?? 0,
-                                'tax' => 2.5
+                                'role' => 'Tutor',
                             ];
+                        }   
+                        else
+                        {
+                            foreach ( $subjects as $subject ) {            
+                                $roleDetails[] = [
+                                    'role' => $role_name,
+                                    'subject' => $subject['subject'],
+                                    'curriculum_id' => Curriculum::where('alias', $subject['curriculum'])->first()->id ?? null,
+                                    'start_date' => $subject['start_date'],
+                                    'end_date' => $subject['end_date'],
+                                    'year' => $subject['year'], # an indicator that allow this user to be a tutor for only student with choosen year
+                                    'head' => $subject['head'],
+                                    'additional_fee' => $subject['additional_fee'] ?? 0,
+                                    'grade' => $subject['grade'],
+                                    'fee_individual' => $subject['fee_individual'] ?? 0,
+                                    'fee_group' => $subject['fee_group'] ?? 0,
+                                    'tax' => 2.5,
+                                ];
+                            }
                         }
                         break;
                 }
@@ -192,13 +210,24 @@ class CreateTempUserService
 
     public function storeOrUpdateRoles(string $tempUserId, array $roleDetails)
     {
+        if ( count($roleDetails) == 0 )
+        {
+            // default
+            TempUserRoles::updateOrCreate(
+                ['temp_user_id' => $tempUserId, 'role' => $detail['role']],
+                []
+            );
+        }
+        
+        $tutor_subjects = $extmentor_streams = []; // default
         foreach ($roleDetails as $detail) 
         {
             switch ($detail['role']) {
                 case "Tutor":
                     $role = $detail['role'];
                     $tutor_subject = $detail['subject'] ?? null;
-                    $curriculum_id = $detail['curriculum'] ?? null;
+                    $tutor_subjects[] = $tutor_subject;
+                    $curriculum_id = $detail['curriculum_id'] ?? null;
                     $start_date = $detail['start_date'] ?? null;
                     $end_date = $detail['end_date'] ?? null;
                     $year = $detail['year'] ?? null;
@@ -208,9 +237,12 @@ class CreateTempUserService
                     $fee_individual = $detail['fee_individual'] ?? 0;
                     $fee_group = $detail['fee_group'] ?? 0;
                     $tax = $detail['tax'] ?? 0;
+
+                    // store new temp_user_roles
                     TempUserRoles::updateOrCreate(
-                        ['temp_user_id' => $tempUserId, 'role' => $role, 'tutor_subject' => $tutor_subject, 'curriculum_id' => $curriculum_id],
+                        ['temp_user_id' => $tempUserId, 'role' => $role, 'tutor_subject' => $tutor_subject],
                         [
+                            'curriculum_id' => $curriculum_id,
                             'start_date' => $start_date,
                             'end_date' => $end_date,
                             'year' => $year,
@@ -219,18 +251,19 @@ class CreateTempUserService
                             'grade' => $grade,
                             'fee_individual' => $fee_individual,
                             'fee_group' => $fee_group,
-                            'tax' => $tax
+                            'tax' => $tax,
+                            'is_active' => 1
                         ]
                     );
                     break;
 
                 case "External Mentor":
-                    TempUserRoles::updateOrCreate(
+                    $updatedOrStoredStream = TempUserRoles::updateOrCreate(
                         [
                             'temp_user_id' => $tempUserId, 
                             'role' => $detail['role'], 
                             'ext_mentor_stream' => $detail['stream'], 
-                            'package_id' => Package::where('type_of', $detail['package'])->first()->id, // because the data from crm will be string 
+                            'package_id' => Package::where('type_of', $detail['package'])->first()->id ?? null, // because the data from crm will be string 
                             'engagement_type_id' => $detail['engagement_type']
                         ],
                         [
@@ -240,9 +273,11 @@ class CreateTempUserService
                             'additional_fee' => $detail['additional_fee'],
                             'grade' => $detail['grade'],
                             'fee_individual' => $detail['fee_individual'],
-                            'tax' => $detail['tax']
+                            'tax' => $detail['tax'],
+                            'is_active' => 1
                         ]
                     );
+                    $extmentor_streams[] = $updatedOrStoredStream->id;
                     break;
             }
 
@@ -253,5 +288,15 @@ class CreateTempUserService
             );
             
         }
+
+        // reset temp_user_roles for tutor
+        if (count($tutor_subjects) > 0) {
+            TempUserRoles::where('temp_user_id', $tempUserId)->whereNotIn('tutor_subject', $tutor_subjects)->update(['is_active' => 0]);
+        }
+
+        // reset temp_user_roles for external mentor
+        if (count($extmentor_streams) > 0) {
+            TempUserRoles::where('temp_user_id', $tempUserId)->whereNotIn('id', $extmentor_streams)->update(['is_active' => 0]);
+        } 
     }
 }
