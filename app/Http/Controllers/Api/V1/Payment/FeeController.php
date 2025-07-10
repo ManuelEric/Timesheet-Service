@@ -6,6 +6,7 @@ use App\Actions\Payment\HiddenCostAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Payment\HiddenCostRequest;
 use App\Models\TempUserRoles;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 
@@ -39,6 +40,13 @@ class FeeController extends Controller
             whereRaw('now() BETWEEN start_date AND end_date')->
             active()->
             first();
+        
+        if ( !$details ) {
+            throw new HttpResponseException(response()->json([
+                'error' => 'Not found.'
+            ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY));
+        }
+        
         return response()->json($details);
     }
 
