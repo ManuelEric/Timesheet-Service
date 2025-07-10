@@ -209,16 +209,7 @@ class CreateTempUserService
     }
 
     public function storeOrUpdateRoles(string $tempUserId, array $roleDetails)
-    {
-        if ( count($roleDetails) == 0 )
-        {
-            // default
-            TempUserRoles::updateOrCreate(
-                ['temp_user_id' => $tempUserId, 'role' => $detail['role']],
-                []
-            );
-        }
-        
+    {        
         $tutor_subjects = $extmentor_streams = []; // default
         foreach ($roleDetails as $detail) 
         {
@@ -226,7 +217,6 @@ class CreateTempUserService
                 case "Tutor":
                     $role = $detail['role'];
                     $tutor_subject = $detail['subject'] ?? null;
-                    $tutor_subjects[] = $tutor_subject;
                     $curriculum_id = $detail['curriculum_id'] ?? null;
                     $start_date = $detail['start_date'] ?? null;
                     $end_date = $detail['end_date'] ?? null;
@@ -238,55 +228,84 @@ class CreateTempUserService
                     $fee_group = $detail['fee_group'] ?? 0;
                     $tax = $detail['tax'] ?? 0;
 
-                    // store new temp_user_roles
-                    TempUserRoles::updateOrCreate(
-                        ['temp_user_id' => $tempUserId, 'role' => $role, 'tutor_subject' => $tutor_subject],
-                        [
-                            'curriculum_id' => $curriculum_id,
-                            'start_date' => $start_date,
-                            'end_date' => $end_date,
-                            'year' => $year,
-                            'head' => $head,
-                            'additional_fee' => $additional_fee,
-                            'grade' => $grade,
-                            'fee_individual' => $fee_individual,
-                            'fee_group' => $fee_group,
-                            'tax' => $tax,
-                            'is_active' => 1
-                        ]
-                    );
+
+                    if ( !array_key_exists('subject', $detail) )
+                    {
+                        // store new temp_user_roles but only for role
+                        // it indicates that the user doesn't have agreement (subject) in CRM
+                        TempUserRoles::updateOrCreate(
+                            ['temp_user_id' => $tempUserId, 'role' => $detail['role']],
+                            []
+                        );
+                    }
+                    else
+                    {
+                        // store new temp_user_roles
+                        TempUserRoles::updateOrCreate(
+                            ['temp_user_id' => $tempUserId, 'role' => $role, 'tutor_subject' => $tutor_subject],
+                            [
+                                'curriculum_id' => $curriculum_id,
+                                'start_date' => $start_date,
+                                'end_date' => $end_date,
+                                'year' => $year,
+                                'head' => $head,
+                                'additional_fee' => $additional_fee,
+                                'grade' => $grade,
+                                'fee_individual' => $fee_individual,
+                                'fee_group' => $fee_group,
+                                'tax' => $tax,
+                                'is_active' => 1
+                            ]
+                        );
+                        $tutor_subjects[] = $tutor_subject;
+                    }
                     break;
 
                 case "External Mentor":
-                    $updatedOrStoredStream = TempUserRoles::updateOrCreate(
-                        [
-                            'temp_user_id' => $tempUserId, 
-                            'role' => $detail['role'], 
-                            'ext_mentor_stream' => $detail['stream'], 
-                            'package_id' => Package::where('type_of', $detail['package'])->first()->id ?? null, // because the data from crm will be string 
-                            'engagement_type_id' => $detail['engagement_type']
-                        ],
-                        [
-                            'start_date' => $detail['start_date'],
-                            'end_date' => $detail['end_date'],
-                            'head' => $detail['head'],
-                            'additional_fee' => $detail['additional_fee'],
-                            'grade' => $detail['grade'],
-                            'fee_individual' => $detail['fee_individual'],
-                            'tax' => $detail['tax'],
-                            'is_active' => 1
-                        ]
-                    );
-                    $extmentor_streams[] = $updatedOrStoredStream->id;
-                    break;
-            }
 
-            // default
-            TempUserRoles::updateOrCreate(
-                ['temp_user_id' => $tempUserId, 'role' => $detail['role']],
-                []
-            );
-            
+                    if ( !array_key_exists('stream', $detail) )
+                    {
+                        // store new temp_user_roles but only for role
+                        // it indicates that the user doesn't have agreement (stream) in CRM
+                        TempUserRoles::updateOrCreate(
+                            ['temp_user_id' => $tempUserId, 'role' => $detail['role']],
+                            []
+                        );
+                    }
+                    else
+                    {
+                        // store new temp_user_roles
+                        $updatedOrStoredStream = TempUserRoles::updateOrCreate(
+                            [
+                                'temp_user_id' => $tempUserId, 
+                                'role' => $detail['role'], 
+                                'ext_mentor_stream' => $detail['stream'], 
+                                'package_id' => Package::where('type_of', $detail['package'])->first()->id ?? null, // because the data from crm will be string 
+                                'engagement_type_id' => $detail['engagement_type']
+                            ],
+                            [
+                                'start_date' => $detail['start_date'],
+                                'end_date' => $detail['end_date'],
+                                'head' => $detail['head'],
+                                'additional_fee' => $detail['additional_fee'],
+                                'grade' => $detail['grade'],
+                                'fee_individual' => $detail['fee_individual'],
+                                'tax' => $detail['tax'],
+                                'is_active' => 1
+                            ]
+                        );
+                        $extmentor_streams[] = $updatedOrStoredStream->id;
+                    }
+                    break;
+                
+                default:
+                    // store new temp_user_roles if role name are not match with the switch case
+                    TempUserRoles::updateOrCreate(
+                        ['temp_user_id' => $tempUserId, 'role' => $detail['role']],
+                        []
+                    );
+
+            }
         }
 
         // reset temp_user_roles for tutor
