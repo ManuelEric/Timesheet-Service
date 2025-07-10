@@ -36,11 +36,16 @@ class MainController extends Controller
         $isPaginate = $additionalSearch['paginate'] ?? false;
 
         $tutormentors = TempUser::with([
-                'roles',
+                'roles' => function ($query) {
+                    // show temp_user_roles only if active and within start_date and end_date
+                    $query->whereRaw('now() BETWEEN temp_user_roles.start_date AND temp_user_roles.end_date')->where('temp_user_roles.is_active', 1);
+                },
                 'roles.curriculum' => function ($query) {
                     $query->select('id', 'name', 'alias');
                 }
-            ])->onSearch($search)->orderBy('full_name', 'ASC')->get();
+            ])->
+            onSearch($search)->
+            orderBy('full_name', 'ASC')->get();
 
         /* in order to grouped the roles by role_name, we need to mapping the data */
         $mappedTutormentors = $tutormentors->map(function ($item) {
@@ -101,6 +106,8 @@ class MainController extends Controller
                         'temp_user_id' => $subject->temp_user_id,
                         'role' => $subject->role,
                         'tutor_subject' => $subject->tutor_subject,
+                        'start_date' => $subject->start_date,
+                        'end_date' => $subject->end_date,
                         'year' => $subject->year,
                         'head' => $subject->head,
                         'additional_fee' => $subject->additional_fee,
@@ -126,7 +133,10 @@ class MainController extends Controller
                         'temp_user_id' => $subject->temp_user_id,
                         'role' => $subject->role,
                         'stream' => $subject->ext_mentor_stream,
-                        'package' => $subject->ext_mentor_package,
+                        'package' => $subject->package_id,
+                        'engagement_type' => $subject->engagement_type_id,
+                        'start_date' => $subject->start_date,
+                        'end_date' => $subject->end_date,
                         'year' => $subject->year,
                         'head' => $subject->head,
                         'additional_fee' => $subject->additional_fee,
