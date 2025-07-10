@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\MentorTutor;
 
 use App\Http\Controllers\Controller;
+use App\Models\Curriculum;
 use App\Models\Package;
 use App\Models\Ref_Program;
 use App\Models\TempUser;
@@ -15,7 +16,7 @@ use Illuminate\Http\Request;
 
 class ComponentController extends Controller
 {
-    public function comp_subjects(TempUser $tempUser)
+    public function comp_subjects(TempUser $tempUser, Curriculum $curriculum)
     {
         # because there were changes to the creation of timesheet
         # like: subjects now fetched from timesheet database instead of CRM
@@ -46,7 +47,12 @@ class ComponentController extends Controller
 
 
         # preferably return subject owned by tutor/mentor him/herself
-        return response()->json(TempUserRoles::where('temp_user_id', $tempUser->id)->active()->orderBy('tutor_subject', 'asc')->select(['id', 'tutor_subject'])->get());
+        $data = TempUserRoles::where('temp_user_id', $tempUser->id)->
+            where('curriculum_id', $curriculum->id)->
+            active()->
+            orderBy('tutor_subject', 'asc')->
+            select(['id', 'tutor_subject'])->get();
+        return response()->json($data);
     }
 
     public function former_comp_subjects($mentorTutorsUuid): JsonResponse
