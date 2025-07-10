@@ -1,5 +1,6 @@
 import axios from 'axios'
 import JwtService from './JwtService'
+import UserService from './UserService'
 
 
 const token = JwtService.getToken()
