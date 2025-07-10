@@ -22,7 +22,7 @@ class FeeController extends Controller
          * and this function can be called to check not only tutor, but mentor also
          */
         $subject_name = gettype($subject_name) == "string" && $subject_name == "null" ? null : $subject_name;
-        $curriculum_id = gettype($curriculum_id) == "string" && $subject_name == "null" ? null : $curriculum_id;
+        $curriculum_id = gettype($curriculum_id) == "string" && $curriculum_id == "null" ? null : $curriculum_id;
         $grade = gettype($grade) == "string" && $grade == "null" ? null : $grade;
 
         $details = TempUserRoles::query()->
