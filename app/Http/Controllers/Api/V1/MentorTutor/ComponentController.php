@@ -51,6 +51,7 @@ class ComponentController extends Controller
             when($curriculum, function ($query) use ($curriculum) {
                 $query->where('curriculum_id', $curriculum->id);
             })->
+            whereRaw('now() BETWEEN start_date AND end_date')->
             active()->
             orderBy('tutor_subject', 'asc')->
             select(['id', 'tutor_subject'])->get();
