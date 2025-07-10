@@ -83,7 +83,7 @@ class StoreRequest extends FormRequest
             ],
             'subject_name' => 'nullable',
             'individual_fee' => 'nullable',
-            'tax' => 'required',
+            'tax' => 'nullable',
             'curriculum_id' => 'nullable|exists:curriculums,id'
         ];
     }
