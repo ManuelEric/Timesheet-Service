@@ -97,7 +97,7 @@ Route::middleware(['throttle:2500,1'])->group(function () {
                 Route::GET('list', [V1UserListController::class, 'component']);
             });
             /* List subject by Mentor / Tutor */
-            Route::GET('mentor-tutors/{mentortutor_uuid}/subjects', [V1MentorTutorComponentController::class, 'comp_subjects']);
+            Route::GET('mentor-tutors/{tempUser:uuid}/subjects', [V1MentorTutorComponentController::class, 'comp_subjects']);
             /* List students mentored / tutored by Mentor / Tutor */
             Route::GET('mentor-tutors/{mentortutor_uuid}/students', [V1MentorTutorComponentController::class, 'comp_students']);
         });

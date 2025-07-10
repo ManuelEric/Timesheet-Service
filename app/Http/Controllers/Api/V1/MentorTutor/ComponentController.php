@@ -15,34 +15,38 @@ use Illuminate\Http\Request;
 
 class ComponentController extends Controller
 {
-    public function comp_subjects()
+    public function comp_subjects(TempUser $tempUser)
     {
         # because there were changes to the creation of timesheet
         # like: subjects now fetched from timesheet database instead of CRM
         # so I'll put the change here
 
         # after changes
-        $subjects = [
-            'Chemistry',
-            'Biology',
-            'SAT English',
-            'SAT Math & English',
-            'SAT Math',
-            'TOEFL',
-            'IELTS',
-            'IB Writing',
-            'Mathematics',
-            'Environmental Sciences & Society (ESS)',
-            'Physics',
-            'Economics',
-            'Computer Science',
-            'Programming',
-            'Life Science',
-            'English',
-            'Business Management'
-        ];
-        $subject_collections = collect($subjects)->sort()->values()->all();
-        return response()->json($subject_collections);
+        // $subjects = [
+        //     'Chemistry',
+        //     'Biology',
+        //     'SAT English',
+        //     'SAT Math & English',
+        //     'SAT Math',
+        //     'TOEFL',
+        //     'IELTS',
+        //     'IB Writing',
+        //     'Mathematics',
+        //     'Environmental Sciences & Society (ESS)',
+        //     'Physics',
+        //     'Economics',
+        //     'Computer Science',
+        //     'Programming',
+        //     'Life Science',
+        //     'English',
+        //     'Business Management'
+        // ];
+        // $subject_collections = collect($subjects)->sort()->values()->all();
+        // return response()->json($subject_collections);
+
+
+        # preferably return subject owned by tutor/mentor him/herself
+        return response()->json(TempUserRoles::where('temp_user_id', $tempUser->id)->active()->orderBy('tutor_subject', 'asc')->select(['id', 'tutor_subject'])->get());
     }
 
     public function former_comp_subjects($mentorTutorsUuid): JsonResponse
