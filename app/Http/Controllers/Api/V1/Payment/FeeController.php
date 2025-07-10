@@ -68,6 +68,12 @@ class FeeController extends Controller
             active()->
             first();
 
+        if ( !$details ) {
+            throw new HttpResponseException(response()->json([
+                'error' => 'Not found.'
+            ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY));
+        }
+
         return response()->json($details);
     }
 
