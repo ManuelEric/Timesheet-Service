@@ -83,7 +83,7 @@ class StoreRequest extends FormRequest
             ],
             'subject_name' => 'nullable',
             'individual_fee' => 'nullable',
-            'tax' => 'nullable',
+            'tax' => 'required',
             'curriculum_id' => 'nullable|exists:curriculums,id'
         ];
     }
@@ -110,8 +110,8 @@ class StoreRequest extends FormRequest
                     return $query->where('id', $this->input('subject_id'))->where('temp_user_id', $tempUser->id);
                 })
             ],
-            'individual_fee' => 'required',
-            'tax' => 'required|min:2.5',
+            'individual_fee' => 'nullable',
+            'tax' => 'nullable',
         ];
     }
 
