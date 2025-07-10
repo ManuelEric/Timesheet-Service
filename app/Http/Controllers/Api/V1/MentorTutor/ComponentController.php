@@ -16,7 +16,7 @@ use Illuminate\Http\Request;
 
 class ComponentController extends Controller
 {
-    public function comp_subjects(TempUser $tempUser, Curriculum $curriculum)
+    public function comp_subjects(TempUser $tempUser, ?Curriculum $curriculum = null)
     {
         # because there were changes to the creation of timesheet
         # like: subjects now fetched from timesheet database instead of CRM
@@ -48,7 +48,9 @@ class ComponentController extends Controller
 
         # preferably return subject owned by tutor/mentor him/herself
         $data = TempUserRoles::where('temp_user_id', $tempUser->id)->
-            where('curriculum_id', $curriculum->id)->
+            when($curriculum, function ($query) use ($curriculum) {
+                $query->where('curriculum_id', $curriculum->id);
+            })->
             active()->
             orderBy('tutor_subject', 'asc')->
             select(['id', 'tutor_subject'])->get();
