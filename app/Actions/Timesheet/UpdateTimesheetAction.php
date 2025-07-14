@@ -2,6 +2,7 @@
 
 namespace App\Actions\Timesheet;
 
+use App\Models\Ref_Program;
 use App\Models\Timesheet;
 use App\Services\ResponseService;
 use Exception;
@@ -28,6 +29,7 @@ class UpdateTimesheetAction
         ?int $subjectId = NULL,
         $feeHours,
         $tax,
+        array $refIds,
         )
     {
         /* define submitted package variables */
@@ -45,6 +47,9 @@ class UpdateTimesheetAction
         
         DB::beginTransaction();
         try {
+
+            /* used for adding another student to existing group */
+            Ref_Program::whereIn('id', $refIds)->update(['timesheet_id' => $existingTimesheet->id]);
 
             $existingTimesheet->update($timesheetNewDetails);
             $existingTimesheet->handle_by()->attach($mentortutorId, ['active' => true]);

@@ -91,6 +91,14 @@ class StoreRequest extends FormRequest
     public function update(): array
     {
         return [
+            'ref_id' => 'required|array',
+            'ref_id.*' => [
+                'required', 
+                'exists:ref_programs,id',
+                //new MatchingProgramName,
+                //new SameGrade($this->input('mentortutor_email'), $this->input('subject_id'), $this->input('package_id')),
+                //new CompatibleProgram($this->input('subject_id')),
+            ],
             'mentortutor_email' => 'required|email|exists:temp_users,email',
             'inhouse_id' => [
                 'required',
