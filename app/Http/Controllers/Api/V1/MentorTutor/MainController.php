@@ -14,6 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class MainController extends Controller
 {
@@ -112,6 +113,7 @@ class MainController extends Controller
                         'head' => $subject->head,
                         'additional_fee' => $subject->additional_fee,
                         'grade' => $subject->grade,
+                        'agreement' => Storage::disk('s3')->temporaryUrl('project/crm/user/'.$item->uuid.'/'.$subject->agreement, now()->addMinutes(5)),
                         'fee_individual' => $subject->fee_individual,
                         'fee_group' => $subject->fee_group,
                         'tax' => $subject->tax,
@@ -141,6 +143,7 @@ class MainController extends Controller
                         'head' => $subject->head,
                         'additional_fee' => $subject->additional_fee,
                         'grade' => $subject->grade,
+                        'agreement' => Storage::disk('s3')->temporaryUrl('project/crm/user/'.$item->uuid.'/'.$subject->agreement, now()->addMinutes(5)),
                         'fee_individual' => $subject->fee_individual,
                         'tax' => $subject->tax,
                         'created_at' => $subject->created_at,
