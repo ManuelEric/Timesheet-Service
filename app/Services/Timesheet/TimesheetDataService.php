@@ -231,6 +231,7 @@ class TimesheetDataService
         $timesheetFeeHours = $timesheet->activities()->first()?->fee_hours ?? null;
         
         $editableColumns = [
+            'ref_id' => $timesheet->ref_program()->pluck('id')->toArray(),
             'pic_id' => $adminId,
             'tutormentor_id' => $tutorMentorUuid,
             'tutormentor_email' => $tutorMentorEmail,

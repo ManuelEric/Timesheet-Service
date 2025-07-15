@@ -52,12 +52,14 @@ class CreateTempUserService
 
                 /* retrieve and create an array for details of user_subject or user_stream */
                 switch ($role_name) {
+
                     /* when role_name is mentor then no need to add the details because they won't have the subject or stream */
                     case "Mentor":
                         $roleDetails[] = [
                             'role' => $role_name
                         ];
                         break;
+
                     /* when role_name is external mentor then add the details from user_stream */
                     case "External Mentor":
 
@@ -87,6 +89,7 @@ class CreateTempUserService
                             }
                         }
                         break;
+                        
                     /* when role_name is tutor then add the details from user_subject */
                     case "Tutor":
                         if ( !isset($subjects) )
