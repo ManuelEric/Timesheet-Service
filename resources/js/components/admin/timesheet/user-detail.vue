@@ -329,6 +329,13 @@ watch(() => {
                 <td>{{ data.packageDetails?.inhouse_name }}</td>
               </tr>
               <tr>
+                <td>Curriculum</td>
+                <td width="1%">:</td>
+                <td>
+                  {{ data.editableColumns?.curriculum_name ?? '-' }}
+                </td>
+              </tr>
+              <tr>
                 <td>Notes</td>
                 <td width="1%">:</td>
                 <td>
@@ -468,6 +475,7 @@ watch(() => {
         :item="data.editableColumns"
         :package_id="data.packageDetails?.package_id"
         :id="props.id"
+        :timesheet-type="props.name"
         @close="toggleDialog('edit')"
         @reload="getData(props.id)"
       />

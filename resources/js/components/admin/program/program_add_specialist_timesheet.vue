@@ -100,7 +100,7 @@ const getIndividualFee = async (mentor_id, stream, engagement_type, packages) =>
     const res = await ApiService.get(
       'api/v1/component/fee/ext-mentor/' + mentor_id + '/' + stream + '/' + engagement_type + '/' + packages,
     )
-    if (res.length > 0) {
+    if (res) {
       // if student more than one, use fee group
       form.value.individual_fee = form.value.ref_details.length > 1 ? res.fee_group : res.fee_individual
       if (form.value.individual_fee) {
@@ -108,14 +108,16 @@ const getIndividualFee = async (mentor_id, stream, engagement_type, packages) =>
       } else {
         fee_nett.value = null
       }
-    } else {
-      showNotif(
-        'error',
-        "We're sorry, but we couldn't find a tutor fee for the selected curriculum and subject. This may be outside the scope of our current agreement. Please reach out to our HR team for assistance or to explore available options",
-        'bottom-end',
-      )
     }
   } catch (error) {
+    form.value.individual_fee = null
+    fee_nett.value = null
+
+    showNotif(
+      'error',
+      "We're sorry, but we couldn't find a tutor fee for the selected curriculum and subject. This may be outside the scope of our current agreement. Please reach out to our HR team for assistance or to explore available options",
+      'bottom-end',
+    )
     console.error(error)
   }
 
@@ -360,7 +362,7 @@ onMounted(() => {
               :loading="loading"
               :disabled="loading"
               @update:modelValue="
-                getIndividualFee(tutor_selected.uuid, stream_selected, form.engagement_type, form.package_id)
+                getIndividualFee(tutor_selected.id, stream_selected, form.engagement_type, form.package_id)
               "
             ></VAutocomplete>
           </VCol>
@@ -389,6 +391,7 @@ onMounted(() => {
               v-model="fee_nett"
               density="compact"
               :rules="rules.required"
+              readonly
               @update:model-value="checkGrossFee"
             />
           </VCol>
@@ -403,6 +406,7 @@ onMounted(() => {
               v-model="form.tax"
               :rules="rules.required"
               density="compact"
+              readonly
               @update:model-value="checkGrossFee"
             />
           </VCol>

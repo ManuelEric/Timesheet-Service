@@ -3,9 +3,10 @@ import { showNotif } from '@/helper/notification'
 import { rules } from '@/helper/rules'
 import ApiService from '@/services/ApiService'
 
-const prop = defineProps(['id', 'item', 'package_id'])
+const prop = defineProps(['id', 'item', 'package_id', 'timesheetType'])
 const emit = defineEmits(['close', 'reload'])
 
+const program_list = ref([])
 const tutor_list = ref([])
 const package_list = ref([])
 const pic_list = ref([])
@@ -17,6 +18,7 @@ const fee_nett = ref(null)
 
 const formData = ref()
 const form = ref({
+  ref_id: prop.item?.ref_id,
   mentortutor_email: prop.item?.tutormentor_email,
   subject_id: prop.item?.subject_id,
   inhouse_id: prop.item?.inhouse_id,
@@ -24,9 +26,26 @@ const form = ref({
   duration: prop.item?.duration,
   notes: prop.item?.notes,
   pic_id: prop.item?.pic_id,
-  tax: prop.item?.tax,
-  individual_fee: Math.trunc(prop.item?.individual_fee),
+  tax: null,
+  individual_fee: null,
 })
+
+const getProgram = async () => {
+  const url = 'api/v1/program/list?require=tutor'
+  try {
+    loading.value = true
+    const res = await ApiService.get(url)
+
+    if (res) {
+      program_list.value = res
+    }
+    loading.value = false
+  } catch (error) {
+    showNotif('error', error.response?.data?.message, 'bottom-end')
+    console.error(error)
+    loading.value = false
+  }
+}
 
 const getTutor = async (inhouse = false) => {
   loading_select.value = true
@@ -96,6 +115,7 @@ const submit = async () => {
       const res = await ApiService.put('api/v1/timesheet/' + prop.id + '/update', form.value)
       if (res) {
         form.value = {
+          ref_id: null,
           mentortutor_email: null,
           subject_id: null,
           inhouse_id: null,
@@ -142,6 +162,7 @@ const checkGrossFee = () => {
 }
 
 onMounted(() => {
+  getProgram()
   getTutor(true)
   getPackage()
   getPIC()
@@ -169,6 +190,33 @@ onMounted(() => {
         validate-on="input"
       >
         <VRow>
+          <VCol
+            md="12"
+            cols="12"
+            v-if="prop.timesheetType != 'specialist'"
+          >
+            <VAutocomplete
+              clearable
+              v-model="form.ref_id"
+              label="Student Name"
+              :items="program_list"
+              :item-props="
+                item => ({
+                  title: item.student_name,
+                  subtitle:
+                    item.program_name + (item.timesheet_id ? ' ✅' : '') + (item.scnd_timesheet_id ? ' ✅' : ''),
+                  disabled: item.timesheet_id && item.scnd_timesheet_id,
+                })
+              "
+              item-value="id"
+              :rules="rules.required"
+              :loading="loading"
+              :disabled="loading"
+              @update:model-value="checkProgram"
+              density="compact"
+              multiple
+            ></VAutocomplete>
+          </VCol>
           <VCol
             md="8"
             cols="8"
@@ -227,6 +275,7 @@ onMounted(() => {
             md="4"
             cols="7"
             v-if="prop.item?.individual_fee"
+            class="d-none"
           >
             <VTextField
               type="number"
@@ -234,7 +283,7 @@ onMounted(() => {
               label="Fee/hours (Nett)"
               v-model="fee_nett"
               density="compact"
-              :rules="rules.required"
+              readonly
               @update:model-value="checkGrossFee"
             />
           </VCol>
@@ -242,14 +291,15 @@ onMounted(() => {
             md="4"
             cols="5"
             v-if="prop.item?.individual_fee"
+            class="d-none"
           >
             <VTextField
               type="number"
               clearable
               label="Tax"
               v-model="form.tax"
-              :rules="rules.required"
               density="compact"
+              readonly
               @update:model-value="checkGrossFee"
             />
           </VCol>
@@ -257,6 +307,7 @@ onMounted(() => {
             md="4"
             cols="12"
             v-if="prop.item?.individual_fee"
+            class="d-none"
           >
             <v-tooltip
               activator="parent"
@@ -271,7 +322,6 @@ onMounted(() => {
               v-model="form.individual_fee"
               density="compact"
               readonly
-              :rules="rules.required"
               @update:model-value="checkNettFee"
             />
           </VCol>
