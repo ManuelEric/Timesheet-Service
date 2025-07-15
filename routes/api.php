@@ -78,7 +78,7 @@ Route::middleware(['throttle:2500,1'])->group(function () {
 
     /* Mentor & Tutors */
     Route::prefix('user')->group(function () {
-        // Route::middleware(['auth:sanctum', 'ability:mentortutors-menu,program-menu'])->group(function () {
+        Route::middleware(['auth:sanctum', 'ability:mentortutors-menu,program-menu'])->group(function () {
             /* List Mentor & Tutors */
             Route::GET('mentor-tutors', [V1MentorTutorController::class, 'index']);
             Route::PUT('mentor-tutors/{mentortutor_uuid}', [V1MentorTutorController::class, 'update']);
@@ -100,7 +100,7 @@ Route::middleware(['throttle:2500,1'])->group(function () {
             Route::GET('mentor-tutors/{tempUser:uuid}/subjects/{curriculum?}', [V1MentorTutorComponentController::class, 'comp_subjects']);
             /* List students mentored / tutored by Mentor / Tutor */
             Route::GET('mentor-tutors/{mentortutor_uuid}/students', [V1MentorTutorComponentController::class, 'comp_students']);
-        // });
+        });
     });
 
     /* Request */
