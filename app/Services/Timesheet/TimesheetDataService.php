@@ -203,7 +203,10 @@ class TimesheetDataService
             ? $refProgram->first()->engagement_type->name
             : null;
         $tax = $timesheet->subject->tax;
-        $feeHours = $timesheet->subject->fee_individual;
+        $isGroup = $timesheet->ref_program()->count() > 1 ? true : false;
+        $feeHours = $isGroup ? $timesheet->subject->fee_group : $timesheet->subject->fee_individual;
+
+
         $packageDetails = [
             'program_name' => $programName,
             'void' => $timesheet->void,
