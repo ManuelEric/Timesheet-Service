@@ -219,7 +219,7 @@ class TimesheetDataService
             'tutormentor_name' => $tutorMentorName,
             'tutormentor_has_npwp' => $tutorMentorHasNPWP,
             'tutormentor_tax' => $tax,
-            'tutormentor_fee_hours' => $feeHours,
+            'tutormentor_fee_hours' => $feeHours, // bisa individual atau group
             'inhouse_name' => $inhouseName,
             'last_updated' => $last_updated,
             'duration_in_minutes' => $duration,

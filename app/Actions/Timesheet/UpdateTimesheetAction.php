@@ -48,6 +48,9 @@ class UpdateTimesheetAction
         DB::beginTransaction();
         try {
 
+            /* reset timesheet_id in ref_program */
+            Ref_Program::where('timesheet_id', $existingTimesheet->id)->update(['timesheet_id' => null]);
+
             /* used for adding another student to existing group */
             Ref_Program::whereIn('id', $refIds)->update(['timesheet_id' => $existingTimesheet->id]);
 
