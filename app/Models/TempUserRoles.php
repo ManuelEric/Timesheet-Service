@@ -34,6 +34,7 @@ class TempUserRoles extends Model
         'fee_individual',
         'fee_group',
         'tax',
+        'agreement',
         'is_active',
     ];
 

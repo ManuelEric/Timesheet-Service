@@ -61,19 +61,22 @@ class UpdateTimesheetAction
             //     'tax' => $tax,
             //     'fee_hours' => $feeHours,
             // ]);
-            if ($feeHours != null && $tax != null)
-            {
-                $existingTimesheet->activities()->update([
-                    'tax' => $tax,
-                    'fee_hours' => $feeHours,
-                ]);
+
+            //* untuk update tax dan fee hours ke setiap activity 
+            // if ($feeHours != null && $tax != null)
+            // {
+            //     $existingTimesheet->activities()->update([
+            //         'tax' => $tax,
+            //         'fee_hours' => $feeHours,
+            //     ]);
     
-                /* also update the tax and fees from temp_user_roles */
-                $existingTimesheet->subject()->update([
-                    'tax' => $tax,
-                    'fee_individual' => $feeHours,
-                ]);
-            }
+            //* untuk update tax and individual fee ke temp_user_roles
+            //     /* also update the tax and fees from temp_user_roles */
+            //     $existingTimesheet->subject()->update([
+            //         'tax' => $tax,
+            //         'fee_individual' => $feeHours,
+            //     ]);
+            // }
 
             DB::commit();
 

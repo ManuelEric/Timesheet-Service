@@ -84,7 +84,8 @@ class CreateTempUserService
                                     'head' => $subject['head'],
                                     'grade' => $subject['grade'],
                                     'additional_fee' => $subject['additional_fee'] ?? 0,
-                                    'tax' => 2.5
+                                    'tax' => 2.5,
+                                    'agreement' => $subject['agreement'] ?? null,
                                 ];
                             }
                         }
@@ -114,6 +115,7 @@ class CreateTempUserService
                                     'fee_individual' => $subject['fee_individual'] ?? 0,
                                     'fee_group' => $subject['fee_group'] ?? 0,
                                     'tax' => 2.5,
+                                    'agreement' => $subject['agreement'] ?? null,
                                 ];
                             }
                         }
@@ -230,6 +232,7 @@ class CreateTempUserService
                     $fee_individual = $detail['fee_individual'] ?? 0;
                     $fee_group = $detail['fee_group'] ?? 0;
                     $tax = $detail['tax'] ?? 0;
+                    $agreement = $detail['agreement'];
 
 
                     if ( !array_key_exists('subject', $detail) )
@@ -245,11 +248,14 @@ class CreateTempUserService
                     {
                         // store new temp_user_roles
                         TempUserRoles::updateOrCreate(
-                            ['temp_user_id' => $tempUserId, 'role' => $role, 'tutor_subject' => $tutor_subject],
                             [
-                                'curriculum_id' => $curriculum_id,
+                                'temp_user_id' => $tempUserId, 
+                                'role' => $role, 
+                                'tutor_subject' => $tutor_subject,
                                 'start_date' => $start_date,
                                 'end_date' => $end_date,
+                            ], [
+                                'curriculum_id' => $curriculum_id,
                                 'year' => $year,
                                 'head' => $head,
                                 'additional_fee' => $additional_fee,
@@ -257,6 +263,7 @@ class CreateTempUserService
                                 'fee_individual' => $fee_individual,
                                 'fee_group' => $fee_group,
                                 'tax' => $tax,
+                                'agreement' => $agreement,
                                 'is_active' => 1
                             ]
                         );
@@ -284,16 +291,16 @@ class CreateTempUserService
                                 'role' => $detail['role'], 
                                 'ext_mentor_stream' => $detail['stream'], 
                                 'package_id' => Package::where('type_of', $detail['package'])->first()->id ?? null, // because the data from crm will be string 
-                                'engagement_type_id' => $detail['engagement_type']
-                            ],
-                            [
+                                'engagement_type_id' => $detail['engagement_type'],
                                 'start_date' => $detail['start_date'],
                                 'end_date' => $detail['end_date'],
+                            ], [
                                 'head' => $detail['head'],
                                 'additional_fee' => $detail['additional_fee'],
                                 'grade' => $detail['grade'],
                                 'fee_individual' => $detail['fee_individual'],
                                 'tax' => $detail['tax'],
+                                'agreement' => $detail['agreement'],
                                 'is_active' => 1
                             ]
                         );

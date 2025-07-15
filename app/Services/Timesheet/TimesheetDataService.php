@@ -229,6 +229,7 @@ class TimesheetDataService
         $subjectId = $timesheet->subject_id;
         $timesheetTax = $timesheet->activities()->first()?->tax ?? null;
         $timesheetFeeHours = $timesheet->activities()->first()?->fee_hours ?? null;
+
         
         $editableColumns = [
             'ref_id' => $timesheet->ref_program()->pluck('id')->toArray(),
