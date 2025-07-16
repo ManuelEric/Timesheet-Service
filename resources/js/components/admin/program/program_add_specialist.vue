@@ -292,7 +292,7 @@ onMounted(() => {
                             :key="subject"
                           >
                             <td nowrap>
-                              {{ subject.engagement_type ?? '-' }}
+                              {{ subject.engagement_type_name ?? '-' }}
                               <a
                                 :href="subject.agreement"
                                 target="_blank"
@@ -309,7 +309,7 @@ onMounted(() => {
                               </a>
                             </td>
                             <td nowrap>{{ subject.stream ?? '-' }}</td>
-                            <td nowrap>{{ subject.package ?? '-' }}</td>
+                            <td nowrap>{{ subject.package_name ?? '-' }}</td>
                             <td nowrap>
                               Rp.
                               {{ new Intl.NumberFormat('id-ID').format(subject.fee_individual) }}
