@@ -8,7 +8,7 @@ const props = defineProps({ selected: Object })
 const emit = defineEmits(['close', 'reload'])
 
 const loading = ref(false)
-const tutor_selected = ref([])
+const tutor_selected = ref(null)
 const tutor_list = ref([])
 const stream_list = ref([])
 const stream_selected = ref(null)
@@ -88,7 +88,7 @@ const getIndividualFee = async (mentor_id, stream, packages) => {
   } catch (error) {
     form.value.individual_fee = null
     fee_nett.value = null
-    
+
     showNotif(
       'error',
       "We're sorry, but we couldn't find a tutor fee for the selected curriculum and subject. This may be outside the scope of our current agreement. Please reach out to our HR team for assistance or to explore available options",
@@ -213,7 +213,7 @@ onMounted(() => {
         <VRow>
           <VCol
             md="6"
-            cols="12"
+            :cols="tutor_selected ? 11 : 12"
           >
             <VAutocomplete
               density="compact"
@@ -233,7 +233,105 @@ onMounted(() => {
             ></VAutocomplete>
           </VCol>
           <VCol
-            md="6"
+            cols="1"
+            v-if="tutor_selected"
+          >
+            <VDialog max-width="600">
+              <template v-slot:activator="{ props: activatorProps }">
+                <VTooltip
+                  activator="parent"
+                  location="end"
+                  >Fee Detail</VTooltip
+                >
+                <VIcon
+                  icon="ri-folder-info-line"
+                  class="cursor-pointer mt-3"
+                  v-bind="activatorProps"
+                />
+              </template>
+
+              <template v-slot:default="{ isActive }">
+                <VCard>
+                  <VCardText class="py-5">
+                    <div class="d-flex justify-between align-center mb-3">
+                      <h4 class="w-100">Detail of Active Agreement</h4>
+
+                      <VBtn
+                        size="x-small"
+                        color="secondary"
+                        icon="ri-close-line"
+                        @click="isActive.value = false"
+                      ></VBtn>
+                    </div>
+                    <!-- Start Tutor  -->
+                    <VTable
+                      density="compact"
+                      v-if="tutor_selected?.roles.findIndex(role => role.name === 'External Mentor') >= 0"
+                    >
+                      <thead>
+                        <tr>
+                          <th
+                            class="text-left"
+                            nowrap
+                          >
+                            Engagement Type
+                          </th>
+                          <th nowrap>Stream</th>
+                          <th nowrap>Package</th>
+                          <th nowrap>Fee Individual - Gross</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <template
+                          v-for="(sub_item, index) in tutor_selected.roles"
+                          :key="index"
+                        >
+                          <tr
+                            v-if="sub_item.name == 'External Mentor'"
+                            v-for="subject in sub_item.subjects"
+                            :key="subject"
+                          >
+                            <td nowrap>
+                              {{ subject.engagement_type ?? '-' }}
+                              <a
+                                :href="subject.agreement"
+                                target="_blank"
+                                class="ms-2 d-inline cursor-pointer"
+                                v-if="subject.agreement"
+                              >
+                                <VTooltip
+                                  activator="parent"
+                                  location="end"
+                                >
+                                  Check Agreement
+                                </VTooltip>
+                                <VIcon icon="ri-file-pdf-2-line" />
+                              </a>
+                            </td>
+                            <td nowrap>{{ subject.stream ?? '-' }}</td>
+                            <td nowrap>{{ subject.package ?? '-' }}</td>
+                            <td nowrap>
+                              Rp.
+                              {{ new Intl.NumberFormat('id-ID').format(subject.fee_individual) }}
+                            </td>
+                          </tr>
+                        </template>
+                      </tbody>
+                    </VTable>
+                    <VCardText
+                      v-else
+                      class="text-center"
+                    >
+                      There is no tutoring subject
+                    </VCardText>
+                    <!-- End Tutor  -->
+                  </VCardText>
+                </VCard>
+              </template>
+            </VDialog>
+          </VCol>
+          <VCol
+            :md="tutor_selected ? 5 : 6"
             cols="12"
           >
             <VAutocomplete

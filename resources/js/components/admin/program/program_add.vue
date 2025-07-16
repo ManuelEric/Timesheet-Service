@@ -36,6 +36,7 @@ const form = ref({
 })
 
 const getTutor = async (inhouse = false) => {
+  loading.value = true
   const url = inhouse
     ? 'api/v1/user/mentor-tutors?inhouse=true&role=' + require
     : 'api/v1/user/mentor-tutors?role=' + require
@@ -50,10 +51,13 @@ const getTutor = async (inhouse = false) => {
     }
   } catch (error) {
     console.error(error)
+  } finally {
+    loading.value = false
   }
 }
 
 const getPackage = async () => {
+  loading.value = true
   try {
     const res = await ApiService.get('api/v1/package/component/list?category=' + require)
     if (res) {
@@ -61,6 +65,8 @@ const getPackage = async () => {
     }
   } catch (error) {
     console.error(error)
+  } finally {
+    loading.value = false
   }
 }
 
@@ -414,7 +420,8 @@ onMounted(() => {
               item-value="id"
               :rules="rules.required"
               :loading="loading"
-              :disabled="loading || props.selected[0]?.package"
+              :readonly="props.selected[0]?.package"
+              :disabled="loading"
               @update:modelValue="checkPackage"
             ></VAutocomplete>
           </VCol>
