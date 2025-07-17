@@ -10,7 +10,7 @@ class IdentifierCheckingAction
 {
     public function execute(int $activityId, int $timesheetId)
     {
-        $activity = Activity::with('cutoff_history')->find($activityId)->makeHidden(['cutoff_ref_id']);
+        $activity = Activity::with('cutoff_history')->findOrFail($activityId)->makeHidden(['cutoff_ref_id']);
         if ( !$activity || $activity->timesheet_id != $timesheetId)
         {
             throw new HttpResponseException(

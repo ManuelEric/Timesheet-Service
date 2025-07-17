@@ -37,7 +37,7 @@ class MentoringServices
         int $phase_detail_id, 
         string $mentor_id, 
         string $activity_description,
-        string $meeting_link,
+        ?string $meeting_link = null,
         array $options = []
     )
     {
@@ -52,7 +52,9 @@ class MentoringServices
             'meeting_notes' => $activity_description,
             'meeting_link' => $meeting_link,
         ], ['mentoring-authorization' => env('MENTORING_AUTHORIZATION_KEY')]);
-        
+
+        Log::info("Mentoring log created for Ref Program ID: {$ref_Program_id} with status code: {$status_code}");
+
         # update column mentoring_log_id using ref_program_id
         # in order to help determine which ref_program should be deleted if mentor cancel/delete the request
         Ref_Program::find($ref_Program_id)->update([
