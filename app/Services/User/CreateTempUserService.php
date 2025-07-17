@@ -35,6 +35,10 @@ class CreateTempUserService
         $phone = $userRawInformation['phone'];
         $password = $userRawInformation['password'];
         $has_npwp = $userRawInformation['has_npwp'];
+        $account_name = ucwords($userRawInformation['account_name']);
+        $account_no = $userRawInformation['account_no'];
+        $bank_name = $userRawInformation['bank_name'];
+        $swift_code = $userRawInformation['swift_code'];
 
         /* check existing temp user */
         $tempUser = TempUser::where('email', $email)->first();
@@ -136,6 +140,10 @@ class CreateTempUserService
                 $tempUser->email = $email;
                 $tempUser->phone = $phone;
                 $tempUser->has_npwp = $has_npwp;
+                $tempUser->account_name = $account_name;
+                $tempUser->account_no = $account_no;
+                $tempUser->bank_name = $bank_name;
+                $tempUser->swift_code = $swift_code; // bank code
                 $tempUser->save();
                 $tempUserId = $tempUser->id;
     
@@ -232,7 +240,7 @@ class CreateTempUserService
                     $fee_individual = $detail['fee_individual'] ?? 0;
                     $fee_group = $detail['fee_group'] ?? 0;
                     $tax = $detail['tax'] ?? 0;
-                    $agreement = $detail['agreement'];
+                    $agreement = $detail['agreement'] ?? null;
 
 
                     if ( !array_key_exists('subject', $detail) )
@@ -290,7 +298,7 @@ class CreateTempUserService
                                 'temp_user_id' => $tempUserId, 
                                 'role' => $detail['role'], 
                                 'ext_mentor_stream' => $detail['stream'], 
-                                'package_id' => Package::where('type_of', $detail['package'])->first()->id ?? null, // because the data from crm will be string 
+                                'package_id' => Package::where('type_of', $detail['package'])->where('active', 1)->first()->id ?? null, // because the data from crm will be string 
                                 'engagement_type_id' => $detail['engagement_type'],
                                 'start_date' => $detail['start_date'],
                                 'end_date' => $detail['end_date'],

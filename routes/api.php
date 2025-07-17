@@ -212,7 +212,8 @@ Route::middleware(['throttle:2500,1'])->group(function () {
                 Route::GET('export/{timesheet}/{cutoff_start}/{cutoff_end}', [V1CutoffController::class, 'export'])->withoutMiddleware(['auth:sanctum', 'abilities:payment-menu']);
                 /* Export multiple sheets at the same time */
                 Route::GET('export/{cutoff_start}/{cutoff_end}', [V1CutoffController::class, 'export_multiple'])->withoutMiddleware(['auth:sanctum', 'abilities:payment-menu']);
-
+                /* Export exclusive excel to summarize overall activities and fee */
+                Route::GET('summarize/{cutoff_start}/{cutoff_end}', [V1CutoffController::class, 'export_summary'])->withoutMiddleware(['auth:sanctum', 'abilities:payment-menu']);
             });
         });
     });
