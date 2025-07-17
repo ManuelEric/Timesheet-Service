@@ -36,6 +36,7 @@ const form = ref({
 })
 
 const getTutor = async (inhouse = false) => {
+  loading.value = true
   const url = inhouse
     ? 'api/v1/user/mentor-tutors?inhouse=true&role=' + require
     : 'api/v1/user/mentor-tutors?role=' + require
@@ -50,10 +51,13 @@ const getTutor = async (inhouse = false) => {
     }
   } catch (error) {
     console.error(error)
+  } finally {
+    loading.value = false
   }
 }
 
 const getPackage = async () => {
+  loading.value = true
   try {
     const res = await ApiService.get('api/v1/package/component/list?category=' + require)
     if (res) {
@@ -61,6 +65,8 @@ const getPackage = async () => {
     }
   } catch (error) {
     console.error(error)
+  } finally {
+    loading.value = false
   }
 }
 
@@ -95,18 +101,18 @@ const getSubject = async (item, uuid = null, npwp = 0) => {
   form.value.tax = npwp == 1 ? 2.5 : 2.5
 
   form.value.subject_id = null
+  form.value.subject_name = null
+  form.value.individual_fee = null
+  fee_nett.value = null
 
-  if (require == 'mentor') {
-    form.value.subject_id = item[0].subjects[0].id
-  } else {
-    try {
-      const res = await ApiService.get('api/v1/user/mentor-tutors/' + uuid + '/subjects')
-      if (res) {
-        subjects.value = res
-      }
-    } catch (error) {
-      console.error(error)
+  const curriculum = form.value.curriculum_id ? '/' + form.value.curriculum_id : ''
+  try {
+    const res = await ApiService.get('api/v1/user/mentor-tutors/' + uuid + '/subjects' + curriculum)
+    if (res) {
+      subjects.value = res
     }
+  } catch (error) {
+    console.error(error)
   }
 }
 
@@ -118,24 +124,27 @@ const getIndividualFee = async (tutor_id, subject_name, curriculum_id) => {
       const res = await ApiService.get(
         'api/v1/component/fee/tutor/' + tutor_id + '/' + subject_name + '/' + curriculum_id + '/' + grade,
       )
-      if (res.length > 0) {
+
+      if (res) {
         // if student more than one, use fee group
-        form.value.individual_fee = selected.value.length > 1 ? res.fee_group : res.fee_individual
+        form.value.individual_fee = props.selected?.length > 1 ? res.fee_group : res.fee_individual
         if (form.value.individual_fee) {
           checkNettFee()
         } else {
           fee_nett.value = null
         }
-      } else {
-        showNotif(
-          'error',
-          "We're sorry, but we couldn't find a tutor fee for the selected curriculum and subject. This may be outside the scope of our current agreement. Please reach out to our HR team for assistance or to explore available options",
-          'bottom-end',
-        )
       }
     } catch (error) {
+      showNotif(
+        'error',
+        "We're sorry, but we couldn't find a tutor fee for the selected curriculum and subject. This may be outside the scope of our current agreement. Please reach out to our HR team for assistance or to explore available options",
+        'bottom-end',
+      )
       console.error(error)
     }
+  } else {
+    form.value.individual_fee = null
+    fee_nett.value = null
   }
 }
 
@@ -253,17 +262,6 @@ onMounted(() => {
               density="compact"
               @update:modelValue="getSubject(tutor_selected.roles, tutor_selected.uuid, tutor_selected.has_npwp)"
             ></VAutocomplete>
-            <!-- <v-alert
-              :color="has_npwp == 1 ? 'success' : 'error'"
-              class="py-1 mt-2"
-              v-if="has_npwp != null"
-            >
-              <VIcon
-                icon="ri-error-warning-line"
-                class="mr-2"
-              />
-              <small> Tutor {{ has_npwp == 1 ? 'already' : 'don`t' }} have NPWP </small>
-            </v-alert> -->
           </VCol>
           <VCol
             cols="1"
@@ -324,10 +322,29 @@ onMounted(() => {
                             v-for="subject in sub_item.subjects"
                             :key="subject"
                           >
-                            <td nowrap>{{ subject.curriculum ?? '-' }}</td>
+                            <td nowrap>
+                              {{ subject.curriculum_name ?? '-' }}
+                              <a
+                                :href="subject.agreement"
+                                target="_blank"
+                                class="ms-2 d-inline cursor-pointer"
+                                v-if="subject.agreement"
+                              >
+                                <VTooltip
+                                  activator="parent"
+                                  location="end"
+                                >
+                                  Check Agreement
+                                </VTooltip>
+                                <VIcon icon="ri-file-pdf-2-line" />
+                              </a>
+                            </td>
                             <td nowrap>{{ subject.tutor_subject ?? '-' }}</td>
                             <td nowrap>{{ subject.grade ?? '-' }}</td>
-                            <td nowrap>Rp. {{ new Intl.NumberFormat('id-ID').format(subject.fee_individual) }}</td>
+                            <td nowrap>
+                              Rp.
+                              {{ new Intl.NumberFormat('id-ID').format(subject.fee_individual) }}
+                            </td>
                           </tr>
                         </template>
                       </tbody>
@@ -358,9 +375,8 @@ onMounted(() => {
                   title: item.name,
                 })
               "
-              :rules="rules.required"
               :loading="loading"
-              :disabled="loading || props.selected[0]?.curriculum"
+              readonly
               density="compact"
               item-value="id"
               @update:modelValue="getIndividualFee(tutor_selected.id, form.subject_name, form.curriculum_id)"
@@ -376,6 +392,8 @@ onMounted(() => {
               v-model="form.subject_name"
               label="Subject Tutoring"
               :items="subjects"
+              item-value="tutor_subject"
+              item-title="tutor_subject"
               :loading="loading"
               :disabled="loading"
               :rules="rules.required"
@@ -402,7 +420,8 @@ onMounted(() => {
               item-value="id"
               :rules="rules.required"
               :loading="loading"
-              :disabled="loading || props.selected[0]?.package"
+              :readonly="props.selected[0]?.package"
+              :disabled="loading"
               @update:modelValue="checkPackage"
             ></VAutocomplete>
           </VCol>
@@ -430,6 +449,7 @@ onMounted(() => {
               label="Fee/hours (Nett)"
               v-model="fee_nett"
               density="compact"
+              readonly
               :rules="rules.required"
               @update:model-value="checkGrossFee"
             />
@@ -445,6 +465,7 @@ onMounted(() => {
               v-model="form.tax"
               :rules="rules.required"
               density="compact"
+              readonly
               @update:model-value="checkGrossFee"
             />
           </VCol>

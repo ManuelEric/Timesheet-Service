@@ -281,6 +281,7 @@ onMounted(() => {
                   curriculum: item.curriculum,
                   program_name: item.program_name,
                   grade: item.student_grade,
+                  engagement_type: item.engagement_type_id,
                 }"
                 v-else-if="(!item.timesheet_id || !item.scnd_timesheet_id) && !item.cancellation_reason"
               ></VCheckbox>
