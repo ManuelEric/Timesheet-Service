@@ -251,6 +251,7 @@ onMounted(() => {
         validate-on="input"
       >
         <VRow>
+          {{ form }}
           <VCol cols="12">
             <VAutocomplete
               clearable
@@ -266,6 +267,11 @@ onMounted(() => {
               :rules="rules.required"
               :loading="loading"
               :disabled="loading"
+              @update:model-value="
+                () => (
+                  (form.ref_details = []), (tutor_selected = null), (stream_selected = null), (form.package_id = null)
+                )
+              "
             ></VAutocomplete>
           </VCol>
           <VCol
