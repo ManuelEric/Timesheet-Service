@@ -1,7 +1,6 @@
 <?php
 
-if (! function_exists('minutesToTimeFormat'))
-{
+if (! function_exists('minutesToTimeFormat')) {
     /**
      * Create a new function for the converter date.
      *
@@ -12,18 +11,19 @@ if (! function_exists('minutesToTimeFormat'))
     {
         $hours = floor($minutes / 60);
         $minutes = $minutes % 60;
-    
+
         return sprintf('%02d:%02d', $hours, $minutes);
     }
 
     function formatToRupiah($value)
     {
-        return "Rp ". number_format($value, 0, ',', '.');
+        return "Rp " . number_format($value, 0, ',', '.');
     }
 
-    function roundCustom($number) {
-        $lower = floor($number / 10) * 10;
-        $upper = ceil($number / 10) * 10;
+    function roundCustom($number)
+    {
+        $lower = floor($number / 100) * 100;
+        $upper = ceil($number / 100) * 100;
         return ($number - $lower) < ($upper - $number) ? $lower : $upper;
     }
 }

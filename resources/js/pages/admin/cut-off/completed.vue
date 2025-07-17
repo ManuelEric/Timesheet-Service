@@ -145,7 +145,10 @@ const downloadPayroll = async data => {
   let end_date = moment(cut_off_date[cut_off_date.length - 1]).format('YYYY-MM-DD')
   let specific = formDownload.value.specific ? '/' + formDownload.value.timesheet_id : ''
 
-  let url = data == 'timesheet' ? 'api/v1/payment/cut-off/export' + specific + '/' + start_date + '/' + end_date : ''
+  let url =
+    data == 'timesheet'
+      ? 'api/v1/payment/cut-off/export' + specific + '/' + start_date + '/' + end_date
+      : 'api/v1/payment/cut-off/summarize/' + start_date + '/' + end_date
 
   const { valid } = await formData.value.validate()
   if (valid) {
@@ -164,7 +167,10 @@ const downloadPayroll = async data => {
         // Create a temporary <a> element to trigger the download
         const link = document.createElement('a')
         link.href = url
-        link.setAttribute('download', `Payroll_${start_date}_${end_date}.xlsx`)
+        link.setAttribute(
+          'download',
+          data == 'timesheet' ? `Timesheet_${start_date}_${end_date}.xlsx` : `Payroll_${start_date}_${end_date}.xlsx`,
+        )
 
         // Append the <a> element to the body and click it to trigger the download
         document.body.appendChild(link)
@@ -178,11 +184,10 @@ const downloadPayroll = async data => {
         showNotif('success', 'Successfully downloaded', 'bottom-end')
       }
     } catch (error) {
-      downloadDialog.value = true
       showNotif('error', 'Cut-Off date is not found!', 'bottom-end')
       console.log(error)
     } finally {
-      resetForm()
+      downloadDialog.value = true
     }
   }
 }
@@ -335,6 +340,8 @@ onMounted(() => {
               type="button"
               color="info"
               class="me-2"
+              :loading="loading"
+              :disabled="loading"
               @click.prevent="downloadPayroll('recap')"
             >
               Recap
@@ -348,6 +355,8 @@ onMounted(() => {
               variant="tonal"
               color="success"
               type="submit"
+              :loading="loading"
+              :disabled="loading"
             >
               Timesheet
               <VIcon
