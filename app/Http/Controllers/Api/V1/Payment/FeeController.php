@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1\Payment;
 use App\Actions\Payment\HiddenCostAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Payment\HiddenCostRequest;
+use App\Http\Traits\StudentClub;
 use App\Models\TempUserRoles;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
@@ -12,6 +13,7 @@ use Illuminate\Support\Carbon;
 
 class FeeController extends Controller
 {
+    use StudentClub;
     public function component_tutor(string $tutor_id, ?string $subject_name = null, ?string $curriculum_id = null, ?string $grade = null)
     {
         /**
@@ -52,6 +54,14 @@ class FeeController extends Controller
 
     public function component_extmentor(string $mentor_id, string $stream, string $engagement_type_id, string $package_id)
     {
+        /** 
+         * package_id 30 is student club hourly 
+         * and because the fee of student club is same as professional sharing
+         * then select fee from professional sharing (1-on-1 / 2-10 / > 10)  
+         * 
+        */
+        [$engagement_type_id, $package_id] = $this->convertToProfessionalSharingPackageId((int)$engagement_type_id, (int)$package_id);
+
         $details = TempUserRoles::query()->
             select(['start_date', 'end_date', 'grade', 'fee_individual', 'fee_group'])->
             where('temp_user_id', $mentor_id)->
