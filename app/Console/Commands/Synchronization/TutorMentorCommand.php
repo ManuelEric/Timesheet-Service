@@ -45,14 +45,17 @@ class TutorMentorCommand extends Command
     public function handle(
         CheckEmailMentorTutorAction $checkEmailMentorTutorAction,
         CreateTempUserService $createTempUserService,
-        )
-    {
+    ) {
         [$statusCode, $mentorTutors] = $this->make_call('get', env('CRM_DOMAIN') . 'user/mentor-tutors');
         $progress = $this->output->createProgressBar(count($mentorTutors));
         $progress->start();
-        
-        foreach ( $mentorTutors as $mentorTutor )
-        {
+
+        foreach ($mentorTutors as $mentorTutor) {
+            // if ($mentorTutor['uuid'] != '2854136c-b8a4-4a67-a5d5-07f453b40665')
+            //     continue;
+            if ($mentorTutor['uuid'] != 'e89ac079-29e6-435e-99e4-f85c5152117b')
+                continue;
+
             try {
 
                 $name = $this->concat($mentorTutor['first_name'], $mentorTutor['last_name']);
@@ -60,26 +63,22 @@ class TutorMentorCommand extends Command
                 [$emailCheckingResult, $userRawInformation] = $checkEmailMentorTutorAction->execute($email);
                 $this->newLine();
 
-                $createTempUserService->execute($userRawInformation);
+                $this->info($createTempUserService->execute($userRawInformation));
                 $this->info("User `{$name}` with email `{$email}` has been stored successfully." . json_encode($userRawInformation));
                 $progress->advance();
-    
             } catch (Exception $e) {
 
-                Log::debug($e->getMessage() . ' on '. $e->getLine() . ' file '. $e->getFile());
+                Log::debug($e->getMessage() . ' on ' . $e->getLine() . ' file ' . $e->getFile());
                 $this->newLine();
-                $this->error("Cannot stored user `{$name}` with email `{$email}`. Error: {$e->getMessage()}");
+                $this->error("Cannot stored user `{$name}` with email `{$email}`. Error: {$e->getMessage()} on {$e->getFile()} at line {$e->getLine()}");
                 continue;
-
             } catch (HttpResponseException $e) {
 
-                Log::debug($e->getMessage() . ' on '. $e->getLine() . ' file '. $e->getFile());
+                Log::debug($e->getMessage() . ' on ' . $e->getLine() . ' file ' . $e->getFile());
                 $this->newLine();
-                $this->error("Cannot stored user `{$name}` with email `{$email}`. Error: {$e->getMessage()}");
+                $this->error("Cannot stored user `{$name}` with email `{$email}`. Error: {$e->getMessage()} on {$e->getFile()} at line {$e->getLine()}");
                 continue;
-
             }
-
         }
 
         $progress->finish();

@@ -46,7 +46,7 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware(['throttle:120,1'])->group(function () {
+Route::middleware(['throttle:2500,1'])->group(function () {
 
     Route::prefix('timesheet')->group(function () {
         Route::GET('{timesheet}/export', [V1TimesheetController::class, 'export']);
@@ -249,7 +249,8 @@ Route::middleware(['throttle:120,1'])->group(function () {
          * The Components
          */
         Route::prefix('component')->group(function () {
-            Route::GET('fee/{tutor_id}/{subject_name}/{curriculum_id}', [V1FeeController::class, 'component']);
+            Route::GET('fee/tutor/{tutor_id}/{subject_name}/{curriculum_id}/{grade}', [V1FeeController::class, 'component_tutor']);
+            Route::GET('fee/ext-mentor/{extmentor_id}/{stream}/{engagement_type_id}/{package_id}', [V1FeeController::class, 'component_extmentor']);
         });
     });
 
