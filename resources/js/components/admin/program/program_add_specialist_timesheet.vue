@@ -251,7 +251,6 @@ onMounted(() => {
         validate-on="input"
       >
         <VRow>
-          {{ form }}
           <VCol cols="12">
             <VAutocomplete
               clearable
