@@ -112,7 +112,7 @@ class MainController extends Controller
             ], [
                 'role' => 'Tutor',
                 'head' => 1,
-                'grade' => '[9-12]',
+                'grade' => '9-12',
                 'fee_individual' => $validatedFeeIndividual,
                 'tax' => $validatedTax
             ]);
@@ -126,7 +126,7 @@ class MainController extends Controller
             ], [
                 'year' => Carbon::now()->format('Y'),
                 'head' => 1,
-                'grade' => '[9-12]',
+                'grade' => '9-12',
                 'fee_individual' => $validatedFeeIndividual,
                 'tax' => $validatedTax
             ]);

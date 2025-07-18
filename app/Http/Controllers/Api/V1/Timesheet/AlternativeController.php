@@ -63,8 +63,8 @@ class AlternativeController extends Controller
                 ];
             })->toArray();
     
-            $storedRequest = $refProgramServices->createMany($modifiedValidatedRefProgram);
-    
+            $storedRefProgram = $refProgramServices->createManySkipRequest($modifiedValidatedRefProgram);
+
             /* declare the validated variables for timesheet mentor */
             $validated = $request->safe()->only([
                 'mentortutor_email',
@@ -77,8 +77,8 @@ class AlternativeController extends Controller
                 'individual_fee',
                 'tax',
             ]);
-    
-            $validatedRefPrograms = array_column($storedRequest, 'id'); // filled with newly stored ref program above
+
+            $validatedRefPrograms = $storedRefProgram; // filled with newly stored ref program above
             $validatedEmail = $validated['mentortutor_email'];
             $validatedInhouse = $validated['inhouse_id'];
             $validatedPics = $validated['pic_id'];
