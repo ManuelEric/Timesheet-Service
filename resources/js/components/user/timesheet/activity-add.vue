@@ -154,7 +154,6 @@ const submit = async () => {
               density="compact"
               :loading="loading"
               :disabled="loading"
-              :rules="rules.url"
             />
           </VCol>
         </VRow>
