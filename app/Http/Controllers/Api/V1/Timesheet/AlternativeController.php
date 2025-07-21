@@ -101,7 +101,7 @@ class AlternativeController extends Controller
             ], [
                 'year' => Carbon::now()->format('Y'), // hardcoded
                 'head' => 1, // hardcoded
-                'grade' => '[9-12]', // hardcoded
+                'grade' => '9-12', // hardcoded
                 'fee_individual' => $validatedFeeIndividual,
                 'tax' => $validatedTax
             ]);
