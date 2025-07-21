@@ -266,10 +266,10 @@ onMounted(() => {
                                 {{ sub_item.name == 'Tutor' ? subject.tutor_subject : subject.engagement_type_name }}
 
                                 <a
-                                  :href="sub_item.agreement"
+                                  :href="subject.agreement"
                                   target="_blank"
                                   class="ms-2 d-inline cursor-pointer"
-                                  v-if="sub_item.agreement"
+                                  v-if="subject.agreement"
                                 >
                                   <VTooltip
                                     activator="parent"
