@@ -37,6 +37,21 @@ class CreateActivityAction
         $head = count($timesheet->ref_program);
         $isGroup = $head > 1 ? true : false;
         $fee_perHours = 0; # default
+
+        /**
+         * in order to protect from paying editor for activity that not suit with agreement in CRM
+         * need to check either the subject is active or not
+         * if the subject is not active, then prevent editor from creating activity 
+         */
+        //! but for now this function will be commented out
+        // if ($timesheet->subject->is_active == 0) {
+        //     $errors = 'The agreement associated with your account has been deprecated and is no longer valid, so new activities cannot be created under it.';
+        //     throw new HttpResponseException(
+        //         response()->json(['errors' => $errors], JsonResponse::HTTP_UNPROCESSABLE_ENTITY)
+        //     );
+        // }
+        //! commented function end here
+
         $tax = $timesheet->subject->tax;
 
         if ( $type == "tutoring" )

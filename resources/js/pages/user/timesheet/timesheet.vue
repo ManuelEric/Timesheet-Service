@@ -202,6 +202,15 @@ onMounted(() => {
                 />
                 {{ item.clients }}
               </VText>
+
+              <VBadge
+                color="success"
+                :content="'Done'"
+                inline
+                v-if="item.spent == item.duration"
+                class="ms-2"
+              >
+              </VBadge>
             </td>
             <td>
               <VIcon
@@ -244,7 +253,7 @@ onMounted(() => {
                 icon="ri-timer-2-line"
                 class="cursor-pointer me-3"
               />
-              {{ item.spent / 60 }} Hours
+              {{ (item.spent / 60).toFixed(2) }} Hours
             </td>
             <td>
               <router-link :to="'/user/timesheet/' + item.id + '/' + item.require.toLowerCase()">

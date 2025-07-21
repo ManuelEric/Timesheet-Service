@@ -97,7 +97,7 @@ Route::middleware(['throttle:2500,1'])->group(function () {
                 Route::GET('list', [V1UserListController::class, 'component']);
             });
             /* List subject by Mentor / Tutor */
-            Route::GET('mentor-tutors/{mentortutor_uuid}/subjects', [V1MentorTutorComponentController::class, 'comp_subjects']);
+            Route::GET('mentor-tutors/{tempUser:uuid}/subjects/{curriculum?}', [V1MentorTutorComponentController::class, 'comp_subjects']);
             /* List students mentored / tutored by Mentor / Tutor */
             Route::GET('mentor-tutors/{mentortutor_uuid}/students', [V1MentorTutorComponentController::class, 'comp_students']);
         });
@@ -212,7 +212,8 @@ Route::middleware(['throttle:2500,1'])->group(function () {
                 Route::GET('export/{timesheet}/{cutoff_start}/{cutoff_end}', [V1CutoffController::class, 'export'])->withoutMiddleware(['auth:sanctum', 'abilities:payment-menu']);
                 /* Export multiple sheets at the same time */
                 Route::GET('export/{cutoff_start}/{cutoff_end}', [V1CutoffController::class, 'export_multiple'])->withoutMiddleware(['auth:sanctum', 'abilities:payment-menu']);
-
+                /* Export exclusive excel to summarize overall activities and fee */
+                Route::GET('summarize/{cutoff_start}/{cutoff_end}', [V1CutoffController::class, 'export_summary'])->withoutMiddleware(['auth:sanctum', 'abilities:payment-menu']);
             });
         });
     });

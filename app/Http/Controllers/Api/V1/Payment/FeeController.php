@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Api\V1\Payment;
 use App\Actions\Payment\HiddenCostAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Payment\HiddenCostRequest;
+use App\Http\Traits\StudentClub;
 use App\Models\TempUserRoles;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 
 class FeeController extends Controller
 {
+    use StudentClub;
     public function component_tutor(string $tutor_id, ?string $subject_name = null, ?string $curriculum_id = null, ?string $grade = null)
     {
         /**
@@ -21,7 +24,7 @@ class FeeController extends Controller
          * and this function can be called to check not only tutor, but mentor also
          */
         $subject_name = gettype($subject_name) == "string" && $subject_name == "null" ? null : $subject_name;
-        $curriculum_id = gettype($curriculum_id) == "string" && $subject_name == "null" ? null : $curriculum_id;
+        $curriculum_id = gettype($curriculum_id) == "string" && $curriculum_id == "null" ? null : $curriculum_id;
         $grade = gettype($grade) == "string" && $grade == "null" ? null : $grade;
 
         $details = TempUserRoles::query()->
@@ -39,11 +42,26 @@ class FeeController extends Controller
             whereRaw('now() BETWEEN start_date AND end_date')->
             active()->
             first();
+        
+        if ( !$details ) {
+            throw new HttpResponseException(response()->json([
+                'error' => 'Not found.'
+            ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY));
+        }
+        
         return response()->json($details);
     }
 
     public function component_extmentor(string $mentor_id, string $stream, string $engagement_type_id, string $package_id)
     {
+        /** 
+         * package_id 30 is student club hourly 
+         * and because the fee of student club is same as professional sharing
+         * then select fee from professional sharing (1-on-1 / 2-10 / > 10)  
+         * 
+        */
+        [$engagement_type_id, $package_id] = $this->convertToProfessionalSharingPackageId((int)$engagement_type_id, (int)$package_id);
+
         $details = TempUserRoles::query()->
             select(['start_date', 'end_date', 'grade', 'fee_individual', 'fee_group'])->
             where('temp_user_id', $mentor_id)->
@@ -59,6 +77,12 @@ class FeeController extends Controller
             whereRaw('now() BETWEEN start_date AND end_date')->
             active()->
             first();
+
+        if ( !$details ) {
+            throw new HttpResponseException(response()->json([
+                'error' => 'Not found.'
+            ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY));
+        }
 
         return response()->json($details);
     }

@@ -38,6 +38,11 @@ class TempUser extends Authenticatable implements CanResetPassword
         'role',
         'inhouse',
         'has_npwp',
+        'account_name',
+        'account_no',
+        'bank_name',
+        'swift_code',
+        'is_active',
         'last_activity',
     ];
 

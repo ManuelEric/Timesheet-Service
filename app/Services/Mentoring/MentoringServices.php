@@ -37,12 +37,21 @@ class MentoringServices
         int $phase_detail_id, 
         string $mentor_id, 
         string $activity_description,
-        string $meeting_link,
+        ?string $meeting_link = null,
         array $options = []
     )
     {
         $endpoint = env('MENTORING_DOMAIN') . "mentoring-log";
 
+        // Log::info("Mentoring log creating for Ref Program ID: {$ref_Program_id}", [
+        //     'student_id' => $mentee_id,
+        //     'phase_detail_id' => $phase_detail_id,
+        //     'start_date' => $options['start_date'],
+        //     'end_date' => $options['end_date'],
+        //     'mentor_id' => $mentor_id,
+        //     'meeting_notes' => $activity_description,
+        //     'meeting_link' => $meeting_link,
+        // ]);
         [$status_code, $result] = $this->make_call('post', $endpoint, [
             'student_id' => $mentee_id,
             'phase_detail_id' => $phase_detail_id,
@@ -52,7 +61,9 @@ class MentoringServices
             'meeting_notes' => $activity_description,
             'meeting_link' => $meeting_link,
         ], ['mentoring-authorization' => env('MENTORING_AUTHORIZATION_KEY')]);
-        
+
+        Log::info("Mentoring log created for Ref Program ID: {$ref_Program_id} with status code: {$status_code}");
+
         # update column mentoring_log_id using ref_program_id
         # in order to help determine which ref_program should be deleted if mentor cancel/delete the request
         Ref_Program::find($ref_Program_id)->update([

@@ -17,7 +17,7 @@ class ActivityDataService
     {
         /* fetch activities based on requested timesheet */
         $activities = $timesheet->activities;
-        
+
         return $activities->sortBy('asc')->map(function ($data) {
 
             $start_date = Carbon::parse($data->start_date);
@@ -49,7 +49,26 @@ class ActivityDataService
                 'estimate' => $estimate,
                 'disabled_changes' => $is_disabled
             ];
-        
         });
+    }
+
+    public function summarizeActivity(Cutoff $cutoff)
+    {
+        return Activity::query()->join('timesheets', 'timesheets.id', '=', 'timesheet_activities.timesheet_id')->join('timesheet_packages', 'timesheet_packages.id', '=', 'timesheets.package_id')->join('temp_user_roles', 'temp_user_roles.id', '=', 'timesheets.subject_id')->join('temp_users', 'temp_users.id', '=', 'temp_user_roles.temp_user_id')->where('cutoff_ref_id', $cutoff->id)->selectRaw('
+                GROUP_CONCAT(DISTINCT 
+                        (CASE
+                            WHEN timesheet_packages.category = "External Mentors" THEN "Subject Specialist"
+                            ELSE timesheet_packages.category 
+                        END) 
+                    ORDER BY timesheet_packages.type_of ASC SEPARATOR ", ") 
+                AS package_name,
+                temp_users.full_name,
+                temp_users.account_name,
+                temp_users.account_no,
+                temp_users.bank_name,
+                temp_users.swift_code, 
+                SUM( (timesheet_activities.time_spent/60) * timesheet_activities.fee_hours ) as subtotal_fee_gross,
+                SUM(timesheet_activities.additional_fee + timesheet_activities.bonus_fee) as subtotal_additional_or_bonus_fee
+            ')->groupBy('temp_users.id')->orderBy('temp_users.full_name', 'asc')->get();
     }
 }

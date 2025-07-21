@@ -7,16 +7,16 @@ import ApiServiceCRM from '@/services/ApiServiceCRM'
 const emit = defineEmits(['close', 'reload'])
 
 const loading = ref(false)
-const tutor_selected = ref([])
+const tutor_selected = ref(null)
 const tutor_list = ref([])
 const program_list = ref([])
-const subjects = ref([])
+const stream_list = ref([])
+const stream_selected = ref(null)
 const package_list = ref([])
 const pic_list = ref([])
 const inhouse_mentor = ref([])
 const duration_readonly = ref(false)
 const require = 'mentor'
-const has_npwp = ref(null)
 const fee_nett = ref(null)
 const packageItems = ref([])
 
@@ -28,7 +28,7 @@ const form = ref({
   inhouse_id: null,
   package_id: null,
   duration: '',
-  tax: null,
+  tax: 2.5,
   individual_fee: null,
   notes: '',
   pic_id: [],
@@ -47,14 +47,14 @@ const getStudent = async () => {
   }
 }
 
-const getProgram = async () => {
-  const url = 'api/v1/program/list'
+const getStream = async () => {
+  const url = 'external-mentor/streams'
   try {
     loading.value = true
-    const res = await ApiService.get(url)
+    const res = await ApiServiceCRM.get(url)
 
     if (res) {
-      program_list.value = res
+      stream_list.value = res
     }
     loading.value = false
   } catch (error) {
@@ -95,6 +95,35 @@ const getPackage = async () => {
   }
 }
 
+const getIndividualFee = async (mentor_id, stream, engagement_type, packages) => {
+  try {
+    const res = await ApiService.get(
+      'api/v1/component/fee/ext-mentor/' + mentor_id + '/' + stream + '/' + engagement_type + '/' + packages,
+    )
+    if (res) {
+      // if student more than one, use fee group
+      form.value.individual_fee = form.value.ref_details.length > 1 ? res.fee_group : res.fee_individual
+      if (form.value.individual_fee) {
+        checkNettFee()
+      } else {
+        fee_nett.value = null
+      }
+    }
+  } catch (error) {
+    form.value.individual_fee = null
+    fee_nett.value = null
+
+    showNotif(
+      'error',
+      "We're sorry, but we couldn't find a tutor fee for the selected curriculum and subject. This may be outside the scope of our current agreement. Please reach out to our HR team for assistance or to explore available options",
+      'bottom-end',
+    )
+    console.error(error)
+  }
+
+  checkPackage()
+}
+
 const checkPackage = () => {
   const package_id = form.value.package_id
   const index = package_list.value.findIndex(item => item.id === package_id)
@@ -117,34 +146,6 @@ const getPIC = async () => {
     }
   } catch (error) {
     console.error(error)
-  }
-}
-
-const getSubject = async (item, uuid = null, npwp = 0) => {
-  form.value.subject_id = null
-
-  // check NPWP
-  has_npwp.value = npwp
-  form.value.tax = npwp == 1 ? 2.5 : 2.5
-
-  if (require == 'mentor') {
-    form.value.subject_id = item[0]?.subjects[0]?.id
-    form.value.individual_fee = item[0]?.subjects[0]?.fee_individual
-
-    if (form.value.individual_fee) {
-      checkNettFee()
-    } else {
-      fee_nett.value = null
-    }
-  } else {
-    try {
-      const res = await ApiService.get('api/v1/user/mentor-tutors/' + uuid + '/subjects')
-      if (res) {
-        subjects.value = res
-      }
-    } catch (error) {
-      console.error(error)
-    }
   }
 }
 
@@ -214,7 +215,7 @@ const checkGrossFee = () => {
 // End Functions
 
 onMounted(() => {
-  // getProgram()
+  getStream()
   getStudent()
   getEngagement()
   getTutor()
@@ -265,6 +266,11 @@ onMounted(() => {
               :rules="rules.required"
               :loading="loading"
               :disabled="loading"
+              @update:model-value="
+                () => (
+                  (form.ref_details = []), (tutor_selected = null), (stream_selected = null), (form.package_id = null)
+                )
+              "
             ></VAutocomplete>
           </VCol>
           <VCol
@@ -304,8 +310,8 @@ onMounted(() => {
             ></VAutocomplete>
           </VCol>
           <VCol
-            md="12"
-            cols="12"
+            md="6"
+            :cols="tutor_selected ? 11 : 12"
           >
             <VAutocomplete
               density="compact"
@@ -322,19 +328,121 @@ onMounted(() => {
               :rules="rules.required"
               :loading="loading"
               :disabled="loading"
-              @update:modelValue="getSubject(tutor_selected.roles, tutor_selected.uuid, tutor_selected.has_npwp)"
             ></VAutocomplete>
-            <!-- <v-alert
-              :color="has_npwp == 1 ? 'success' : 'error'"
-              class="py-2 mt-2"
-              v-if="has_npwp != null"
-            >
-              <VIcon
-                icon="ri-error-warning-line"
-                class="mr-2"
-              />
-              <small> Mentor {{ has_npwp == 1 ? 'already' : 'don`t' }} have NPWP </small>
-            </v-alert> -->
+          </VCol>
+          <VCol
+            cols="1"
+            v-if="tutor_selected"
+          >
+            <VDialog max-width="600">
+              <template v-slot:activator="{ props: activatorProps }">
+                <VTooltip
+                  activator="parent"
+                  location="end"
+                  >Fee Detail</VTooltip
+                >
+                <VIcon
+                  icon="ri-folder-info-line"
+                  class="cursor-pointer mt-3"
+                  v-bind="activatorProps"
+                />
+              </template>
+
+              <template v-slot:default="{ isActive }">
+                <VCard>
+                  <VCardText class="py-5">
+                    <div class="d-flex justify-between align-center mb-3">
+                      <h4 class="w-100">Detail of Active Agreement</h4>
+
+                      <VBtn
+                        size="x-small"
+                        color="secondary"
+                        icon="ri-close-line"
+                        @click="isActive.value = false"
+                      ></VBtn>
+                    </div>
+                    <!-- Start Tutor  -->
+                    <VTable
+                      density="compact"
+                      v-if="tutor_selected?.roles.findIndex(role => role.name === 'External Mentor') >= 0"
+                    >
+                      <thead>
+                        <tr>
+                          <th
+                            class="text-left"
+                            nowrap
+                          >
+                            Engagement Type
+                          </th>
+                          <th nowrap>Stream</th>
+                          <th nowrap>Package</th>
+                          <th nowrap>Fee Individual - Gross</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <template
+                          v-for="(sub_item, index) in tutor_selected.roles"
+                          :key="index"
+                        >
+                          <tr
+                            v-if="sub_item.name == 'External Mentor'"
+                            v-for="subject in sub_item.subjects"
+                            :key="subject"
+                          >
+                            <td nowrap>
+                              {{ subject.engagement_type_name ?? '-' }}
+                              <a
+                                :href="subject.agreement"
+                                target="_blank"
+                                class="ms-2 d-inline cursor-pointer"
+                                v-if="subject.agreement"
+                              >
+                                <VTooltip
+                                  activator="parent"
+                                  location="end"
+                                >
+                                  Check Agreement
+                                </VTooltip>
+                                <VIcon icon="ri-file-pdf-2-line" />
+                              </a>
+                            </td>
+                            <td nowrap>{{ subject.stream ?? '-' }}</td>
+                            <td nowrap>{{ subject.package_name ?? '-' }}</td>
+                            <td nowrap>
+                              Rp.
+                              {{ new Intl.NumberFormat('id-ID').format(subject.fee_individual) }}
+                            </td>
+                          </tr>
+                        </template>
+                      </tbody>
+                    </VTable>
+                    <VCardText
+                      v-else
+                      class="text-center"
+                    >
+                      There is no tutoring subject
+                    </VCardText>
+                    <!-- End Tutor  -->
+                  </VCardText>
+                </VCard>
+              </template>
+            </VDialog>
+          </VCol>
+          <VCol
+            :md="tutor_selected ? 5 : 6"
+            cols="12"
+          >
+            <VAutocomplete
+              density="compact"
+              clearable
+              label="Stream"
+              v-model="stream_selected"
+              :items="stream_list"
+              item-title="stream_name"
+              item-value="stream_name"
+              :loading="loading"
+              :disabled="loading"
+            ></VAutocomplete>
           </VCol>
           <VCol
             md="8"
@@ -356,7 +464,9 @@ onMounted(() => {
               :rules="rules.required"
               :loading="loading"
               :disabled="loading"
-              @update:modelValue="checkPackage"
+              @update:modelValue="
+                getIndividualFee(tutor_selected.id, stream_selected, form.engagement_type, form.package_id)
+              "
             ></VAutocomplete>
           </VCol>
           <VCol
@@ -384,6 +494,7 @@ onMounted(() => {
               v-model="fee_nett"
               density="compact"
               :rules="rules.required"
+              readonly
               @update:model-value="checkGrossFee"
             />
           </VCol>
@@ -398,6 +509,7 @@ onMounted(() => {
               v-model="form.tax"
               :rules="rules.required"
               density="compact"
+              readonly
               @update:model-value="checkGrossFee"
             />
           </VCol>

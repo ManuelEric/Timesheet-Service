@@ -36,7 +36,7 @@ const form = ref({
 })
 
 const getProgram = async () => {
-  const url = 'api/v1/program/list'
+  const url = 'api/v1/program/list?require=tutor'
   try {
     loading.value = true
     const res = await ApiService.get(url)
@@ -112,36 +112,49 @@ const getSubject = async (item, uuid = null, npwp = 0) => {
   form.value.tax = npwp == 1 ? 2.5 : 2.5
 
   form.value.subject_id = null
+  form.value.subject_name = null
+  form.value.individual_fee = null
+  fee_nett.value = null
 
-  if (require.value == 'mentor') {
-    form.value.subject_id = item[0].subjects[0].id
-  } else {
-    try {
-      const res = await ApiService.get('api/v1/user/mentor-tutors/' + uuid + '/subjects')
-      if (res) {
-        subjects.value = res
-      }
-    } catch (error) {
-      console.error(error)
+  const curriculum = form.value.curriculum_id ? '/' + form.value.curriculum_id : ''
+  try {
+    const res = await ApiService.get('api/v1/user/mentor-tutors/' + uuid + '/subjects' + curriculum)
+    if (res) {
+      subjects.value = res
     }
+  } catch (error) {
+    console.error(error)
   }
 }
 
 const getIndividualFee = async (tutor_id, subject_name, curriculum_id) => {
+  const grade = selected.value[0]?.grade
+
   if (subject_name) {
     try {
-      const res = await ApiService.get('api/v1/component/fee/' + tutor_id + '/' + subject_name + '/' + curriculum_id)
+      const res = await ApiService.get(
+        'api/v1/component/fee/tutor/' + tutor_id + '/' + subject_name + '/' + curriculum_id + '/' + grade,
+      )
       if (res) {
-        form.value.individual_fee = res.fee_individual
-        if (res.fee_individual) {
+        // if student more than one, use fee group
+        form.value.individual_fee = selected.value.length > 1 ? res.fee_group : res.fee_individual
+        if (form.value.individual_fee) {
           checkNettFee()
         } else {
           fee_nett.value = null
         }
       }
     } catch (error) {
+      showNotif(
+        'error',
+        "We're sorry, but we couldn't find a tutor fee for the selected curriculum and subject. This may be outside the scope of our current agreement. Please reach out to our HR team for assistance or to explore available options",
+        'bottom-end',
+      )
       console.error(error)
     }
+  } else {
+    form.value.individual_fee = null
+    fee_nett.value = null
   }
 }
 
@@ -199,9 +212,9 @@ const submit = async () => {
 const checkProgram = () => {
   form.value = {
     ref_id: selected.value.map(item => item.id),
-    curriculum_id: selected.value[0].curriculum ?? null,
-    package_id: selected.value[0].package ?? null,
-    program_name: selected.value[0].program_name ?? null,
+    curriculum_id: selected.value[0]?.curriculum ?? null,
+    package_id: selected.value[0]?.package ?? null,
+    program_name: selected.value[0]?.program_name ?? null,
   }
 }
 
@@ -261,7 +274,7 @@ onMounted(() => {
             <VAutocomplete
               clearable
               v-model="selected"
-              label="Mentee Name"
+              label="Student Name"
               :items="program_list"
               :item-props="
                 item => ({
@@ -276,6 +289,7 @@ onMounted(() => {
                     package: item.package,
                     curriculum: item.curriculum,
                     program_name: item.program_name,
+                    grade: item.student_grade,
                   },
                 })
               "
@@ -305,17 +319,6 @@ onMounted(() => {
               density="compact"
               @update:modelValue="getSubject(tutor_selected.roles, tutor_selected.uuid, tutor_selected.has_npwp)"
             ></VAutocomplete>
-            <!-- <v-alert
-              :color="has_npwp == 1 ? 'success' : 'error'"
-              class="py-1 mt-2"
-              v-if="has_npwp != null"
-            >
-              <VIcon
-                icon="ri-error-warning-line"
-                class="mr-2"
-              />
-              <small> Tutor {{ has_npwp == 1 ? 'already' : 'don`t' }} have NPWP </small>
-            </v-alert> -->
           </VCol>
           <VCol
             cols="1"
@@ -339,7 +342,7 @@ onMounted(() => {
                 <VCard>
                   <VCardText class="py-5">
                     <div class="d-flex justify-between align-center mb-3">
-                      <h4 class="w-100">Detail</h4>
+                      <h4 class="w-100">Detail of Active Agreement</h4>
 
                       <VBtn
                         size="x-small"
@@ -359,10 +362,10 @@ onMounted(() => {
                             class="text-left"
                             nowrap
                           >
-                            Subject Tutoring
+                            Curriculum
                           </th>
+                          <th nowrap>Subject Tutoring</th>
                           <th nowrap>Grade</th>
-                          <th nowrap>Year</th>
                           <th nowrap>Fee Individual - Gross</th>
                         </tr>
                       </thead>
@@ -376,9 +379,9 @@ onMounted(() => {
                             v-for="subject in sub_item.subjects"
                             :key="subject"
                           >
-                            <td nowrap>{{ subject.tutor_subject }}</td>
-                            <td nowrap>{{ subject.grade }}</td>
-                            <td nowrap>{{ subject.year }}</td>
+                            <td nowrap>{{ subject.curriculum_name ?? '-' }}</td>
+                            <td nowrap>{{ subject.tutor_subject ?? '-' }}</td>
+                            <td nowrap>{{ subject.grade ?? '-' }}</td>
                             <td nowrap>Rp. {{ new Intl.NumberFormat('id-ID').format(subject.fee_individual) }}</td>
                           </tr>
                         </template>
@@ -410,9 +413,8 @@ onMounted(() => {
                   title: item.name,
                 })
               "
-              :rules="rules.required"
               :loading="loading"
-              :disabled="loading || selected[0]?.curriculum"
+              readonly
               density="compact"
               item-value="id"
               @update:modelValue="getIndividualFee(tutor_selected.id, form.subject_name, form.curriculum_id)"
@@ -427,6 +429,8 @@ onMounted(() => {
               v-model="form.subject_name"
               label="Subject Tutoring"
               :items="subjects"
+              item-value="tutor_subject"
+              item-title="tutor_subject"
               :loading="loading"
               :disabled="loading"
               :rules="rules.required"
@@ -482,6 +486,7 @@ onMounted(() => {
               v-model="fee_nett"
               density="compact"
               :rules="rules.required"
+              readonly
               @update:model-value="checkGrossFee"
             />
           </VCol>
@@ -496,6 +501,7 @@ onMounted(() => {
               v-model="form.tax"
               :rules="rules.required"
               density="compact"
+              readonly
               @update:model-value="checkGrossFee"
             />
           </VCol>

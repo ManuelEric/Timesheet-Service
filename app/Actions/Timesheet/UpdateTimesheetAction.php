@@ -2,6 +2,7 @@
 
 namespace App\Actions\Timesheet;
 
+use App\Models\Ref_Program;
 use App\Models\Timesheet;
 use App\Services\ResponseService;
 use Exception;
@@ -28,6 +29,7 @@ class UpdateTimesheetAction
         ?int $subjectId = NULL,
         $feeHours,
         $tax,
+        array $refIds,
         )
     {
         /* define submitted package variables */
@@ -46,6 +48,12 @@ class UpdateTimesheetAction
         DB::beginTransaction();
         try {
 
+            /* reset timesheet_id in ref_program */
+            Ref_Program::where('timesheet_id', $existingTimesheet->id)->update(['timesheet_id' => null]);
+
+            /* used for adding another student to existing group */
+            Ref_Program::whereIn('id', $refIds)->update(['timesheet_id' => $existingTimesheet->id]);
+
             $existingTimesheet->update($timesheetNewDetails);
             $existingTimesheet->handle_by()->attach($mentortutorId, ['active' => true]);
             $existingTimesheet->admin()->sync($picIds);
@@ -56,16 +64,22 @@ class UpdateTimesheetAction
             //     'tax' => $tax,
             //     'fee_hours' => $feeHours,
             // ]);
-            $existingTimesheet->activities()->update([
-                'tax' => $tax,
-                'fee_hours' => $feeHours,
-            ]);
 
-            /* also update the tax and fees from temp_user_roles */
-            $existingTimesheet->subject()->update([
-                'tax' => $tax,
-                'fee_individual' => $feeHours,
-            ]);
+            //* untuk update tax dan fee hours ke setiap activity 
+            // if ($feeHours != null && $tax != null)
+            // {
+            //     $existingTimesheet->activities()->update([
+            //         'tax' => $tax,
+            //         'fee_hours' => $feeHours,
+            //     ]);
+    
+            //* untuk update tax and individual fee ke temp_user_roles
+            //     /* also update the tax and fees from temp_user_roles */
+            //     $existingTimesheet->subject()->update([
+            //         'tax' => $tax,
+            //         'fee_individual' => $feeHours,
+            //     ]);
+            // }
 
             DB::commit();
 

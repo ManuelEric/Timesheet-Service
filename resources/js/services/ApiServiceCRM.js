@@ -1,9 +1,11 @@
+import { showNotif } from '@/helper/notification'
 import axios from 'axios'
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_CRM_DOMAIN, // Ganti dengan URL API yang sesuai
   headers: {
     'Content-Type': 'application/json',
+    'Header-ET': import.meta.env.VITE_HEADER_TIMESHEET_CRM
     // Jika diperlukan, Anda bisa menambahkan header lain di sini
   },
 })
@@ -24,10 +26,24 @@ apiClient.interceptors.response.use(
     return response
   },
   error => {
-    if (error?.response?.status === 401) {
-      // console.log('Token expired or invalid. Please log in again.');
-      router.go(0)
-    }
+    const status = error.response?.status;
+    
+        switch (status) {
+          case 401:
+            showNotif('error','Error 401: Unauthorized CRM. Please log in first.','bottom-end')
+    
+            router.go(0)
+            break;
+          case 403:
+            showNotif('error','Error 403: Access denied.','bottom-end');
+            break;
+          case 404:
+            showNotif('error','Error 404: Resource not found.','bottom-end');
+            break;
+          case 502:
+            showNotif('error','Error 502: Bad gateway. Your internet connection might be unstable.','bottom-end');
+            break;
+        }
 
     return Promise.reject(error)
   },

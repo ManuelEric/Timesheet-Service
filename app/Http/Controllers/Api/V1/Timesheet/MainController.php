@@ -112,7 +112,7 @@ class MainController extends Controller
             ], [
                 'role' => 'Tutor',
                 'head' => 1,
-                'grade' => '[9-12]',
+                'grade' => '9-12',
                 'fee_individual' => $validatedFeeIndividual,
                 'tax' => $validatedTax
             ]);
@@ -126,7 +126,7 @@ class MainController extends Controller
             ], [
                 'year' => Carbon::now()->format('Y'),
                 'head' => 1,
-                'grade' => '[9-12]',
+                'grade' => '9-12',
                 'fee_individual' => $validatedFeeIndividual,
                 'tax' => $validatedTax
             ]);
@@ -181,7 +181,9 @@ class MainController extends Controller
             'tax',
         ]); 
 
+        //! perlu nambahin ref_id 
         /* defines the validated variables */
+        $validatedRefId = $validated['ref_id'];
         $validatedEmail = $validated['mentortutor_email'];
         $validatedInhouse = $validated['inhouse_id'];
         $validatedPics = $validated['pic_id'];
@@ -195,7 +197,7 @@ class MainController extends Controller
         $newPackageDetails = compact('validatedPackageId', 'validatedDuration');
 
         $mentorTutorId = TempUser::where('email', $validatedEmail)->first()->id;
-        $updateTimesheetAction->execute($timesheet, $newPackageDetails, $validatedNotes, $validatedInhouse, $validatedPics, $mentorTutorId, $validatedSubject, $validatedIndividualFee, $validatedTax);
+        $updateTimesheetAction->execute($timesheet, $newPackageDetails, $validatedNotes, $validatedInhouse, $validatedPics, $mentorTutorId, $validatedSubject, $validatedIndividualFee, $validatedTax, $validatedRefId);
 
         return response()->json([
             'message' => 'Timesheet has been updated successfully.'

@@ -100,4 +100,13 @@ class CutoffController extends Controller
         $validated = $request->safe()->only(['cutoff_start', 'cutoff_end']);
         return $paymentService->exportPayrollAsMultipleSheets($validated);
     }
+
+    public function export_summary(
+        CutoffExportRequest $request,
+        PaymentService $paymentService,
+    )
+    {
+        $validated = $request->safe()->only(['cutoff_start', 'cutoff_end']);
+        return $paymentService->exportPayrollSummary($validated);
+    }
 }

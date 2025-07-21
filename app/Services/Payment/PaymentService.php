@@ -3,6 +3,7 @@
 namespace App\Services\Payment;
 
 use App\Exports\PayrollExport;
+use App\Exports\SummaryExport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Services\Activity\ActivityDataService;
 use App\Services\Timesheet\TimesheetDataService;
@@ -11,6 +12,7 @@ use App\Exports\PayrollExportMultipleSheets;
 use App\Models\Cutoff;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Str;
 
 class PaymentService
 {
@@ -109,5 +111,16 @@ class PaymentService
         // exit;
 
         return Excel::download(new PayrollExportMultipleSheets($exports), $this->filename);
+    }
+
+    public function exportPayrollSummary(array $validated)
+    {
+        $validatedCutoffStart = $validated['cutoff_start'];
+        $validatedCutoffEnd = $validated['cutoff_end'];
+        $cutoff = Cutoff::inBetween($validatedCutoffStart, $validatedCutoffEnd)->first();
+
+        $activities = $this->activityDataService->summarizeActivity($cutoff);
+        
+        return Excel::download(new SummaryExport($cutoff, $activities), 'Payroll_Summary_' . Str::of($cutoff->month)->replace(' ', '_'). '.xlsx');
     }
 }

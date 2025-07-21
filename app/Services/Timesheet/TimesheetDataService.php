@@ -203,7 +203,10 @@ class TimesheetDataService
             ? $refProgram->first()->engagement_type->name
             : null;
         $tax = $timesheet->subject->tax;
-        $feeHours = $timesheet->subject->fee_individual;
+        $isGroup = $timesheet->ref_program()->count() > 1 ? true : false;
+        $feeHours = $isGroup ? $timesheet->subject->fee_group : $timesheet->subject->fee_individual;
+
+
         $packageDetails = [
             'program_name' => $programName,
             'void' => $timesheet->void,
@@ -216,7 +219,7 @@ class TimesheetDataService
             'tutormentor_name' => $tutorMentorName,
             'tutormentor_has_npwp' => $tutorMentorHasNPWP,
             'tutormentor_tax' => $tax,
-            'tutormentor_fee_hours' => $feeHours,
+            'tutormentor_fee_hours' => $feeHours, // bisa individual atau group
             'inhouse_name' => $inhouseName,
             'last_updated' => $last_updated,
             'duration_in_minutes' => $duration,
@@ -229,8 +232,10 @@ class TimesheetDataService
         $subjectId = $timesheet->subject_id;
         $timesheetTax = $timesheet->activities()->first()?->tax ?? null;
         $timesheetFeeHours = $timesheet->activities()->first()?->fee_hours ?? null;
+
         
         $editableColumns = [
+            'ref_id' => $timesheet->ref_program()->pluck('id')->toArray(),
             'pic_id' => $adminId,
             'tutormentor_id' => $tutorMentorUuid,
             'tutormentor_email' => $tutorMentorEmail,

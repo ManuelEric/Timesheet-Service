@@ -22,7 +22,7 @@ class TempUserRoles extends Model
         'role',
         'tutor_subject',
         'ext_mentor_stream',
-        'package_id',
+        'package_id', // foreign of timesheet packages
         'engagement_type_id', // foreign of engagement_types
         'curriculum_id',
         'start_date',
@@ -34,6 +34,7 @@ class TempUserRoles extends Model
         'fee_individual',
         'fee_group',
         'tax',
+        'agreement',
         'is_active',
     ];
 
@@ -55,6 +56,16 @@ class TempUserRoles extends Model
     public function curriculum()
     {
         return $this->belongsTo(Curriculum::class, 'curriculum_id', 'id');
+    }
+
+    public function package()
+    {
+        return $this->belongsTo(Package::class, 'package_id', 'id');
+    }
+
+    public function engagement_type()
+    {
+        return $this->belongsTo(EngagementType::class, 'engagement_type_id', 'id');
     }
 
     /**
