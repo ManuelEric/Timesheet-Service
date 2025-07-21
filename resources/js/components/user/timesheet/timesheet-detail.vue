@@ -58,16 +58,14 @@ const deleteActivity = async () => {
     const res = await ApiService.delete('api/v1/timesheet/' + props.id + '/activity/' + selectedItem.value.id)
     if (res) {
       showNotif('success', res.message, 'bottom-end')
-      toggleDialog('delete')
     }
   } catch (error) {
-    if (error.response?.status == 400) {
-      showNotif('error', error.response?.data?.errors, 'bottom-end')
-    }
+    showNotif('error', error.response?.data?.errors, 'bottom-end')
   } finally {
     loading.value = false
     getData()
     updateReload(true)
+    toggleDialog('delete')
   }
 }
 

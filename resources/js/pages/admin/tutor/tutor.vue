@@ -2,6 +2,7 @@
 import { showNotif } from '@/helper/notification'
 import ApiService from '@/services/ApiService'
 import debounce from 'lodash/debounce'
+import moment from 'moment'
 
 // Start Variable
 const currentPage = ref(1)
@@ -222,7 +223,10 @@ onMounted(() => {
                       <!-- Start Tutor  -->
                       <VTable
                         density="compact"
-                        v-if="item.roles.findIndex(role => role.name === 'Tutor') >= 0"
+                        v-if="
+                          item.roles.findIndex(role => role.name === 'Tutor') >= 0 ||
+                          item.roles.findIndex(role => role.name === 'External Mentor') >= 0
+                        "
                       >
                         <thead>
                           <tr>
@@ -230,19 +234,22 @@ onMounted(() => {
                               class="text-left"
                               nowrap
                             >
-                              Subject Tutoring
+                              {{
+                                item.roles.findIndex(role => role.name === 'Tutor') >= 0
+                                  ? 'Subject Tutoring'
+                                  : 'Engagement Type'
+                              }}
                             </th>
-                            <th nowrap>Curriculum</th>
-                            <th nowrap>Grade</th>
+                            <th nowrap>
+                              {{
+                                item.roles.findIndex(role => role.name === 'Tutor') >= 0 ? 'Curriculum' : 'Package Name'
+                              }}
+                            </th>
+                            <th nowrap>
+                              {{ item.roles.findIndex(role => role.name === 'Tutor') >= 0 ? 'Grade' : 'Stream' }}
+                            </th>
                             <th nowrap>Year</th>
                             <th nowrap>Fee Individual - Gross</th>
-                            <!-- <th nowrap>Fee Group</th> -->
-                            <!-- <th
-                              nowrap
-                              class="text-end"
-                            >
-                              Additional Fee
-                            </th> -->
                           </tr>
                         </thead>
                         <tbody>
@@ -251,14 +258,26 @@ onMounted(() => {
                             :key="index"
                           >
                             <tr
-                              v-if="sub_item.name == 'Tutor'"
+                              v-if="sub_item.name == 'Tutor' || sub_item.name == 'External Mentor'"
                               v-for="subject in sub_item.subjects"
                               :key="subject"
                             >
-                              <td nowrap>{{ subject.tutor_subject }}</td>
-                              <td nowrap>{{ subject.curriculum_alias }}</td>
-                              <td nowrap>{{ subject.grade }}</td>
-                              <td nowrap>{{ subject.year }}</td>
+                              <td nowrap>
+                                {{ sub_item.name == 'Tutor' ? subject.tutor_subject : subject.engagement_type_name }}
+                              </td>
+                              <td nowrap>
+                                {{ sub_item.name == 'Tutor' ? subject.curriculum_name : subject.package_name }}
+                              </td>
+                              <td nowrap>
+                                {{ sub_item.name == 'Tutor' ? subject.grade : subject.stream }}
+                              </td>
+                              <td nowrap>
+                                {{
+                                  moment(subject.start_date).format('LL') +
+                                  ' - ' +
+                                  moment(subject.end_date).format('LL')
+                                }}
+                              </td>
                               <td nowrap>
                                 <VTextField
                                   prefix="Rp. "
@@ -270,13 +289,6 @@ onMounted(() => {
                                   @update:model-value="updateFee(item.uuid, subject)"
                                 />
                               </td>
-                              <!-- <td nowrap>Rp. {{ new Intl.NumberFormat('id-ID').format(subject.fee_group) }}</td>
-                              <td
-                                class="text-end"
-                                nowrap
-                              >
-                                Rp. {{ new Intl.NumberFormat('id-ID').format(subject.additional_fee) }}
-                              </td> -->
                             </tr>
                           </template>
                         </tbody>
