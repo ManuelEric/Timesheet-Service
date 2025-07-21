@@ -43,6 +43,15 @@ class MentoringServices
     {
         $endpoint = env('MENTORING_DOMAIN') . "mentoring-log";
 
+        // Log::info("Mentoring log creating for Ref Program ID: {$ref_Program_id}", [
+        //     'student_id' => $mentee_id,
+        //     'phase_detail_id' => $phase_detail_id,
+        //     'start_date' => $options['start_date'],
+        //     'end_date' => $options['end_date'],
+        //     'mentor_id' => $mentor_id,
+        //     'meeting_notes' => $activity_description,
+        //     'meeting_link' => $meeting_link,
+        // ]);
         [$status_code, $result] = $this->make_call('post', $endpoint, [
             'student_id' => $mentee_id,
             'phase_detail_id' => $phase_detail_id,
