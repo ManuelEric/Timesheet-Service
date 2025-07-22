@@ -78,7 +78,7 @@ const getIndividualFee = async (mentor_id, stream, packages) => {
     )
     if (res) {
       // if student more than one, use fee group
-      form.value.individual_fee = props.selected.length > 1 ? res.fee_group : res.fee_individual
+      form.value.individual_fee = res.fee_individual
       if (form.value.individual_fee) {
         checkNettFee()
       } else {

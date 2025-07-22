@@ -379,7 +379,23 @@ onMounted(() => {
                             v-for="subject in sub_item.subjects"
                             :key="subject"
                           >
-                            <td nowrap>{{ subject.curriculum_name ?? '-' }}</td>
+                            <td nowrap>
+                              {{ subject.curriculum_name ?? '-' }}
+                              <a
+                                :href="subject.agreement"
+                                target="_blank"
+                                class="ms-2 d-inline cursor-pointer"
+                                v-if="subject.agreement"
+                              >
+                                <VTooltip
+                                  activator="parent"
+                                  location="end"
+                                >
+                                  Check Agreement
+                                </VTooltip>
+                                <VIcon icon="ri-file-pdf-2-line" />
+                              </a>
+                            </td>
                             <td nowrap>{{ subject.tutor_subject ?? '-' }}</td>
                             <td nowrap>{{ subject.grade ?? '-' }}</td>
                             <td nowrap>Rp. {{ new Intl.NumberFormat('id-ID').format(subject.fee_individual) }}</td>

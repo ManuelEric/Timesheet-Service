@@ -45,8 +45,7 @@ class TutorMentorCommand extends Command
     public function handle(
         CheckEmailMentorTutorAction $checkEmailMentorTutorAction,
         CreateTempUserService $createTempUserService,
-        )
-    {
+    ) {
         [$statusCode, $mentorTutors] = $this->make_call('get', env('CRM_DOMAIN') . 'user/mentor-tutors');
         $progress = $this->output->createProgressBar(count($mentorTutors));
         $progress->start();
@@ -63,23 +62,19 @@ class TutorMentorCommand extends Command
                 $this->info($createTempUserService->execute($userRawInformation));
                 $this->info("User `{$name}` with email `{$email}` has been stored successfully." . json_encode($userRawInformation));
                 $progress->advance();
-    
             } catch (Exception $e) {
 
-                Log::debug($e->getMessage() . ' on '. $e->getLine() . ' file '. $e->getFile());
+                Log::debug($e->getMessage() . ' on ' . $e->getLine() . ' file ' . $e->getFile());
                 $this->newLine();
                 $this->error("Cannot stored user `{$name}` with email `{$email}`. Error: {$e->getMessage()} on {$e->getFile()} at line {$e->getLine()}");
                 continue;
-
             } catch (HttpResponseException $e) {
 
-                Log::debug($e->getMessage() . ' on '. $e->getLine() . ' file '. $e->getFile());
+                Log::debug($e->getMessage() . ' on ' . $e->getLine() . ' file ' . $e->getFile());
                 $this->newLine();
                 $this->error("Cannot stored user `{$name}` with email `{$email}`. Error: {$e->getMessage()} on {$e->getFile()} at line {$e->getLine()}");
                 continue;
-
             }
-
         }
 
         $progress->finish();

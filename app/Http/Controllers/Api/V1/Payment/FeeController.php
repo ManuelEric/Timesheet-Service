@@ -77,7 +77,6 @@ class FeeController extends Controller
             whereRaw('now() BETWEEN start_date AND end_date')->
             active()->
             first();
-        dd($stream . ' and '.$engagement_type_id . ' and '. $package_id);
 
         if ( !$details ) {
             throw new HttpResponseException(response()->json([

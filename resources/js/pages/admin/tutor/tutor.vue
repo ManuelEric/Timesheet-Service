@@ -264,6 +264,21 @@ onMounted(() => {
                             >
                               <td nowrap>
                                 {{ sub_item.name == 'Tutor' ? subject.tutor_subject : subject.engagement_type_name }}
+
+                                <a
+                                  :href="subject.agreement"
+                                  target="_blank"
+                                  class="ms-2 d-inline cursor-pointer"
+                                  v-if="subject.agreement"
+                                >
+                                  <VTooltip
+                                    activator="parent"
+                                    location="end"
+                                  >
+                                    Check Agreement
+                                  </VTooltip>
+                                  <VIcon icon="ri-file-pdf-2-line" />
+                                </a>
                               </td>
                               <td nowrap>
                                 {{ sub_item.name == 'Tutor' ? subject.curriculum_name : subject.package_name }}
