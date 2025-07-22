@@ -39,7 +39,7 @@ class MainController extends Controller
         $tutormentors = TempUser::with([
                 'roles' => function ($query) use ($search) {
                     // show temp_user_roles only if active and now() within start_date and end_date
-                    // $query->whereRaw('now() BETWEEN temp_user_roles.start_date AND temp_user_roles.end_date')->where('temp_user_roles.role', $search['role'])->where('temp_user_roles.is_active', 1);
+                    $query->where('temp_user_roles.is_active', 1);
                 },
                 'roles.curriculum' => function ($query) {
                     $query->select('id', 'name', 'alias');
