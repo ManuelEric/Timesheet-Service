@@ -149,12 +149,15 @@ class TempUser extends Authenticatable implements CanResetPassword
     {
         $keyword = array_key_exists('keyword', $search) ? $search['keyword'] : false;
         $role = array_key_exists('role', $search) ? strtolower($search['role']) : false;
-        $inhouse = array_key_exists('inhouse', $search) ? $search['inhouse'] === 'true' ? 1 : 0  : null;
+        $inhouse = array_key_exists('inhouse', $search) ? $search['inhouse'] === true || $search['inhouse'] == 'true' ? 1 : 0  : null;
 
         $query->
             when($role, function ($sub) use ($role) {
                 $sub->whereHas('roles', function ($_sub_) use ($role) {
-                    $_sub_->whereRaw("LOWER(role) = '{$role}'")->whereRaw('now() BETWEEN start_date AND end_date')->where('is_active', 1);
+                    $_sub_->whereRaw("LOWER(role) = '{$role}'")->
+                        when($role != 'mentor', function ($query){
+                            $query->whereRaw('now() BETWEEN start_date AND end_date');
+                        })->where('is_active', 1);
                 });
             })->
             when($keyword, function ($sub) use ($keyword) {
