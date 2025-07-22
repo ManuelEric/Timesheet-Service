@@ -149,6 +149,13 @@ onMounted(() => {
                 class="me-3"
               ></VIcon>
               {{ item.full_name }}
+              <div
+                v-if="item.is_active == 0"
+                class="d-inline rounded-pill text-error px-2 py-1 ms-2"
+                style="font-size: 10px; border: 1px solid red"
+              >
+                Inactive
+              </div>
             </td>
             <td
               class="text-start"
@@ -164,18 +171,27 @@ onMounted(() => {
               class="text-start"
               nowrap
             >
-              <VIcon
-                icon="ri-user-line"
-                class="me-3"
-              ></VIcon>
-              <span
-                v-for="(role, index) in item.roles"
-                :key="index"
-              >
-                {{ role.name }}
-                <!-- Menambahkan koma jika bukan item terakhir -->
-                <span v-if="index < item.roles.length - 1">, </span>
-              </span>
+              <div v-if="item.roles?.length > 0">
+                <VIcon
+                  icon="ri-user-line"
+                  class="me-3"
+                ></VIcon>
+                <span
+                  v-for="(role, index) in item.roles"
+                  :key="index"
+                >
+                  {{ role.name }}
+                  <!-- Menambahkan koma jika bukan item terakhir -->
+                  <span v-if="index < item.roles.length - 1">, </span>
+                </span>
+              </div>
+              <div v-else>
+                <VIcon
+                  icon="ri-user-line"
+                  class="me-2"
+                ></VIcon>
+                <span> Mentor </span>
+              </div>
             </td>
             <td class="d-flex justify-center">
               <VSwitch

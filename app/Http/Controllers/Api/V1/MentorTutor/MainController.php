@@ -45,8 +45,14 @@ class MainController extends Controller
                     $query->select('id', 'name', 'alias');
                 }
             ])->
+
             onSearch($search)->
-            orderBy('full_name', 'ASC')->get();
+            // orderBy('full_name', 'ASC')->get();
+            orderByRaw("
+                full_name ASC,
+                is_active DESC
+            ")->
+            get();
 
         /* in order to grouped the roles by role_name, we need to mapping the data */
         $mappedTutormentors = $tutormentors->map(function ($item) {
@@ -59,7 +65,8 @@ class MainController extends Controller
                 'inhouse' => $item->inhouse,
                 'last_activity' => $item->last_activity,
                 'has_npwp' => $item->has_npwp,
-                'roles' => new Collection()
+                'roles' => new Collection(),
+                'is_active' => $item->is_active,
             ];
 
             # separate mentor & tutor

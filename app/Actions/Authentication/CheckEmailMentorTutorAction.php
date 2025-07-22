@@ -61,6 +61,7 @@ class CheckEmailMentorTutorAction
             'account_no' => $response['account_no'],
             'bank_name' => $response['bank_name'],
             'swift_code' => $response['swift_code'],
+            'active' => $response['active'],
         ];
 
         $result = [$checkingResult, $rawInformation];

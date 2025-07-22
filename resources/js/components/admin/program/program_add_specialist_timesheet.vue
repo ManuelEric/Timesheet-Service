@@ -322,7 +322,8 @@ onMounted(() => {
               :item-props="
                 item => ({
                   title: item.full_name,
-                  subtitle: item.roles.map(role => role.name).join(', '),
+                  subtitle: item.roles?.length > 0 ? item.roles.map(role => role.name).join(', ') : '-',
+                  disabled: item.is_active == 0,
                 })
               "
               :rules="rules.required"

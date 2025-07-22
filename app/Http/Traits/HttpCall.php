@@ -27,7 +27,7 @@ trait HttpCall
             withoutVerifying()->
             withHeaders($headers)->
             withOptions(['verify' => false])->
-            timeout(30)->{$method}( $endpoint, $params );
+            timeout(60)->{$method}( $endpoint, $params );
     
             if ( $request->failed() ) {
                 Log::error('Failed to make a call to ' . $endpoint, $request->json());
