@@ -205,7 +205,16 @@ onMounted(() => {
               />
               {{ item.estimate }} Minutes
             </td>
-            <td class="text-left">Rp. {{ new Intl.NumberFormat('id-ID').format(item.fee_hours) }}</td>
+            <td class="text-left">
+              Rp.
+              {{
+                item.activity === 'Bonus Fee'
+                  ? new Intl.NumberFormat('id-ID').format(item.bonus_fee)
+                  : item.activity === 'Additional Fee'
+                  ? new Intl.NumberFormat('id-ID').format(item.additional_fee)
+                  : new Intl.NumberFormat('id-ID').format(item.fee_hours)
+              }}
+            </td>
             <td>
               <VCheckbox
                 color="success"
