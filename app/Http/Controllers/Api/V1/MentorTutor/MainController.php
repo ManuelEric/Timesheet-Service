@@ -53,6 +53,7 @@ class MainController extends Controller
                 full_name ASC
             ")->
             get();
+        return response()->json($tutormentors);
 
         /* in order to grouped the roles by role_name, we need to mapping the data */
         $mappedTutormentors = $tutormentors->map(function ($item) {
