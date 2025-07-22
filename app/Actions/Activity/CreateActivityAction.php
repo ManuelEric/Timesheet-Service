@@ -65,12 +65,14 @@ class CreateActivityAction
 
         $endDate = array_key_exists('end_date', $validated) ? $validated['end_date'] : NULL;
         $additionalFee = $bonusFee = $status = 0;
+        $program_name = $timesheet->reference_program[0]->program_name;
 
         /* when the request comes from fee controller */
         if ( array_key_exists('additional_fee', $validated) ) 
         {
             $fee_perHours = $tax = 0;
             $additionalFee = $validated['additional_fee'];
+            $program_name = $validated['activity'];
             $status = 1;
         } 
 
@@ -79,13 +81,12 @@ class CreateActivityAction
         {
             $fee_perHours = $tax = 0;
             $bonusFee = $validated['bonus_fee'];
+            $program_name = $validated['activity'];
             $status = 1;
         } 
 
         DB::beginTransaction();
         try {
-
-            $program_name = $timesheet->reference_program[0]->program_name;
 
             $activityDetails = [
                 'timesheet_id' => $timesheetId,

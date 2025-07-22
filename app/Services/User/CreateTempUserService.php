@@ -328,13 +328,17 @@ class CreateTempUserService
             }
         }
 
-        // reset temp_user_roles for tutor
-        if (count($tutor_subjects) > 0) {
+        if (count($tutor_subjects) > 0 && count($extmentor_streams) > 0) {
+            TempUserRoles::where('temp_user_id', $tempUserId)->whereNotIn('tutor_subject', $tutor_subjects)->whereNotIn('id', $extmentor_streams)->update(['is_active' => 0]);
+        }
+
+        // reset temp_user_roles for tutor when user is tutor only
+        if (count($tutor_subjects) > 0 && count($extmentor_streams) == 0) {
             TempUserRoles::where('temp_user_id', $tempUserId)->whereNotIn('tutor_subject', $tutor_subjects)->update(['is_active' => 0]);
         }
 
-        // reset temp_user_roles for external mentor
-        if (count($extmentor_streams) > 0) {
+        // reset temp_user_roles for external mentor when user is ext mentor only
+        if (count($extmentor_streams) > 0 && count($tutor_subjects) == 0) {
             TempUserRoles::where('temp_user_id', $tempUserId)->whereNotIn('id', $extmentor_streams)->update(['is_active' => 0]);
         } 
     }

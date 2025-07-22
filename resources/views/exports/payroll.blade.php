@@ -120,7 +120,7 @@
                 {{ minutesToTimeFormat($activity['estimate']) }}
             </td>
             <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">
-                {{ formatToRupiah($activity['fee_hours']) }}
+                {{ formatToRupiah($activity['fee_hours'] + $activity['bonus_fee'] + $activity['additional_fee']) }}
             </td>
             <td valign="middle" align="center" style="border: 1px solid #000; word-wrap: break-word;">
                 {{ $activity['status'] == 1 ? "done" : "-" }}

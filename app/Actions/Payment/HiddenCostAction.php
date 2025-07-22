@@ -39,6 +39,7 @@ class HiddenCostAction
             'start_date' => $date,
             'end_date' => $date,
             'meeting_link' => NULL,
+            'tax' => '2.5',
             $columnForFee => $amount,
         ];
         $timesheet = Timesheet::find($timesheetId);
