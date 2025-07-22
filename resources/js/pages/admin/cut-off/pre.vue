@@ -242,7 +242,11 @@ onMounted(() => {
             <td>Rp. {{ item.fee_hours }}</td>
             <td>
               Rp.
-              {{ (item.time_spent / 60).toFixed(2) * item.fee_hours }}
+              {{
+                ['Bonus Fee"', 'Additional Fee'].includes(item.activity)
+                  ? (item.time_spent / 60).toFixed(2) * item.fee_hours
+                  : item.fee_hours
+              }}
             </td>
             <td class="text-center">
               <VChip :color="item.cutoff_status == 'not yet' ? '#ff0217' : '#91c45e'">

@@ -197,7 +197,7 @@ onMounted(() => {
               <VSwitch
                 v-model="item.inhouse"
                 @update:modelValue="updateInhouse(item.uuid, item.inhouse, item.email)"
-                value="1"
+                :value="1"
               ></VSwitch>
             </td>
             <td
