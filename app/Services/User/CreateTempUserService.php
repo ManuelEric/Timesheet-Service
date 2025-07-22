@@ -39,6 +39,7 @@ class CreateTempUserService
         $account_no = $userRawInformation['account_no'];
         $bank_name = $userRawInformation['bank_name'];
         $swift_code = $userRawInformation['swift_code'];
+        $is_active = $userRawInformation['active'];
 
         /* check existing temp user */
         $tempUser = TempUser::where('email', $email)->first();
@@ -144,6 +145,7 @@ class CreateTempUserService
                 $tempUser->account_no = $account_no;
                 $tempUser->bank_name = $bank_name;
                 $tempUser->swift_code = $swift_code; // bank code
+                $tempUser->is_active = $is_active;
                 $tempUser->save();
                 $tempUserId = $tempUser->id;
     
@@ -262,12 +264,12 @@ class CreateTempUserService
                                 'tutor_subject' => $tutor_subject,
                                 'start_date' => $start_date,
                                 'end_date' => $end_date,
-                            ], [
+                                'grade' => $grade,
                                 'curriculum_id' => $curriculum_id,
+                            ], [
                                 'year' => $year,
                                 'head' => $head,
                                 'additional_fee' => $additional_fee,
-                                'grade' => $grade,
                                 'fee_individual' => $fee_individual,
                                 'fee_group' => $fee_group,
                                 'tax' => $tax,
