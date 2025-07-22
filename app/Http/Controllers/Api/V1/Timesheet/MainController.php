@@ -210,13 +210,14 @@ class MainController extends Controller
         ): JsonResponse
     {
         DB::beginTransaction();    
+
+        Ref_Program::where('timesheet_id', $timesheetId)->update(['timesheet_id' => null]);
+
         $timesheet = $identifyTimesheetIdAction->execute($timesheetId);
         
         if ( $timesheet->delete() )
-        {
-            Ref_Program::where('timesheet_id', $timesheetId)->update(['timesheet_id' => null]);
             DB::commit();
-        }
+        
             
 
         return response()->json([
