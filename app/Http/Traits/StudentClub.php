@@ -21,7 +21,7 @@ trait StudentClub
         // Convert Engagement Type ID
         // 2 is for Student Club
         // 3 is for Professional Sharing
-        $engagement_type_id = $engagement_type_id == 2 ? 3 : null;
+        $engagement_type_id = $engagement_type_id == 2 ? 3 : $engagement_type_id;
 
         // Convert student club package IDs to professional sharing package IDs
         switch ($package_id) {
