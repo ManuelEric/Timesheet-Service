@@ -154,10 +154,17 @@ class TempUser extends Authenticatable implements CanResetPassword
         $query->
             when($role, function ($sub) use ($role) {
                 $sub->whereHas('roles', function ($_sub_) use ($role) {
-                    $_sub_->whereRaw("LOWER(role) = '{$role}'")->
-                        when($role != 'mentor', function ($query){
-                            $query->whereRaw('now() BETWEEN start_date AND end_date');
-                        })->where('is_active', 1);
+
+                    switch ($role) {
+                        case "mentor":
+                            $_sub_->whereRaw("LOWER(role) = '{$role}'")->where('is_active', 1);
+                            break;
+
+                        case "tutor":
+                        case "external mentor":
+                            $_sub_->whereRaw("LOWER(role) = '{$role}'")->whereRaw('now() BETWEEN start_date AND end_date')->where('is_active', 1);
+                            break;
+                    }
                 });
             })->
             when($keyword, function ($sub) use ($keyword) {
