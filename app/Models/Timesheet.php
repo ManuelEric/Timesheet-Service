@@ -198,8 +198,10 @@ class Timesheet extends Model
 
     public function scopeHandleBy(Builder $query, string $identifier): void
     {        
+        // dd($identifier);
         $query->whereHas('handle_by', function($sub) use ($identifier) {
-            $sub->where('uuid', $identifier);
+            // $sub->where('uuid', $identifier);
+            $sub->where('temp_users.uuid', $identifier);
         });
     }
 
@@ -220,8 +222,8 @@ class Timesheet extends Model
 
             $_sub_->
                 where('inhouse_id', $tempUserUuid)->
-                orWhere(function ($__sub__) use ($tempUserUuid) {
-                    $__sub__->handleBy($tempUserUuid);
+                orWhere(function ($query) use ($tempUserUuid) {
+                    $query->handleBy($tempUserUuid);
                 });
         });
     }

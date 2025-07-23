@@ -52,6 +52,16 @@ class GenerateTokenService
             );
         }
 
+
+        /* check if password is null */
+        if ($tempUser->password === null) {
+            throw new HttpResponseException(
+                response()->json([
+                    'errors' => 'She/he have not create a password'
+                ], JsonResponse::HTTP_BAD_REQUEST)
+            );
+        }
+
         /* check user credentials */
         if (!Hash::check($validatedPassword, $tempUser->password)) { # need to be remember that "tempUser->password" need to be updated also if the one in crm was updated, for now no update function (need to be discussed)
             throw new HttpResponseException(
@@ -66,12 +76,15 @@ class GenerateTokenService
         $granted_access = ['timesheet-menu', 'program-menu', 'request-menu']; #program-menu needed for summary on dashboard
         $token = $tempUser->createToken('user-access', $granted_access)->plainTextToken;
 
+        $roles = $tempUser->roles()->where('is_active', 1)->groupBy('role')->pluck('role')->toArray();
         return [
             'uuid' => $tempUser->uuid,
             'full_name' => $tempUser->full_name,
             'email' => $tempUser->email,
-            'role' => $tempUser->roles->first()->role,
-            'role_detail' => $tempUser->roles,
+            'role' => $tempUser->roles()->where('is_active', 1)->first()->role,
+            'multiple_role' => count($roles) > 1 ? true : false,
+            'roles' => $roles,
+            'role_detail' => $tempUser->roles()->where('is_active', 1)->get(),
             'granted_token' => $token
         ];
     }

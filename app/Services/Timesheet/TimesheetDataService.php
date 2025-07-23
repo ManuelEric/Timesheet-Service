@@ -62,7 +62,6 @@ class TimesheetDataService
         onSession()->
         newest()->
         select('timesheets.id', 'inhouse_id', 'package_id', 'duration', 'notes', 'void', 'created_at')->get();
-        
 
         $mappedTimesheets = $timesheets->map(function ($data) {
 
@@ -204,8 +203,7 @@ class TimesheetDataService
             : null;
         $tax = $timesheet->subject->tax;
         $isGroup = $timesheet->ref_program()->count() > 1 ? true : false;
-        $feeHours = $isGroup ? $timesheet->subject->fee_group : $timesheet->subject->fee_individual;
-
+        $feeHours = $isGroup && $timesheet->ref_program->first()->require == 'Tutor' ? $timesheet->subject->fee_group : $timesheet->subject->fee_individual;
 
         $packageDetails = [
             'program_name' => $programName,

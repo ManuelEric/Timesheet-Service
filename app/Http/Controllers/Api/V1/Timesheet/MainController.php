@@ -39,7 +39,7 @@ class MainController extends Controller
         $search = $request->only(['program_name', 'package_id', 'keyword']);
 
         /* to determine whether timesheet tutor or timesheet mentor */
-        $is_subject_specialist = $request->is_subject_specialist;
+        $is_subject_specialist = $request->is_subject_specialist; //! point ini yg perlu di make sure dari front-end, karena valuenya null sehingga condition terpenuhi adalah tutoring()
 
         $results = $this->timesheetDataService->listTimesheet($search, $is_subject_specialist);
         return response()->json($results);

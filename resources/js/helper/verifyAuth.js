@@ -10,7 +10,7 @@ export const verifyAuth = () => {
     if (JwtService.getToken()) {
       try {
         const data = await ApiService.get('check')
-
+        alert(data)
         UserService.saveUser(data.data)
       } catch (error) {
         UserService.destroyUser()
