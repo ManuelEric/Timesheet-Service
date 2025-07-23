@@ -2,8 +2,10 @@
 import { showNotif } from '@/helper/notification'
 import ApiService from '@/services/ApiService'
 import UserService from '@/services/UserService'
+import { onUpdated } from 'vue'
 import { useRouter } from 'vue-router'
 
+const props = defineProps({ cat: String })
 const router = useRouter()
 const currentPage = ref(1)
 const role = ref(UserService.getUser().role_detail[0].role.toLowerCase())
@@ -22,7 +24,7 @@ const getData = async () => {
   const search = keyword.value ? '&keyword=' + keyword.value : ''
   const package_search = package_name.value ? '&package_id=' + package_name.value : ''
   const paginate = '&paginate=true'
-  const is_subject = role.value == 'tutor' ? '' : '&is_subject_specialist=true'
+  const is_subject = role.value == 'tutor' || props?.cat == 'tutoring' ? '' : '&is_subject_specialist=true'
 
   try {
     loading.value = true
@@ -69,6 +71,10 @@ const goToTimesheet = (id, require) => {
   router.push('/user/timesheet/' + id + '/' + require.toLowerCase())
 }
 // End Function
+
+onUpdated(() => {
+  getData()
+})
 
 onMounted(() => {
   getData()
