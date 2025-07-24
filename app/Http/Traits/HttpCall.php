@@ -41,7 +41,7 @@ trait HttpCall
 
             Log::error("The server isn't responding to host : {$endpoint} | {$err->getMessage()}");
             throw new HttpResponseException(
-                response()->json(['errors' => "The server isn't responding." ])
+                response()->json(['errors' => "The server isn't responding."], JsonResponse::HTTP_SERVICE_UNAVAILABLE)
             );
         }
 
