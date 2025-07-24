@@ -151,15 +151,9 @@ class TempUser extends Authenticatable implements CanResetPassword
         $role = array_key_exists('role', $search) ? strtolower($search['role']) : false;
         $inhouse = array_key_exists('inhouse', $search) ? $search['inhouse'] == true ? 1 : 0  : null;
 
-        //! somehow if role "Tutor" and inhouse "1" will not showing the inhouse mentor
-        //! maybe because the inhouse mentor only has mentor role
-        //! so in this case, to avoid inhouse not showing..
-        //! role need to be changed to "Mentor" if role "Tutor" and inhouse "1"
-        $role = $inhouse === 1 ? 'Mentor' : $role;
-
         $query->
-            when($role, function ($sub) use ($role) {
-                $sub->whereHas('roles', function ($_sub_) use ($role) {
+            when($role, function ($sub) use ($role, $inhouse) {
+                $sub->whereHas('roles', function ($_sub_) use ($role, $inhouse) {
 
                     switch ($role) {
                         case "mentor":
@@ -168,7 +162,9 @@ class TempUser extends Authenticatable implements CanResetPassword
 
                         case "tutor":
                         case "external mentor":
-                            $_sub_->whereRaw("LOWER(role) = '{$role}'")->whereRaw('now() BETWEEN start_date AND end_date')->where('is_active', 1);
+                            $_sub_->whereRaw("LOWER(role) = '{$role}'")->when(!$inhouse, function ($query) {
+                                $query->whereRaw('now() BETWEEN start_date AND end_date')->where('is_active', 1);
+                            });
                             break;
                     }
                 });
