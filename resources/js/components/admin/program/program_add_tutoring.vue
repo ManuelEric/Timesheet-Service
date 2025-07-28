@@ -120,7 +120,15 @@ const getSubject = async (item, uuid = null, npwp = 0) => {
   try {
     const res = await ApiService.get('api/v1/user/mentor-tutors/' + uuid + '/subjects' + curriculum)
     if (res) {
-      subjects.value = res
+      const unique = []
+      const seen = new Set()
+      for (const item of res) {
+        if (!seen.has(item.tutor_subject)) {
+          seen.add(item.tutor_subject)
+          unique.push(item)
+        }
+      }
+      subjects.value = unique
     }
   } catch (error) {
     console.error(error)
