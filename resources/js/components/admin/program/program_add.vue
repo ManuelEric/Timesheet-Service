@@ -385,6 +385,7 @@ onMounted(() => {
                 })
               "
               :loading="loading"
+              readonly
               density="compact"
               item-value="id"
               @update:modelValue="getIndividualFee(tutor_selected.id, form.subject_name, form.curriculum_id)"
