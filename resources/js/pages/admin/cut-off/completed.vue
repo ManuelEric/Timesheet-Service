@@ -292,6 +292,7 @@ onMounted(() => {
                 label="Start - End Date"
                 prepend-icon=""
                 multiple="range"
+                variant="outlined"
                 v-model="formDownload.cut_off_date"
                 :rules="rules.required"
                 class="mb-3"

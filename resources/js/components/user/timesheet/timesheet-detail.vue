@@ -5,6 +5,7 @@ import ApiService from '@/services/ApiService'
 import UserService from '@/services/UserService'
 import debounce from 'lodash/debounce'
 import AddActivity from './activity-add.vue'
+import EditActivity from './activity-edit.vue'
 
 // Start Variable
 const props = defineProps({ id: String, require: String })
@@ -16,6 +17,7 @@ const role = ref(UserService.getUser().role_detail[0].role.toLowerCase())
 const isDialogVisible = ref([
   {
     add: false,
+    edit: false,
     delete: false,
   },
 ])
@@ -232,6 +234,21 @@ onMounted(() => {
                   Join
                 </a>
               </VBtn>
+
+              <VBtn
+                color="warning"
+                density="compact"
+                class="me-1"
+                v-tooltip:start="'Edit Activity'"
+                :disabled="item.cutoff_status == 'completed'"
+                @click="selectedActivity('edit', item)"
+              >
+                <VIcon
+                  icon="ri-edit-line"
+                  class="cursor-pointer"
+                />
+              </VBtn>
+
               <VBtn
                 color="error"
                 density="compact"
@@ -254,6 +271,20 @@ onMounted(() => {
         v-else
       />
     </VCardText>
+
+    <!-- Edit Dialog -->
+    <VDialog
+      v-model="isDialogVisible.edit"
+      max-width="600"
+      persistent
+    >
+      <EditActivity
+        :timesheet_id="props?.id"
+        :activity="selectedItem"
+        @close="toggleDialog('edit')"
+        @reload="getData"
+      />
+    </VDialog>
 
     <!-- Delete Dialog -->
     <VDialog
