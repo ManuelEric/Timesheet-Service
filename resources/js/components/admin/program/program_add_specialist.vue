@@ -231,7 +231,7 @@ onMounted(() => {
               :rules="rules.required"
               :loading="loading"
               :disabled="loading"
-              @update:model-value="() => ((tutor_selected = null), (stream_selected = null), (form.package_id = null))"
+              @update:model-value="() => ((stream_selected = null), (form.package_id = null))"
             ></VAutocomplete>
           </VCol>
           <VCol

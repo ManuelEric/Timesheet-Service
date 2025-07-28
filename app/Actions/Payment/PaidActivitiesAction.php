@@ -48,6 +48,7 @@ class PaidActivitiesAction
                 'cutoff_date' => $cutoffDate,
                 'subtotal' => ($timeSpent / 60) * $feeHours,
             ];
+        
         });
 
         return $mappedActivities->sortByDesc('start_date')->values();
@@ -55,8 +56,8 @@ class PaidActivitiesAction
 
     private function getStudents(Activity $activity): string
     {
-        return ( $activity->timesheet->ref_program()->exists() ) 
-            ? implode(", ", $activity->timesheet->ref_program->pluck('student_name')->toArray()) 
+        return ( $activity->timesheet->ref_program()->exists() || $activity->timesheet->second_ref_program()->exists() ) 
+            ? implode(", ", $activity->timesheet->ref_program->pluck('student_name')->toArray() + $activity->timesheet->second_ref_program->pluck('student_name')->toArray()) 
             : implode(", ", $activity->timesheet->transferred->pluck('student_name')->toArray());
     }
 }

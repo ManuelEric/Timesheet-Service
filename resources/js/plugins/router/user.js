@@ -16,7 +16,10 @@ export default [
         component: () => import('@/pages/user/request/request.vue'),
       },
       {
-        path: '/user/timesheet',
+        path: '/user/timesheet/:cat?',
+        props: route => ({
+          cat:route.params.cat
+        }),
         component: () => import('@/pages/user/timesheet/timesheet.vue'),
       },
       {
