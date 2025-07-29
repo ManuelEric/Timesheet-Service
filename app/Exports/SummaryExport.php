@@ -14,11 +14,13 @@ class SummaryExport implements FromView, WithTitle, WithColumnFormatting
 {
     public Cutoff $cutoff;
     public $activities;
+    public $editor_activities;
 
-    public function __construct(Cutoff $cutoff, Collection $activities)
+    public function __construct(Cutoff $cutoff, Collection $activities, Collection $editor_activities)
     {
         $this->cutoff = $cutoff;
         $this->activities = $activities;
+        $this->editor_activities = $editor_activities;
     }
 
     /**
@@ -41,12 +43,13 @@ class SummaryExport implements FromView, WithTitle, WithColumnFormatting
     }
 
     /**
-    * @return \Illuminate\Contracts\View\View
-    */
+     * @return \Illuminate\Contracts\View\View
+     */
     public function view(): View
     {
         return view('exports.fee-summary', [
             'activities' => $this->activities,
+            'editor_activities' => $this->editor_activities
         ]);
     }
 }

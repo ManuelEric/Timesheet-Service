@@ -61,16 +61,34 @@
             <td align="center">{{ $activity->swift_code }}</td>
         </tr>
     @endforeach
+
+    @if (count($editor_activities) > 0)
+        @foreach ($editor_activities as $item)
+            <tr>
+                <td>{{ count($activities) + intval($item['number']) }}</td>
+                <td>{{ $item['transaction'] }}</td>
+                <td align="right">{{ formatToRupiah($item['total_fee']) }}</td>
+                <td align="right">{{ formatToRupiah($item['tax']) }}</td>
+                <td align="right">{{ formatToRupiah($item['total_fee_nett']) }}</td>
+                <td align="right">{{ formatToRupiah(roundCustom($item['total_fee_nett'])) }}</td>
+                <td align="left">{{ $item['editor_name'] }}</td>
+                <td align="left">{{ $item['account_name'] }}</td>
+                <td align="left">{{ $item['account_number'] }}</td>
+                <td align="left">{{ $item['bank_account'] }}</td>
+                <td align="center">{{ $item['swift_code'] }}</td>
+            </tr>
+        @endforeach
+    @endif
     <!-- Body end -->
 
     <!-- Footer -->
-    <tr>
+    {{-- <tr>
         <td></td>
         <td style="font-weight: bold;">Subtotal</td>
         <td style="font-weight: bold;">{{ formatToRupiah($subtotal_fee_gross) }}</td>
         <td style="font-weight: bold;">{{ formatToRupiah($subtotal_tax) }}</td>
         <td style="font-weight: bold;">{{ formatToRupiah($subtotal_fee_nett) }}</td>
         <td style="font-weight: bold;">{{ formatToRupiah($subtotal_rounding) }}</td>
-    </tr>
+    </tr> --}}
     <!-- Footer end -->
 </table>
