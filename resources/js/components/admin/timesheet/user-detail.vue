@@ -275,6 +275,28 @@ watch(() => {
                 <td width="1%">:</td>
                 <td>{{ data.clientProfile[0].client_mail }}</td>
               </tr>
+              <tr>
+                <td>Sales PIC</td>
+                <td width="1%">:</td>
+                <td>
+                  {{ data.clientProfile[0].sales_pic_name }}
+                  <a
+                    :href="
+                      'https://api.whatsapp.com/send?phone=' +
+                      data.clientProfile[0].sales_pic_phone +
+                      '&text=Halo%20' +
+                      data.clientProfile[0].sales_pic_name
+                    "
+                    target="_blank"
+                  >
+                    <VIcon
+                      icon="ri-whatsapp-line"
+                      color="success"
+                      class="ms-3"
+                    />
+                  </a>
+                </td>
+              </tr>
             </tbody>
           </VTable>
 
