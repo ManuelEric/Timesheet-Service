@@ -100,15 +100,10 @@ class PaymentService
             $cutoffId = $cutoff->id;
             $activities = $activities->where('cutoff_ref_id', $cutoffId);
             
-            // echo json_encode($activities);
-            // echo '<br>';
-            // echo 'cutoff ref id terakhir ' . $activities[count($activities)-1]['cutoff_ref_id']. ' dari total activities '. count($activities);
-            // echo '<br><br><br><br><br><br>';continue;
-
             // regist into the exports
             $exports[] = new PayrollExport($detailTimesheet, $activities, $cutoff);
         }
-        // exit;
+
 
         return Excel::download(new PayrollExportMultipleSheets($exports), $this->filename);
     }
