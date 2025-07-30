@@ -29,6 +29,8 @@ class Ref_Program extends Model
         'clientprog_id',
         'schprog_id',
         'invoice_id',
+        'sales_pic_name',
+        'sales_pic_phone',
         'student_uuid',
         'student_name',
         'student_school',

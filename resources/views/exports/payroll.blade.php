@@ -4,6 +4,37 @@
         <td colspan="8" align="center" style="font-weight: bold;">Basic Profile</td>
     </tr>
     @if ($isGroup)
+        <tr>
+            <td>Program</td>
+            <td align="center">:</td>
+            <td>{{ $packageDetails['program_name'] }}</td>
+        </tr>
+        <tr>
+            <td>Package</td>
+            <td align="center">:</td>
+            <td>{{ $packageDetails['package_name'] }}</td>
+        </tr>
+        @if (isset($editableColumns['curriculum_name']))
+            <tr>
+                <td>Curriculum</td>
+                <td align="center">:</td>
+                <td>{{ $editableColumns['curriculum_name'] }}</td>
+            </tr>
+        @endif
+
+        @if (isset($packageDetails['engagement_type']))
+            <tr>
+                <td>Engagement Type</td>
+                <td align="center">:</td>
+                <td>{{ $packageDetails['engagement_type'] }}</td>
+            </tr>
+        @endif
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+
         <tr height="25">
             <td valign="middle" align="center">No</td>
             <td valign="middle" align="center">Student Name</td>
@@ -70,6 +101,26 @@
             <td></td>
             <td></td>
         </tr>
+        <tr>
+            <td>Package</td>
+            <td align="center">:</td>
+            <td>{{ $packageDetails['package_name'] }}</td>
+        </tr>
+        @if (isset($editableColumns['curriculum_name']))
+            <tr>
+                <td>Curriculum</td>
+                <td align="center">:</td>
+                <td>{{ $editableColumns['curriculum_name'] }}</td>
+            </tr>
+        @endif
+
+        @if (isset($packageDetails['engagement_type']))
+            <tr>
+                <td>Engagement Type</td>
+                <td align="center">:</td>
+                <td>{{ $packageDetails['engagement_type'] }}</td>
+            </tr>
+        @endif
         <tr>
             <td></td>
         </tr>

@@ -258,6 +258,8 @@ class TimesheetDataService
                 $category = $ref->category;
                 $studentUUID = $ref->student_uuid;
                 $studentName = $ref->student_name;
+                $salesPicName = $ref->sales_pic_name;
+                $salesPicPhone = $ref->sales_pic_phone;
                 $studentSchool = $ref->student_school;
                 $client = $category == "b2c" ? $studentName : $studentSchool;
 
@@ -271,6 +273,8 @@ class TimesheetDataService
                         'client_mail' => $crm_clientInfo['mail'],
                         'client_school' => $studentSchool,
                         'client_grade' => $crm_clientInfo['grade'],
+                        'sales_pic_name' => $salesPicName,
+                        'sales_pic_phone' => $salesPicPhone,
                     ]);
                     continue;
                 }
@@ -288,6 +292,8 @@ class TimesheetDataService
             $studentUUID = $relatedProgram->first()->student_uuid;
             $studentName = $relatedProgram->first()->student_name;
             $studentSchool = $relatedProgram->first()->student_school;
+            $salesPicName = $relatedProgram->first()->sales_pic_name;
+            $salesPicPhone = $relatedProgram->first()->sales_pic_phone;
 
             if ($category == "b2c") {
                 /* fetch the client profile information from CRM */
@@ -299,6 +305,8 @@ class TimesheetDataService
                     'client_mail' => $crm_clientInfo['mail'] ?? null,
                     'client_school' => $studentSchool,
                     'client_grade' => $crm_clientInfo['grade'] ?? null,
+                    'sales_pic_name' => $salesPicName,
+                    'sales_pic_phone' => $salesPicPhone,
                 ]);
             }
         }

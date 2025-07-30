@@ -37,6 +37,8 @@ class RefProgramServices
             $category = $crm_success_program['category'];
             $clientprog_id = $schprog_id = $student_uuid = $student_name = $student_grade = NULL;
             $invoice_id = $crm_success_program['invoice_id'];
+            $sales_pic_name = $crm_success_program['pic']['name'];
+            $sales_pic_phone = $crm_success_program['pic']['phone'];
             $student_school = $crm_success_program['client']['school_name'];
             $program_name = $crm_success_program['program_name'];
             $require = $crm_success_program['require'];
@@ -64,6 +66,8 @@ class RefProgramServices
                 $existing_clientprog[] = $clientprog_id;
                 Ref_Program::where('clientprog_id', $clientprog_id)->update([
                     'student_grade' => $student_grade,
+                    'sales_pic_name' => $sales_pic_name,
+                    'sales_pic_phone' => $sales_pic_phone,
                     //? need to update package, curriculum, program_name, 
                     'program_name' => $program_name,
                     'free_trial' => $package == "Free Trial" ? 1 : 0,
@@ -79,6 +83,8 @@ class RefProgramServices
                 'clientprog_id' => $clientprog_id,
                 'schprog_id' => $schprog_id,
                 'invoice_id' => $invoice_id,
+                'sales_pic_name' => $sales_pic_name,
+                'sales_pic_phone' => $sales_pic_phone,
                 'student_uuid' => $student_uuid,
                 'student_name' => $student_name,
                 'student_school' => $student_school,

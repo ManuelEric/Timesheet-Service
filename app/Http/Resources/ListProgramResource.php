@@ -21,6 +21,8 @@ class ListProgramResource extends JsonResource
             "clientprog_id" => $this->clientprog_id,
             "schprog_id" => $this->schprog_id,
             "invoice_id" => $this->invoice_id,
+            "sales_pic_name" => $this->sales_pic_name,
+            "sales_pic_phone" => $this->sales_pic_phone,
             "student_uuid" => $this->student_uuid,
             "student_name" => $this->student_name,
             "student_school" => $this->student_school,
