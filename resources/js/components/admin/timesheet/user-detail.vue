@@ -245,7 +245,10 @@ watch(() => {
                 <td>Grade</td>
               </tr>
               <tr v-for="client in data.clientProfile">
-                <td>{{ client.client_name }}</td>
+                <td>
+                  {{ client.client_name }}
+                  <small v-if="client.sales_pic_name"> Sales PIC: {{ client.sales_pic_name }} </small>
+                </td>
                 <td>{{ client.client_school }}</td>
                 <td>{{ client.client_grade <= 12 ? client.client_grade : 'Not High School' }}</td>
               </tr>
@@ -275,7 +278,7 @@ watch(() => {
                 <td width="1%">:</td>
                 <td>{{ data.clientProfile[0].client_mail }}</td>
               </tr>
-              <tr>
+              <tr v-if="data.clientProfile[0].sales_pic_name">
                 <td>Sales PIC</td>
                 <td width="1%">:</td>
                 <td>
@@ -287,6 +290,7 @@ watch(() => {
                       '&text=Halo%20' +
                       data.clientProfile[0].sales_pic_name
                     "
+                    v-if="data.clientProfile[0].sales_pic_phone"
                     target="_blank"
                   >
                     <VIcon
