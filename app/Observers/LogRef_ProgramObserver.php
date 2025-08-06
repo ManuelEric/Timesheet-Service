@@ -12,7 +12,7 @@ class LogRef_ProgramObserver
      */
     public function created(LogRef_Program $logRef_Program): void
     {
-        Log::info('Timesheet ID. ' . $logRef_Program->timesheet_id . ' has been unassigned from Program ID : ' . $logRef_Program->program_id);
+        Log::notice('Timesheet ID. ' . $logRef_Program->timesheet_id . ' has been unassigned from Program ID : ' . $logRef_Program->program_id);
     }
 
     /**

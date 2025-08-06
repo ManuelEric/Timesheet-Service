@@ -1,5 +1,6 @@
 import { showNotif } from "@/helper/notification";
 import { verifyAuth } from "@/helper/verifyAuth";
+import ApiService from "@/services/ApiService";
 import UserService from "@/services/UserService";
 import { createRouter, createWebHistory } from "vue-router";
 import adminRoutes from "./admin";
@@ -12,9 +13,21 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const verify = verifyAuth();
   const user = UserService.getUser()
+
+
+  try {
+    const res = await ApiService.post('api/v1/tracking/access', {
+      path: to.path,
+      name: to.name,
+      user_id: UserService.getUser() ? UserService.getUser().id : null
+    })
+    console.log(res);
+  } catch (error) {
+    console.log(error);
+  }
 
   if (to.meta.middleware == "auth-user") {
     if (verify.isAuthenticated.value) {

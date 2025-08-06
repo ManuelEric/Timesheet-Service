@@ -34,6 +34,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Programs\ExternalController as V1ProgramEXTERNALController;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /*
 |--------------------------------------------------------------------------
@@ -70,7 +71,7 @@ Route::middleware(['throttle:2500,1'])->group(function () {
         Route::middleware(['auth:sanctum'])->group(function () {
             /* Logout */
             Route::GET('terminate', [V1LogoutController::class, 'execute']);
-            
+
             /* for tutor mentor only that able to change password */
             Route::PATCH('change-password', [V1ChangePasswordController::class, 'patch']);
         });
@@ -133,7 +134,7 @@ Route::middleware(['throttle:2500,1'])->group(function () {
     });
 
     /* Mentee */
-    Route::middleware(['auth:sanctum', 'abilities:request-menu', 'throttle:2500,1'])->group(function  () {
+    Route::middleware(['auth:sanctum', 'abilities:request-menu', 'throttle:2500,1'])->group(function () {
 
         /**
          * The Components
@@ -168,7 +169,7 @@ Route::middleware(['throttle:2500,1'])->group(function () {
                 /* timesheet */
                 Route::GET('list', [V1TimesheetComponentController::class, 'list']);
                 Route::GET('summary/{month}', [V1TimesheetComponentController::class, 'summaryMonthlyTimesheet']);
-                
+
                 /* activity */
                 Route::GET('activity/{month}', [V1ActivitiesComponentController::class, 'monthlyActivities']);
                 Route::GET('activity/summary/{month}', [V1ActivitiesComponentController::class, 'summaryMonthlyActivities']);
@@ -201,7 +202,7 @@ Route::middleware(['throttle:2500,1'])->group(function () {
             /* Add bonus into the timesheet */
             Route::POST('bonus/create', [V1BonusController::class, 'store']);
 
-            Route::prefix('cut-off')->group(function() {
+            Route::prefix('cut-off')->group(function () {
                 /* Create cut-off */
                 Route::POST('create', [V1CutoffController::class, 'store']);
                 /* Add to an existing cut-off */
@@ -275,7 +276,23 @@ Route::middleware(['throttle:2500,1'])->group(function () {
     /**
      * used out of auth sanctum
      * since this is going to be a private API
-    */
+     */
     Route::get('program/{clientprog_id}/detail', [V1ProgramEXTERNALController::class, 'index']);
 
+
+    // Track User Menu Access 
+    Route::post('tracking/access', function () {
+        Log::notice(
+            'Route accessed',
+            [
+                'method' => request()->method(),
+                'ip' => request()->ip(),
+                'uri' => request()->input('path', null),
+                'user_id' =>  request()->input('user_id', null),
+                'accessed_name' => request()->input('name', null),
+            ]
+        );
+
+        return 'Successfully logged';
+    });
 });

@@ -18,7 +18,7 @@ class PicObserver implements ShouldHandleEventsAfterCommit
         $userId = $pic->user_id;
         $user = User::find($userId);
         $userName = $user->full_name;
-        Log::info("{$userName} has been registered to be PIC for Timesheet No. {$timesheetId}");
+        Log::notice("{$userName} has been registered to be PIC for Timesheet No. {$timesheetId}");
     }
 
     /**
@@ -38,7 +38,7 @@ class PicObserver implements ShouldHandleEventsAfterCommit
         $userId = $pic->user_id;
         $user = User::find($userId);
         $userName = $user->full_name;
-        Log::info("{$userName} has been archived from PIC-ing Timesheet No. {$timesheetId}");
+        Log::notice("{$userName} has been archived from PIC-ing Timesheet No. {$timesheetId}");
     }
 
     /**

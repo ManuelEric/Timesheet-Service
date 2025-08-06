@@ -18,8 +18,7 @@ class CreatePasswordController extends Controller
         CreatePasswordRequest $request,
         ResetPasswordService $resetPasswordService,
         ResponseService $responseService,
-        ): JsonResponse
-    {
+    ): JsonResponse {
         $validated = $request->safe()->only(['email', 'password']);
         $validatedEmail = $validated['email'];
         $validatedPassword = $validated['password'];

@@ -21,7 +21,7 @@ class Ref_ProgramObserver implements ShouldHandleEventsAfterCommit
      */
     public function created(Ref_Program $ref_Program): void
     {
-        Log::info('Invoice ID : ' . $ref_Program->invoice_id . ' has been stored.');
+        Log::notice('Invoice ID : ' . $ref_Program->invoice_id . ' has been stored.');
     }
 
     /**
@@ -29,10 +29,10 @@ class Ref_ProgramObserver implements ShouldHandleEventsAfterCommit
      */
     public function updated(Ref_Program $ref_Program): void
     {
-        Log::info('Invoice ID : ' . $ref_Program->invoice_id . ' has been updated.');
+        Log::notice('Invoice ID : ' . $ref_Program->invoice_id . ' has been updated.');
 
-        if ( $ref_Program->wasChanged('timesheet_id') )
-            Log::info('Timesheet for Invoice ID : ' . $ref_Program->invoice_id . ' has been created.');
+        if ($ref_Program->wasChanged('timesheet_id'))
+            Log::notice('Timesheet for Invoice ID : ' . $ref_Program->invoice_id . ' has been created.');
     }
 
     /**
@@ -40,7 +40,7 @@ class Ref_ProgramObserver implements ShouldHandleEventsAfterCommit
      */
     public function deleted(Ref_Program $ref_Program): void
     {
-        Log::info('Invoice ID : ' . $ref_Program->invoice_id . ' has been removed.');
+        Log::notice('Invoice ID : ' . $ref_Program->invoice_id . ' has been removed.');
     }
 
     /**

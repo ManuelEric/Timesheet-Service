@@ -25,25 +25,23 @@ class ActivityObserver implements ShouldHandleEventsAfterCommit
      */
     public function created(Activity $activity): void
     {
-        switch ($activity->activity) 
-        {
+        switch ($activity->activity) {
             case "Additional Fee":
-                Log::info('An additional fee has been added to the Timesheet ID: ' . $activity->timesheet_id);
+                Log::notice('An additional fee has been added to the Timesheet ID: ' . $activity->timesheet_id);
                 break;
 
             case "Bonus":
-                Log::info('A bonus has been added to the Timesheet ID: ' . $activity->timesheet_id);
+                Log::notice('A bonus has been added to the Timesheet ID: ' . $activity->timesheet_id);
                 break;
 
             default:
-                Log::info('Activity of Timesheet ID: ' . $activity->timesheet_id . ' has been created.');
+                Log::notice('Activity of Timesheet ID: ' . $activity->timesheet_id . ' has been created.');
         }
-            
+
         /**
          * check if the activity is from ref_program which has a engagement_type_id
          */
-        if ( $ref_Program = $activity->timesheet->ref_program->whereNotNull('engagement_type_id')->whereNull('cancelled_at')->where('require', 'Mentor')->first() )
-        {
+        if ($ref_Program = $activity->timesheet->ref_program->whereNotNull('engagement_type_id')->whereNull('cancelled_at')->where('require', 'Mentor')->first()) {
             $mentee_id = $ref_Program->student_uuid;
             $phase_detail_id = $ref_Program->engagement_type_id; //! the primary of engagement type should be the same as primary of phase_detail_id
             $mentor_id = $activity->timesheet->subject->temp_user->uuid;
@@ -51,7 +49,6 @@ class ActivityObserver implements ShouldHandleEventsAfterCommit
             $meeting_link = $activity->meeting_link;
             $this->mentoring_services->storeMentoringLog($ref_Program->id, $mentee_id, $phase_detail_id, $mentor_id, $activity_description, $meeting_link, $activity->toArray());
         }
-
     }
 
     /**
@@ -64,21 +61,19 @@ class ActivityObserver implements ShouldHandleEventsAfterCommit
         /**
          * Listening to 'updated cutoff_ref_id'
          */
-        if ( $activity->wasChanged('cutoff_ref_id') ) 
-        {
+        if ($activity->wasChanged('cutoff_ref_id')) {
             $newValue_of_cutoffStatus = $activity->cutoff_status;
             $newValue_of_cutoffrefId = $activity->cutoff_ref_id;
 
             # not yet meaning unpaid
-            if ( $newValue_of_cutoffStatus == 'not yet' && $newValue_of_cutoffrefId == NULL ) #1
+            if ($newValue_of_cutoffStatus == 'not yet' && $newValue_of_cutoffrefId == NULL) #1
             {
-                Log::info($this->userName . ' has unassigned the activity no. ' . $activityId );
-                
-            } 
+                Log::notice($this->userName . ' has unassigned the activity no. ' . $activityId);
+            }
             # completed meaning paid
-            else if ( $newValue_of_cutoffStatus == 'completed' && $newValue_of_cutoffrefId != NULL ) #2
+            else if ($newValue_of_cutoffStatus == 'completed' && $newValue_of_cutoffrefId != NULL) #2
             {
-                Log::info($this->userName . ' has stored into cut-off.');
+                Log::notice($this->userName . ' has stored into cut-off.');
             }
             return;
         }
@@ -86,27 +81,24 @@ class ActivityObserver implements ShouldHandleEventsAfterCommit
         /**
          * Listening to 'updated end_date
          */
-        if ( $activity->wasChanged('end_date') )
-        {
+        if ($activity->wasChanged('end_date')) {
             $endTime = $activity->end_date != NULL ? Carbon::parse($activity->end_date)->format('d M Y H:i') : 'NULL';
-            Log::info($this->userName . ' has just updated the end date to ' . $endTime . ' of activity no. ' . $activityId);
+            Log::notice($this->userName . ' has just updated the end date to ' . $endTime . ' of activity no. ' . $activityId);
             return;
         }
 
         /**
          * Listening to 'updated status'
          */
-        if ( $activity->wasChanged('status') )
-        {
-            if ( $activity->status == 1 )
-                Log::info($this->userName . ' has just completed the activity no. ' . $activityId);
+        if ($activity->wasChanged('status')) {
+            if ($activity->status == 1)
+                Log::notice($this->userName . ' has just completed the activity no. ' . $activityId);
             else
-                Log::info($this->userName . ' has just undone the completed activity no. ' . $activityId);
+                Log::notice($this->userName . ' has just undone the completed activity no. ' . $activityId);
             return;
         }
 
-        Log::info($this->userName . ' has just update the activity.');
-
+        Log::notice($this->userName . ' has just update the activity.');
     }
 
     /**
@@ -118,12 +110,12 @@ class ActivityObserver implements ShouldHandleEventsAfterCommit
         /**
          * check if the activity is from ref_program which has a engagement_type_id
          */
-        if ( $ref_Program = $activity->timesheet->ref_program->whereNotNull('engagement_type_id')->whereNull('cancelled_at')->where('require', 'Mentor')->first() )
+        if ($ref_Program = $activity->timesheet->ref_program->whereNotNull('engagement_type_id')->whereNull('cancelled_at')->where('require', 'Mentor')->first())
             $this->mentoring_services->deleteMentoringLog($ref_Program->id);
-        
+
 
         $activityName = $activity->activity;
-        Log::info($this->userName . ' just deleted the activity ' . $activityName);
+        Log::notice($this->userName . ' just deleted the activity ' . $activityName);
     }
 
     /**

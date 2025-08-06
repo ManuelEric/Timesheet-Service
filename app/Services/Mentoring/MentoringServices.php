@@ -24,7 +24,7 @@ class MentoringServices
     public function updateQuota(string $mentee_id, int $phase_detail_id, string $type)
     {
         $endpoint = env('CRM_DOMAIN') . "program-phase/{$mentee_id}/phase-detail/{$phase_detail_id}/use";
-            
+
         [$status_code, $result] = $this->make_call('patch', $endpoint, [
             'use' => 1,
             'type' => $type
@@ -32,18 +32,17 @@ class MentoringServices
     }
 
     public function storeMentoringLog(
-        int $ref_Program_id, 
-        string $mentee_id, 
-        int $phase_detail_id, 
-        string $mentor_id, 
+        int $ref_Program_id,
+        string $mentee_id,
+        int $phase_detail_id,
+        string $mentor_id,
         string $activity_description,
         ?string $meeting_link = null,
         array $options = []
-    )
-    {
+    ) {
         $endpoint = env('MENTORING_DOMAIN') . "mentoring-log";
 
-        // Log::info("Mentoring log creating for Ref Program ID: {$ref_Program_id}", [
+        // Log::notice("Mentoring log creating for Ref Program ID: {$ref_Program_id}", [
         //     'student_id' => $mentee_id,
         //     'phase_detail_id' => $phase_detail_id,
         //     'start_date' => $options['start_date'],
@@ -62,7 +61,7 @@ class MentoringServices
             'meeting_link' => $meeting_link,
         ], ['mentoring-authorization' => env('MENTORING_AUTHORIZATION_KEY')]);
 
-        Log::info("Mentoring log created for Ref Program ID: {$ref_Program_id} with status code: {$status_code}");
+        Log::notice("Mentoring log created for Ref Program ID: {$ref_Program_id} with status code: {$status_code}");
 
         # update column mentoring_log_id using ref_program_id
         # in order to help determine which ref_program should be deleted if mentor cancel/delete the request

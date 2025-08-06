@@ -22,10 +22,9 @@ class LoginController extends Controller
 
     public function authenticateNonAdmin(
         AuthenticateNonAdminRequest $request,
-        ): JsonResponse
-    {
+    ): JsonResponse {
         $validated = $request->safe()->only(['email', 'password']);
-        
+
         $authenticate = $this->generateTokenService->createNonAdminToken($validated);
 
         return response()->json($authenticate, JsonResponse::HTTP_OK);
@@ -33,10 +32,9 @@ class LoginController extends Controller
 
     public function authenticateAdmin(
         AuthenticateAdminRequest $request,
-        ): JsonResponse
-    {
+    ): JsonResponse {
         $validated = $request->safe()->only(['email', 'password']);
-        
+
         $authenticate = $this->generateTokenService->createAdminToken($validated);
 
         return response()->json($authenticate, JsonResponse::HTTP_OK);
@@ -44,10 +42,9 @@ class LoginController extends Controller
 
     public function authenticateByUuidNonAdmin(
         AuthenticateByUuidRequest $request,
-        ): JsonResponse
-    {
+    ): JsonResponse {
         $validated = $request->safe()->only(['uuid']);
-        
+
         $authenticate = $this->generateTokenService->createTokenByUuid($validated);
 
         return response()->json($authenticate, JsonResponse::HTTP_OK);
@@ -55,10 +52,9 @@ class LoginController extends Controller
 
     public function authenticateAdminByEmail(
         AuthenticateAdminByEmailRequest $request,
-        ): JsonResponse
-    {
+    ): JsonResponse {
         $validated = $request->safe()->only(['email']);
-        
+
         $authenticate = $this->generateTokenService->createAdminTokenByEmail($validated);
 
         return response()->json($authenticate, JsonResponse::HTTP_OK);

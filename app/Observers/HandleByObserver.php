@@ -19,21 +19,19 @@ class HandleByObserver implements ShouldHandleEventsAfterCommit
         $createdDate = $handleBy->created_at;
         $replacedMentorTutors = HandleBy::where('timesheet_id', $timesheetId)->where('created_at', '<', $createdDate)->get();
         $mts = array();
-        foreach ($replacedMentorTutors as $mt)
-        {
+        foreach ($replacedMentorTutors as $mt) {
             $mt->active = false;
             $mt->save();
 
             $mentorTutorId = $mt->temp_user_id;
             $mentorTutor = TempUser::find($mentorTutorId);
             $mentorTutor_name = $mentorTutor->full_name;
-            if ( !in_array($mentorTutor_name, $mts) && $handleBy->temp_user_id !== $mentorTutorId )
+            if (!in_array($mentorTutor_name, $mts) && $handleBy->temp_user_id !== $mentorTutorId)
                 array_push($mts, $mentorTutor_name);
-            
         }
 
         $print_replacedMTs = implode(', ', $mts);
-        Log::info("Mentor / Tutor ({$print_replacedMTs}) has been archived from Handling Timesheet No. {$timesheetId}");
+        Log::notice("Mentor / Tutor ({$print_replacedMTs}) has been archived from Handling Timesheet No. {$timesheetId}");
     }
 
     /**
@@ -45,7 +43,7 @@ class HandleByObserver implements ShouldHandleEventsAfterCommit
         $mentorTutor = TempUser::find($mentorTutorId);
         $mentorTutor_name = $mentorTutor->full_name;
         $timesheetId = $handleBy->timesheet_id;
-        Log::info('Timesheet No. ' . $timesheetId . ' has been attached to ' . $mentorTutor_name);
+        Log::notice('Timesheet No. ' . $timesheetId . ' has been attached to ' . $mentorTutor_name);
     }
 
     /**
