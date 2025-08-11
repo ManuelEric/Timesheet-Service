@@ -22,7 +22,7 @@ router.beforeEach(async (to, from, next) => {
     const res = await ApiService.post('api/v1/tracking/access', {
       path: to.path,
       name: to.name,
-      user_id: UserService.getUser() ? UserService.getUser().id : null
+      user_id: UserService.getUser() ? UserService.getUser().uuid : null
     })
     console.log(res);
   } catch (error) {

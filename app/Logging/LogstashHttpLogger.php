@@ -24,7 +24,9 @@ class LogstashHttpLogger
                     $method = request()->method() ?? null;
                     $ip = request()->ip() ?? null;
                     $uri = request()->getRequestUri() ?? null;
-                    $userId = null; // need setup for admin/user
+                    $userId = Auth::user()?->id ?? null;
+                    $userAgent = request()->header('User-Agent');
+                    $traceId = request()->header('X-Request-ID', uniqid());
 
                     // Tambahkan default context ke context log asli
                     $context = array_merge([
@@ -32,6 +34,8 @@ class LogstashHttpLogger
                         'ip'       => $ip,
                         'uri'      => $uri,
                         'user_id'  => $userId,
+                        'user_agent'    => $userAgent,
+                        'trace_id'      => $traceId
                     ], $record['context']);
 
                     Http::asJson()

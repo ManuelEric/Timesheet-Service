@@ -118,6 +118,7 @@ class GenerateTokenService
         $token = $user->createToken('admin-access', $granted_access, Carbon::now()->addHours(8))->plainTextToken;
 
         return [
+            'uuid' => $user->id,
             'full_name' => $user->full_name,
             'email' => $user->email,
             'role' => $user->role,
@@ -134,7 +135,7 @@ class GenerateTokenService
 
         if (!$tempUser) {
             [$statusCode, $response] = $this->make_call('get', env('CRM_DOMAIN') . 'user/mentor/by/' . $validatedUuid);
-            if (!$response){
+            if (!$response) {
                 return response()->json($response, JsonResponse::HTTP_BAD_REQUEST);
             }
 
@@ -157,7 +158,7 @@ class GenerateTokenService
         $tempUser->authenticate();
         $granted_access = ['timesheet-menu', 'program-menu', 'request-menu']; #program-menu needed for summary on dashboard
         $token = $tempUser->createToken('user-access', $granted_access)->plainTextToken;
-        
+
         return [
             'uuid' => $tempUser->uuid,
             'full_name' => $tempUser->full_name,
@@ -194,6 +195,7 @@ class GenerateTokenService
         $token = $user->createToken('admin-access', $granted_access, Carbon::now()->addHours(8))->plainTextToken;
 
         return [
+            'uuid' => $user->id,
             'full_name' => $user->full_name,
             'email' => $user->email,
             'role' => $user->role,
