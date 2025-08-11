@@ -34,11 +34,7 @@ trait HttpCall
             withoutVerifying()->
             withHeaders($headers)->
             timeout(60)->{$method}( $endpoint, $params );
-    
-            Log::debug("Response status: " . $request->status());
-            Log::debug("Response body: " . $request->body());
-            Log::debug("Sent headers: ", $headers);
-            Log::debug("Sent params: ", $params);
+
             if ( $request->failed() ) {
                 Log::error('Failed to make a call to ' . $endpoint, [
                     'body' => $request->json() ?? $request->body()
