@@ -12,7 +12,7 @@ class TempUserObserver
      */
     public function authenticated(TempUser $tempUser): void
     {
-        Log::info($tempUser->full_name . ' has been login.');
+        Log::notice($tempUser->full_name . ' has been login.');
     }
 
     /**
@@ -20,8 +20,8 @@ class TempUserObserver
      */
     public function logged_out(TempUser $tempUser): void
     {
-        Log::info($tempUser->full_name . ' has been logged out.');
-        
+        Log::notice($tempUser->full_name . ' has been logged out.');
+
         /* save the last activity */
         $tempUser->last_activity = now();
         $tempUser->save();
@@ -32,7 +32,7 @@ class TempUserObserver
      */
     public function created(TempUser $tempUser): void
     {
-        Log::info($tempUser->full_name . ' has been registered.');
+        Log::notice($tempUser->full_name . ' has been registered.');
     }
 
     /**
@@ -45,11 +45,11 @@ class TempUserObserver
         /**
          * Listening to 'updated password'
          */
-        if ( $tempUser->wasChanged('password') )
-            Log::info($tempUser->full_name . ' has perform a password change.');
+        if ($tempUser->wasChanged('password'))
+            Log::notice($tempUser->full_name . ' has perform a password change.');
 
-        if ( $tempUser->wasChanged('inhouse') )
-            Log::info($tempUser->full_name . ' has been set to inhouse by ' . $admin->full_name );
+        if ($tempUser->wasChanged('inhouse'))
+            Log::notice($tempUser->full_name . ' has been set to inhouse by ' . $admin->full_name);
     }
 
     /**

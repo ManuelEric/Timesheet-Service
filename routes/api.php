@@ -8,9 +8,11 @@ use App\Http\Controllers\Api\V1\Authentication\ResetPasswordController as V1Rese
 use App\Http\Controllers\Api\V1\Authentication\CreatePasswordController as V1CreatePasswordController;
 use App\Http\Controllers\Api\V1\MentorTutor\MainController as V1MentorTutorController;
 use App\Http\Controllers\Api\V1\MentorTutor\ComponentController as V1MentorTutorComponentController;
+use App\Http\Controllers\Api\V1\MentorTutor\FeeController as V1MentorTutorFeeController;
 use App\Http\Controllers\Api\V1\Programs\ListController as V1ProgramsListController;
 use App\Http\Controllers\Api\V1\Programs\ComponentController as V1ProgramsComponentController;
 use App\Http\Controllers\Api\V1\Timesheet\MainController as V1TimesheetController;
+use App\Http\Controllers\Api\V1\Timesheet\AlternativeController as V1TimesheetAlternativeController;
 use App\Http\Controllers\Api\V1\Timesheet\ComponentController as V1TimesheetComponentController;
 use App\Http\Controllers\Api\V1\Activity\MainController as V1ActivitiesController;
 use App\Http\Controllers\Api\V1\Activity\ComponentController as V1ActivitiesComponentController;
@@ -28,8 +30,11 @@ use App\Http\Controllers\Api\V1\Curriculums\ListController as V1CurriculumListCo
 use App\Http\Controllers\Api\V1\Request\EngagementTypeController as V1EngagementTypeController;
 use App\Http\Controllers\Api\V1\Request\MainController as V1RequestController;
 use App\Http\Controllers\Api\V1\Mentee\MainController as V1MenteeController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\V1\Programs\ExternalController as V1ProgramEXTERNALController;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,7 +46,8 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-Route::middleware(['throttle:120,1'])->group(function () {
+
+Route::middleware(['throttle:2500,1'])->group(function () {
 
     Route::prefix('timesheet')->group(function () {
         Route::GET('{timesheet}/export', [V1TimesheetController::class, 'export']);
@@ -52,6 +58,9 @@ Route::middleware(['throttle:120,1'])->group(function () {
 
     /* Authentication */
     Route::prefix('auth')->group(function () {
+        # login timesheet by uuid (Currently use for mentor)
+        Route::GET('u/{uuid}', [V1LoginController::class, 'authenticateByUuidNonAdmin']);
+        Route::GET('token/{email}', [V1LoginController::class, 'authenticateAdminByEmail']);
 
         Route::POST('email/checking', [V1CheckEmailController::class, 'execute']);
         Route::POST('token', [V1LoginController::class, 'authenticateAdmin']);
@@ -62,7 +71,7 @@ Route::middleware(['throttle:120,1'])->group(function () {
         Route::middleware(['auth:sanctum'])->group(function () {
             /* Logout */
             Route::GET('terminate', [V1LogoutController::class, 'execute']);
-            
+
             /* for tutor mentor only that able to change password */
             Route::PATCH('change-password', [V1ChangePasswordController::class, 'patch']);
         });
@@ -74,7 +83,12 @@ Route::middleware(['throttle:120,1'])->group(function () {
             /* List Mentor & Tutors */
             Route::GET('mentor-tutors', [V1MentorTutorController::class, 'index']);
             Route::PUT('mentor-tutors/{mentortutor_uuid}', [V1MentorTutorController::class, 'update']);
-            
+
+            /* List Fee of Mentor & Tutors */
+            Route::PATCH('mentor-tutors/{tempUser:uuid}/subjects/{roles}', [V1MentorTutorFeeController::class, 'patch'])->scopeBindings()->missing(function (Request $request) {
+                return response()->json(['error' => '404'], JsonResponse::HTTP_NOT_FOUND);
+            });
+
             /**
              * The Components.
              */
@@ -84,7 +98,7 @@ Route::middleware(['throttle:120,1'])->group(function () {
                 Route::GET('list', [V1UserListController::class, 'component']);
             });
             /* List subject by Mentor / Tutor */
-            Route::GET('mentor-tutors/{mentortutor_uuid}/subjects', [V1MentorTutorComponentController::class, 'comp_subjects']);
+            Route::GET('mentor-tutors/{tempUser:uuid}/subjects/{curriculum?}', [V1MentorTutorComponentController::class, 'comp_subjects']);
             /* List students mentored / tutored by Mentor / Tutor */
             Route::GET('mentor-tutors/{mentortutor_uuid}/students', [V1MentorTutorComponentController::class, 'comp_students']);
         });
@@ -120,7 +134,7 @@ Route::middleware(['throttle:120,1'])->group(function () {
     });
 
     /* Mentee */
-    Route::middleware(['auth:sanctum', 'abilities:request-menu', 'throttle:30,1'])->group(function  () {
+    Route::middleware(['auth:sanctum', 'abilities:request-menu', 'throttle:2500,1'])->group(function () {
 
         /**
          * The Components
@@ -134,7 +148,9 @@ Route::middleware(['throttle:120,1'])->group(function () {
             /* List Timesheet */
             Route::GET('list', [V1TimesheetController::class, 'index']);
             /* Store Timesheet */
-            Route::POST('create', [V1TimesheetController::class, 'store']);
+            Route::POST('create', [V1TimesheetController::class, 'store'])->name('timesheet.tutor.store');
+            /* Store Timesheet from subject specialist */
+            Route::POST('create/skip-request', [V1TimesheetAlternativeController::class, 'store'])->name('timesheet.mentor.store');
             /* Detail Timesheet */
             Route::GET('{timesheet}/detail', [V1TimesheetController::class, 'show']);
             /* Update Timesheet */
@@ -153,7 +169,7 @@ Route::middleware(['throttle:120,1'])->group(function () {
                 /* timesheet */
                 Route::GET('list', [V1TimesheetComponentController::class, 'list']);
                 Route::GET('summary/{month}', [V1TimesheetComponentController::class, 'summaryMonthlyTimesheet']);
-                
+
                 /* activity */
                 Route::GET('activity/{month}', [V1ActivitiesComponentController::class, 'monthlyActivities']);
                 Route::GET('activity/summary/{month}', [V1ActivitiesComponentController::class, 'summaryMonthlyActivities']);
@@ -186,7 +202,7 @@ Route::middleware(['throttle:120,1'])->group(function () {
             /* Add bonus into the timesheet */
             Route::POST('bonus/create', [V1BonusController::class, 'store']);
 
-            Route::prefix('cut-off')->group(function() {
+            Route::prefix('cut-off')->group(function () {
                 /* Create cut-off */
                 Route::POST('create', [V1CutoffController::class, 'store']);
                 /* Add to an existing cut-off */
@@ -197,7 +213,8 @@ Route::middleware(['throttle:120,1'])->group(function () {
                 Route::GET('export/{timesheet}/{cutoff_start}/{cutoff_end}', [V1CutoffController::class, 'export'])->withoutMiddleware(['auth:sanctum', 'abilities:payment-menu']);
                 /* Export multiple sheets at the same time */
                 Route::GET('export/{cutoff_start}/{cutoff_end}', [V1CutoffController::class, 'export_multiple'])->withoutMiddleware(['auth:sanctum', 'abilities:payment-menu']);
-
+                /* Export exclusive excel to summarize overall activities and fee */
+                Route::GET('summarize/{cutoff_start}/{cutoff_end}', [V1CutoffController::class, 'export_summary'])->withoutMiddleware(['auth:sanctum', 'abilities:payment-menu']);
             });
         });
     });
@@ -234,7 +251,8 @@ Route::middleware(['throttle:120,1'])->group(function () {
          * The Components
          */
         Route::prefix('component')->group(function () {
-            Route::GET('fee/{tutor_id}/{subject_name}/{curriculum_id}', [V1FeeController::class, 'component']);
+            Route::GET('fee/tutor/{tutor_id}/{subject_name}/{curriculum_id}/{grade}', [V1FeeController::class, 'component_tutor']);
+            Route::GET('fee/ext-mentor/{extmentor_id}/{stream}/{engagement_type_id}/{package_id}', [V1FeeController::class, 'component_extmentor']);
         });
     });
 
@@ -254,4 +272,27 @@ Route::middleware(['throttle:120,1'])->group(function () {
     /* log everytime user visit any pages */
     Route::middleware('auth:sanctum')->get('visit/{page_name}/{detail?}', [LogController::class, 'index']);
 
+
+    /**
+     * used out of auth sanctum
+     * since this is going to be a private API
+     */
+    Route::get('program/{clientprog_id}/detail', [V1ProgramEXTERNALController::class, 'index']);
+
+
+    // Track User Menu Access 
+    Route::post('tracking/access', function () {
+        Log::notice(
+            'Route accessed',
+            [
+                'method' => request()->method(),
+                'ip' => request()->ip(),
+                'uri' => request()->input('path', null),
+                'user_id' =>  request()->input('user_id', null),
+                'accessed_name' => request()->input('name', null),
+            ]
+        );
+
+        return 'Successfully logged';
+    });
 });

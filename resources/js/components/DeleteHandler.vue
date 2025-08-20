@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-const prop = defineProps(['data', 'title'])
+const prop = defineProps(['data', 'title', 'loading'])
 const emit = defineEmits(['close', 'delete'])
 
 const closeDialogContent = () => {
@@ -42,6 +42,8 @@ const deleteData = () => {
       </VBtn>
       <VBtn
         color="success"
+        :disabled="prop.loading"
+        :loading="prop.loading"
         @click="deleteData"
       >
         <VIcon

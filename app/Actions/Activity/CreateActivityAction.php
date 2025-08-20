@@ -37,6 +37,21 @@ class CreateActivityAction
         $head = count($timesheet->ref_program);
         $isGroup = $head > 1 ? true : false;
         $fee_perHours = 0; # default
+
+        /**
+         * in order to protect from paying editor for activity that not suit with agreement in CRM
+         * need to check either the subject is active or not
+         * if the subject is not active, then prevent editor from creating activity 
+         */
+        //! but for now this function will be commented out
+        // if ($timesheet->subject->is_active == 0) {
+        //     $errors = 'The agreement associated with your account has been deprecated and is no longer valid, so new activities cannot be created under it.';
+        //     throw new HttpResponseException(
+        //         response()->json(['errors' => $errors], JsonResponse::HTTP_UNPROCESSABLE_ENTITY)
+        //     );
+        // }
+        //! commented function end here
+
         $tax = $timesheet->subject->tax;
 
         if ( $type == "tutoring" )
@@ -50,12 +65,14 @@ class CreateActivityAction
 
         $endDate = array_key_exists('end_date', $validated) ? $validated['end_date'] : NULL;
         $additionalFee = $bonusFee = $status = 0;
+        $program_name = $timesheet->reference_program[0]->program_name;
 
         /* when the request comes from fee controller */
         if ( array_key_exists('additional_fee', $validated) ) 
         {
             $fee_perHours = $tax = 0;
             $additionalFee = $validated['additional_fee'];
+            $program_name = $validated['activity'];
             $status = 1;
         } 
 
@@ -64,13 +81,12 @@ class CreateActivityAction
         {
             $fee_perHours = $tax = 0;
             $bonusFee = $validated['bonus_fee'];
+            $program_name = $validated['activity'];
             $status = 1;
         } 
 
         DB::beginTransaction();
         try {
-
-            $program_name = $timesheet->reference_program[0]->program_name;
 
             $activityDetails = [
                 'timesheet_id' => $timesheetId,

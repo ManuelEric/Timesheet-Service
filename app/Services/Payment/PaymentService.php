@@ -3,14 +3,19 @@
 namespace App\Services\Payment;
 
 use App\Exports\PayrollExport;
+use App\Exports\SummaryExport;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Services\Activity\ActivityDataService;
 use App\Services\Timesheet\TimesheetDataService;
 use App\Actions\Timesheet\IdentifierCheckingAction as IdentifyTimesheetIdAction;
 use App\Exports\PayrollExportMultipleSheets;
 use App\Models\Cutoff;
+use Exception;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class PaymentService
 {
@@ -21,9 +26,9 @@ class PaymentService
 
     public function __construct(
         ActivityDataService $activityDataService,
-        TimesheetDataService $timesheetDataService, 
-        IdentifyTimesheetIdAction $identifyTimesheetIdAction)
-    {
+        TimesheetDataService $timesheetDataService,
+        IdentifyTimesheetIdAction $identifyTimesheetIdAction
+    ) {
         $this->activityDataService = $activityDataService;
         $this->timesheetDataService = $timesheetDataService;
         $this->identifyTimesheetIdAction = $identifyTimesheetIdAction;
@@ -37,11 +42,10 @@ class PaymentService
         $validatedTimesheetId = $validated['timesheet_id'] ?? null;
         $validatedCutoffStart = $validated['cutoff_start'];
         $validatedCutoffEnd = $validated['cutoff_end'];
-        
-        if ( $validatedTimesheetId ) {
+
+        if ($validatedTimesheetId) {
             $timesheet = $this->identifyTimesheetIdAction->execute($validatedTimesheetId);
-            if ( !$timesheet )
-            {
+            if (!$timesheet) {
                 throw new HttpResponseException(
                     response()->json([
                         'errors' => 'No downloadable activities were found.'
@@ -57,9 +61,8 @@ class PaymentService
             $cutoff = Cutoff::inBetween($validatedCutoffStart, $validatedCutoffEnd)->first();
             $cutoffId = $cutoff->id;
             $activities = $activities->where('cutoff_ref_id', $cutoffId);
-            
-            return Excel::download(new PayrollExport($detailTimesheet, $activities), $this->filename);
 
+            return Excel::download(new PayrollExport($detailTimesheet, $activities, $cutoff), $this->filename);
         }
 
         throw new HttpResponseException(
@@ -75,8 +78,7 @@ class PaymentService
         $validatedCutoffEnd = $validated['cutoff_end'];
 
         $timesheets = $this->timesheetDataService->listTimesheetByCutoffDate($validatedCutoffStart, $validatedCutoffEnd);
-        if ( count($timesheets) == 0 )
-        {
+        if (count($timesheets) == 0) {
             throw new HttpResponseException(
                 response()->json([
                     'errors' => 'No downloadable activities were found.'
@@ -84,27 +86,45 @@ class PaymentService
             );
         }
 
-        foreach ( $timesheets as $timesheet )
-        {
+        //! perlu di sorting by tutor name
+        foreach ($timesheets as $timesheet) {
             if (!isset($timesheet->reference_program))
                 continue;
 
             $timesheet = $this->identifyTimesheetIdAction->execute($timesheet->id);
             $detailTimesheet = $this->timesheetDataService->detailTimesheet($timesheet);
-            // echo json_encode($detailTimesheet);
-            // echo '<br><br>';
-
             $activities = $this->activityDataService->listActivitiesByTimesheet($timesheet);
-            // echo json_encode($activities);
-            // echo '<br>';
-            // echo 'cutoff ref id terakhir ' . $activities[count($activities)-1]['cutoff_ref_id']. ' dari total activities '. count($activities);
-            // echo '<br><br><br><br><br><br>';continue;
 
+            $cutoff = Cutoff::inBetween($validatedCutoffStart, $validatedCutoffEnd)->first();
+            $cutoffId = $cutoff->id;
+            $activities = $activities->where('cutoff_ref_id', $cutoffId);
+            
             // regist into the exports
-            $exports[] = new PayrollExport($detailTimesheet, $activities);
+            $exports[] = new PayrollExport($detailTimesheet, $activities, $cutoff);
         }
-        // exit;
+
 
         return Excel::download(new PayrollExportMultipleSheets($exports), $this->filename);
+    }
+
+    public function exportPayrollSummary(array $validated)
+    {
+        $validatedCutoffStart = $validated['cutoff_start'];
+        $validatedCutoffEnd = $validated['cutoff_end'];
+        $cutoff = Cutoff::inBetween($validatedCutoffStart, $validatedCutoffEnd)->first();
+
+        $activities = $this->activityDataService->summarizeActivity($cutoff);
+
+        // Fetch editor activities from Essay Editing endpoint via POST method
+        try {
+            $activitiesEssayEditing = collect(Http::post(env('ESSAY_EDITING_API_URL') . 'timesheet/essay-tracking/cut-off', [
+                'cutoff_start' => $validatedCutoffStart,
+                'cutoff_end' => $validatedCutoffEnd,
+            ])->json());
+        } catch (Exception $e) {
+            Log::error('Error Fetch: ', $e);
+        }
+
+        return Excel::download(new SummaryExport($cutoff, $activities, $activitiesEssayEditing), 'Payroll_Summary_' . Str::of($cutoff->month)->replace(' ', '_') . '.xlsx');
     }
 }

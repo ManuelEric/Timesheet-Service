@@ -20,7 +20,7 @@ class CutOffObserver implements ShouldHandleEventsAfterCommit
      */
     public function created(Cutoff $cutoff): void
     {
-        Log::info('Cut-off has been created by ' . $this->user_loggedIn);
+        Log::notice('Cut-off has been created by ' . $this->user_loggedIn);
     }
 
     /**

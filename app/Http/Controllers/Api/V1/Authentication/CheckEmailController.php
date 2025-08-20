@@ -7,6 +7,7 @@ use App\Services\User\CreateTempUserService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Authentication\CheckEmailRequest;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class CheckEmailController extends Controller
 {
@@ -14,8 +15,7 @@ class CheckEmailController extends Controller
         CheckEmailRequest $request,
         CheckEmailMentorTutorAction $checkEmailMentorTutorAction,
         CreateTempUserService $createTempUserService
-        ): JsonResponse
-    {
+    ): JsonResponse {
         $validated = $request->safe()->only(['email']);
         $validatedEmail = $validated['email'];
 
@@ -23,6 +23,7 @@ class CheckEmailController extends Controller
 
         $createTempUserService->execute($userRawInformation);
 
+        Log::notice('Successfully checked the email');
         return response()->json($emailCheckingResult);
     }
 }

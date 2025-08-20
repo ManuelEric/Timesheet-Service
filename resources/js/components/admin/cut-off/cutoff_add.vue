@@ -3,25 +3,25 @@ import { showNotif } from '@/helper/notification'
 import { rules } from '@/helper/rules'
 import ApiService from '@/services/ApiService'
 import moment from 'moment'
+import { ref } from 'vue'
 
 const emit = defineEmits(['close', 'reload'])
 
+const loading = ref(false)
 const formData = ref()
+const start_date = ref(null)
+const end_date = ref(null)
 const form = ref({
   start_date: null,
   end_date: null,
+  start_time: null,
+  end_time: null,
 })
-const cut_off_date = ref(null)
-
-const handleDate = () => {
-  form.value.start_date = moment(cut_off_date.value[0]).format('YYYY-MM-DD')
-  form.value.end_date = moment(cut_off_date.value[cut_off_date.value.length - 1]).format('YYYY-MM-DD')
-  console.log(form.value)
-}
 
 const submit = async () => {
   const { valid } = await formData.value.validate()
   if (valid) {
+    loading.value = true
     try {
       const res = await ApiService.post('api/v1/payment/cut-off/create', form.value)
       if (res) {
@@ -35,6 +35,7 @@ const submit = async () => {
 
       showNotif('error', err, 'bottom-end')
     } finally {
+      loading.value = false
       emit('close')
       emit('reload')
     }
@@ -50,19 +51,67 @@ const submit = async () => {
       >
         <VRow>
           <VCol cols="12">
-            <VDateInput
-              v-model="cut_off_date"
-              variant="solo"
-              label="Start - End Date"
-              :rules="rules.required"
-              multiple="range"
-              @update:modelValue="handleDate"
-            />
+            <div class="d-flex gap-2">
+              <VDateInput
+                prepend-icon=""
+                v-model="start_date"
+                input-format="yyyy-mm-dd"
+                label="Start Date"
+                variant="outlined"
+                density="compact"
+                :rules="rules.required"
+                @update:modelValue="
+                  form.start_date = moment(start_date).format('YYYY-MM-DD') + ' ' + form.start_time + ':00'
+                "
+              />
+              <div class="">
+                <VTextField
+                  v-model="form.start_time"
+                  type="time"
+                  density="compact"
+                  label="Start Time"
+                  placeholder="End Time"
+                  :rules="rules.required"
+                  :loading="loading"
+                  :disabled="!start_date || loading"
+                  @update:modelValue="
+                    form.start_date = moment(start_date).format('YYYY-MM-DD') + ' ' + form.start_time + ':00'
+                  "
+                />
+              </div>
+            </div>
+            <div class="d-flex gap-2">
+              <VDateInput
+                prepend-icon=""
+                v-model="end_date"
+                label="End Date"
+                variant="outlined"
+                density="compact"
+                :rules="rules.required"
+                @update:modelValue="form.end_date = moment(end_date).format('YYYY-MM-DD') + ' ' + form.end_time + ':00'"
+              />
+              <div class="">
+                <VTextField
+                  v-model="form.end_time"
+                  type="time"
+                  density="compact"
+                  label="Start Time"
+                  placeholder="End Time"
+                  :rules="rules.required"
+                  :loading="loading"
+                  :disabled="!end_date || loading"
+                  @update:modelValue="
+                    form.end_date = moment(end_date).format('YYYY-MM-DD') + ' ' + form.end_time + ':00'
+                  "
+                />
+              </div>
+            </div>
           </VCol>
         </VRow>
         <VDivider class="my-3" />
-        <VCardActions>
+        <VCardActions class="px-0">
           <VBtn
+            variant="tonal"
             color="error"
             @click="emit('close')"
           >
@@ -74,6 +123,9 @@ const submit = async () => {
           </VBtn>
           <VSpacer />
           <VBtn
+            variant="tonal"
+            :loading="loading"
+            :disabled="loading"
             color="success"
             type="submit"
           >

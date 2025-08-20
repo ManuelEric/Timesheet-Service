@@ -77,6 +77,7 @@ class CreateTimesheetService
                 
         try {
 
+            //! butuh check engagement type id nya
             foreach ($ref_Programs as $program)
             {
                 /* validate if program already has 2 timesheet */
@@ -108,11 +109,14 @@ class CreateTimesheetService
             DB::rollBack();
             $errorMessage = "There was an error while updating the ref programs.";
             $this->responseService->storeErrorLog($errorMessage, $e->getMessage(), ['file' => $e->getFile(), 'error_line' => $e->getLine()]);
-            return response()->json([
-                'errors' => $errorMessage
-            ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
-
+            throw new HttpResponseException(
+                response()->json([
+                    'errors' => $errorMessage
+                ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY)
+            );
         }
+
+        return $createdTimesheet;
     }
 
     # replaceTimesheet function is 100% same with createTimesheet function

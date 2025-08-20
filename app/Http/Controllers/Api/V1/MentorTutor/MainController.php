@@ -14,6 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class MainController extends Controller
 {
@@ -35,7 +36,23 @@ class MainController extends Controller
         /* manage the variables of additional search */
         $isPaginate = $additionalSearch['paginate'] ?? false;
 
-        $tutormentors = TempUser::with('roles')->onSearch($search)->orderBy('full_name', 'ASC')->get();
+        $tutormentors = TempUser::with([
+                'roles' => function ($query) use ($search) {
+                    // show temp_user_roles only if active and now() within start_date and end_date
+                    $query->where('temp_user_roles.is_active', 1);
+                },
+                'roles.curriculum' => function ($query) {
+                    $query->select('id', 'name', 'alias');
+                }
+            ])->
+
+            onSearch($search)->
+            // orderBy('full_name', 'ASC')->get();
+            orderByRaw("
+                is_active DESC,
+                full_name ASC
+            ")->
+            get();
 
         /* in order to grouped the roles by role_name, we need to mapping the data */
         $mappedTutormentors = $tutormentors->map(function ($item) {
@@ -48,7 +65,8 @@ class MainController extends Controller
                 'inhouse' => $item->inhouse,
                 'last_activity' => $item->last_activity,
                 'has_npwp' => $item->has_npwp,
-                'roles' => new Collection()
+                'roles' => new Collection(),
+                'is_active' => $item->is_active,
             ];
 
             # separate mentor & tutor
@@ -66,7 +84,24 @@ class MainController extends Controller
             {
                 $profile['roles']->push([
                     'name' => 'Mentor',
-                    'subjects' => array_values($mentorDetail->all())
+                    'subjects' => array_values($mentorDetail->map(fn($subject) => [
+                        'id' => $subject->id,
+                        'temp_user_id' => $subject->temp_user_id,
+                        'role' => $subject->role,
+                        'tutor_subject' => $subject->tutor_subject,
+                        'year' => $subject->year,
+                        'head' => $subject->head,
+                        'additional_fee' => $subject->additional_fee,
+                        'grade' => $subject->grade,
+                        'fee_individual' => $subject->fee_individual,
+                        'fee_group' => $subject->fee_group,
+                        'tax' => $subject->tax,
+                        'created_at' => $subject->created_at,
+                        'updated_at' => $subject->updated_at,
+                        'curriculum_id' => $subject->curriculum_id,
+                        'curriculum_name' => $subject->curriculum?->name ?? null,
+                        'curriculum_alias' => $subject->curriculum?->alias ?? null,
+                    ])->all())
                 ]);
             }
 
@@ -74,7 +109,27 @@ class MainController extends Controller
             {
                 $profile['roles']->push([
                     'name' => 'Tutor', 
-                    'subjects' => array_values($tutorDetail->all())
+                    'subjects' => array_values($tutorDetail->map(fn($subject) => [
+                        'id' => $subject->id,
+                        'temp_user_id' => $subject->temp_user_id,
+                        'role' => $subject->role,
+                        'tutor_subject' => $subject->tutor_subject,
+                        'start_date' => $subject->start_date,
+                        'end_date' => $subject->end_date,
+                        'year' => $subject->year,
+                        'head' => $subject->head,
+                        'additional_fee' => $subject->additional_fee,
+                        'grade' => $subject->grade,
+                        'agreement' => $subject->agreement ? Storage::disk('s3')->temporaryUrl('project/crm/user/'.$item->uuid.'/'.$subject->agreement, now()->addMinutes(5)) : null,
+                        'fee_individual' => $subject->fee_individual,
+                        'fee_group' => $subject->fee_group,
+                        'tax' => $subject->tax,
+                        'created_at' => $subject->created_at,
+                        'updated_at' => $subject->updated_at,
+                        'curriculum_id' => $subject->curriculum_id,
+                        'curriculum_name' => $subject->curriculum?->name ?? null,
+                        'curriculum_alias' => $subject->curriculum?->alias ?? null,
+                    ])->all())
                 ]);
             }
 
@@ -82,7 +137,30 @@ class MainController extends Controller
             {
                 $profile['roles']->push([
                     'name' => 'External Mentor',
-                    'subjects' => array_values($externalMentorDetail->all())
+                    'subjects' => array_values($externalMentorDetail->map(fn($subject) => [
+                        'id' => $subject->id,
+                        'temp_user_id' => $subject->temp_user_id,
+                        'role' => $subject->role,
+                        'stream' => $subject->ext_mentor_stream,
+                        'package' => $subject->package_id,
+                        'package_name' => $subject->package?->type_of ?? null,
+                        'engagement_type' => $subject->engagement_type_id,
+                        'engagement_type_name' => $subject->engagement_type?->name ?? null,
+                        'start_date' => $subject->start_date,
+                        'end_date' => $subject->end_date,
+                        'year' => $subject->year,
+                        'head' => $subject->head,
+                        'additional_fee' => $subject->additional_fee,
+                        'grade' => $subject->grade,
+                        'agreement' => $subject->agreement ? Storage::disk('s3')->temporaryUrl('project/crm/user/'.$item->uuid.'/'.$subject->agreement, now()->addMinutes(5)) : null,
+                        'fee_individual' => $subject->fee_individual,
+                        'tax' => $subject->tax,
+                        'created_at' => $subject->created_at,
+                        'updated_at' => $subject->updated_at,
+                        'curriculum_id' => $subject->curriculum_id,
+                        'curriculum_name' => $subject->curriculum?->name ?? null,
+                        'curriculum_alias' => $subject->curriculum?->alias ?? null,
+                    ])->all())
                 ]);
             }
 

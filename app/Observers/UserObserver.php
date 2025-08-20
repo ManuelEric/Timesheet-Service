@@ -13,7 +13,7 @@ class UserObserver implements ShouldHandleEventsAfterCommit
      */
     public function authenticated(User $user): void
     {
-        Log::info($user->full_name . ' has been login.');
+        Log::notice($user->full_name . ' has been login.');
     }
 
     /**
@@ -21,8 +21,8 @@ class UserObserver implements ShouldHandleEventsAfterCommit
      */
     public function logged_out(User $user): void
     {
-        Log::info($user->full_name . ' has been logged out.');
-        
+        Log::notice($user->full_name . ' has been logged out.');
+
         /* save the last activity */
         $user->last_activity = now();
         $user->save();
@@ -33,7 +33,7 @@ class UserObserver implements ShouldHandleEventsAfterCommit
      */
     public function created(User $user): void
     {
-        Log::info($user->full_name . ' has been created.');
+        Log::notice($user->full_name . ' has been created.');
     }
 
     /**

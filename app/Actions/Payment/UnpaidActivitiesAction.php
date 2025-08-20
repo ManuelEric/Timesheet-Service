@@ -23,7 +23,7 @@ class UnpaidActivitiesAction
             $mentorTutorName = $data->timesheet->subject->temp_user->full_name;
             $startDate = Carbon::parse($data->start_date);
             $endDate = $data->end_date ? Carbon::parse($data->end_date) : null;
-            $timeSpent = $data->end_date ? in_array(strtolower($activity), ['additional fee', 'bonus fee']) ? 60 : $startDate->diffInMinutes($endDate) : 0;
+            $timeSpent = $data->end_date ? in_array(strtolower($activity), ['additional fee', 'bonus fee']) ? 0 : $startDate->diffInMinutes($endDate) : 0;
             $fee = $this->selectFee($activity, $data);
             $cutoffStatus = $data->cutoff_status;
             $students = $this->getStudents($data);
@@ -52,8 +52,8 @@ class UnpaidActivitiesAction
 
     private function getStudents(Activity $activity): string
     {
-        return ( $activity->timesheet->ref_program()->exists() ) 
-            ? implode(", ", $activity->timesheet->ref_program->pluck('student_name')->toArray()) 
+        return ( $activity->timesheet->ref_program()->exists() || $activity->timesheet->second_ref_program()->exists() ) 
+            ? implode(", ", $activity->timesheet->ref_program->pluck('student_name')->toArray() + $activity->timesheet->second_ref_program->pluck('student_name')->toArray()) 
             : implode(", ", $activity->timesheet->transferred->pluck('student_name')->toArray());
     }
 }

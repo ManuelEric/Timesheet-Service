@@ -3,17 +3,25 @@
 namespace App\Observers;
 
 use App\Models\Ref_Program;
+use App\Services\Mentoring\MentoringServices;
 use Illuminate\Contracts\Events\ShouldHandleEventsAfterCommit;
 use Illuminate\Support\Facades\Log;
 
 class Ref_ProgramObserver implements ShouldHandleEventsAfterCommit
 {
+
+    protected $mentoring_services;
+
+    public function __construct(MentoringServices $mentoring_services)
+    {
+        $this->mentoring_services = $mentoring_services;
+    }
     /**
      * Handle the Ref_Program "created" event.
      */
     public function created(Ref_Program $ref_Program): void
     {
-        Log::info('Invoice ID : ' . $ref_Program->invoice_id . ' has been stored.');
+        Log::notice('Invoice ID : ' . $ref_Program->invoice_id . ' has been stored.');
     }
 
     /**
@@ -21,10 +29,10 @@ class Ref_ProgramObserver implements ShouldHandleEventsAfterCommit
      */
     public function updated(Ref_Program $ref_Program): void
     {
-        Log::info('Invoice ID : ' . $ref_Program->invoice_id . ' has been updated.');
+        Log::notice('Invoice ID : ' . $ref_Program->invoice_id . ' has been updated.');
 
-        if ( $ref_Program->wasChanged('timesheet_id') )
-            Log::info('Timesheet for Invoice ID : ' . $ref_Program->invoice_id . ' has been created.');
+        if ($ref_Program->wasChanged('timesheet_id'))
+            Log::notice('Timesheet for Invoice ID : ' . $ref_Program->invoice_id . ' has been created.');
     }
 
     /**
@@ -32,7 +40,7 @@ class Ref_ProgramObserver implements ShouldHandleEventsAfterCommit
      */
     public function deleted(Ref_Program $ref_Program): void
     {
-        //
+        Log::notice('Invoice ID : ' . $ref_Program->invoice_id . ' has been removed.');
     }
 
     /**

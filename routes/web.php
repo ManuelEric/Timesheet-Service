@@ -15,4 +15,4 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('{any?}', function () {
     return view('application');
-})->where('any', '.*');
+})->where('any', '^(?!api|log-viewer).*$');

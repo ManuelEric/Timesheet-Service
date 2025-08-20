@@ -28,7 +28,7 @@ class CutoffAction
 
             /* select all activities between start_date and end_date */
             /* all of these activities going to be updated into paid activities */
-            $rawQuery = Activity::query()->unpaid()->where('start_date', '>=', "{$startDate} 00:00:00")->where('end_date', '<=', "{$endDate} 23:59:59");
+            $rawQuery = Activity::query()->unpaid()->where('start_date', '>=', $startDate)->where('end_date', '<', $endDate);
             $activities = $rawQuery->select('fee_hours', 'additional_fee', 'bonus_fee')->get();
 
             if ( count($activities) == 0 )

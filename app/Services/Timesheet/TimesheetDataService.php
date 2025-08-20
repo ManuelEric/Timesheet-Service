@@ -153,6 +153,15 @@ class TimesheetDataService
     public function detailTimesheet(Timesheet $timesheet)
     {
         $refProgram = $timesheet->reference_program;
+        if ( count($refProgram) == 0 )
+        {
+            throw new HttpResponseException(
+                response()->json([
+                    'message' => 'Timesheet is invalid. No reference program found.'
+                ], JsonResponse::HTTP_NOT_FOUND)
+            );
+        }
+
         $transferredLog = $timesheet->transferred;
         $relatedProgram = count($refProgram) > 0 ? $refProgram : $transferredLog;
         # because timesheets consists of multiple ref programs
@@ -169,6 +178,9 @@ class TimesheetDataService
         $detailPackage = $timesheet->detail_package;
         $duration = $timesheet->duration;
         $timeSpent = $timesheet->activities()->sum('time_spent');
+
+
+        // $notes = $timesheet->ref_program->last()->notes ?? $timesheet->second_ref_program->last()->notes ?? null;
         $notes = $timesheet->notes;
         $void = $timesheet->void;
 
@@ -190,6 +202,9 @@ class TimesheetDataService
             ? $refProgram->first()->engagement_type->name
             : null;
         $tax = $timesheet->subject->tax;
+        $isGroup = $timesheet->ref_program()->count() > 1 ? true : false;
+        $feeHours = $isGroup && $timesheet->ref_program->first()->require == 'Tutor' ? $timesheet->subject->fee_group : $timesheet->subject->fee_individual;
+
         $packageDetails = [
             'program_name' => $programName,
             'void' => $timesheet->void,
@@ -202,6 +217,7 @@ class TimesheetDataService
             'tutormentor_name' => $tutorMentorName,
             'tutormentor_has_npwp' => $tutorMentorHasNPWP,
             'tutormentor_tax' => $tax,
+            'tutormentor_fee_hours' => $feeHours, // bisa individual atau group
             'inhouse_name' => $inhouseName,
             'last_updated' => $last_updated,
             'duration_in_minutes' => $duration,
@@ -212,8 +228,12 @@ class TimesheetDataService
 
         /* fetch the data to support editable columns */
         $subjectId = $timesheet->subject_id;
+        $timesheetTax = $timesheet->activities()->first()?->tax ?? null;
+        $timesheetFeeHours = $timesheet->activities()->first()?->fee_hours ?? null;
+
         
         $editableColumns = [
+            'ref_id' => $timesheet->ref_program()->pluck('id')->toArray(),
             'pic_id' => $adminId,
             'tutormentor_id' => $tutorMentorUuid,
             'tutormentor_email' => $tutorMentorEmail,
@@ -222,7 +242,9 @@ class TimesheetDataService
             'notes' => $notes,
             'subject_id' => $subjectId,
             'inhouse_id' => $inhouseUuid,
-            'curriculum_name' => $timesheet->subject->curriculum ? $timesheet->subject->curriculum->name : null
+            'curriculum_name' => $timesheet->subject->curriculum ? $timesheet->subject->curriculum->name : null,
+            'tax' => $timesheetTax, // timesheet tax
+            'individual_fee' => $timesheetFeeHours, // timesheet fee hours
         ];
 
         return compact('clientProfile', 'packageDetails', 'editableColumns');
@@ -236,6 +258,8 @@ class TimesheetDataService
                 $category = $ref->category;
                 $studentUUID = $ref->student_uuid;
                 $studentName = $ref->student_name;
+                $salesPicName = $ref->sales_pic_name;
+                $salesPicPhone = $ref->sales_pic_phone;
                 $studentSchool = $ref->student_school;
                 $client = $category == "b2c" ? $studentName : $studentSchool;
 
@@ -249,6 +273,8 @@ class TimesheetDataService
                         'client_mail' => $crm_clientInfo['mail'],
                         'client_school' => $studentSchool,
                         'client_grade' => $crm_clientInfo['grade'],
+                        'sales_pic_name' => $salesPicName,
+                        'sales_pic_phone' => $salesPicPhone,
                     ]);
                     continue;
                 }
@@ -266,6 +292,8 @@ class TimesheetDataService
             $studentUUID = $relatedProgram->first()->student_uuid;
             $studentName = $relatedProgram->first()->student_name;
             $studentSchool = $relatedProgram->first()->student_school;
+            $salesPicName = $relatedProgram->first()->sales_pic_name;
+            $salesPicPhone = $relatedProgram->first()->sales_pic_phone;
 
             if ($category == "b2c") {
                 /* fetch the client profile information from CRM */
@@ -276,7 +304,9 @@ class TimesheetDataService
                     'client_name' => $studentName,
                     'client_mail' => $crm_clientInfo['mail'] ?? null,
                     'client_school' => $studentSchool,
-                    'client_grade' => $crm_clientInfo['grade'],
+                    'client_grade' => $crm_clientInfo['grade'] ?? null,
+                    'sales_pic_name' => $salesPicName,
+                    'sales_pic_phone' => $salesPicPhone,
                 ]);
             }
         }
@@ -345,7 +375,24 @@ class TimesheetDataService
         ];
         
         /* we're gonna find timesheets using cutoff `from` and `to` */
-        $timesheets = Timesheet::with('activities', 'ref_program', 'second_ref_program')->filterCutoff($search)->get();
+        // $timesheets = Timesheet::with('activities', 'ref_program', 'second_ref_program')->filterCutoff($search)->get();
+        $timesheets = Timesheet::with([
+            'activities', 
+            'ref_program', 
+            'second_ref_program',
+            'subject.temp_user' => function ($query) {
+                $query->select('id', 'full_name');
+            },
+        ])->
+        filterCutoff($search)->
+        orderBy(
+            \App\Models\TempUser::from('temp_users as tu')->select('tu.full_name')->
+            leftJoin('temp_user_roles as tur', 'tur.temp_user_id', '=', 'tu.id')->
+            whereColumn('tur.id', 'timesheets.subject_id'), 'asc'
+        )->
+        get();
         return $timesheets;
+
+
     }
 }

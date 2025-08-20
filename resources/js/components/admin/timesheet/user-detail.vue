@@ -46,6 +46,7 @@ const getData = async id => {
 }
 
 const deleteTimesheet = async () => {
+  loading.value = true
   try {
     const res = await ApiService.delete('api/v1/timesheet/' + props.id + '/delete')
     if (res) {
@@ -58,6 +59,8 @@ const deleteTimesheet = async () => {
     if (error.response?.status == 400) {
       showNotif('error', error.response?.data?.errors, 'bottom-end')
     }
+  } finally {
+    loading.value = false
   }
 }
 
@@ -242,7 +245,10 @@ watch(() => {
                 <td>Grade</td>
               </tr>
               <tr v-for="client in data.clientProfile">
-                <td>{{ client.client_name }}</td>
+                <td>
+                  {{ client.client_name }}
+                  <small v-if="client.sales_pic_name"> Sales PIC: {{ client.sales_pic_name }} </small>
+                </td>
                 <td>{{ client.client_school }}</td>
                 <td>{{ client.client_grade <= 12 ? client.client_grade : 'Not High School' }}</td>
               </tr>
@@ -271,6 +277,29 @@ watch(() => {
                 <td>Email</td>
                 <td width="1%">:</td>
                 <td>{{ data.clientProfile[0].client_mail }}</td>
+              </tr>
+              <tr v-if="data.clientProfile[0].sales_pic_name">
+                <td>Sales PIC</td>
+                <td width="1%">:</td>
+                <td>
+                  {{ data.clientProfile[0].sales_pic_name }}
+                  <a
+                    :href="
+                      'https://api.whatsapp.com/send?phone=' +
+                      data.clientProfile[0].sales_pic_phone +
+                      '&text=Halo%20' +
+                      data.clientProfile[0].sales_pic_name
+                    "
+                    v-if="data.clientProfile[0].sales_pic_phone"
+                    target="_blank"
+                  >
+                    <VIcon
+                      icon="ri-whatsapp-line"
+                      color="success"
+                      class="ms-3"
+                    />
+                  </a>
+                </td>
               </tr>
             </tbody>
           </VTable>
@@ -315,12 +344,22 @@ watch(() => {
               <tr>
                 <td>{{ props.name == 'tutoring' ? 'Tutor' : 'Mentor' }} Name</td>
                 <td width="1%">:</td>
-                <td>{{ data.packageDetails?.tutormentor_name }}</td>
+                <td>
+                  {{ data.packageDetails?.tutormentor_name }} ( Rp.
+                  {{ new Intl.NumberFormat('id-ID').format(data.packageDetails?.tutormentor_fee_hours) }} )
+                </td>
               </tr>
               <tr>
                 <td>Inhouse {{ props.name == 'tutoring' ? 'Tutor' : 'Mentor' }}</td>
                 <td width="1%">:</td>
                 <td>{{ data.packageDetails?.inhouse_name }}</td>
+              </tr>
+              <tr>
+                <td>Curriculum</td>
+                <td width="1%">:</td>
+                <td>
+                  {{ data.editableColumns?.curriculum_name ?? '-' }}
+                </td>
               </tr>
               <tr>
                 <td>Notes</td>
@@ -462,6 +501,7 @@ watch(() => {
         :item="data.editableColumns"
         :package_id="data.packageDetails?.package_id"
         :id="props.id"
+        :timesheet-type="props.name"
         @close="toggleDialog('edit')"
         @reload="getData(props.id)"
       />
@@ -475,6 +515,7 @@ watch(() => {
     >
       <DeleteDialog
         title="timesheet"
+        :loading="loading"
         @delete="deleteTimesheet"
         @close="toggleDialog('delete')"
       />

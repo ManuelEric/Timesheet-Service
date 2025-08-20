@@ -10,6 +10,7 @@ use App\Models\Ref_Program;
 use App\Services\Program\RefProgramServices;
 use App\Services\Timesheet\TimesheetDataService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class MainController extends Controller
 {
@@ -58,6 +59,7 @@ class MainController extends Controller
                 'free_trial' => $item->free_trial,
                 'require' => $item->require,
                 'timesheet_id' => $item->timesheet_id,
+                'engagement_type_id' => $item->engagement_type->id,
                 'engagement_type' => $item->engagement_type->name,
                 'notes' => $item->notes,
                 'requested_by' => $item->requested_by,

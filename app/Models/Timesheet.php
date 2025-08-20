@@ -66,6 +66,21 @@ class Timesheet extends Model
             return $this->second_ref_program;
     }
 
+    protected function listOfStudentName(): Attribute
+    {
+        return new Attribute(
+            get: fn () => $this->getListOfStudentName()
+        );
+    }
+
+    private function getListOfStudentName()
+    {
+        $student_name = [];
+        foreach ($this->reference_program as $program) {
+            $student_name[] = $program->student_name;
+        }
+        return implode(', ', $student_name);
+    }
     
     /**
      * The relations.
@@ -148,6 +163,8 @@ class Timesheet extends Model
             when( $program_name, function ($_sub_) use ($program_name) {
                 $_sub_->whereHas('ref_program', function ($__sub__) use ($program_name) {
                     $__sub__->where('program_name', 'like', '%'.urldecode($program_name).'%');
+                })->orWhereHas('second_ref_program', function ($__sub__) use ($program_name) {
+                    $__sub__->where('program_name', 'like', '%'.urldecode($program_name).'%');
                 });
             })->
             when( $package_id, function ($_sub_) use ($package_id) {
@@ -157,15 +174,18 @@ class Timesheet extends Model
                 $_sub_->
                     where( function ($__sub__) use ($keyword) {
                         $__sub__->
-                            whereHas('inhouse_pic', function ($___sub___) use ($keyword) {
+                            whereHas('ref_program', function ($___sub___) use ($keyword) {
+                                $___sub___->where('student_name', 'like', '%'.$keyword.'%')->orWhere('student_school', 'like', '%'.$keyword.'%');
+                            })->
+                            orWhereHas('second_ref_program', function ($___sub___) use ($keyword) {
+                                $___sub___->where('student_name', 'like', '%'.$keyword.'%')->orWhere('student_school', 'like', '%'.$keyword.'%');
+                            })->
+                            orWhereHas('inhouse_pic', function ($___sub___) use ($keyword) {
                                 $___sub___->where('full_name', 'like', '%' . $keyword . '%');
                             })->
                             orWhereHas('handle_by', function ($___sub___) use ($keyword) {
                                 $___sub___->where('full_name', 'like', '%'. $keyword .'%');
-                            })->
-                            orWhereHas('ref_program', function ($___sub___) use ($keyword) {
-                                $___sub___->where('student_name', 'like', '%'.$keyword.'%')->orWhere('student_school', 'like', '%'.$keyword.'%');
-                        });
+                            });
                     });
             })->
             when( $mentor_id, function ($_sub_) use ($search) {
@@ -178,8 +198,10 @@ class Timesheet extends Model
 
     public function scopeHandleBy(Builder $query, string $identifier): void
     {        
+        // dd($identifier);
         $query->whereHas('handle_by', function($sub) use ($identifier) {
-            $sub->where('uuid', $identifier);
+            // $sub->where('uuid', $identifier);
+            $sub->where('temp_users.uuid', $identifier);
         });
     }
 
@@ -200,8 +222,8 @@ class Timesheet extends Model
 
             $_sub_->
                 where('inhouse_id', $tempUserUuid)->
-                orWhere(function ($__sub__) use ($tempUserUuid) {
-                    $__sub__->handleBy($tempUserUuid);
+                orWhere(function ($query) use ($tempUserUuid) {
+                    $query->handleBy($tempUserUuid);
                 });
         });
     }

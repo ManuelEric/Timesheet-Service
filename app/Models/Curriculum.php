@@ -18,7 +18,17 @@ class Curriculum extends Model
      */
     protected $fillable = [
         'name',
+        'alias',
+        'active',
     ];
+
+    /**
+     * The scopes.
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('active', 1);
+    }
 
     /**
      * The relations.
@@ -26,5 +36,10 @@ class Curriculum extends Model
     public function subject()
     {
         return $this->hasMany(TempUserRoles::class, 'curriculum_id', 'id');
+    }
+
+    public function ref_programs()
+    {
+        return $this->hasMany(Ref_Program::class, 'curriculum', 'alias');
     }
 }

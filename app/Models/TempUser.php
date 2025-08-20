@@ -38,6 +38,11 @@ class TempUser extends Authenticatable implements CanResetPassword
         'role',
         'inhouse',
         'has_npwp',
+        'account_name',
+        'account_no',
+        'bank_name',
+        'swift_code',
+        'is_active',
         'last_activity',
     ];
 
@@ -105,14 +110,15 @@ class TempUser extends Authenticatable implements CanResetPassword
      *
      * @var array<int, string>
      */
-    public function request()
-    {
-        return $this->hasMany(NewRequest::class, 'mentor_id', 'id');
-    }
 
     public function timesheets()
     {
         return $this->belongsToMany(Timesheet::class, 'timesheet_handle_by', 'temp_user_id', 'timesheet_id')->withTimestamps()->using(HandleBy::class);
+    }
+
+    public function activeTimesheets()
+    {
+        return $this->belongsToMany(Timesheet::class, 'timesheet_handle_by', 'temp_user_id', 'timesheet_id')->wherePivot('active', 1)->withTimestamps()->using(HandleBy::class);
     }
 
     public function roles()
@@ -143,12 +149,24 @@ class TempUser extends Authenticatable implements CanResetPassword
     {
         $keyword = array_key_exists('keyword', $search) ? $search['keyword'] : false;
         $role = array_key_exists('role', $search) ? strtolower($search['role']) : false;
-        $inhouse = array_key_exists('inhouse', $search) ? $search['inhouse'] === 'true' ? 1 : 0  : null;
+        $inhouse = array_key_exists('inhouse', $search) ? $search['inhouse'] == true ? 1 : 0  : null;
 
         $query->
-            when($role, function ($sub) use ($role) {
-                $sub->whereHas('roles', function ($_sub_) use ($role) {
-                    $_sub_->whereRaw("LOWER(role) = '{$role}'");
+            when($role, function ($sub) use ($role, $inhouse) {
+                $sub->whereHas('roles', function ($_sub_) use ($role, $inhouse) {
+
+                    switch ($role) {
+                        case "mentor":
+                            $_sub_->whereRaw("LOWER(role) = '{$role}'")->where('is_active', 1);
+                            break;
+
+                        case "tutor":
+                        case "external mentor":
+                            $_sub_->whereRaw("LOWER(role) = '{$role}'")->when(!$inhouse, function ($query) {
+                                $query->whereRaw('now() BETWEEN start_date AND end_date')->where('is_active', 1);
+                            });
+                            break;
+                    }
                 });
             })->
             when($keyword, function ($sub) use ($keyword) {

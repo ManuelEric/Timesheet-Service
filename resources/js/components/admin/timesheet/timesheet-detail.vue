@@ -51,6 +51,7 @@ const selectedActivity = (type, item) => {
 }
 
 const deleteActivity = async () => {
+  loading.value = true
   try {
     const res = await ApiService.delete('api/v1/timesheet/' + props.id + '/activity/' + selectedItem.value.id)
     if (res) {
@@ -62,6 +63,7 @@ const deleteActivity = async () => {
       showNotif('error', error.response?.data?.errors, 'bottom-end')
     }
   } finally {
+    loading.value = false
     getData()
     updateReload(true)
   }
@@ -75,6 +77,8 @@ const updateStatus = async item => {
       showNotif('success', res.message, 'bottom-end')
     }
   } catch (error) {
+    if (error?.response?.data?.message) showNotif('error', error.response.data.message, 'bottom-end')
+
     if (error?.response?.data?.errors) {
       const validationErrors = error.response.data.errors
       let errorMessage = 'Validation errors:'
@@ -146,11 +150,12 @@ onMounted(() => {
               No
             </th>
             <!-- <th class="text-uppercase text-center">Activity</th> -->
-            <th class="text-uppercase text-center">Meeting Discussion</th>
+            <th class="text-uppercase text-start">Meeting Discussion</th>
             <th class="text-uppercase text-center">Date</th>
             <th class="text-uppercase text-center">Start Time</th>
             <th class="text-uppercase text-center">End Time</th>
             <th class="text-uppercase text-center">Time Spent</th>
+            <th class="text-uppercase text-left">Fee Hours</th>
             <th class="text-uppercase text-center">Status</th>
             <th class="text-uppercase text-end">#</th>
           </tr>
@@ -177,7 +182,11 @@ onMounted(() => {
               {{ item.activity }}
             </td>
             <td class="text-start">
-              {{ item.description }}
+              <div
+                class="py-2"
+                style="width: 250px; text-wrap: wrap"
+                v-html="item.description"
+              ></div>
             </td>
             <td>
               {{ $moment(item.start_date).format('dddd') }},
@@ -195,6 +204,16 @@ onMounted(() => {
                 class="cursor-pointer me-3"
               />
               {{ item.estimate }} Minutes
+            </td>
+            <td class="text-left">
+              Rp.
+              {{
+                item.activity === 'Bonus Fee'
+                  ? new Intl.NumberFormat('id-ID').format(item.bonus_fee)
+                  : item.activity === 'Additional Fee'
+                  ? new Intl.NumberFormat('id-ID').format(item.additional_fee)
+                  : new Intl.NumberFormat('id-ID').format(item.fee_hours)
+              }}
             </td>
             <td>
               <VCheckbox
@@ -217,6 +236,7 @@ onMounted(() => {
                   :href="item.meeting_link"
                   target="_blank"
                   class="bg-primary"
+                  :disabled="item.cutoff_status == 'completed'"
                 >
                   <VIcon icon="ri ri-link" />
                   Join
@@ -227,6 +247,7 @@ onMounted(() => {
                 density="compact"
                 class="me-1"
                 v-tooltip:start="'Edit Activity'"
+                :disabled="item.cutoff_status == 'completed'"
                 @click="selectedActivity('edit', item)"
               >
                 <VIcon
@@ -239,6 +260,7 @@ onMounted(() => {
                 color="error"
                 density="compact"
                 v-tooltip:start="'Delete Activity'"
+                :disabled="item.cutoff_status == 'completed'"
                 @click="selectedActivity('delete', item)"
               >
                 <VIcon
@@ -279,6 +301,7 @@ onMounted(() => {
     >
       <DeleteDialog
         title="activity"
+        :loading="loading"
         @close="toggleDialog('delete')"
         @delete="deleteActivity"
       />

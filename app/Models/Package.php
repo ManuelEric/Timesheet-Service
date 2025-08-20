@@ -23,6 +23,7 @@ class Package extends Model
         'type_of',
         'package',
         'detail',
+        'active',
     ];
 
     /**
@@ -33,6 +34,11 @@ class Package extends Model
     public function timesheets()
     {
         return $this->hasMany(Timesheet::class, 'package_id', 'id');
+    }
+
+    public function ref_programs()
+    {
+        return $this->hasMany(Ref_Program::class, 'package', 'package');
     }
 
     /**

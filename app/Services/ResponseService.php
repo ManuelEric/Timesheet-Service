@@ -4,7 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Log;
 
-class ResponseService 
+class ResponseService
 {
     public function storeErrorLog(string $message, string $errors, array $value = [])
     {
@@ -12,7 +12,7 @@ class ResponseService
 
         $response = $message;
         $response .= '\n ' . $errors;
-        if ( isset($value) ) {
+        if (isset($value)) {
             $response .= ' in file ' . $value['file'];
             $response .= ' on line ' . $value['error_line'];
         }
@@ -23,6 +23,6 @@ class ResponseService
     public function storeInfoLog(string $message, array $value = [])
     {
         $user = auth('sanctum')->user() ?? 'anonymous';
-        Log::info($user . ' : ' . $message, $value);
+        Log::notice($user . ' : ' . $message, $value);
     }
 }

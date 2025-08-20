@@ -1,4 +1,6 @@
 <script setup>
+import ProgramAddSpecialist from '@/components/admin/program/program_add_specialist_timesheet.vue'
+import ProgramAddTutoring from '@/components/admin/program/program_add_tutoring.vue'
 import { showNotif } from '@/helper/notification'
 import ApiService from '@/services/ApiService'
 import debounce from 'lodash/debounce'
@@ -10,6 +12,7 @@ const props = defineProps({ name: String })
 const router = useRouter()
 
 const selected = ref([])
+const dialog = ref(false)
 const currentPage = ref(1)
 const totalPage = ref()
 const keyword = ref()
@@ -80,7 +83,8 @@ const searchData = debounce(async item => {
 }, 1000)
 
 const goToTimesheet = id => {
-  router.push('/admin/timesheet/' + props.name + '/' + id)
+  const routeData = router.resolve('/admin/timesheet/' + props.name + '/' + id)
+  window.open(routeData.href, '_blank')
 }
 // End Function
 
@@ -96,6 +100,23 @@ onMounted(() => {
 </script>
 
 <template>
+  <VDialog
+    v-model="dialog"
+    width="auto"
+    persistent
+  >
+    <ProgramAddTutoring
+      v-if="props.name == 'tutoring'"
+      @close="dialog = false"
+      @reload="getData"
+    />
+
+    <ProgramAddSpecialist
+      v-else
+      @close="dialog = false"
+      @reload="getData"
+    />
+  </VDialog>
   <VCard>
     <VCardTitle>
       <div class="d-flex justify-between align-center">
@@ -117,13 +138,13 @@ onMounted(() => {
               md="6"
             >
               <VAutocomplete
+                density="compact"
                 clearable
                 v-model="program_name"
                 label="Program Name"
                 :items="program_list"
                 item-title="program_name"
                 placeholder="Select Program Name"
-                variant="solo"
                 :loading="loading"
                 :disabled="loading"
                 @update:modelValue="getData"
@@ -134,6 +155,7 @@ onMounted(() => {
               md="6"
             >
               <VAutocomplete
+                density="compact"
                 clearable="true"
                 v-model="package_name"
                 label="Package"
@@ -145,7 +167,6 @@ onMounted(() => {
                 "
                 item-value="id"
                 placeholder="Select Package"
-                variant="solo"
                 :loading="loading"
                 :disabled="loading"
                 @update:modelValue="getData"
@@ -155,18 +176,36 @@ onMounted(() => {
         </VCol>
         <VCol
           cols="12"
-          md="3"
+          :md="props.name == 'tutoring' ? 3 : 12"
         >
-          <VTextField
-            :loading="loading"
-            :disabled="loading"
-            append-inner-icon="ri-search-line"
-            label="Search"
-            variant="solo"
-            hide-details
-            single-line
-            @input="searchData"
-          />
+          <div class="d-flex gap-2">
+            <VTextField
+              density="compact"
+              :loading="loading"
+              :disabled="loading"
+              append-inner-icon="ri-search-line"
+              label="Search"
+              hide-details
+              single-line
+              @input="searchData"
+            />
+
+            <div
+              class="text-end"
+              :class="props.name == 'tutoring' ? '' : 'w-md-75'"
+            >
+              <v-tooltip
+                activator="parent"
+                location="start"
+                >Add New Timesheet</v-tooltip
+              >
+              <v-btn
+                icon="ri-add-line"
+                @click="dialog = true"
+              >
+              </v-btn>
+            </div>
+          </div>
         </VCol>
       </VRow>
 
@@ -244,6 +283,15 @@ onMounted(() => {
                 />
                 {{ item.clients }}
               </VText>
+
+              <VBadge
+                color="success"
+                :content="'Done'"
+                inline
+                v-if="item.spent == item.duration"
+                class="ms-2"
+              >
+              </VBadge>
             </td>
             <td v-if="props.name == 'tutoring'">
               <VIcon
@@ -293,25 +341,26 @@ onMounted(() => {
                 icon="ri-timer-2-line"
                 class="cursor-pointer me-3"
               />
-              {{ item.spent / 60 }} Hours
+              {{ (item.spent / 60).toFixed(2) }} Hours
             </td>
             <td>
-              <router-link :to="'/admin/timesheet/' + props.name + '/' + item.id">
-                <VBtn :color="item.void == 'true' ? 'light' : 'secondary'">
-                  <VIcon
-                    icon="ri-timeline-view"
-                    class="cursor-pointer"
-                  />
+              <VBtn
+                :color="item.void == 'true' ? 'light' : 'secondary'"
+                @click="goToTimesheet(item.id)"
+              >
+                <VIcon
+                  icon="ri-timeline-view"
+                  class="cursor-pointer"
+                />
 
-                  <VTooltip
-                    activator="parent"
-                    location="top"
-                    transition="scroll-y-transition"
-                  >
-                    View Detail
-                  </VTooltip>
-                </VBtn>
-              </router-link>
+                <VTooltip
+                  activator="parent"
+                  location="top"
+                  transition="scroll-y-transition"
+                >
+                  View Detail
+                </VTooltip>
+              </VBtn>
             </td>
           </tr>
         </tbody>

@@ -10,10 +10,12 @@ trait SelectFeeByActivity
     {
         switch (strtolower($activityName))
         {
-            case "additional fee":
+            // activityName will be Additional Fee 
+            case "additional fee": 
                 $selectedFee = $feeCollections->additional_fee;
                 break;
 
+            // activityName will be Bonus Fee
             case "bonus fee":
                 $selectedFee = $feeCollections->bonus_fee;
                 break;

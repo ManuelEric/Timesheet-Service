@@ -5,9 +5,11 @@ import VerticalNavLink from '@layouts/components/VerticalNavLink.vue'
 import { onMounted } from 'vue'
 
 const role = ref(null)
+const roles = ref(null)
 onMounted(() => {
   const user = UserService.getUser()
   role.value = user.role
+  roles.value = user.roles
 })
 </script>
 
@@ -30,20 +32,46 @@ onMounted(() => {
 
   <VerticalNavLink
     :item="{
-      title: 'Program',
+      title: 'New Request',
       icon: 'ri-sticky-note-add-line',
       to: '/user/request',
     }"
     v-if="role == 'Mentor'"
   />
 
-  <VerticalNavLink
-    :item="{
-      title: 'Timesheet',
-      icon: 'ri-calendar-todo-line',
-      to: '/user/timesheet',
-    }"
-  />
+  <div class="">
+    <VTooltip
+      :activator="'parent'"
+      :location="'top'"
+    >
+      Tutoring Timesheet
+    </VTooltip>
+    <VerticalNavLink
+      :item="{
+        title: 'Tutoring Timesheet',
+        icon: 'ri-calendar-todo-line',
+        to: '/user/timesheet/tutoring',
+      }"
+      v-if="roles?.includes('Tutor')"
+    />
+  </div>
+
+  <div class="">
+    <VTooltip
+      :activator="'parent'"
+      :location="'top'"
+    >
+      Specialist Timesheet
+    </VTooltip>
+    <VerticalNavLink
+      :item="{
+        title: 'Subject Specialist Timesheet',
+        icon: 'ri-calendar-todo-line',
+        to: '/user/timesheet/specialist',
+      }"
+      v-if="roles?.includes('External Mentor') || role == 'Mentor'"
+    />
+  </div>
 
   <VerticalNavLink
     :item="{

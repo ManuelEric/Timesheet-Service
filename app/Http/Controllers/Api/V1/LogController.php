@@ -13,10 +13,10 @@ class LogController extends Controller
     {
         $user = auth('sanctum')->check() ? auth('sanctum')->user()->full_name : "Anonymous";
         $message = "{$user} has visited page {$visited_page}";
-        if ( $detail )
-            $message .= " use detail {$detail}"; 
+        if ($detail)
+            $message .= " use detail {$detail}";
 
-        Log::info($message);
+        Log::notice($message);
 
         return response()->json([
             'message' => 'Log has been created.'

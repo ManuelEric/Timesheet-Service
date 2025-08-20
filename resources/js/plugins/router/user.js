@@ -9,18 +9,25 @@ export default [
     children: [
       {
         path: '/user/dashboard',
+        name: 'user-dashboard',
         component: () => import('@/pages/user/dashboard/dashboard.vue'),
       },
       {
         path: '/user/request',
+        name: 'user-request',
         component: () => import('@/pages/user/request/request.vue'),
       },
       {
-        path: '/user/timesheet',
+        path: '/user/timesheet/:cat?',
+        name: 'user-timesheet',
+        props: route => ({
+          cat:route.params.cat
+        }),
         component: () => import('@/pages/user/timesheet/timesheet.vue'),
       },
       {
         path: '/user/timesheet/:id/:require',
+        name: 'user-timesheet-detail',
         props: route => ({
           id:route.params.id,
           require:route.params.require
@@ -29,6 +36,7 @@ export default [
       },
       {
         path: '/user/account-settings',
+        name: 'user-settings',
         component: () => import('@/pages/user/setting/account.vue'),
       },
     ],
@@ -43,7 +51,16 @@ export default [
         component: () => import('@/pages/auth/login.vue'),
       },
       {
+        path: '/user/login/:uuid',
+        name:'login-uuid',
+        component: () => import('@/pages/auth/login.vue'),
+        props: route => ({
+          uuid:route.params.uuid,
+        }),
+      },
+      {
         path: '/reset-password/:token?/:email?',
+        name: 'user-reset-password',
         component: () => import('@/pages/auth/login.vue'),
         props: route => ({
           token:route.query.token,
@@ -52,10 +69,12 @@ export default [
       },
       {
         path: '/user/forgot',
+        name: 'user-forgot-password',
         component: () => import('@/pages/auth/forgot.vue'),
       },
       {
         path: '/user/register',
+        name: 'user-register',
         component: () => import('@/pages/auth/register.vue'),
       },
       {

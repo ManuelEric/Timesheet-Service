@@ -18,7 +18,7 @@ const authThemeMask = computed(() => {
 })
 
 // Start Variable
-const props = defineProps({ token: String, email: String })
+const props = defineProps({ token: String, email: String, uuid: String })
 
 const formData = ref()
 
@@ -140,11 +140,40 @@ const checkAuth = () => {
 }
 // End Function
 
+const checkAuthUUID = async () => {
+  try {
+    const res = await ApiService.get('api/v1/auth/u/' + props.uuid)
+
+    if (res) {
+      // save token
+      JwtService.saveToken(res.granted_token)
+      UserService.saveUser(res)
+      setTimeout(() => {
+        router.push('/user/request').then(() => {
+          showNotif('success', 'You`ve successfully login.', 'bottom-end')
+          router.go()
+        })
+      }, 1500)
+    }
+  } catch (error) {
+    form.value.password = ''
+    showNotif('error', 'You`re password is wrong.', 'bottom-end')
+    console.error(error)
+  } finally {
+    loading.value = false
+  }
+}
+
 onMounted(() => {
   // JwtService.destroyToken()
   checkAuth()
   if (props.token) {
     checkResetPassword()
+  }
+
+  // Check UUID from External Platform
+  if (props.uuid) {
+    checkAuthUUID()
   }
 })
 </script>

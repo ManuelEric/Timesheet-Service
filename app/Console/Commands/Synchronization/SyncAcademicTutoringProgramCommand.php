@@ -46,7 +46,7 @@ class SyncAcademicTutoringProgramCommand extends Command
     public function handle(RefProgramServices $refProgramServices)
     {
         /* call API to get all of the success and paid programs */
-        [$statusCode, $response] = $this->make_call('get', env('CRM_DOMAIN') . 'program/academic/list');
+        [$statusCode, $response] = $this->make_call('get', env('CRM_DOMAIN') . 'program/tutoring/list');
         if (! $response) {
             $this->error('There are no data.');
             return COMMAND::FAILURE;

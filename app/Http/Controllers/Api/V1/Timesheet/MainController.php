@@ -39,7 +39,7 @@ class MainController extends Controller
         $search = $request->only(['program_name', 'package_id', 'keyword']);
 
         /* to determine whether timesheet tutor or timesheet mentor */
-        $is_subject_specialist = $request->is_subject_specialist;
+        $is_subject_specialist = $request->is_subject_specialist; //! point ini yg perlu di make sure dari front-end, karena valuenya null sehingga condition terpenuhi adalah tutoring()
 
         $results = $this->timesheetDataService->listTimesheet($search, $is_subject_specialist);
         return response()->json($results);
@@ -86,7 +86,7 @@ class MainController extends Controller
         $validatedPackageId = $validated['package_id'];
         $validatedDuration = $validated['duration'];
         $validatedNotes = $validated['notes'];
-        // $validatedSubject = $validated['subject_id'];
+        $validatedSubject = $validated['subject_id'];
         $validatedSubjectName = $validated['subject_name'] ?? null;
         $validatedFeeIndividual = $validated['individual_fee'] ?? 0;
         $validatedTax = $validated['tax'] ?? 0;
@@ -112,19 +112,21 @@ class MainController extends Controller
             ], [
                 'role' => 'Tutor',
                 'head' => 1,
-                'grade' => '[9-12]',
+                'grade' => '9-12',
                 'fee_individual' => $validatedFeeIndividual,
                 'tax' => $validatedTax
             ]);
             
-        } elseif ($refProgram && $refProgram->require === 'Mentor') { # require mentor
+        } 
+        elseif ($refProgram && $refProgram->require === 'Mentor') # require mentor
+        { 
             $tempUserRoles = TempUserRoles::firstOrCreate([
                 'temp_user_id' => $mentorTutorId,
                 'role' => 'External Mentor',
             ], [
                 'year' => Carbon::now()->format('Y'),
                 'head' => 1,
-                'grade' => '[9-12]',
+                'grade' => '9-12',
                 'fee_individual' => $validatedFeeIndividual,
                 'tax' => $validatedTax
             ]);
@@ -145,10 +147,14 @@ class MainController extends Controller
         $validatedSubject = $tempUserRoles->id;
         /************************* changes ***********************/
 
-        $createTimesheetService->storeTimesheet($validatedRefPrograms, $newPackageDetails, $validatedNotes, $validatedInhouse, $validatedPics, $mentorTutorId, $validatedSubject);
+        $createdTimesheet = $createTimesheetService->storeTimesheet($validatedRefPrograms, $newPackageDetails, $validatedNotes, $validatedInhouse, $validatedPics, $mentorTutorId, $validatedSubject);
     
         return response()->json([
-            'message' => "Timesheet has been created successfully."
+            'message' => "Timesheet has been created successfully.",
+            'data' => [
+                'timesheet_id' => $createdTimesheet->id,
+                'student_name' => $createdTimesheet->list_of_student_name, // could be more than 1 student 
+            ]
         ]);
     }
 
@@ -170,9 +176,14 @@ class MainController extends Controller
             'pic_id',
             'notes',
             'subject_id',
+            /* added */
+            'individual_fee',
+            'tax',
         ]); 
 
+        //! perlu nambahin ref_id 
         /* defines the validated variables */
+        $validatedRefId = $validated['ref_id'];
         $validatedEmail = $validated['mentortutor_email'];
         $validatedInhouse = $validated['inhouse_id'];
         $validatedPics = $validated['pic_id'];
@@ -180,11 +191,13 @@ class MainController extends Controller
         $validatedDuration = $validated['duration'];
         $validatedNotes = $validated['notes'];
         $validatedSubject = $validated['subject_id'];
+        $validatedIndividualFee = $validated['individual_fee'];
+        $validatedTax = $validated['tax'];
 
         $newPackageDetails = compact('validatedPackageId', 'validatedDuration');
 
         $mentorTutorId = TempUser::where('email', $validatedEmail)->first()->id;
-        $updateTimesheetAction->execute($timesheet, $newPackageDetails, $validatedNotes, $validatedInhouse, $validatedPics, $mentorTutorId, $validatedSubject);
+        $updateTimesheetAction->execute($timesheet, $newPackageDetails, $validatedNotes, $validatedInhouse, $validatedPics, $mentorTutorId, $validatedSubject, $validatedIndividualFee, $validatedTax, $validatedRefId);
 
         return response()->json([
             'message' => 'Timesheet has been updated successfully.'
@@ -197,10 +210,14 @@ class MainController extends Controller
         ): JsonResponse
     {
         DB::beginTransaction();    
+
+        Ref_Program::where('timesheet_id', $timesheetId)->update(['timesheet_id' => null]);
+
         $timesheet = $identifyTimesheetIdAction->execute($timesheetId);
         
         if ( $timesheet->delete() )
             DB::commit();
+        
             
 
         return response()->json([

@@ -26,7 +26,7 @@ class ExistingCutoffController extends Controller
         $validatedActivityIds = $validated['activity_id'];
         $validatedStartDate = $validated['start_date'];
         $validatedEndDate = $validated['end_date'];
-        $validatedMonth = Carbon::parse($validatedStartDate)->format('F Y');
+        $validatedMonth = Carbon::parse($validatedEndDate)->format('F Y');
 
         /* get the cut off id by requested date */
         $cutoff = Cutoff::where('month', $validatedMonth)->inBetween($validatedStartDate, $validatedEndDate)->first();

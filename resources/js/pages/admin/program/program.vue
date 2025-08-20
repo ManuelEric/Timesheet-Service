@@ -4,26 +4,29 @@ import ProgramMentor from '@/components/admin/program/program_add_specialist.vue
 import { showNotif } from '@/helper/notification'
 import ApiService from '@/services/ApiService'
 import debounce from 'lodash/debounce'
+import { onUpdated } from 'vue'
 
 // Start Variable
 const selected = ref([])
 const dialog = ref(false)
+const dialogNotes = ref(false)
 
 const props = defineProps({ name: String })
 
 const currentPage = ref(1)
 const totalPage = ref()
-const keyword = ref()
+const keyword = ref(null)
 const data = ref([])
 const loading = ref(false)
 const program_list = ref([])
 const program_name = ref()
+const notes = ref()
 // End Variable
 
 // Start Function
 const getData = async () => {
   // reset selected
-  selected.value = []
+  // selected.value = []
 
   // Check Category of Ref Program
   const category = props.name
@@ -36,7 +39,7 @@ const getData = async () => {
   const url =
     category == 'tutoring'
       ? 'api/v1/program/list' + page + search + program + paginate
-      : 'api/v1/request' + page + keyword + '&is_cancelled=true'
+      : 'api/v1/request' + page + search + '&is_cancelled=true'
   try {
     loading.value = true
     const res = await ApiService.get(url)
@@ -75,11 +78,14 @@ const searchData = debounce(async item => {
 const goToTimesheet = id => {
   window.open('/admin/timesheet/' + props.name + '/' + id)
 }
-
 // End Function
 
 watch(() => {
   getData()
+})
+
+onUpdated(() => {
+  selected.value = []
 })
 
 onMounted(() => {
@@ -89,6 +95,19 @@ onMounted(() => {
 </script>
 
 <template>
+  <v-dialog
+    v-model="dialogNotes"
+    width="400"
+  >
+    <v-card
+      title="Notes"
+      prepend-icon="ri-chat-3-line"
+    >
+      <v-card-text>
+        <div v-html="notes"></div>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
   <VCard>
     <VCardTitle>
       <div class="d-flex justify-between align-center">
@@ -112,7 +131,6 @@ onMounted(() => {
             item-title="program_name"
             placeholder="Select Program Name"
             density="compact"
-            variant="solo"
             hide-details
             single-line
             :loading="loading"
@@ -130,7 +148,6 @@ onMounted(() => {
             append-inner-icon="ri-search-line"
             density="compact"
             label="Search"
-            variant="solo"
             hide-details
             single-line
             @input="searchData"
@@ -168,20 +185,41 @@ onMounted(() => {
         <ProgramTutor
           v-if="props.name == 'tutoring'"
           :selected="selected"
-          @close="dialog = false"
-          @reload="getData"
+          @close=";(dialog = false), (selected = [])"
+          @reload=";(selected = []), getData()"
         />
 
         <ProgramMentor
           v-if="props.name == 'specialist'"
           :selected="selected"
           @close="dialog = false"
-          @reload="getData"
+          @reload=";(selected = []), getData()"
         />
       </VDialog>
       <!-- End Assign Modal  -->
 
       <!-- Loader  -->
+      <div
+        class="d-flex bg-secondary py-1 px-2 rounded-lg"
+        style="align-items: center"
+        v-if="selected.length > 0"
+      >
+        Selected:
+        <small
+          class="bg-info px-3 rounded-xl ms-1 d-flex"
+          style="font-size: 10px; align-items: center"
+          v-for="item in selected"
+          :key="item"
+        >
+          {{ item.mentee }}
+          <v-icon
+            icon="ri-close-line"
+            color="error"
+            class="ms-2 cursor-pointer"
+            @click="selected = selected.filter(data => data !== item)"
+          />
+        </small>
+      </div>
       <vSkeletonLoader
         class="mx-auto border"
         type="table-thead, table-row@10"
@@ -204,6 +242,12 @@ onMounted(() => {
             <th class="text-uppercase text-center">School Name</th>
             <th class="text-uppercase text-center">
               {{ props.name == 'tutoring' ? 'Program Name' : 'Engagement Type' }}
+            </th>
+            <th
+              class="text-uppercase text-center"
+              v-if="props.name == 'tutoring'"
+            >
+              Tutor Name
             </th>
           </tr>
         </thead>
@@ -232,6 +276,12 @@ onMounted(() => {
                 :value="{
                   id: item.id,
                   require: item.require,
+                  mentee: item.student_name,
+                  package: item.package,
+                  curriculum: item.curriculum,
+                  program_name: item.program_name,
+                  grade: item.student_grade,
+                  engagement_type: item.engagement_type_id,
                 }"
                 v-else-if="(!item.timesheet_id || !item.scnd_timesheet_id) && !item.cancellation_reason"
               ></VCheckbox>
@@ -300,6 +350,23 @@ onMounted(() => {
                 class="me-3"
               ></VIcon>
               {{ item.student_name }}
+
+              <div
+                class="d-inline ms-2 cursor-pointer"
+                v-if="props.name == 'specialist' && item.notes"
+                @click=";(dialogNotes = true), (notes = item.notes)"
+              >
+                <v-tooltip
+                  activator="parent"
+                  location="start"
+                >
+                  Notes
+                </v-tooltip>
+                <v-icon
+                  icon="ri-chat-3-line"
+                  color="info"
+                ></v-icon>
+              </div>
             </td>
             <td
               class="text-left"
@@ -329,6 +396,12 @@ onMounted(() => {
                 class="me-3"
               ></VIcon>
               {{ item.engagement_type }}
+            </td>
+            <td
+              v-if="props.name == 'tutoring'"
+              nowrap
+            >
+              {{ item.tutor_name }}
             </td>
           </tr>
         </tbody>

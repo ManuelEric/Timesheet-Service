@@ -21,7 +21,12 @@ class TempUserRoles extends Model
         'temp_user_id',
         'role',
         'tutor_subject',
+        'ext_mentor_stream',
+        'package_id', // foreign of timesheet packages
+        'engagement_type_id', // foreign of engagement_types
         'curriculum_id',
+        'start_date',
+        'end_date',
         'year',
         'head',
         'additional_fee',
@@ -29,6 +34,8 @@ class TempUserRoles extends Model
         'fee_individual',
         'fee_group',
         'tax',
+        'agreement',
+        'is_active',
     ];
 
     /**
@@ -51,12 +58,27 @@ class TempUserRoles extends Model
         return $this->belongsTo(Curriculum::class, 'curriculum_id', 'id');
     }
 
+    public function package()
+    {
+        return $this->belongsTo(Package::class, 'package_id', 'id');
+    }
+
+    public function engagement_type()
+    {
+        return $this->belongsTo(EngagementType::class, 'engagement_type_id', 'id');
+    }
+
     /**
      * The scopes.
      */
     public function scopeTutor(Builder $query): void
     {
         $query->where('role', 'Tutor')->whereNotNull('tutor_subject');
+    }
+
+    public function scopeActive(Builder $query): void
+    {
+        $query->where('is_active', 1);
     }
 
     public function scopeOnSearch(Builder $query, $search = []): void

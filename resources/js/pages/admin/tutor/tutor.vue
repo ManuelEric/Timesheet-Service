@@ -2,6 +2,7 @@
 import { showNotif } from '@/helper/notification'
 import ApiService from '@/services/ApiService'
 import debounce from 'lodash/debounce'
+import moment from 'moment'
 
 // Start Variable
 const currentPage = ref(1)
@@ -64,6 +65,21 @@ const updateInhouse = async (uuid, value, email) => {
     showNotif('error', error.response?.data?.errors, 'bottom-end')
   }
 }
+
+const updateFee = debounce(async (uuid, subject) => {
+  try {
+    const res = await ApiService.patch('api/v1/user/mentor-tutors/' + uuid + '/subjects/' + subject.id, {
+      fee_individual: subject.fee_individual ?? 0,
+    })
+
+    if (res) {
+      showNotif('success', res.message, 'bottom-end')
+    }
+  } catch (error) {
+    console.error(error)
+    showNotif('error', 'Please fill in the field individual fee', 'bottom-end')
+  }
+}, 1000)
 // End Function
 
 onMounted(() => {
@@ -87,7 +103,6 @@ onMounted(() => {
             append-inner-icon="ri-search-line"
             density="compact"
             label="Search"
-            variant="solo"
             hide-details
             single-line
             @input="searchData"
@@ -134,6 +149,13 @@ onMounted(() => {
                 class="me-3"
               ></VIcon>
               {{ item.full_name }}
+              <div
+                v-if="item.is_active == 0"
+                class="d-inline rounded-pill text-error px-2 py-1 ms-2"
+                style="font-size: 10px; border: 1px solid red"
+              >
+                Inactive
+              </div>
             </td>
             <td
               class="text-start"
@@ -149,24 +171,33 @@ onMounted(() => {
               class="text-start"
               nowrap
             >
-              <VIcon
-                icon="ri-user-line"
-                class="me-3"
-              ></VIcon>
-              <span
-                v-for="(role, index) in item.roles"
-                :key="index"
-              >
-                {{ role.name }}
-                <!-- Menambahkan koma jika bukan item terakhir -->
-                <span v-if="index < item.roles.length - 1">, </span>
-              </span>
+              <div v-if="item.roles?.length > 0">
+                <VIcon
+                  icon="ri-user-line"
+                  class="me-3"
+                ></VIcon>
+                <span
+                  v-for="(role, index) in item.roles"
+                  :key="index"
+                >
+                  {{ role.name }}
+                  <!-- Menambahkan koma jika bukan item terakhir -->
+                  <span v-if="index < item.roles.length - 1">, </span>
+                </span>
+              </div>
+              <div v-else>
+                <VIcon
+                  icon="ri-user-line"
+                  class="me-2"
+                ></VIcon>
+                <span> Mentor </span>
+              </div>
             </td>
             <td class="d-flex justify-center">
               <VSwitch
                 v-model="item.inhouse"
                 @update:modelValue="updateInhouse(item.uuid, item.inhouse, item.email)"
-                value="1"
+                :value="1"
               ></VSwitch>
             </td>
             <td
@@ -183,7 +214,7 @@ onMounted(() => {
               class="text-center"
               nowrap
             >
-              <VDialog max-width="600">
+              <VDialog max-width="700">
                 <template v-slot:activator="{ props: activatorProps }">
                   <VIcon
                     icon="ri-folder-info-line"
@@ -208,7 +239,10 @@ onMounted(() => {
                       <!-- Start Tutor  -->
                       <VTable
                         density="compact"
-                        v-if="item.roles.findIndex(role => role.name === 'Tutor') >= 0"
+                        v-if="
+                          item.roles.findIndex(role => role.name === 'Tutor') >= 0 ||
+                          item.roles.findIndex(role => role.name === 'External Mentor') >= 0
+                        "
                       >
                         <thead>
                           <tr>
@@ -216,18 +250,22 @@ onMounted(() => {
                               class="text-left"
                               nowrap
                             >
-                              Subject Tutoring
+                              {{
+                                item.roles.findIndex(role => role.name === 'Tutor') >= 0
+                                  ? 'Subject Tutoring'
+                                  : 'Engagement Type'
+                              }}
                             </th>
-                            <th nowrap>Grade</th>
-                            <th nowrap>Head</th>
-                            <th nowrap>Fee Individual</th>
-                            <th nowrap>Fee Group</th>
-                            <th
-                              nowrap
-                              class="text-end"
-                            >
-                              Additional Fee
+                            <th nowrap>
+                              {{
+                                item.roles.findIndex(role => role.name === 'Tutor') >= 0 ? 'Curriculum' : 'Package Name'
+                              }}
                             </th>
+                            <th nowrap>
+                              {{ item.roles.findIndex(role => role.name === 'Tutor') >= 0 ? 'Grade' : 'Stream' }}
+                            </th>
+                            <th nowrap>Year</th>
+                            <th nowrap>Fee Individual - Gross</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -236,20 +274,51 @@ onMounted(() => {
                             :key="index"
                           >
                             <tr
-                              v-if="sub_item.name == 'Tutor'"
+                              v-if="sub_item.name == 'Tutor' || sub_item.name == 'External Mentor'"
                               v-for="subject in sub_item.subjects"
                               :key="subject"
                             >
-                              <td nowrap>{{ subject.tutor_subject }}</td>
-                              <td nowrap>{{ subject.grade }}</td>
-                              <td nowrap>{{ subject.head }}</td>
-                              <td nowrap>Rp. {{ new Intl.NumberFormat('id-ID').format(subject.fee_individual) }}</td>
-                              <td nowrap>Rp. {{ new Intl.NumberFormat('id-ID').format(subject.fee_group) }}</td>
-                              <td
-                                class="text-end"
-                                nowrap
-                              >
-                                Rp. {{ new Intl.NumberFormat('id-ID').format(subject.additional_fee) }}
+                              <td nowrap>
+                                {{ sub_item.name == 'Tutor' ? subject.tutor_subject : subject.engagement_type_name }}
+
+                                <a
+                                  :href="subject.agreement"
+                                  target="_blank"
+                                  class="ms-2 d-inline cursor-pointer"
+                                  v-if="subject.agreement"
+                                >
+                                  <VTooltip
+                                    activator="parent"
+                                    location="end"
+                                  >
+                                    Check Agreement
+                                  </VTooltip>
+                                  <VIcon icon="ri-file-pdf-2-line" />
+                                </a>
+                              </td>
+                              <td nowrap>
+                                {{ sub_item.name == 'Tutor' ? subject.curriculum_name : subject.package_name }}
+                              </td>
+                              <td nowrap>
+                                {{ sub_item.name == 'Tutor' ? subject.grade : subject.stream }}
+                              </td>
+                              <td nowrap>
+                                {{
+                                  moment(subject.start_date).format('LL') +
+                                  ' - ' +
+                                  moment(subject.end_date).format('LL')
+                                }}
+                              </td>
+                              <td nowrap>
+                                <VTextField
+                                  prefix="Rp. "
+                                  v-model="subject.fee_individual"
+                                  density="compact"
+                                  type="number"
+                                  label="Fee Gross"
+                                  class="my-3"
+                                  @update:model-value="updateFee(item.uuid, subject)"
+                                />
                               </td>
                             </tr>
                           </template>

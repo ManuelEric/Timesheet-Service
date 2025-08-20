@@ -3,9 +3,10 @@ import { showNotif } from '@/helper/notification'
 import { rules } from '@/helper/rules'
 import ApiService from '@/services/ApiService'
 
-const prop = defineProps(['id', 'item', 'package_id'])
+const prop = defineProps(['id', 'item', 'package_id', 'timesheetType'])
 const emit = defineEmits(['close', 'reload'])
 
+const program_list = ref([])
 const tutor_list = ref([])
 const package_list = ref([])
 const pic_list = ref([])
@@ -13,9 +14,11 @@ const inhouse_mentor = ref([])
 const duration_readonly = ref(false)
 const loading = ref(true)
 const loading_select = ref(true)
+const fee_nett = ref(null)
 
 const formData = ref()
 const form = ref({
+  ref_id: prop.item?.ref_id,
   mentortutor_email: prop.item?.tutormentor_email,
   subject_id: prop.item?.subject_id,
   inhouse_id: prop.item?.inhouse_id,
@@ -23,7 +26,26 @@ const form = ref({
   duration: prop.item?.duration,
   notes: prop.item?.notes,
   pic_id: prop.item?.pic_id,
+  tax: null,
+  individual_fee: null,
 })
+
+const getProgram = async () => {
+  const url = 'api/v1/program/list?require=tutor'
+  try {
+    loading.value = true
+    const res = await ApiService.get(url)
+
+    if (res) {
+      program_list.value = res
+    }
+    loading.value = false
+  } catch (error) {
+    showNotif('error', error.response?.data?.message, 'bottom-end')
+    console.error(error)
+    loading.value = false
+  }
+}
 
 const getTutor = async (inhouse = false) => {
   loading_select.value = true
@@ -93,6 +115,7 @@ const submit = async () => {
       const res = await ApiService.put('api/v1/timesheet/' + prop.id + '/update', form.value)
       if (res) {
         form.value = {
+          ref_id: null,
           mentortutor_email: null,
           subject_id: null,
           inhouse_id: null,
@@ -124,10 +147,26 @@ const submit = async () => {
   }
 }
 
+const checkNettFee = () => {
+  if (form.value.individual_fee) {
+    const nett = form.value.individual_fee * (1 - form.value.tax / 100)
+    fee_nett.value = Math.trunc(nett)
+  } else {
+    fee_nett.value = null
+  }
+}
+
+const checkGrossFee = () => {
+  const gross = fee_nett.value / (1 - form.value.tax / 100)
+  form.value.individual_fee = Math.trunc(gross)
+}
+
 onMounted(() => {
+  getProgram()
   getTutor(true)
   getPackage()
   getPIC()
+  checkNettFee()
 
   setTimeout(() => {
     loading.value = false
@@ -151,9 +190,39 @@ onMounted(() => {
         validate-on="input"
       >
         <VRow>
-          <VCol md="8">
+          <VCol
+            md="12"
+            cols="12"
+            v-if="prop.timesheetType != 'specialist'"
+          >
             <VAutocomplete
-              variant="solo"
+              clearable
+              v-model="form.ref_id"
+              label="Student Name"
+              :items="program_list"
+              :item-props="
+                item => ({
+                  title: item.student_name,
+                  subtitle:
+                    item.program_name + (item.timesheet_id ? ' ✅' : '') + (item.scnd_timesheet_id ? ' ✅' : ''),
+                  disabled: item.timesheet_id && item.scnd_timesheet_id,
+                })
+              "
+              item-value="id"
+              :rules="rules.required"
+              :loading="loading"
+              :disabled="loading"
+              @update:model-value="checkProgram"
+              density="compact"
+              multiple
+            ></VAutocomplete>
+          </VCol>
+          <VCol
+            md="8"
+            cols="8"
+          >
+            <VAutocomplete
+              density="compact"
               clearable
               label="Package"
               v-model="form.package_id"
@@ -168,10 +237,12 @@ onMounted(() => {
               :disabled="loading_select"
             ></VAutocomplete>
           </VCol>
-          <VCol md="4">
+          <VCol
+            md="4"
+            cols="4"
+          >
             <VTextField
               type="number"
-              variant="solo"
               clearable
               :label="+form.duration / 60 ? 'Minutes (' + form.duration / 60 + ' Hours)' : 'Minutes'"
               :readonly="duration_readonly"
@@ -179,9 +250,12 @@ onMounted(() => {
               :rules="rules.required"
             />
           </VCol>
-          <VCol md="12">
+          <VCol
+            md="12"
+            cols="12"
+          >
             <VAutocomplete
-              variant="solo"
+              density="compact"
               clearable
               v-model="form.inhouse_id"
               label="Inhouse Mentor/Tutor"
@@ -197,9 +271,66 @@ onMounted(() => {
               :disabled="loading_select"
             ></VAutocomplete>
           </VCol>
-          <VCol md="12">
+          <VCol
+            md="4"
+            cols="7"
+            v-if="prop.item?.individual_fee"
+            class="d-none"
+          >
+            <VTextField
+              type="number"
+              clearable
+              label="Fee/hours (Nett)"
+              v-model="fee_nett"
+              density="compact"
+              readonly
+              @update:model-value="checkGrossFee"
+            />
+          </VCol>
+          <VCol
+            md="4"
+            cols="5"
+            v-if="prop.item?.individual_fee"
+            class="d-none"
+          >
+            <VTextField
+              type="number"
+              clearable
+              label="Tax"
+              v-model="form.tax"
+              density="compact"
+              readonly
+              @update:model-value="checkGrossFee"
+            />
+          </VCol>
+          <VCol
+            md="4"
+            cols="12"
+            v-if="prop.item?.individual_fee"
+            class="d-none"
+          >
+            <v-tooltip
+              activator="parent"
+              location="top"
+            >
+              Fee Gross is automatically calculated based on the entered Net Fee and Tax Rate.
+            </v-tooltip>
+            <VTextField
+              type="number"
+              clearable
+              label="Fee/hours (Gross)"
+              v-model="form.individual_fee"
+              density="compact"
+              readonly
+              @update:model-value="checkNettFee"
+            />
+          </VCol>
+          <VCol
+            md="12"
+            cols="12"
+          >
             <VAutocomplete
-              variant="solo"
+              density="compact"
               multiple
               clearable
               chips
@@ -213,18 +344,22 @@ onMounted(() => {
               :disabled="loading_select"
             ></VAutocomplete>
           </VCol>
-          <VCol md="12">
+          <VCol
+            md="12"
+            cols="12"
+          >
             <VTextarea
+              density="compact"
               label="Notes"
               v-model="form.notes"
-              variant="solo"
             ></VTextarea>
           </VCol>
         </VRow>
 
-        <VDivider class="my-3" />
+        <VDivider class="my-3 px-0" />
         <VCardActions>
           <VBtn
+            variant="tonal"
             color="error"
             type="button"
             @click="emit('close')"
@@ -237,6 +372,7 @@ onMounted(() => {
           </VBtn>
           <VSpacer />
           <VBtn
+            variant="tonal"
             color="success"
             type="submit"
           >

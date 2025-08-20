@@ -13,6 +13,6 @@ class ListController extends Controller
      */
     public function component()
     {
-        return response()->json(Curriculum::get());
+        return response()->json(Curriculum::active()->get());
     }
 }

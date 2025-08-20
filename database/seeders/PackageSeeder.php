@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Package;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
@@ -13,7 +14,25 @@ class PackageSeeder extends Seeder
      */
     public function run(): void
     {
-        $seeds = [
+        $seeds_for_student_club = ['Student Club 1 on 1', 'Student Club 2 - 10', 'Student Club > 10'];
+        foreach ($seeds_for_student_club as $key => $seed) {
+            $seeds[] = [
+                'category' => 'External Mentors',
+                'type_of' => $seed,
+                'package' => 'Hourly',
+                'detail' => null,
+                'active' => 1,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ];
+        }
+
+        Package::insert($seeds);
+        return;
+
+
+        $seeds_for_subject_specialist = 
+        [
             [
                 'category' => 'External Mentors',
                 'type_of' => 'Essay Guidance',
@@ -77,7 +96,12 @@ class PackageSeeder extends Seeder
                 'detail' => NULL,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
-            ],
+            ]
+        ];
+        
+        /* seeds below are seeds for old tutoring and because they renew the package. new package will be insert on line 168 */
+        $seeds_for_tutoring = 
+        [
             [
                 'category' => 'Tutoring',
                 'type_of' => 'ALL',
@@ -160,6 +184,23 @@ class PackageSeeder extends Seeder
             ],
         ];
 
-        \App\Models\Package::insert($seeds);
+        $seeds_for_tutoring_new = [];
+        $packages = ['Group', 'Express', 'Bootcamp', 'Private', 'Semi Private', 'Hourly', 'Paid Trial', 'Basic', 'Pro', 'Elite', 'Free Trial', 'Deposit Trial', 'Bonus'];
+        foreach ($packages as $key => $value) 
+        {
+            $seeds_for_tutoring_new[] = [
+                'category' => 'Tutoring',
+                'type_of' => 'ALL',
+                'package' => $value,
+                'detail' => null,
+                'active' => 1,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ];
+        }
+
+        // \App\Models\Package::insert($seeds_for_subject_specialist);
+        // \App\Models\Package::insert($seeds_for_tutoring);
+        \App\Models\Package::insert($seeds_for_tutoring_new);
     }
 }

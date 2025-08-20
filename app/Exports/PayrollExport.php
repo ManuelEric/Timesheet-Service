@@ -12,11 +12,13 @@ class PayrollExport implements FromView, WithTitle
 {
     protected $timesheet;
     protected $activities;
+    protected $cutoff;
 
-    public function __construct($timesheet, $activities)
+    public function __construct($timesheet, $activities, $cutoff)
     {
         $this->timesheet = $timesheet;
         $this->activities = $activities;
+        $this->cutoff = $cutoff;
     }
 
     /**
@@ -41,13 +43,7 @@ class PayrollExport implements FromView, WithTitle
 
         # store the activities data into activities variable, so that viewData can allow to be inside compact()
         $activities = $this->activities;
-
-        # because there is possibilites, activities in 1 month could have different cutoff history
-        //// # then we only take 1 cutoff history ID as reference for the whole month
-        # then we only take 1 latest cutoff history
-        $latest_index = count($this->activities)-1;
-        $cutoff_ref_id = $this->activities[$latest_index]['cutoff_ref_id'];
-        $cutoff = Cutoff::find($cutoff_ref_id);
+        $cutoff = $this->cutoff;
 
         $total_hour = $this->activities->sum('time_spent');
 
@@ -57,18 +53,40 @@ class PayrollExport implements FromView, WithTitle
             ];
         });
 
-        
         $total_fee_without_tax = $fee->sum('total_fee_per_activity') + $this->activities->sum('additional_fee') + $this->activities->sum('bonus_fee');
 
         # add tax here
         $percentage_of_tax = $this->timesheet['packageDetails']['tutormentor_tax'];
-        $total_tax = ($percentage_of_tax / 100) * $total_fee_without_tax;
 
+        /* previous */
+        $total_tax = ($percentage_of_tax / 100) * $total_fee_without_tax;
         $total_fee = $total_fee_without_tax - $total_tax;
+
+        /* not best formula but this is the only way to keep it round */
+
+        # additional fee
+        $additional_fee = $this->activities->sum('additional_fee');
+        $additional_tax = $additional_fee * ($percentage_of_tax / 100);
+
+        # bonus fee
+        $bonus_fee = $this->activities->sum('bonus_fee');
+        $bonus_tax = $bonus_fee * ($percentage_of_tax / 100);
 
 
         # merge all variables that going to show in view 
-        $viewData = compact('isGroup', 'clients', 'activities', 'cutoff', 'total_hour', 'total_fee_without_tax', 'percentage_of_tax', 'total_tax', 'total_fee');
+        $viewData = compact(
+            'isGroup', 
+            'clients', 
+            'activities', 
+            'cutoff', 
+            'total_hour', 
+            'total_fee_without_tax', 
+            'percentage_of_tax', 
+            'total_tax', 
+            'total_fee', 
+            'bonus_fee', 
+            'bonus_tax'
+        );
 
         return view('exports.payroll', $this->timesheet + $viewData);
     }

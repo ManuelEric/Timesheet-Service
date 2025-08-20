@@ -6,9 +6,11 @@ use App\Models\Pivot\PivotTimesheet;
 use App\Observers\Ref_ProgramObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 #[ObservedBy([Ref_ProgramObserver::class])]
 class Ref_Program extends Model
@@ -27,6 +29,8 @@ class Ref_Program extends Model
         'clientprog_id',
         'schprog_id',
         'invoice_id',
+        'sales_pic_name',
+        'sales_pic_phone',
         'student_uuid',
         'student_name',
         'student_school',
@@ -34,6 +38,8 @@ class Ref_Program extends Model
         'program_name',
         'free_trial',
         'require',
+        'package',
+        'curriculum',
         'timesheet_id',
         'scnd_timesheet_id',
         'engagement_type_id',
@@ -41,7 +47,35 @@ class Ref_Program extends Model
         'cancellation_reason',
         'cancelled_at',
         'requested_by',
+        'mentoring_log_id',
     ];
+
+    /**
+     * The mutators
+     */
+    protected function programName(): Attribute
+    {
+        return Attribute::make(
+            get:  [$this, 'formattedProgramName'], // Reference the method
+        );
+    }
+
+    protected function formattedProgramName(string $value): string
+    {
+        $formatted = "";
+        if ($this->package != null)
+            $formatted .= $this->package;
+
+        if ($this->curriculum != null) 
+            $formatted .= " - " . $this->curriculum;
+
+        // check if the $formatted contains -
+        // why - ? because the formatted will be filled with package and curriculum so it supposed to have a - symbol
+        if (Str::contains($formatted, '-'))
+            $formatted = '['. $formatted . ']';
+        
+        return $value . ' ' . $formatted;
+    }
 
     /**
      * The relations.
@@ -66,6 +100,16 @@ class Ref_Program extends Model
     public function temp_user()
     {
         return $this->belongsTo(TempUser::class, 'requested_by', 'id');
+    }
+
+    public function curriculums()
+    {
+        return $this->belongsTo(Curriculum::class, 'curriculum', 'alias');
+    }
+
+    public function packages()
+    {
+        return $this->belongsTo(Package::class, 'package', 'package')->where('active', 1);
     }
 
     /**
@@ -96,6 +140,8 @@ class Ref_Program extends Model
     {
         $program_name = $search['program_name'] ?? false;
         $keyword = $search['keyword'] ?? false;
+        $has_timesheet = isset($search['has_timesheet']) ? $search['has_timesheet'] == "true" ? true : false : null;
+        $require = $search['require'] ?? 'all';
 
         $query->
             when( $program_name, function ($_sub_) use ($program_name) {
@@ -108,6 +154,16 @@ class Ref_Program extends Model
                             where('student_name', 'like', '%'.$keyword.'%')->
                             orWhere('student_school', 'like', '%'.$keyword.'%');
                     });
+            })->
+            when( $has_timesheet !== null, function ($query) use ($has_timesheet) {
+                $query->when($has_timesheet == "true", function ($query) {
+                    $query->has('timesheet')->orHas('second_timesheet');
+                }, function ($query) {
+                    $query->doesntHave('timesheet')->doesntHave('second_timesheet');
+                });
+            })->
+            when( $require != 'all', function ($query) use ($require) {
+                $query->where('require', ucfirst($require));
             });
     }
 

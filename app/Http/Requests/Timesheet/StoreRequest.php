@@ -3,11 +3,6 @@
 namespace App\Http\Requests\Timesheet;
 
 use App\Models\TempUser;
-use App\Rules\CompatiblePackage;
-use App\Rules\CompatibleProgram;
-use App\Rules\ExistSubjectPerTutormentor;
-use App\Rules\MatchingProgramName;
-use App\Rules\SameGrade;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -40,21 +35,18 @@ class StoreRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+    public function rules()
     {
         switch ( $this->method() )
         {
             case "POST":
                 return $this->store();
-                break;
 
             case "PUT":
                 return $this->update();
-                break;
 
             case "PATCH":
                 return $this->patch();
-                break;
         }
     }
 
@@ -99,6 +91,14 @@ class StoreRequest extends FormRequest
     public function update(): array
     {
         return [
+            'ref_id' => 'required|array',
+            'ref_id.*' => [
+                'required', 
+                'exists:ref_programs,id',
+                //new MatchingProgramName,
+                //new SameGrade($this->input('mentortutor_email'), $this->input('subject_id'), $this->input('package_id')),
+                //new CompatibleProgram($this->input('subject_id')),
+            ],
             'mentortutor_email' => 'required|email|exists:temp_users,email',
             'inhouse_id' => [
                 'required',
@@ -118,6 +118,8 @@ class StoreRequest extends FormRequest
                     return $query->where('id', $this->input('subject_id'))->where('temp_user_id', $tempUser->id);
                 })
             ],
+            'individual_fee' => 'nullable',
+            'tax' => 'nullable',
         ];
     }
 

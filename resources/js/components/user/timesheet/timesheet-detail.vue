@@ -5,6 +5,7 @@ import ApiService from '@/services/ApiService'
 import UserService from '@/services/UserService'
 import debounce from 'lodash/debounce'
 import AddActivity from './activity-add.vue'
+import EditActivity from './activity-edit.vue'
 
 // Start Variable
 const props = defineProps({ id: String, require: String })
@@ -16,6 +17,7 @@ const role = ref(UserService.getUser().role_detail[0].role.toLowerCase())
 const isDialogVisible = ref([
   {
     add: false,
+    edit: false,
     delete: false,
   },
 ])
@@ -53,19 +55,19 @@ const selectedActivity = (type, item) => {
 }
 
 const deleteActivity = async () => {
+  loading.value = true
   try {
     const res = await ApiService.delete('api/v1/timesheet/' + props.id + '/activity/' + selectedItem.value.id)
     if (res) {
       showNotif('success', res.message, 'bottom-end')
-      toggleDialog('delete')
     }
   } catch (error) {
-    if (error.response?.status == 400) {
-      showNotif('error', error.response?.data?.errors, 'bottom-end')
-    }
+    showNotif('error', error.response?.data?.errors, 'bottom-end')
   } finally {
+    loading.value = false
     getData()
     updateReload(true)
+    toggleDialog('delete')
   }
 }
 
@@ -88,12 +90,13 @@ const updateTime = debounce(async item => {
 
 const updateStatus = async item => {
   try {
-    const res = await ApiService.put('api/v1/timesheet/' + props.id + '/activity/' + item.id, item)
+    const res = await ApiService.patch('api/v1/timesheet/' + props.id + '/activity/' + item.id, item)
 
     if (res) {
       showNotif('success', res.message, 'bottom-end')
     }
   } catch (error) {
+    if (error?.response?.data?.message) showNotif('error', error.response.data.message, 'bottom-end')
     console.error(error)
   } finally {
     getData()
@@ -114,10 +117,10 @@ onMounted(() => {
         <div class="w-100">
           <h4>Activity</h4>
         </div>
+        <!-- for external mentor & tutor  -->
         <VBtn
           v-tooltip:start="'New Activity'"
           @click="toggleDialog('add')"
-          v-if="role == 'external mentor'"
         >
           <VIcon icon="ri-add-line" />
         </VBtn>
@@ -231,6 +234,21 @@ onMounted(() => {
                   Join
                 </a>
               </VBtn>
+
+              <VBtn
+                color="warning"
+                density="compact"
+                class="me-1"
+                v-tooltip:start="'Edit Activity'"
+                :disabled="item.cutoff_status == 'completed'"
+                @click="selectedActivity('edit', item)"
+              >
+                <VIcon
+                  icon="ri-edit-line"
+                  class="cursor-pointer"
+                />
+              </VBtn>
+
               <VBtn
                 color="error"
                 density="compact"
@@ -254,6 +272,20 @@ onMounted(() => {
       />
     </VCardText>
 
+    <!-- Edit Dialog -->
+    <VDialog
+      v-model="isDialogVisible.edit"
+      max-width="600"
+      persistent
+    >
+      <EditActivity
+        :timesheet_id="props?.id"
+        :activity="selectedItem"
+        @close="toggleDialog('edit')"
+        @reload="getData"
+      />
+    </VDialog>
+
     <!-- Delete Dialog -->
     <VDialog
       v-model="isDialogVisible.delete"
@@ -261,6 +293,7 @@ onMounted(() => {
       persistent
     >
       <DeleteDialog
+        :loading="loading"
         title="activity"
         @close="toggleDialog('delete')"
         @delete="deleteActivity"

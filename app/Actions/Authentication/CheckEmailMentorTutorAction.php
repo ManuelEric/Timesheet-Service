@@ -55,8 +55,13 @@ class CheckEmailMentorTutorAction
             'email' => $response['email'],
             'phone' => $response['phone'],
             'password' => $response['password'],
-            'roles' => collect($roles),
+            'roles' => collect($roles), // this will contains details of role such as data from tbl_user_subjects or user_streams
             'has_npwp' => $response['has_npwp'],
+            'account_name' => $response['account_name'],
+            'account_no' => $response['account_no'],
+            'bank_name' => $response['bank_name'],
+            'swift_code' => $response['swift_code'],
+            'active' => $response['active'],
         ];
 
         $result = [$checkingResult, $rawInformation];
