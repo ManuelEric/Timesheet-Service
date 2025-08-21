@@ -27,6 +27,14 @@ class FeeController extends Controller
         $curriculum_id = gettype($curriculum_id) == "string" && $curriculum_id == "null" ? null : $curriculum_id;
         $grade = gettype($grade) == "string" && $grade == "null" ? null : $grade;
 
+        /**
+         * check if the subject name contains SAT
+         * because for SAT, we should not check the grade
+         */
+        if (preg_match('/SAT/i', $subject_name)) {
+            $grade = null;
+        }
+
         $details = TempUserRoles::query()->
             select(['start_date', 'end_date', 'grade', 'fee_individual', 'fee_group'])->
             where('temp_user_id', $tutor_id)->
