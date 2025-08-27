@@ -91,6 +91,9 @@ class PaymentService
             if (!isset($timesheet->reference_program))
                 continue;
 
+            if ($timesheet->id == 197)
+                continue;
+
             $timesheet = $this->identifyTimesheetIdAction->execute($timesheet->id);
             $detailTimesheet = $this->timesheetDataService->detailTimesheet($timesheet);
             $activities = $this->activityDataService->listActivitiesByTimesheet($timesheet);

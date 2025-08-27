@@ -270,9 +270,9 @@ class TimesheetDataService
                     array_push($clients, [
                         'category' => $category,
                         'client_name' => $studentName,
-                        'client_mail' => $crm_clientInfo['mail'],
+                        'client_mail' => $crm_clientInfo['mail'] ?? null,
                         'client_school' => $studentSchool,
-                        'client_grade' => $crm_clientInfo['grade'],
+                        'client_grade' => $crm_clientInfo['grade'] ?? null,
                         'sales_pic_name' => $salesPicName,
                         'sales_pic_phone' => $salesPicPhone,
                     ]);
