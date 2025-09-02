@@ -182,7 +182,7 @@ class Ref_Program extends Model
                             THEN SUBSTRING_INDEX(`invoice_id`, "/", -1)
                             ELSE SUBSTRING_INDEX(SUBSTRING_INDEX(`invoice_id`, "/", 5), "/", -1)
                         END) DESC')-> // for year
-            orderByRaw('SUBSTRING_INDEX(SUBSTRING_INDEX(`invoice_id`, "/", 4), "/", -1) DESC')-> // for month
+            orderByRaw('roman_to_int(SUBSTRING_INDEX(SUBSTRING_INDEX(invoice_id, "/", 4), "/", -1)) DESC')-> // for month
             orderByRaw('SUBSTRING_INDEX(`invoice_id`, "/", 1) DESC'); // for number 
 
     }

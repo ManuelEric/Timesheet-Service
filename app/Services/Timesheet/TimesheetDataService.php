@@ -203,6 +203,7 @@ class TimesheetDataService
             : null;
         $tax = $timesheet->subject->tax;
         $isGroup = $timesheet->ref_program()->count() > 1 ? true : false;
+        // $feeHours = $isGroup && $timesheet->ref_program->first()->require == 'Tutor' ? $timesheet->subject()->where('is_active', 1)->first()->fee_group : $timesheet->subject()->where('is_active', 1)->first()->fee_individual;
         $feeHours = $isGroup && $timesheet->ref_program->first()->require == 'Tutor' ? $timesheet->subject->fee_group : $timesheet->subject->fee_individual;
 
         $packageDetails = [

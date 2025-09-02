@@ -49,9 +49,13 @@ class TutorMentorCommand extends Command
         [$statusCode, $mentorTutors] = $this->make_call('get', env('CRM_DOMAIN') . 'user/mentor-tutors');
         $progress = $this->output->createProgressBar(count($mentorTutors));
         $progress->start();
+
         
         foreach ( $mentorTutors as $mentorTutor )
         {
+            // if ($mentorTutor['email'] != "altairboonraksa@gmail.com")
+            //     continue;
+
             try {
 
                 $name = $this->concat($mentorTutor['first_name'], $mentorTutor['last_name']);
