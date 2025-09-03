@@ -61,7 +61,8 @@ class RefProgramServices
 
 
             /* check existence of success program on timesheet app */
-            if ( Ref_Program::whereWetherB2C_B2B($category, $clientprog_id, $schprog_id)->noTrial()->exists() )
+            // if ( Ref_Program::whereWetherB2C_B2B($category, $clientprog_id, $schprog_id)->noTrial()->exists() )
+            if ( Ref_Program::whereWetherB2C_B2B($category, $clientprog_id, $schprog_id)->exists() )
             {
                 $existing_clientprog[] = $clientprog_id;
                 Ref_Program::where('clientprog_id', $clientprog_id)->update([

@@ -38,7 +38,7 @@ class SummaryExport implements FromView, WithTitle, WithColumnFormatting
             'C' => NumberFormat::FORMAT_NUMBER,
             'D' => NumberFormat::FORMAT_NUMBER,
             'G' => NumberFormat::FORMAT_NUMBER,
-            'I' => NumberFormat::FORMAT_TEXT,
+            'I' => NumberFormat::FORMAT_NUMBER,
         ];
     }
 

@@ -3,6 +3,7 @@
 namespace App\Actions\Timesheet;
 
 use App\Actions\Authentication\CheckEmailMentorTutorAction;
+use App\Actions\Authentication\CheckEmailMentorTutorActionModel;
 use App\Models\TempUser;
 use App\Services\ResponseService;
 use App\Services\User\CreateTempUserService;
@@ -19,12 +20,13 @@ class SelectOrRegisterMentorTutorAction
     protected $responseService;
 
     public function __construct(
-        CheckEmailMentorTutorAction $checkEmailMentorTutorAction,
+        /*CheckEmailMentorTutorAction $checkEmailMentorTutorAction,*/
+        CheckEmailMentorTutorActionModel $checkEmailMentorTutorActionModel,
         CreateTempUserService $createTempUserService,
         ResponseService $responseService,
         )
     {
-        $this->checkEmailMentorTutorAction = $checkEmailMentorTutorAction;
+        $this->checkEmailMentorTutorAction = $checkEmailMentorTutorActionModel;
         $this->createTempUserService = $createTempUserService;
         $this->responseService = $responseService;
     }

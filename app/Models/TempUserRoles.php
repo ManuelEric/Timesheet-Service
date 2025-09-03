@@ -89,4 +89,9 @@ class TempUserRoles extends Model
                 $_sub_->where('temp_user_id', $mentor_id);
             });
     }
+
+    public function scopeIsActive(Builder $query): void
+    {
+        $query->where('is_active', 1);
+    }
 }
