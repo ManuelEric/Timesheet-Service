@@ -244,6 +244,7 @@ class TimesheetDataService
             'notes' => $notes,
             'subject_id' => $subjectId,
             'inhouse_id' => $inhouseUuid,
+            'curriculum_id' => $timesheet->subject->curriculum_id ?? null,
             'curriculum_name' => $timesheet->subject->curriculum ? $timesheet->subject->curriculum->name : null,
             'tax' => $timesheetTax, // timesheet tax
             'individual_fee' => $timesheetFeeHours, // timesheet fee hours
