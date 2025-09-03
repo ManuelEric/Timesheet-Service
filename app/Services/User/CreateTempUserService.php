@@ -129,7 +129,6 @@ class CreateTempUserService
             }
         }
 
-
         /* if the user is exists in timesheet database then update the detail of user and store/update the roles detail */
         if ( $tempUser ) {
             DB::beginTransaction();

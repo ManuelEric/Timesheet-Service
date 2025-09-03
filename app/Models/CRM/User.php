@@ -11,6 +11,12 @@ class User extends Model
 
     protected $connection = 'mysql_crmv2';
     protected $table = 'users';
+    
+    protected $primaryKey = 'id';
+
+    public $incrementing = false;
+
+    protected $keyType = 'string';
 
     /**
      * The attributes that are mass assignable.
