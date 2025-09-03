@@ -41,6 +41,10 @@ class MainController extends Controller
         /* to determine whether timesheet tutor or timesheet mentor */
         $is_subject_specialist = $request->is_subject_specialist; //! point ini yg perlu di make sure dari front-end, karena valuenya null sehingga condition terpenuhi adalah tutoring()
 
+        //! coding sementara hingga dari front-end bawa variable is_subject_specialist
+        if (auth('sanctum')->user()->email == 'hudirobert21@gmail.com')
+            $is_subject_specialist = true;
+
         $results = $this->timesheetDataService->listTimesheet($search, $is_subject_specialist);
         return response()->json($results);
     }
