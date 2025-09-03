@@ -79,8 +79,8 @@ class StoreRequest extends FormRequest
             'pic_id.*' => 'required|exists:users,id',
             'notes' => 'nullable',
             'subject_id' => [
-                // 'nullable',
-                new ExistSubjectPerTutormentor($this->input('mentortutor_email'))
+                'nullable',
+                // new ExistSubjectPerTutormentor($this->input('mentortutor_email'))
             ],
             'subject_name' => 'nullable',
             'individual_fee' => 'nullable',

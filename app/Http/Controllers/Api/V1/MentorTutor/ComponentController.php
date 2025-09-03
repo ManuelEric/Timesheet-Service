@@ -16,7 +16,7 @@ use Illuminate\Http\Request;
 
 class ComponentController extends Controller
 {
-    public function comp_subjects(TempUser $tempUser, ?Curriculum $curriculum = null)
+    public function comp_subjects(TempUser $tempUser, $grade, ?Curriculum $curriculum = null)
     {
         # because there were changes to the creation of timesheet
         # like: subjects now fetched from timesheet database instead of CRM
@@ -50,6 +50,9 @@ class ComponentController extends Controller
         $data = TempUserRoles::where('temp_user_id', $tempUser->id)->
             when($curriculum, function ($query) use ($curriculum) {
                 $query->where('curriculum_id', $curriculum->id);
+            })->
+            when($grade, function ($query) use ($grade) {
+                $query->whereRaw('? BETWEEN CAST(SUBSTRING_INDEX(REPLACE(REPLACE(grade, "[", ""), "]", ""), "-", 1) AS UNSIGNED) AND CAST(SUBSTRING_INDEX(REPLACE(REPLACE(grade, "[", ""), "]", ""), "-", -1) AS UNSIGNED)', [$grade]);
             })->
             whereRaw('now() BETWEEN start_date AND end_date')->
             active()->

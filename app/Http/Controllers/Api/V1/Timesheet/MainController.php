@@ -108,7 +108,8 @@ class MainController extends Controller
                 'year' => Carbon::now()->format('Y'),
                 'temp_user_id' => $mentorTutorId,
                 'tutor_subject' => $validatedSubjectName,
-                'curriculum_id' => $validatedCurriculumId
+                'curriculum_id' => $validatedCurriculumId,
+                'is_active' => 1,
             ], [
                 'role' => 'Tutor',
                 'head' => 1,
@@ -123,6 +124,7 @@ class MainController extends Controller
             $tempUserRoles = TempUserRoles::firstOrCreate([
                 'temp_user_id' => $mentorTutorId,
                 'role' => 'External Mentor',
+                'is_active' => 1,
             ], [
                 'year' => Carbon::now()->format('Y'),
                 'head' => 1,
@@ -147,7 +149,14 @@ class MainController extends Controller
         $validatedSubject = $tempUserRoles->id;
         /************************* changes ***********************/
 
-        $createdTimesheet = $createTimesheetService->storeTimesheet($validatedRefPrograms, $newPackageDetails, $validatedNotes, $validatedInhouse, $validatedPics, $mentorTutorId, $validatedSubject);
+        $createdTimesheet = $createTimesheetService->storeTimesheet(
+            $validatedRefPrograms, 
+            $newPackageDetails, 
+            $validatedNotes, 
+            $validatedInhouse, 
+            $validatedPics, 
+            $mentorTutorId, 
+            $validatedSubject);
     
         return response()->json([
             'message' => "Timesheet has been created successfully.",
