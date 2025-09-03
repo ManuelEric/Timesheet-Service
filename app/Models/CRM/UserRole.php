@@ -21,4 +21,9 @@ class UserRole extends Pivot
         'role_id',
         'capacity', // used for mentor
     ];
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class, 'role_id', 'id');
+    }
 }
