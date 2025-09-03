@@ -140,7 +140,7 @@ class CreateTempUserService
                 $tempUser->full_name = $full_name;
                 $tempUser->email = $email;
                 $tempUser->phone = $phone;
-                $tempUser->has_npwp = $has_npwp;
+                $tempUser->has_npwp = $has_npwp ?? false;
                 $tempUser->account_name = $account_name;
                 $tempUser->account_no = $account_no;
                 $tempUser->bank_name = $bank_name;

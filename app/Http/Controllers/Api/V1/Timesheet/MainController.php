@@ -132,12 +132,10 @@ class MainController extends Controller
             'pic_id',
             'notes',
             'subject_id',
-            /* added */
             'individual_fee',
             'tax',
         ]); 
 
-        //! perlu nambahin ref_id 
         /* defines the validated variables */
         $validatedRefId = $validated['ref_id'];
         $validatedEmail = $validated['mentortutor_email'];
