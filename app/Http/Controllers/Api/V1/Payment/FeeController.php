@@ -72,7 +72,7 @@ class FeeController extends Controller
         [$engagement_type_id, $package_id] = $this->convertToProfessionalSharingPackageId((int)$engagement_type_id, (int)$package_id);
 
         $details = TempUserRoles::query()->
-            select(['start_date', 'end_date', 'grade', 'fee_individual', 'fee_group'])->
+            select(['id', 'start_date', 'end_date', 'grade', 'fee_individual', 'fee_group'])->
             where('temp_user_id', $mentor_id)->
             when( $stream, function ($query) use ($stream) {
                 $query->where('ext_mentor_stream', $stream);
