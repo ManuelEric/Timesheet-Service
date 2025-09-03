@@ -57,7 +57,7 @@ class ComponentController extends Controller
             whereRaw('now() BETWEEN start_date AND end_date')->
             active()->
             orderBy('tutor_subject', 'asc')->
-            select(['id', 'tutor_subject'])->get();
+            select(['id', 'tutor_subject', 'curriculum', 'grade', 'start_date', 'end_date'])->get();
         return response()->json($data);
     }
 
