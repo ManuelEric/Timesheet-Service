@@ -47,7 +47,7 @@ class ComponentController extends Controller
 
 
         # preferably return subject owned by tutor/mentor him/herself
-        $data = TempUserRoles::where('temp_user_id', $tempUser->id)->
+        $data = TempUserRoles::with('curriculum')->where('temp_user_id', $tempUser->id)->
             when($curriculum, function ($query) use ($curriculum) {
                 $query->where('curriculum_id', $curriculum->id);
             })->
@@ -57,7 +57,7 @@ class ComponentController extends Controller
             whereRaw('now() BETWEEN start_date AND end_date')->
             active()->
             orderBy('tutor_subject', 'asc')->
-            select(['id', 'tutor_subject', 'curriculum', 'grade', 'start_date', 'end_date'])->get();
+            select(['id', 'tutor_subject', 'grade', 'start_date', 'end_date'])->get();
         return response()->json($data);
     }
 
