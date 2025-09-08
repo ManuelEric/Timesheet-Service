@@ -2,9 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Actions\Activity\CreateActivityAction;
 use App\Actions\Timesheet\SelectOrRegisterMentorTutorAction;
 use App\Models\User;
 use App\Services\Timesheet\CreateTimesheetService;
+use App\Actions\Timesheet\IdentifierCheckingAction as IdentifyTimesheetIdAction;
+use App\Models\Timesheet;
+use Mockery;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\mock;
@@ -63,5 +67,42 @@ it('creates a timesheet successfully', function () {
                 'timesheet_id' => 123,
                 'student_name' => 'Test Student',
             ],
+        ]);
+});
+
+it ('creates activities successfully', function () {
+
+    $this->actingAs($this->user);
+
+    // Mock timesheet object
+    $timesheet = Mockery::mock(Timesheet::class);
+
+    // Mock IdentifyTimesheetIdAction
+    mock(IdentifyTimesheetIdAction::class)
+        ->shouldReceive('execute')
+        ->once()
+        ->with(123)
+        ->andReturn($timesheet);
+
+    // Mock CreateActivityAction
+    mock(CreateActivityAction::class)
+        ->shouldReceive('execute')
+        ->once()
+        ->with($timesheet, Mockery::type('array'))
+        ->andReturnTrue();
+
+    $payload = [
+        'description' => 'Test activity',
+        'start_date' => '2024-06-01 10:00:00',
+        'end_date' => '2024-06-01 11:00:00',
+        'meeting_link' => 'https://zoom.us/test',
+        'status' => 1,
+    ];
+
+    $response = $this->postJson('/api/v1/timesheet/123/activity', $payload);
+
+    $response->assertStatus(200)
+        ->assertJson([
+            'message' => 'Activity has created successfully.'
         ]);
 });
