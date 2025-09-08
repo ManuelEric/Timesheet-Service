@@ -38,6 +38,8 @@ class ResetSubject extends Command
 
             foreach ($timesheets as $timesheet) 
             {
+                if ($timesheet->id != 211)
+                    continue;
                 
                 array_push($updated_timesheet, $timesheet->id);
                 $this->info('Timesheet ID: '.$timesheet->id. ' need role: '.$timesheet->subject->role);

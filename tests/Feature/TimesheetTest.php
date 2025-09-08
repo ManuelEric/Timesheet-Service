@@ -10,19 +10,24 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\mock;
 use function Pest\Laravel\postJson;
 
-it('creates a timesheet successfully', function () {
-    
-    // Find an admin user 
-    $user = User::where('email', 'admin@edu-all.com')->first();
+beforeEach(function () {
+    $this->user = User::factory()->create([
+        'email' => 'admin@edu-all.com',
+    ]);
+});
 
-    actingAs($user);
+it('creates a timesheet successfully', function () {
+    // Find an admin user 
+    // $user = User::where('email', 'admin@edu-all.com')->first();
+
+    actingAs($this->user);
 
     // Mock the action
     mock(SelectOrRegisterMentorTutorAction::class)
         ->shouldReceive('handle')
         ->once()
-        ->with('tutor@example.com')
-        ->andReturn(999);
+        ->with('paul.edison@edu-all.com')
+        ->andReturn('01J9AN0WXEZZWJAPQ639ENC7MN');
 
     // Mock the timesheet creation service
     mock(CreateTimesheetService::class)
@@ -35,12 +40,12 @@ it('creates a timesheet successfully', function () {
 
     // Define valid payload
     $payload = [
-        'ref_id' => [1],
-        'mentortutor_email' => 'tutor@example.com',
-        'inhouse_id' => 1,
+        'ref_id' => [124],
+        'mentortutor_email' => 'paul.edison@edu-all.com',
+        'inhouse_id' => 'd481f68f-a5d7-495f-9792-336388249cc9',
         'package_id' => 1,
         'duration' => 60,
-        'pic_id' => 1,
+        'pic_id' => ['03J7DBWSKH3W8FD82J8NEPTW2P'],
         'notes' => 'Test note',
         'subject_id' => 1,
         'subject_name' => 'Math',
