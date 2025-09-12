@@ -3,14 +3,18 @@
 namespace Tests\Feature;
 
 use App\Actions\Activity\CreateActivityAction;
+use App\Actions\Payment\CutoffAction;
 use App\Actions\Timesheet\SelectOrRegisterMentorTutorAction;
 use App\Models\User;
 use App\Services\Timesheet\CreateTimesheetService;
 use App\Actions\Timesheet\IdentifierCheckingAction as IdentifyTimesheetIdAction;
 use App\Models\Timesheet;
+use App\Services\Payment\PaymentService;
+use Illuminate\Support\Carbon;
 use Mockery;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 use function Pest\Laravel\mock;
 use function Pest\Laravel\postJson;
 
@@ -105,4 +109,75 @@ it ('creates activities successfully', function () {
         ->assertJson([
             'message' => 'Activity has created successfully.'
         ]);
+});
+
+it('stores cutoff', function () {
+    
+    $this->actingAs($this->user);
+
+    // Mock CutoffAction
+    mock(CutoffAction::class)
+        ->shouldReceive('execute')
+        ->andReturn(collect([
+            (object)[
+                'fee_hours' => 100000,
+                'additional_fee' => 5000,
+                'bonus_fee' => 2000,
+            ],
+            (object)[
+                'fee_hours' => 200000,
+                'additional_fee' => 10000,
+                'bonus_fee' => 3000,
+            ],
+        ]));
+
+    // Prepare request data
+    $startCutoff = date('Y').'-'.date('m', strtotime('-1 month')).'-27';
+    $endCutoff = date('Y-m-').'26';
+
+
+    $startDate = Carbon::parse($startCutoff);
+    $endDate = Carbon::parse($endCutoff);
+    $payload = [
+        'start_date' => $startDate,
+        'end_date' => $endDate,
+    ];
+
+    // Act: call the endpoint
+    $response = postJson('/api/v1/payment/cut-off/create', $payload);
+
+    // Assert
+    $response->assertStatus(200)
+        ->assertJsonStructure(['message']);
+        // ->assertJson([
+        //     'message' => "Payments for all activities conducted from " . Carbon::parse($startDate)->format('F d') . " to " . Carbon::parse($endDate)->format('F d, Y') . ", have been processed with Total Payment : IDR " . number_format(320000, 2, ".")
+        // ]);
+});
+
+it('exports payroll as a single sheet', function () {
+
+    $timesheetId = 123;
+    $cutoffStart = '2025-08-27';
+    $cutoffEnd = '2025-09-26';
+
+    // Arrange: mock PaymentService
+    mock(PaymentService::class)
+        ->shouldReceive('exportPayrollAsSingleSheet')
+        ->once()
+        ->with([
+            'timesheet_id' => $timesheetId,
+            'cutoff_start' => $cutoffStart,
+            'cutoff_end' => $cutoffEnd,
+        ])
+        ->andReturn(
+            response('Payroll_' . date('F_Y') . '.xlsx', 200)
+                ->header('Content-Type', 'application/pdf')
+        ); // Simulate file response
+
+    // Act: call the export endpoint
+    $response = get("/api/v1/payment/cut-off/export/{$timesheetId}/{$cutoffStart}/{$cutoffEnd}");
+
+    // Assert
+    $response->assertStatus(200)
+        ->assertHeader('Content-Type', 'application/pdf');
 });

@@ -86,6 +86,7 @@ class CreateTempUserService
                                     'end_date' => $subject['end_date'],
                                     'year' => $subject['year'],
                                     'fee_individual' => $subject['fee_individual'] ?? 0,
+                                    'fee_group' => $subject['fee_group'] ?? 0,
                                     'head' => $subject['head'],
                                     'grade' => $subject['grade'],
                                     'additional_fee' => $subject['additional_fee'] ?? 0,

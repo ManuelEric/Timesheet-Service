@@ -23,6 +23,7 @@ class CheckEmailController extends Controller
 
         [$emailCheckingResult, $userRawInformation] = $checkEmailMentorTutorAction->execute($validatedEmail);
 
+        dd($userRawInformation);
         $createTempUserService->execute($userRawInformation);
 
         Log::notice('Successfully checked the email');
