@@ -95,33 +95,6 @@ class AlternativeController extends Controller
     
             $mentorTutorId = $selectOrRegisterMentorTutorTimesheetAction->handle($validatedEmail);
     
-            $tempUserRoles = TempUserRoles::firstOrCreate([
-                'temp_user_id' => $mentorTutorId,
-                'role' => 'External Mentor', // hardcoded 
-            ], [
-                'year' => Carbon::now()->format('Y'), // hardcoded
-                'head' => 1, // hardcoded
-                'grade' => '9-12', // hardcoded
-                'fee_individual' => $validatedFeeIndividual,
-                'tax' => $validatedTax
-            ]);
-            
-    
-            
-            //! here's some notes that need to be checked later [IMPORTANT!]
-            # for now, to get tempUserRoles, we only check by year, temp_user_id, and subject name
-            # but there might be some issues when system using head and grade
-            # so if the system are using head and grade to get the subject, please update data below
-            # make sure to update not only the fee_individual but also the other parameters
-            # same goes with the data above, you should not hardcoded the head and grade
-            $tempUserRoles->fee_individual = $validatedFeeIndividual;
-            $tempUserRoles->tax = $validatedTax;
-            $tempUserRoles->save();
-    
-    
-            $validatedSubject = $tempUserRoles->id;
-            /************************* changes ***********************/
-    
             $createdTimesheet = $createTimesheetService->storeTimesheet($validatedRefPrograms, $newPackageDetails, $validatedNotes, $validatedInhouse, $validatedPics, $mentorTutorId, $validatedSubject);
             DB::commit();
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Authentication;
 
 use App\Actions\Authentication\CheckEmailMentorTutorAction;
+use App\Actions\Authentication\CheckEmailMentorTutorActionModel;
 use App\Services\User\CreateTempUserService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Authentication\CheckEmailRequest;
@@ -13,7 +14,8 @@ class CheckEmailController extends Controller
 {
     public function execute(
         CheckEmailRequest $request,
-        CheckEmailMentorTutorAction $checkEmailMentorTutorAction,
+        /*CheckEmailMentorTutorAction $checkEmailMentorTutorAction,*/
+        CheckEmailMentorTutorActionModel $checkEmailMentorTutorAction,
         CreateTempUserService $createTempUserService
     ): JsonResponse {
         $validated = $request->safe()->only(['email']);
@@ -21,6 +23,7 @@ class CheckEmailController extends Controller
 
         [$emailCheckingResult, $userRawInformation] = $checkEmailMentorTutorAction->execute($validatedEmail);
 
+        dd($userRawInformation);
         $createTempUserService->execute($userRawInformation);
 
         Log::notice('Successfully checked the email');

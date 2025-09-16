@@ -86,6 +86,7 @@ class CreateTempUserService
                                     'end_date' => $subject['end_date'],
                                     'year' => $subject['year'],
                                     'fee_individual' => $subject['fee_individual'] ?? 0,
+                                    'fee_group' => $subject['fee_group'] ?? 0,
                                     'head' => $subject['head'],
                                     'grade' => $subject['grade'],
                                     'additional_fee' => $subject['additional_fee'] ?? 0,
@@ -129,7 +130,6 @@ class CreateTempUserService
             }
         }
 
-
         /* if the user is exists in timesheet database then update the detail of user and store/update the roles detail */
         if ( $tempUser ) {
             DB::beginTransaction();
@@ -140,7 +140,7 @@ class CreateTempUserService
                 $tempUser->full_name = $full_name;
                 $tempUser->email = $email;
                 $tempUser->phone = $phone;
-                $tempUser->has_npwp = $has_npwp;
+                $tempUser->has_npwp = $has_npwp ?? false;
                 $tempUser->account_name = $account_name;
                 $tempUser->account_no = $account_no;
                 $tempUser->bank_name = $bank_name;
@@ -226,6 +226,9 @@ class CreateTempUserService
     public function storeOrUpdateRoles(string $tempUserId, array $roleDetails)
     {        
         $tutor_subjects = $extmentor_streams = []; // default
+
+        TempUserRoles::where('temp_user_id', $tempUserId)->update(['is_active' => 0]);
+
         foreach ($roleDetails as $detail) 
         {
             switch ($detail['role']) {
@@ -243,7 +246,6 @@ class CreateTempUserService
                     $fee_group = $detail['fee_group'] ?? 0;
                     $tax = $detail['tax'] ?? 0;
                     $agreement = $detail['agreement'] ?? null;
-
 
                     if ( !array_key_exists('subject', $detail) )
                     {
@@ -328,18 +330,19 @@ class CreateTempUserService
             }
         }
 
-        if (count($tutor_subjects) > 0 && count($extmentor_streams) > 0) {
-            TempUserRoles::where('temp_user_id', $tempUserId)->whereNotIn('tutor_subject', $tutor_subjects)->whereNotIn('id', $extmentor_streams)->update(['is_active' => 0]);
-        }
+        // if (count($tutor_subjects) > 0 && count($extmentor_streams) > 0) {
+        //     // for tutor and external mentor when subject nor subject has not existed in database
+        //     TempUserRoles::where('temp_user_id', $tempUserId)->whereNotIn('tutor_subject', $tutor_subjects)->whereNotIn('id', $extmentor_streams)->update(['is_active' => 0]);
+        // }
 
-        // reset temp_user_roles for tutor when user is tutor only
-        if (count($tutor_subjects) > 0 && count($extmentor_streams) == 0) {
-            TempUserRoles::where('temp_user_id', $tempUserId)->whereNotIn('tutor_subject', $tutor_subjects)->update(['is_active' => 0]);
-        }
+        // // reset temp_user_roles for tutor when user is tutor only
+        // if (count($tutor_subjects) > 0 && count($extmentor_streams) == 0) {
+        //     TempUserRoles::where('temp_user_id', $tempUserId)->whereNotIn('tutor_subject', $tutor_subjects)->update(['is_active' => 0]);
+        // }
 
-        // reset temp_user_roles for external mentor when user is ext mentor only
-        if (count($extmentor_streams) > 0 && count($tutor_subjects) == 0) {
-            TempUserRoles::where('temp_user_id', $tempUserId)->whereNotIn('id', $extmentor_streams)->update(['is_active' => 0]);
-        } 
+        // // reset temp_user_roles for external mentor when user is ext mentor only
+        // if (count($extmentor_streams) > 0 && count($tutor_subjects) == 0) {
+        //     TempUserRoles::where('temp_user_id', $tempUserId)->whereNotIn('id', $extmentor_streams)->update(['is_active' => 0]);
+        // } 
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Timesheet;
 
 use App\Models\TempUser;
+use App\Rules\ExistSubjectPerTutormentor;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -79,7 +80,7 @@ class StoreRequest extends FormRequest
             'notes' => 'nullable',
             'subject_id' => [
                 'nullable',
-                //new ExistSubjectPerTutormentor($this->input('mentortutor_email'))
+                // new ExistSubjectPerTutormentor($this->input('mentortutor_email'))
             ],
             'subject_name' => 'nullable',
             'individual_fee' => 'nullable',

@@ -203,7 +203,9 @@ class TimesheetDataService
             : null;
         $tax = $timesheet->subject->tax;
         $isGroup = $timesheet->ref_program()->count() > 1 ? true : false;
+        // $feeHours = $isGroup && $timesheet->ref_program->first()->require == 'Tutor' ? $timesheet->subject()->where('is_active', 1)->first()->fee_group : $timesheet->subject()->where('is_active', 1)->first()->fee_individual;
         $feeHours = $isGroup && $timesheet->ref_program->first()->require == 'Tutor' ? $timesheet->subject->fee_group : $timesheet->subject->fee_individual;
+        // $feeHours = $timesheet->subject->fee_individual;
 
         $packageDetails = [
             'program_name' => $programName,
@@ -242,6 +244,7 @@ class TimesheetDataService
             'notes' => $notes,
             'subject_id' => $subjectId,
             'inhouse_id' => $inhouseUuid,
+            'curriculum_id' => $timesheet->subject->curriculum_id ?? null,
             'curriculum_name' => $timesheet->subject->curriculum ? $timesheet->subject->curriculum->name : null,
             'tax' => $timesheetTax, // timesheet tax
             'individual_fee' => $timesheetFeeHours, // timesheet fee hours
@@ -270,9 +273,9 @@ class TimesheetDataService
                     array_push($clients, [
                         'category' => $category,
                         'client_name' => $studentName,
-                        'client_mail' => $crm_clientInfo['mail'],
+                        'client_mail' => $crm_clientInfo['mail'] ?? null,
                         'client_school' => $studentSchool,
-                        'client_grade' => $crm_clientInfo['grade'],
+                        'client_grade' => $crm_clientInfo['grade'] ?? null,
                         'sales_pic_name' => $salesPicName,
                         'sales_pic_phone' => $salesPicPhone,
                     ]);

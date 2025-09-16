@@ -16,7 +16,7 @@ use Illuminate\Http\Request;
 
 class ComponentController extends Controller
 {
-    public function comp_subjects(TempUser $tempUser, ?Curriculum $curriculum = null)
+    public function comp_subjects(TempUser $tempUser, $ref_program_id, $grade, ?Curriculum $curriculum = null)
     {
         # because there were changes to the creation of timesheet
         # like: subjects now fetched from timesheet database instead of CRM
@@ -45,16 +45,29 @@ class ComponentController extends Controller
         // $subject_collections = collect($subjects)->sort()->values()->all();
         // return response()->json($subject_collections);
 
+        // check ref Program
+        $ref_program = Ref_Program::findOrFail($ref_program_id);
+        $isSAT = false;
+        if (preg_match('/SAT/i', $ref_program->program_name)) {
+            $isSAT = true;
+            $grade = null;
+        }
 
         # preferably return subject owned by tutor/mentor him/herself
-        $data = TempUserRoles::where('temp_user_id', $tempUser->id)->
+        $data = TempUserRoles::with('curriculum')->where('temp_user_id', $tempUser->id)->
             when($curriculum, function ($query) use ($curriculum) {
                 $query->where('curriculum_id', $curriculum->id);
+            })->
+            when($grade, function ($query) use ($grade) {
+                $query->whereRaw('? BETWEEN CAST(SUBSTRING_INDEX(REPLACE(REPLACE(grade, "[", ""), "]", ""), "-", 1) AS UNSIGNED) AND CAST(SUBSTRING_INDEX(REPLACE(REPLACE(grade, "[", ""), "]", ""), "-", -1) AS UNSIGNED)', [$grade]);
+            })->
+            when($isSAT, function ($query) {
+                $query->where('tutor_subject', 'LIKE', '%SAT%');
             })->
             whereRaw('now() BETWEEN start_date AND end_date')->
             active()->
             orderBy('tutor_subject', 'asc')->
-            select(['id', 'tutor_subject'])->get();
+            select(['id', 'tutor_subject', 'grade', 'start_date', 'end_date', 'fee_individual', 'fee_group'])->get();
         return response()->json($data);
     }
 

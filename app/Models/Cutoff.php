@@ -58,7 +58,9 @@ class Cutoff extends Model
             $sub->
                 // withinTheCutoffDateRange($start)->
                 where(function ($_sub_) use ($start, $end) {
-                    $_sub_->where('from', '>=', "{$start} 00:00:00")->where('to', '<=', "{$end} 23:59:59");
+                    //! need to be changed
+                    //! with below code, there's a chance that some activities are included
+                    $_sub_->where('from', '>=', "{$start} 12:01:00")->where('to', '<=', "{$end} 23:59:59");
                 });
         });
     }

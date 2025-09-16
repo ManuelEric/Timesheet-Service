@@ -25,6 +25,7 @@ class ActivityObserver implements ShouldHandleEventsAfterCommit
      */
     public function created(Activity $activity): void
     {
+        /* creating log */
         switch ($activity->activity) {
             case "Additional Fee":
                 Log::notice('An additional fee has been added to the Timesheet ID: ' . $activity->timesheet_id);
@@ -37,6 +38,11 @@ class ActivityObserver implements ShouldHandleEventsAfterCommit
             default:
                 Log::notice('Activity of Timesheet ID: ' . $activity->timesheet_id . ' has been created.');
         }
+
+        /* store subject_id for activity based on timesheet */
+        $subjectId = $activity->timesheet->subject->id;
+        $activity->subject_id = $subjectId;
+        $activity->save();
 
         /**
          * check if the activity is from ref_program which has a engagement_type_id

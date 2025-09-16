@@ -26,8 +26,8 @@ class ExistSubjectPerTutormentor implements ValidationRule
         {
             $tempUser = TempUser::where('email', $this->mentortutor_email)->first();
 
-            if ( !TempUserRoles::where('id', $value)->where('temp_user_id', $tempUser->id)->exists() )
-                $fail('The subject must be valid.');
+            if ( !TempUserRoles::where('id', $value)->where('temp_user_id', $tempUser->id)->isActive()->exists() )
+                $fail('The subject given is not valid.');
         }
     }
 }

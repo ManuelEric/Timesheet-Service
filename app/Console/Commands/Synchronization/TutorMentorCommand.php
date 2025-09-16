@@ -3,6 +3,7 @@
 namespace App\Console\Commands\Synchronization;
 
 use App\Actions\Authentication\CheckEmailMentorTutorAction;
+use App\Actions\Authentication\CheckEmailMentorTutorActionModel;
 use App\Http\Traits\ConcatenateName;
 use App\Http\Traits\HttpCall;
 use App\Services\Token\TokenService;
@@ -43,19 +44,28 @@ class TutorMentorCommand extends Command
      * Execute the console command.
      */
     public function handle(
-        CheckEmailMentorTutorAction $checkEmailMentorTutorAction,
+        /*CheckEmailMentorTutorAction $checkEmailMentorTutorAction,*/
+        CheckEmailMentorTutorActionModel $checkEmailMentorTutorAction,
         CreateTempUserService $createTempUserService,
     ) {
         [$statusCode, $mentorTutors] = $this->make_call('get', env('CRM_DOMAIN') . 'user/mentor-tutors');
         $progress = $this->output->createProgressBar(count($mentorTutors));
         $progress->start();
+
         
         foreach ( $mentorTutors as $mentorTutor )
         {
+            // if ($mentorTutor['email'] != "altairboonraksa@gmail.com")
+            //     continue;
+
             try {
 
                 $name = $this->concat($mentorTutor['first_name'], $mentorTutor['last_name']);
                 $email = $mentorTutor['email'];
+
+                if ($email != 'hanny.allan.math@gmail.com')
+                    continue;
+
                 [$emailCheckingResult, $userRawInformation] = $checkEmailMentorTutorAction->execute($email);
                 $this->newLine();
 

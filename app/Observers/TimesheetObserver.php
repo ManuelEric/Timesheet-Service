@@ -16,7 +16,7 @@ class TimesheetObserver
 
     public function __construct()
     {
-        $this->user_loggedIn = auth('sanctum')->user()->full_name;
+        $this->user_loggedIn = auth('sanctum')->user()->full_name ?? "Unknown User";
     }
 
     /**

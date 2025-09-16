@@ -77,6 +77,7 @@ onUpdated(() => {
 })
 
 onMounted(() => {
+  console.log(UserService.getUser())
   getData()
   getPackage()
 })

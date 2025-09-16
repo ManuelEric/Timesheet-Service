@@ -11,6 +11,7 @@ use App\Services\Token\TokenService;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 
@@ -38,6 +39,7 @@ class GenerateTokenService
         //         ], JsonResponse::HTTP_BAD_REQUEST)
         //     );
         // }
+        Artisan::call('cache:clear');
 
 
         /* check if the user has already stored in timesheet app */
@@ -77,11 +79,21 @@ class GenerateTokenService
         $token = $tempUser->createToken('user-access', $granted_access)->plainTextToken;
 
         $roles = $tempUser->roles()->where('is_active', 1)->groupBy('role')->pluck('role')->toArray();
+
+        if (!$tempUser->roles()->where('is_active', 1)->exists())
+        {
+            throw new HttpResponseException(
+                response()->json([
+                    'errors' => 'This account doesn\'t have a valid access.'
+                ], JsonResponse::HTTP_BAD_REQUEST)
+            );
+        }
+
         return [
             'uuid' => $tempUser->uuid,
             'full_name' => $tempUser->full_name,
             'email' => $tempUser->email,
-            'role' => $tempUser->roles()->where('is_active', 1)->first()->role,
+            'role' => $tempUser->roles()->where('is_active', 1)->first()?->role,
             'multiple_role' => count($roles) > 1 ? true : false,
             'roles' => $roles,
             'role_detail' => $tempUser->roles()->where('is_active', 1)->get(),

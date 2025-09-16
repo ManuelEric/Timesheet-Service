@@ -39,7 +39,7 @@ class MainController extends Controller
         $search = $request->only(['program_name', 'package_id', 'keyword']);
 
         /* to determine whether timesheet tutor or timesheet mentor */
-        $is_subject_specialist = $request->is_subject_specialist; //! point ini yg perlu di make sure dari front-end, karena valuenya null sehingga condition terpenuhi adalah tutoring()
+        $is_subject_specialist = $request->is_subject_specialist; 
 
         $results = $this->timesheetDataService->listTimesheet($search, $is_subject_specialist);
         return response()->json($results);
@@ -96,58 +96,14 @@ class MainController extends Controller
 
         $mentorTutorId = $selectOrRegisterMentorTutorTimesheetAction->handle($validatedEmail);
 
-        $refProgram = Ref_Program::whereIn('id', $validatedRefPrograms)->first();
-        
-        if ( $refProgram && $refProgram->require === 'Tutor' )
-        {
-            /************************* changes ***********************/
-            # before the data stored into timesheet
-            # need to check if tutor has already subject on temp_user_roles
-            # if tutor doesn't have subject, then create a new one
-            $tempUserRoles = TempUserRoles::firstOrCreate([
-                'year' => Carbon::now()->format('Y'),
-                'temp_user_id' => $mentorTutorId,
-                'tutor_subject' => $validatedSubjectName,
-                'curriculum_id' => $validatedCurriculumId
-            ], [
-                'role' => 'Tutor',
-                'head' => 1,
-                'grade' => '9-12',
-                'fee_individual' => $validatedFeeIndividual,
-                'tax' => $validatedTax
-            ]);
-            
-        } 
-        elseif ($refProgram && $refProgram->require === 'Mentor') # require mentor
-        { 
-            $tempUserRoles = TempUserRoles::firstOrCreate([
-                'temp_user_id' => $mentorTutorId,
-                'role' => 'External Mentor',
-            ], [
-                'year' => Carbon::now()->format('Y'),
-                'head' => 1,
-                'grade' => '9-12',
-                'fee_individual' => $validatedFeeIndividual,
-                'tax' => $validatedTax
-            ]);
-        }
-
-        
-        //! here's some notes that need to be checked later [IMPORTANT!]
-        # for now, to get tempUserRoles, we only check by year, temp_user_id, and subject name
-        # but there might be some issues when system using head and grade
-        # so if the system are using head and grade to get the subject, please update data below
-        # make sure to update not only the fee_individual but also the other parameters
-        # same goes with the data above, you should not hardcoded the head and grade
-        $tempUserRoles->fee_individual = $validatedFeeIndividual;
-        $tempUserRoles->tax = $validatedTax;
-        $tempUserRoles->save();
-
-
-        $validatedSubject = $tempUserRoles->id;
-        /************************* changes ***********************/
-
-        $createdTimesheet = $createTimesheetService->storeTimesheet($validatedRefPrograms, $newPackageDetails, $validatedNotes, $validatedInhouse, $validatedPics, $mentorTutorId, $validatedSubject);
+        $createdTimesheet = $createTimesheetService->storeTimesheet(
+            $validatedRefPrograms, 
+            $newPackageDetails, 
+            $validatedNotes, 
+            $validatedInhouse, 
+            $validatedPics, 
+            $mentorTutorId, 
+            $validatedSubject);
     
         return response()->json([
             'message' => "Timesheet has been created successfully.",
@@ -176,12 +132,10 @@ class MainController extends Controller
             'pic_id',
             'notes',
             'subject_id',
-            /* added */
             'individual_fee',
             'tax',
         ]); 
 
-        //! perlu nambahin ref_id 
         /* defines the validated variables */
         $validatedRefId = $validated['ref_id'];
         $validatedEmail = $validated['mentortutor_email'];
